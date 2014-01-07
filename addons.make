@@ -1,0 +1,15 @@
+ofxBezierWarp
+ofxBlur
+ofxCv
+ofxGui
+ofxKeyModifiers
+ofxLogger
+ofxMSAOpenCL
+ofxMSAPingPong
+ofxNetwork
+ofxOpenCv
+ofxOsc
+ofxPostProcessing
+ofxThreadedVideo
+ofxXmlSettings
+ofxXMP
