@@ -59,6 +59,8 @@ public:
         playerName = "";
         playerFolder = "";
         resetAttempts = 0;
+        directionProbabilities.resize(5);
+        setDirectionEVENUP();
     }
     
     ~PlayerModel(){
@@ -272,6 +274,9 @@ public:
     }
     
     void reset(){
+        
+        
+        
         nextMovieInfo.name = "STND_TODO_CRCH_TODO_STND_TODO_00_" + playerName;
         nextMovieInfo.path = playerFolder + nextMovieInfo.name + ".mov";
         nextMovieInfo.speed = 2.0;
@@ -319,16 +324,6 @@ public:
         
         if(!currentMovieInfo.isMovieDirty && nextMarker == NoMarker && currentMovieInfo.frame >= currentMovieInfo.genframe - 4){
             
-//            if(!currentMovieInfo.intersectedTransition){
-//                cout << "GENERATING POSSIBILITIES" << endl;
-//                currentMovieInfo.possibleTransitions = generateAllPossibleTransitions(currentMovieInfo, 0, 1);
-//            }
-//            else{
-//                cout << "REHASHING POSSIBILITIES " << currentMovieInfo.possibleTransitions.size() << endl;
-//                currentMovieInfo.intersectedTransition = false;
-//                currentMovieInfo.possibleTransitions = generateAllPossibleTransitions(currentMovieInfo, 1, 1);
-//            }
-            
             if(currentMovieInfo.intersectedTransition){
                 cout << "USE PRECALCULATE" << endl;
                 generateAllPossibleTransitions(currentMovieInfo, 1, 1);
@@ -370,176 +365,7 @@ public:
                 cout << "GAMEOVER" << endl;
             }
             
-            
-            
-//                float length = -INFINITY; int index = -1;
-//                for(int i = 0; i < currentMovieInfo.possibleTransitions.size(); i++){
-//                    cout << i << " cunt fucker" << endl;
-//                    MovieInfo mI = currentMovieInfo.possibleTransitions[i];
-//                    if(mI.predictedPosition.size() == 0) break;
-//                    ofPoint p = mI.predictedPosition[mI.predictedPosition.size() - 1] - mI.predictedPosition[0];
-//                    if(p.length() > length){
-//                        cout << p.length() << " > " << length << "  " << i << endl;
-//                        length = p.length();
-//                        index = i;
-//                    }
-//                }
-//                
-//                if(index == -1){
-//                    nextMovieInfo = currentMovieInfo.possibleTransitions[(int)ofRandom(currentMovieInfo.possibleTransitions.size())];
-//                }else{
-//                    nextMovieInfo = currentMovieInfo.possibleTransitions[index];
-//                }
-
-                
-//                nextMovieInfo.position = currentMovieInfo.position;
-//                nextMovieInfo = currentMovieInfo.possibleTransitions[(int)ofRandom(currentMovieInfo.possibleTransitions.size())];
-//                nextMovieInfo.possibleTransitions = currentMovieInfo.possibleTransitions;
-//                nextMovieInfo.impossibleTransitions = currentMovieInfo.impossibleTransitions;
-//                nextMarker = metadata[nextMovieInfo.name].getLastMarker(nextMovieInfo.frame);
-//                
-//                cout << "USING: " << nextMovieInfo.name << " " << nextMovieInfo.frame << " " << nextMovieInfo.genframe << " " << nextMarker.getName() << " " << endl;
-//            }
-//            else{
-//                cout << "STICKING!" << endl;
-//                
-//                if(resetAttempts > 10){
-//                    cout << "RESETTING!" << endl;
-//                    currentMovieInfo.possibleTransitions = generateAllPossibleTransitions(currentMovieInfo, 0, 1);
-//                    if(currentMovieInfo.possibleTransitions.size() > 0){
-//                        nextMovieInfo = currentMovieInfo.possibleTransitions[(int)ofRandom(currentMovieInfo.possibleTransitions.size())];
-//                        nextMovieInfo.possibleTransitions = currentMovieInfo.possibleTransitions;
-//                        nextMarker = metadata[nextMovieInfo.name].getLastMarker(nextMovieInfo.frame);
-//                        
-//                        cout << "SUCCX: " << nextMovieInfo.name << " " << nextMovieInfo.frame << " " << nextMovieInfo.genframe << " " << nextMovieInfo.predictedBounding.size() << " " << endl;
-//                    }
-//                    if(currentMovieInfo.predictedTransition != NULL){
-//                        cout << "   USING PREDICTED!" << endl;
-//                        nextMovieInfo.name = currentMovieInfo.predictedTransition->name;
-//                        nextMovieInfo.path = currentMovieInfo.predictedTransition->path;
-//                        nextMovieInfo.speed = currentMovieInfo.predictedTransition->speed;
-//                        nextMovieInfo.frame = currentMovieInfo.predictedTransition->frame;
-//                        nextMovieInfo.genframe = currentMovieInfo.predictedTransition->genframe;
-//                        nextMovieInfo.position = currentMovieInfo.position;
-//                    }else{
-//                        cout << "   USING STANDARD!" << endl;
-//                        nextMovieInfo.name = "STND_TODO_CRCH_TODO_STND_TODO_00_" + playerName;
-//                        nextMovieInfo.path = playerFolder + nextMovieInfo.name + ".mov";
-//                        nextMovieInfo.speed = 2.0;
-//                        nextMovieInfo.frame = 1;
-//                        nextMovieInfo.genframe = metadata[nextMovieInfo.name].getNextMarker(1).getStartFrame();
-//                        nextMovieInfo.position = currentMovieInfo.position;
-//                    }
-//                    
-//                    
-//                    
-//                    nextMarker = metadata[nextMovieInfo.name].getLastMarker(nextMovieInfo.frame);
-//                    resetAttempts = 0;
-//                }else{
-//                    resetAttempts++;
-//                }
-//                
-//                
-//            }
-            
         }
-        
-//        if(!currentMovieInfo.isMovieDirty && nextMarker == NoMarker){
-//            
-//            ofxXMPMarker& thisMarker = metadata[currentMovieInfo.name].getLastMarker(currentMovieInfo.frame);
-//
-//            if(thisMarker != currentMarker && isLoopMarker(currentMarker)){
-//                
-//                vector<string> markerParts = ofSplitString(currentMarker.getName(), "_");
-//                
-//                string lastMotion = markerParts[2] + "_" + markerParts[3];
-//                
-//                if(lastMotion == "FREE_TODO"){
-//                    
-//                    if(currentMovieInfo.frame >= currentMovieInfo.totalframes - 3){
-//                        
-//                        cout << "FALLING....reload" << endl;
-//                        
-//                        nextMovieInfo.name = "STND_TODO_CRCH_TODO_STND_TODO_00_" + playerName;
-//                        nextMovieInfo.path = playerFolder + nextMovieInfo.name + ".mov";
-//                        nextMovieInfo.speed = 2.0;
-//                        nextMovieInfo.frame = 1;
-//                        
-//                        nextMarker = metadata[nextMovieInfo.name].getLastMarker(1);
-//                        
-//                    } //if(currentFrame >= video.getTotalNumFrames() - 4){
-//                    
-//                }else{ //if(lastMotion == "FREE_TODO"){
-//                    
-//                    cout << lastMotion << endl;
-//                    
-//                    string nextMotion = motionGraph.getRandomTransition(lastMotion);
-//                    string findMotion = lastMotion + "_" + nextMotion;
-//                    
-//                    if(getDoesCurrentMovieHaveTransition(findMotion)){
-//                        
-//                        cout << findMotion << " transition in current movie - find one..." << endl;
-//                        
-//                        if(thisMarker.getName() == findMotion){
-//                            cout << "...it's the next motion in the same file - just keep playing" << endl;
-//                            
-//                            currentMarker = thisMarker;
-//                            
-//                        }else{ //if(thisMarker.getName() == findMotion)
-//                            cout << "...ok it's not the next marker so jump to it!!" << endl;
-//                            
-//                            vector<ofxXMPMarker> possibleMarkers = metadata[currentMovieInfo.name].getMarkers(findMotion);
-//                            nextMarker = possibleMarkers[(int)ofRandom(possibleMarkers.size())];
-//                            
-//                            nextMovieInfo.name = currentMovieInfo.name;
-//                            nextMovieInfo.path = currentMovieInfo.path;
-//                            nextMovieInfo.speed = currentMovieInfo.speed;
-//                            nextMovieInfo.frame = nextMarker.getStartFrame();
-//                            
-//                        } //if(thisMarker.getName() == findMotion)
-//                        
-//                    }else{ //if(getDoesCurrentMovieHaveTransition(findMotion))
-//                        
-//                        map<string, vector<string> >::iterator it = markDictionary.find(findMotion);
-//                        
-//                        if(it == markDictionary.end()){
-//                            
-//                            cout << findMotion << " just isn't a file with this!!!" << endl;
-//                            
-//                        }else{ //if(it == markDictionary.end())
-//                            
-//                            cout << findMotion << " load new file with this!!!" << endl;
-//                            
-//                            vector<string> & possibleFiles = it->second;
-//                            string possibleFileName = possibleFiles[(int)ofRandom(possibleFiles.size() - 1)];
-//                            
-//                            vector<ofxXMPMarker> possibleMarkers = metadata[possibleFileName].getMarkers(findMotion);
-//                            nextMarker = possibleMarkers[(int)ofRandom(possibleMarkers.size())];
-//                            
-//                            nextMovieInfo.name = possibleFileName;
-//                            nextMovieInfo.path = playerFolder + possibleFileName + ".mov";
-//                            nextMovieInfo.speed = currentMovieInfo.speed;
-//                            nextMovieInfo.frame = nextMarker.getStartFrame();
-//                            
-//                        } //if(it == markDictionary.end())
-//                        
-//                    } //if(getDoesCurrentMovieHaveTransition(findMotion))
-//                    
-//                } //if(lastMotion == "FREE_TODO"){
-//                
-//                
-//            }else{ //if(thisMarker != lastMarker && isLoopMarker(lastMarker))
-//                
-//                if(thisMarker.getName() != "" && currentMarker != thisMarker){
-//                    //                        cout << "noblanking out" << endl;
-//                    currentMarker = thisMarker;
-//                }else if(thisMarker.getName() == ""){
-//                    //                        cout << "blanking out" << endl;
-//                }
-//                
-//            } //if(thisMarker != lastMarker && isLoopMarker(lastMarker))
-//            
-//        }
 
     }
     
@@ -582,6 +408,60 @@ public:
         generateAllPossibleTransitions(currentMovieInfo, 0, 0);
     }
     
+    void setDirectionEVENUP(){
+        cout << "Direction EVENUP" << endl;
+        directionProbabilities[0] = 0.100; //STAT     cout << tab << directions[0] << " " << probabilities[0] << endl;
+        directionProbabilities[1] = 0.200; //LEFT     cout << tab << directions[1] << " " << probabilities[1] << endl;
+        directionProbabilities[2] = 0.200; //RIGHT    cout << tab << directions[2] << " " << probabilities[2] << endl;
+        directionProbabilities[3] = 0.300; //UP       cout << tab << directions[3] << " " << probabilities[3] << endl;
+        directionProbabilities[4] = 0.200; //DOWN     cout << tab << directions[4] << " " << probabilities[4] << endl;
+    }
+    
+    void setDirectionSTATIC(){
+        cout << "Direction STATIC" << endl;
+        directionProbabilities[0] = 0.920; //STAT     cout << tab << directions[0] << " " << probabilities[0] << endl;
+        directionProbabilities[1] = 0.020; //LEFT     cout << tab << directions[1] << " " << probabilities[1] << endl;
+        directionProbabilities[2] = 0.020; //RIGHT    cout << tab << directions[2] << " " << probabilities[2] << endl;
+        directionProbabilities[3] = 0.020; //UP       cout << tab << directions[3] << " " << probabilities[3] << endl;
+        directionProbabilities[4] = 0.020; //DOWN     cout << tab << directions[4] << " " << probabilities[4] << endl;
+    }
+    
+    void setDirectionLEFT(){
+        cout << "Direction LEFT" << endl;
+        directionProbabilities[0] = 0.020; //STAT     cout << tab << directions[0] << " " << probabilities[0] << endl;
+        directionProbabilities[1] = 0.920; //LEFT     cout << tab << directions[1] << " " << probabilities[1] << endl;
+        directionProbabilities[2] = 0.020; //RIGHT    cout << tab << directions[2] << " " << probabilities[2] << endl;
+        directionProbabilities[3] = 0.020; //UP       cout << tab << directions[3] << " " << probabilities[3] << endl;
+        directionProbabilities[4] = 0.020; //DOWN     cout << tab << directions[4] << " " << probabilities[4] << endl;
+    }
+    
+    void setDirectionRIGHT(){
+        cout << "Direction RIGHT" << endl;
+        directionProbabilities[0] = 0.020; //STAT     cout << tab << directions[0] << " " << probabilities[0] << endl;
+        directionProbabilities[1] = 0.020; //LEFT     cout << tab << directions[1] << " " << probabilities[1] << endl;
+        directionProbabilities[2] = 0.920; //RIGHT    cout << tab << directions[2] << " " << probabilities[2] << endl;
+        directionProbabilities[3] = 0.020; //UP       cout << tab << directions[3] << " " << probabilities[3] << endl;
+        directionProbabilities[4] = 0.020; //DOWN     cout << tab << directions[4] << " " << probabilities[4] << endl;
+    }
+    
+    void setDirectionUP(){
+        cout << "Direction UP" << endl;
+        directionProbabilities[0] = 0.020; //STAT     cout << tab << directions[0] << " " << probabilities[0] << endl;
+        directionProbabilities[1] = 0.020; //LEFT     cout << tab << directions[1] << " " << probabilities[1] << endl;
+        directionProbabilities[2] = 0.020; //RIGHT    cout << tab << directions[2] << " " << probabilities[2] << endl;
+        directionProbabilities[3] = 0.920; //UP       cout << tab << directions[3] << " " << probabilities[3] << endl;
+        directionProbabilities[4] = 0.020; //DOWN     cout << tab << directions[4] << " " << probabilities[4] << endl;
+    }
+    
+    void setDirectionDOWN(){
+        cout << "Direction DOWN" << endl;
+        directionProbabilities[0] = 0.020; //STAT     cout << tab << directions[0] << " " << probabilities[0] << endl;
+        directionProbabilities[1] = 0.020; //LEFT     cout << tab << directions[1] << " " << probabilities[1] << endl;
+        directionProbabilities[2] = 0.020; //RIGHT    cout << tab << directions[2] << " " << probabilities[2] << endl;
+        directionProbabilities[3] = 0.020; //UP       cout << tab << directions[3] << " " << probabilities[3] << endl;
+        directionProbabilities[4] = 0.920; //DOWN     cout << tab << directions[4] << " " << probabilities[4] << endl;
+    }
+    
     void generateAllPossibleTransitions(MovieInfo & cMovie, int iteration, int iterations){
         
         ofSeedRandom();
@@ -612,21 +492,8 @@ public:
             while(allPossibleTransitions.size() == 0){
                 
                 vector<string>& directions = directionGraph.getKeys();
-                vector<float> probabilities(5);
                 
-                probabilities[0] = 0.100; //STAT     cout << tab << directions[0] << " " << probabilities[0] << endl;
-                probabilities[1] = 0.200; //LEFT     cout << tab << directions[1] << " " << probabilities[1] << endl;
-                probabilities[2] = 0.200; //RIGHT    cout << tab << directions[2] << " " << probabilities[2] << endl;
-                probabilities[3] = 0.300; //UP       cout << tab << directions[3] << " " << probabilities[3] << endl;
-                probabilities[4] = 0.200; //DOWN     cout << tab << directions[4] << " " << probabilities[4] << endl;
-                
-//                probabilities[0] = 0.025; //STAT     cout << tab << directions[0] << " " << probabilities[0] << endl;
-//                probabilities[1] = 0.900; //LEFT     cout << tab << directions[1] << " " << probabilities[1] << endl;
-//                probabilities[2] = 0.025; //RIGHT    cout << tab << directions[2] << " " << probabilities[2] << endl;
-//                probabilities[3] = 0.025; //UP       cout << tab << directions[3] << " " << probabilities[3] << endl;
-//                probabilities[4] = 0.025; //DOWN     cout << tab << directions[4] << " " << probabilities[4] << endl;
-                
-                string preferedDirection = getRandomElementFromDistribution(probabilities, directions);
+                string preferedDirection = getRandomElementFromDistribution(directionProbabilities, directions);
 
                 allPossibleTransitions = motionGraph.getPossibleTransitions(preferedDirection, motion);
                 
@@ -909,6 +776,8 @@ protected:
     
     int resetAttempts;
     
+    vector<float> directionProbabilities;
+
     vector<ofRectangle> projectedRects;
     
     bool bMovieDirty;

@@ -138,8 +138,6 @@ void testApp::draw(){
         glPopMatrix();
     }
     
-    
-    
     if(bShowInfo){
         
         for(int i = 0; i < players.size(); i++){
@@ -269,6 +267,9 @@ void testApp::draw(){
 //--------------------------------------------------------------
 void testApp::keyPressed(int key){
     
+    vector<ofRectangle> & windowPositions = appModel->getWindows();
+    vector<PlayerController*> & players = appModel->getPlayers();
+    
     switch(key) {
         case '0':
         case '1':
@@ -307,15 +308,13 @@ void testApp::keyPressed(int key){
             break;
         case 'r':
         {
-            vector<ofRectangle> & windowPositions = appModel->getWindows();
+            
             iRandom.clear();
             uniqueRandomIndex(iRandom, 0, windowPositions.size(), numPlayers);
             while(!checkRandom()){
                 iRandom.clear();
                 uniqueRandomIndex(iRandom, 0, windowPositions.size(), numPlayers);
             }
-            
-            vector<PlayerController*> & players = appModel->getPlayers();
             
             for(int i = 0; i < players.size(); i++){
                 players[i]->getModel().setDrawScale(200.0/550.0);
@@ -326,29 +325,39 @@ void testApp::keyPressed(int key){
             break;
         case OF_KEY_LEFT:
         {
-            vector<PlayerController*> & players = appModel->getPlayers();
+            for(int i = 0; i < players.size(); i++){
+                players[i]->getModel().setDirectionLEFT();
+            }
         }
             break;
             
         case OF_KEY_RIGHT:
         {
-            vector<PlayerController*> & players = appModel->getPlayers();
+            for(int i = 0; i < players.size(); i++){
+                players[i]->getModel().setDirectionRIGHT();
+            }
         }
             break;
         case OF_KEY_UP:
         {
-            vector<PlayerController*> & players = appModel->getPlayers();
+            for(int i = 0; i < players.size(); i++){
+                players[i]->getModel().setDirectionUP();
+            }
         }
             break;
             
         case OF_KEY_DOWN:
         {
-            vector<PlayerController*> & players = appModel->getPlayers();
+            for(int i = 0; i < players.size(); i++){
+                players[i]->getModel().setDirectionDOWN();
+            }
         }
             break;
         case '/':
         {
-            vector<PlayerController*> & players = appModel->getPlayers();
+            for(int i = 0; i < players.size(); i++){
+                players[i]->getModel().setDirectionEVENUP();
+            }
         }
             break;
             

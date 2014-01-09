@@ -67,11 +67,6 @@ public:
             clMemTrns[i].initBuffer(sizeof(float) * numParticles * 3, CL_MEM_READ_WRITE, particlesTrns[i]);
         }
         
-//        bDrawBoundingBox = false;
-//        minMax = new int[4];
-//        minMax[0] = INFINITY; minMax[1] = INFINITY; minMax[2] = -INFINITY; minMax[3] = -INFINITY;
-//        clMemMinMax.initBuffer(sizeof(int) * 4, CL_MEM_READ_WRITE, minMax);
-        
         // load and compile OpenCL program
         openCL.loadProgramFromFile("ParticleVideo.cl");
         
@@ -103,12 +98,7 @@ public:
         kernel->setArg(3, cl_stride);
         kernel->setArg(4, cl_zdistance);
         kernel->setArg(5, clImage[0].getCLMem());
-        
-//        minMax[0] = INFINITY; minMax[1] = INFINITY; minMax[2] = -INFINITY; minMax[3] = -INFINITY;
-//        clMemMinMax.write(minMax, 0, sizeof(int) * 4);
         kernel->run2D(width, height);
-//        clMemMinMax.read(minMax, 0, sizeof(int) * 4);
-//        boundingBox = ofRectangle(minMax[0], minMax[1], minMax[2] - minMax[0], minMax[3] - minMax[1]);
         
         openCL.finish();
         
@@ -129,12 +119,7 @@ public:
         kernel->setArg(3, cl_stride);
         kernel->setArg(4, cl_zdistance);
         kernel->setArg(5, clImage[1].getCLMem());
-        
-//        minMax[0] = INFINITY; minMax[1] = INFINITY; minMax[2] = -INFINITY; minMax[3] = -INFINITY;
-//        clMemMinMax.write(minMax, 0, sizeof(int) * 4);
         kernel->run2D(width, height);
-//        clMemMinMax.read(minMax, 0, sizeof(int) * 4);
-//        boundingBox = ofRectangle(minMax[0], minMax[1], minMax[2] - minMax[0], minMax[3] - minMax[1]);
         
     }
     
@@ -156,13 +141,6 @@ public:
         kernel->setArg(4, cl_zdistance);
         kernel->setArg(5, clImage[0].getCLMem());
         kernel->run2D(width, height);
-        
-        
-//        minMax[0] = INFINITY; minMax[1] = INFINITY; minMax[2] = -INFINITY; minMax[3] = -INFINITY;
-//        clMemMinMax.write(minMax, 0, sizeof(int) * 4);
-        
-//        clMemMinMax.read(minMax, 0, sizeof(int) * 4);
-//        boundingBox = ofRectangle(minMax[0], minMax[1], minMax[2] - minMax[0], minMax[3] - minMax[1]);
         
     }
     
@@ -247,22 +225,6 @@ public:
         return (float)tween;
     }
     
-//    ofRectangle getBoundingBox(){
-//        return boundingBox;
-//    }
-//    
-//    void setDrawBoundingBox(bool b){
-//        bDrawBoundingBox = b;
-//    }
-//    
-//    void toggleDrawBoundingBox(){
-//        bDrawBoundingBox = !bDrawBoundingBox;
-//    }
-//    
-//    bool getDrawBoundBox(){
-//        return bDrawBoundingBox;
-//    }
-    
 protected:
     
     ofFbo               fbo;
@@ -272,10 +234,6 @@ protected:
     
     GLuint				vbo[1];
     GLuint				cbo[1];
-    
-//    ofRectangle         boundingBox;
-//    int*				minMax;
-//    msa::OpenCLBuffer	clMemMinMax;
     
     float*				particlesPos;
     msa::OpenCLBuffer	clMemPosVBO;
