@@ -23,7 +23,7 @@ DebugView::DebugView(){
     StateGroup & debugViewStates = appModel->getStateGroup("DebugViewStates");
     
     debugViewStates.setState(kDEBUGVIEW_SHOWINFO, true);
-    debugViewStates.setState(kDEBUGVIEW_SHOWSTATES, true);
+    debugViewStates.setState(kDEBUGVIEW_SHOWSTATES, false);
     debugViewStates.setState(kDEBUGVIEW_SHOWPROPS, true);
     
 }

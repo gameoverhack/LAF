@@ -18,6 +18,8 @@
 #include "FileList.h"
 #include "MotionGraph.h"
 #include "PlayerController.h"
+#include "ofxCv.h"
+#include "ofVideoPlayer.h"
 
 class AppModel : public BaseModel{
     
@@ -31,39 +33,38 @@ public:
         //BaseModel::~BaseModel();
     }
     
+    //--------------------------------------------------------------
     void createPlayer(string name){
         ofxLogNotice() << "Creating player of type: " << name << endl;;
-        createPlayerModel(name);
-        PlayerController* p = new PlayerController;
-        p->setup(getPlayerModel(name));
-        p->getModel().setMotionGraph(motionGraph);
-        p->getModel().setDirectionGraph(directionGraph);
-        p->getModel().setWindowPositions(windows);
-        players.push_back(p);
+//        createPlayerModel(name);
+//        PlayerController* p = new PlayerController;
+//        p->setup(getPlayerModel(name));
+//        p->getModel().setMotionGraph(motionGraph);
+//        p->getModel().setDirectionGraph(directionGraph);
+//        p->getModel().setWindowPositions(windows);
+//        players.push_back(p);
     }
     
+    //--------------------------------------------------------------
     vector<PlayerController*>& getPlayers(){
         return players;
     }
     
-    void createPlayerModel(string name){
-        map<string, PlayerModel>::iterator it = playerModels.find(name);
-        if(it == playerModels.end()){
-            ofxLogNotice() << "Loading assets for players of type: " << name << endl;
-            PlayerModel& m = playerModels[name];
-            m.setup(name, getProperty<string>("mediaPath"), motionGraph);
-        }else{
-            ofxLogNotice() << "Reusing assets for players of type: " << name << endl;
-        }
-
-    }
-    
+    //--------------------------------------------------------------
     PlayerModel& getPlayerModel(string name){
         map<string, PlayerModel>::iterator it = playerModels.find(name);
-        assert(it != playerModels.end());
-        return it->second;
+        if(it == playerModels.end()){
+            ofxLogNotice() << "Creating new template model for " << name << endl;
+        }
+        return playerModels[name];
     }
     
+    //--------------------------------------------------------------
+    map<string, PlayerModel>& getPlayerModels(){
+        return playerModels;
+    }
+    
+    //--------------------------------------------------------------
     void loadWindowPositions(string path){
         
         ofxLogNotice() << "Setting up windows with: " << path << endl;
@@ -83,37 +84,69 @@ public:
         }
     }
     
+    //--------------------------------------------------------------
     vector<ofRectangle>& getWindows(){
         return windows;
     }
     
+    //--------------------------------------------------------------
     void loadMotionGraph(string path){
         motionGraph.setup(path);
     }
     
+    //--------------------------------------------------------------
     MotionGraph& getMotionGraph(){
         return motionGraph;
     }
     
+    //--------------------------------------------------------------
     void loadDirectionGraph(string path){
         directionGraph.setup(path);
     }
     
+    //--------------------------------------------------------------
     MotionGraph& getDirectionGraph(){
         return directionGraph;
     }
     
+    //--------------------------------------------------------------
+    ofVideoPlayer& getAnalysisVideo(){
+        return analysisVideo;
+    }
+    
+    //--------------------------------------------------------------
+    ofRectangle& getAnalysisRectangle(){
+        return analysisRectangle;
+    }
+    
+    //--------------------------------------------------------------
+    ofxCv::ContourFinder & getAnalysisContourFinder(){
+        return analysisContourFinder;
+    }
+    
+    //--------------------------------------------------------------
     void save(string filename, ArchiveType archiveType){
         Serializer.saveClass(filename, (*this), archiveType);
         BaseModel::save(filename + "_props", archiveType);
     }
-
+    
+    //--------------------------------------------------------------
+    void backup(string filename, ArchiveType archiveType){
+        Serializer.saveClass(filename + "_" + ofGetTimestampString() + ".bak", (*this), archiveType);
+        BaseModel::save(filename + "_props_" + ofGetTimestampString() + ".bak", archiveType);
+    }
+    
+    //--------------------------------------------------------------
     void load(string filename, ArchiveType archiveType){
         Serializer.loadClass(filename, (*this), archiveType);
         BaseModel::load(filename + "_props", archiveType);
     }
     
 protected:
+    
+    ofVideoPlayer           analysisVideo;
+    ofRectangle             analysisRectangle;
+    ofxCv::ContourFinder    analysisContourFinder;
     
     vector<PlayerController*>   players;
     map<string, PlayerModel>    playerModels;

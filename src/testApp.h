@@ -27,7 +27,7 @@ public:
     
     ofEasyCam cam;
     
-    vector<PlayerController*> pVideos;
+//    vector<PlayerController*> pVideos;
     
     vector<int> iRandom;
     int numPlayers;

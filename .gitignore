@@ -4,6 +4,8 @@
 #Applications
 *.app
 *.exe
+*.bak
+*.log
 
 # Compiled Object files
 *.slo

@@ -13,8 +13,8 @@
 #include "AppModel.h"
 #include "AppView.h"
 #include "DebugView.h"
-
-#define NUM_PLAYERS 12
+#include "PlayController.h"
+#include "AnalyzeController.h"
 
 class AppController : public BaseController{
     
@@ -42,6 +42,9 @@ protected:
     
     AppView * appView;
     DebugView * debugView;
+    
+    AnalyzeController * analyzeController;
+    PlayController * playController;
     
 };
 

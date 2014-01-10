@@ -23,19 +23,13 @@ void AppController::setup(){
     
     // set log levels
     ofxLogSetLogLevel(LOG_VERBOSE);
-    ofSetLogLevel(OF_LOG_VERBOSE);
+    ofSetLogLevel(OF_LOG_NOTICE);
     
     ofxLogNotice() << "AppController start setup" << endl;
-    
-    // register key/mouse events (this way we get them from any window)
-    ofRegisterMouseEvents(this);
-    ofRegisterKeyEvents(this);
     
     // register AppController states
     StateGroup newAppControllerStates("AppControllerStates");
     newAppControllerStates.addState(State(kAPPCONTROLLER_INIT, "kAPPCONTROLLER_INIT"));
-    newAppControllerStates.addState(State(kAPPCONTROLLER_LOAD, "kAPPCONTROLLER_LOAD"));
-    newAppControllerStates.addState(State(kAPPCONTROLLER_ANALYZE, "kAPPCONTROLLER_ANALYZE"));
     newAppControllerStates.addState(State(kAPPCONTROLLER_PLAY, "kAPPCONTROLLER_PLAY"));
     
     // add them to the model
@@ -47,42 +41,32 @@ void AppController::setup(){
     // load the config file
     
     appModel->load("config", ARCHIVE_BINARY);
+    //appModel->backup("config", ARCHIVE_BINARY);
     
-    appModel->setProperty("VerticalSync", true);
-    ofSetVerticalSync(appModel->getProperty<bool>("VerticalSync"));
+//    appModel->removeAllProperties();
     
-    appModel->setProperty("Ortho", true);
+//    appModel->setProperty("LogToFile", false);
+//    
+//    appModel->setProperty("VerticalSync", true);
+//    appModel->setProperty("Ortho", true);
+//    
+//    appModel->setProperty("MediaPath", (string)"/Users/gameover/Desktop/LOTE/TESTRENDERS/media");
+//    appModel->setProperty("NumberPlayers", 12);
+//    
+//    appModel->setProperty("ForceFileListUpdate", false);
+//    appModel->setProperty("ForceFileListCheck", false);
+//    
+//    appModel->setProperty("ContourMinArea", 10);
+//    appModel->setProperty("ContourMaxArea", 1200);
+//    appModel->setProperty("ContourThreshold", 11);
+//    
+//    appModel->setProperty("VideoWidth", 550.0f);
+//    appModel->setProperty("VideoHeight", 550.0f);
+//    
+//    appModel->setProperty("OutputWidth", 1920.0f);
+//    appModel->setProperty("OutputHeight", 1080.0f);
     
-    //    appModel->setProperty("LogToFile", false);
-//    ofxLogSetLogToFile(appModel->getProperty<bool>("LogToFile"), ofToDataPath("log_" + ofGetTimestampString() + ".txt"));
-    
-    //    appModel->setProperty("warp0_x", 0.0f);
-    //    appModel->setProperty("warp0_y", 0.0f);
-    
-    //    appModel->setProperty("warp1_x", 0.0f);
-    //    appModel->setProperty("warp1_y", 0.0f);
-    
-//    w0x = appModel->getProperty<float>("warp0_x");
-//    w0y = appModel->getProperty<float>("warp0_y");
-//    w1x = appModel->getProperty<float>("warp1_x");
-//    w1y = appModel->getProperty<float>("warp1_y");
-    
-//    appModel->setProperty("VideoPath", (string)rootPath + "ANIME60/");
-    
-    appModel->setProperty("mediaPath", (string)"/Users/gameover/Desktop/LOTE/TESTRENDERS");
-    
-    appModel->setProperty("OverrideVideoPath", true);
-    appModel->setProperty("ImportClipRects", false);
-    
-    appModel->setProperty("ContourMinArea", 10);
-    appModel->setProperty("ContourMaxArea", 1200);
-    appModel->setProperty("ContourThreshold", 11);
-    
-    appModel->setProperty("VideoWidth", 550.0f);
-    appModel->setProperty("VideoHeight", 550.0f);
-    
-    appModel->setProperty("OutputWidth", 1920.0f);
-    appModel->setProperty("OutputHeight", 1080.0f);
+    ofxLogSetLogToFile(appModel->getProperty<bool>("LogToFile"), ofToDataPath("log_" + ofGetTimestampString() + ".log"));
     
 //    appModel->loadWindowPositions("WindowPositions.txt");
 //    appModel->loadMotionGraph("MotionGraph.txt");
@@ -95,60 +79,21 @@ void AppController::setup(){
                    ViewOption(),
                    (string)"output");
     
-//
-//    // setup the warp grid for this appView window
-//    BezierWarp & warp = appView->getWarp<BezierWarp>();
-//    warp.setWarpGrid(5, 4);
-//    warp.setWarpGridResolution(ceil(1920.0/80.0f), ceil(1080.0/80.0f));
-//    
-//    // load the control points for this appView Window
-//    string pntPropName = "warpPoints_"+ofToString(screen);
-//    if(appModel->hasProperty< vector<float> >(pntPropName)){
-//        warp.setControlPoints(appModel->getProperty< vector<float> >(pntPropName));
-//    }
-    
-    //    appModel->removeAllProperties();
-    //    appModel->setProperty("warpPoints_0", appViews[0]->getWarp<BezierWarp>().getControlPoints());
-    //    appModel->setProperty("warpPoints_1", appViews[1]->getWarp<BezierWarp>().getControlPoints());
-    //    appModel->setProperty("warp0_x", w0x);
-    //    appModel->setProperty("warp0_y", w0y);
-    //    appModel->setProperty("warp1_x", w1x);
-    //    appModel->setProperty("warp1_y", w1y);
-    
-    
     // make a debug window
     debugView = new DebugView();
     debugView->setup(ofGetWidth(),
                      ofGetHeight(),
                      ViewOption(),
                      (string)"debug");
-//
-//    analyzeView = new AnalyzeView();
-//    
-//    analyzeView->setup(appModel->getProperty<float>("VideoWidth"),
-//                       appModel->getProperty<float>("VideoHeight"),
-//                       ViewOption(),
-//                       (string)"analyze");
     
+    analyzeController = new AnalyzeController();
+    analyzeController->setup();
     
-    // Create other controllers
-//    loadController = new LoadController();
-//    loadController->setup();
-//    
-//    analyzeController = new AnalyzeController();
-//    analyzeController->setup();
-//    
-//    playController = new PlayController();
-//    playController->setup();
-//    
+    playController = new PlayController();
+    playController->setup();
+    
 //    networkController = new NetworkController();
 //    networkController->setup();
-    
-    
-//    StateGroup & debugViewStates = appModel->getStateGroup("DebugViewStates");
-//    StateGroup & analyzeViewStates = appModel->getStateGroup("AnalyzeViewStates");
-//    debugViewStates.setState(kDEBUGVIEW_SHOWINFO, 0);
-//    analyzeViewStates.setState(kANALYZEVIEW_SHOW, 0);
     
     
 //    CGPoint p;
@@ -160,7 +105,43 @@ void AppController::setup(){
     //ofSetFullscreen(true);
     
     ofBackground(0, 0, 0);
-    appControllerStates.setState(kAPPCONTROLLER_LOAD);
+    ofSetVerticalSync(appModel->getProperty<bool>("VerticalSync"));
+    
+    // register key/mouse events (this way we get them from any window)
+    ofRegisterMouseEvents(this);
+    ofRegisterKeyEvents(this);
+    
+    appControllerStates.setState(kAPPCONTROLLER_INIT);
+    
+    //    appModel->setProperty("warp0_x", 0.0f);
+    //    appModel->setProperty("warp0_y", 0.0f);
+    
+    //    appModel->setProperty("warp1_x", 0.0f);
+    //    appModel->setProperty("warp1_y", 0.0f);
+    
+    //    w0x = appModel->getProperty<float>("warp0_x");
+    //    w0y = appModel->getProperty<float>("warp0_y");
+    //    w1x = appModel->getProperty<float>("warp1_x");
+    //    w1y = appModel->getProperty<float>("warp1_y");
+    //
+    //    // setup the warp grid for this appView window
+    //    BezierWarp & warp = appView->getWarp<BezierWarp>();
+    //    warp.setWarpGrid(5, 4);
+    //    warp.setWarpGridResolution(ceil(1920.0/80.0f), ceil(1080.0/80.0f));
+    //
+    //    // load the control points for this appView Window
+    //    string pntPropName = "warpPoints_"+ofToString(screen);
+    //    if(appModel->hasProperty< vector<float> >(pntPropName)){
+    //        warp.setControlPoints(appModel->getProperty< vector<float> >(pntPropName));
+    //    }
+    
+    //    appModel->removeAllProperties();
+    //    appModel->setProperty("warpPoints_0", appViews[0]->getWarp<BezierWarp>().getControlPoints());
+    //    appModel->setProperty("warpPoints_1", appViews[1]->getWarp<BezierWarp>().getControlPoints());
+    //    appModel->setProperty("warp0_x", w0x);
+    //    appModel->setProperty("warp0_y", w0y);
+    //    appModel->setProperty("warp1_x", w1x);
+    //    appModel->setProperty("warp1_y", w1y);
     
 }
 
@@ -168,45 +149,19 @@ void AppController::setup(){
 void AppController::update(){
     
     StateGroup & appControllerStates = appModel->getStateGroup("AppControllerStates");
-    
-    vector<ofRectangle> & windowPositions = appModel->getWindows();
-    vector<PlayerController*> & players = appModel->getPlayers();
+    StateGroup & analyzeControllerStates = appModel->getStateGroup("AnalyzeControllerStates");
     
     switch (appControllerStates.getState()) {
             
         case kAPPCONTROLLER_INIT:
         {
-            
-//            appControllerStates.setState(kAPPCONTROLLER_LOAD);
-        }
-            break;
-        case kAPPCONTROLLER_LOAD:
-        {
-            for(int i = 0; i < NUM_PLAYERS; i++){
-                appModel->createPlayer("MARTINW");
-            }
-            
-            for(int i = 0; i < players.size(); i++){
-                players[i]->getModel().setDrawScale(200.0/550.0);
-                players[i]->getModel().setNormalPosition(ofPoint(windowPositions[i].x + windowPositions[i].width / 2.0f,
-                                                                 windowPositions[i].y, 0.0f));
-            }
-            appControllerStates.setState(kAPPCONTROLLER_PLAY);
-//            loadController->update();
-//            playController->resetClipGroups();
-        }
-            break;
-        case kAPPCONTROLLER_ANALYZE:
-        {
-//            analyzeController->update();
+            analyzeController->update();
+            if(analyzeControllerStates.getState(kANALYZECONTROLER_DONE)) appControllerStates.setState(kAPPCONTROLLER_PLAY);
         }
             break;
         case kAPPCONTROLLER_PLAY:
         {
-            for(int i = 0; i < players.size(); i++){
-                players[i]->update();
-            }
-//            playController->update();
+            playController->update();
         }
             break;
     }
@@ -216,7 +171,6 @@ void AppController::update(){
 //--------------------------------------------------------------
 void AppController::draw(){
     
-//    StateGroup & analyzeViewStates = appModel->getStateGroup("AnalyzeViewStates");
     StateGroup & debugViewStates = appModel->getStateGroup("DebugViewStates");
     StateGroup & appControllerStates = appModel->getStateGroup("AppControllerStates");
 //    StateGroup & playControllerStates = appModel->getStateGroup("PlayControllerStates");
@@ -224,20 +178,9 @@ void AppController::draw(){
     appView->update();
     
     if(debugViewStates.getState(kDEBUGVIEW_SHOWINFO)) debugView->update();
-//    if(analyzeViewStates.getState(kANALYZEVIEW_SHOW)) analyzeView->update();
     
     switch (appControllerStates.getState()) {
         case kAPPCONTROLLER_INIT:
-        {
-            // nothing to do
-        }
-            break;
-        case kAPPCONTROLLER_LOAD:
-        {
-            // nothing to do
-        }
-            break;
-        case kAPPCONTROLLER_ANALYZE:
         {
             // nothing to do
         }
@@ -252,7 +195,6 @@ void AppController::draw(){
     }
     
     if(debugViewStates.getState(kDEBUGVIEW_SHOWINFO)) debugView->draw();
-//    if(analyzeViewStates.getState(kANALYZEVIEW_SHOW)) analyzeView->draw();
     
     ofDisableBlendMode();
     
@@ -262,14 +204,13 @@ void AppController::draw(){
 
 //--------------------------------------------------------------
 void AppController::exit(){
-    
+    appModel->save("config", ARCHIVE_BINARY);
 }
 
 //--------------------------------------------------------------
 void AppController::keyPressed(ofKeyEventArgs & e){
     
     StateGroup & debugViewStates = appModel->getStateGroup("DebugViewStates");
-//    StateGroup & analyzeViewStates = appModel->getStateGroup("AnalyzeViewStates");
     StateGroup & appViewStates = appModel->getStateGroup("AppViewStates");
 //    StateGroup & playControllerStates = appModel->getStateGroup("PlayControllerStates");
     
@@ -277,7 +218,7 @@ void AppController::keyPressed(ofKeyEventArgs & e){
 //    BezierWarp & warp1 = appViews[1]->getWarp<BezierWarp>();
     
         
-    //    ofxLogVerbose() << e.key << endl;
+//    ofxLogVerbose() << e.key << endl;
     
     vector<ofRectangle> & windowPositions = appModel->getWindows();
     vector<PlayerController*> & players = appModel->getPlayers();
@@ -307,64 +248,52 @@ void AppController::keyPressed(ofKeyEventArgs & e){
         case ' ':
         {
             vector<PlayerController*> & players = appModel->getPlayers();
-            players[0]->getModel().generateAllPossibleTransitions();
+//            players[0]->getModel().generateAllPossibleTransitions();
         }
             
             break;
         case 'x':
         {
             
-//            iRandom.clear();
-//            uniqueRandomIndex(iRandom, 0, windowPositions.size(), numPlayers);
-//            while(!checkRandom()){
-//                iRandom.clear();
-//                uniqueRandomIndex(iRandom, 0, windowPositions.size(), numPlayers);
-//            }
-//            
+        }
+            break;
+//        case OF_KEY_LEFT:
+//        {
 //            for(int i = 0; i < players.size(); i++){
-//                players[i]->getModel().setDrawScale(200.0/550.0);
-//                players[i]->getModel().setNormalPosition(ofPoint(windowPositions[iRandom[i]].x + windowPositions[iRandom[i]].width / 2.0f,
-//                                                                 windowPositions[iRandom[i]].y, 0.0f));
+//                players[i]->getModel().setDirectionLEFT();
 //            }
-        }
-            break;
-        case OF_KEY_LEFT:
-        {
-            for(int i = 0; i < players.size(); i++){
-                players[i]->getModel().setDirectionLEFT();
-            }
-        }
-            break;
-            
-        case OF_KEY_RIGHT:
-        {
-            for(int i = 0; i < players.size(); i++){
-                players[i]->getModel().setDirectionRIGHT();
-            }
-        }
-            break;
-        case OF_KEY_UP:
-        {
-            for(int i = 0; i < players.size(); i++){
-                players[i]->getModel().setDirectionUP();
-            }
-        }
-            break;
-            
-        case OF_KEY_DOWN:
-        {
-            for(int i = 0; i < players.size(); i++){
-                players[i]->getModel().setDirectionDOWN();
-            }
-        }
-            break;
-        case '/':
-        {
-            for(int i = 0; i < players.size(); i++){
-                players[i]->getModel().setDirectionEVENUP();
-            }
-        }
-            break;
+//        }
+//            break;
+//            
+//        case OF_KEY_RIGHT:
+//        {
+//            for(int i = 0; i < players.size(); i++){
+//                players[i]->getModel().setDirectionRIGHT();
+//            }
+//        }
+//            break;
+//        case OF_KEY_UP:
+//        {
+//            for(int i = 0; i < players.size(); i++){
+//                players[i]->getModel().setDirectionUP();
+//            }
+//        }
+//            break;
+//            
+//        case OF_KEY_DOWN:
+//        {
+//            for(int i = 0; i < players.size(); i++){
+//                players[i]->getModel().setDirectionDOWN();
+//            }
+//        }
+//            break;
+//        case '/':
+//        {
+//            for(int i = 0; i < players.size(); i++){
+//                players[i]->getModel().setDirectionEVENUP();
+//            }
+//        }
+//            break;
             
 	}
     

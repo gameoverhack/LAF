@@ -74,8 +74,25 @@ void AppView::toggleCameraOrtho(){
 //--------------------------------------------------------------
 void AppView::update(){
     
-//    StateGroup & playControllerStates = appModel->getStateGroup("PlayControllerStates");
-//    StateGroup & debugViewStates = appModel->getStateGroup("DebugViewStates");
+    StateGroup & analyzeControllerStates = appModel->getStateGroup("AnalyzeControllerStates");
+
+    if(analyzeControllerStates.getState(kANALYZECONTROLER_ANALYZE)){
+        ofVideoPlayer & analysisVideo = appModel->getAnalysisVideo();
+        ofRectangle & analysisRectangle = appModel->getAnalysisRectangle();
+        ofxCv::ContourFinder& analysisContourFinder = appModel->getAnalysisContourFinder();
+        begin();
+        {
+            ofSetBackgroundColor(0, 0, 0, 0);
+            ofSetColor(255, 255, 255);
+            analysisVideo.draw(0, 0, analysisVideo.getWidth(), analysisVideo.getHeight());
+            analysisContourFinder.draw();
+            ofNoFill();
+            ofSetColor(255, 0, 0);
+            ofRect(analysisRectangle);
+        }
+        end();
+        return;
+    }
     
     StateGroup & appViewStates = appModel->getStateGroup("AppViewStates");
     
@@ -130,8 +147,8 @@ void AppView::update(){
             for(int i = 0; i < players.size(); i++){
                 glPushMatrix();
                 
-                glTranslatef(players[i]->getPosition().x, players[i]->getPosition().y, players[i]->getPosition().z);
-                glScalef(players[i]->getDrawScale(), players[i]->getDrawScale(), 1.0f);
+//                glTranslatef(players[i]->getPosition().x, players[i]->getPosition().y, players[i]->getPosition().z);
+//                glScalef(players[i]->getDrawScale(), players[i]->getDrawScale(), 1.0f);
                 
                 players[i]->getView().drawParticles();
                 
@@ -145,8 +162,8 @@ void AppView::update(){
             for(int i = 0; i < players.size(); i++){
                 glPushMatrix();
                 
-                glTranslatef(players[i]->getPosition().x, players[i]->getPosition().y, players[i]->getPosition().z);
-                glScalef(players[i]->getDrawScale(), players[i]->getDrawScale(), 1.0f);
+//                glTranslatef(players[i]->getPosition().x, players[i]->getPosition().y, players[i]->getPosition().z);
+//                glScalef(players[i]->getDrawScale(), players[i]->getDrawScale(), 1.0f);
                 
                 players[i]->getView().drawImage();
                 
