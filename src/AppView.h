@@ -19,6 +19,10 @@ public:
     AppView();
     ~AppView();
     
+    void resetCamera();
+    void setCameraOrtho(bool b);
+    void toggleCameraOrtho();
+    
     void update();
     
 protected:

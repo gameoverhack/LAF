@@ -37,6 +37,7 @@
 		72a929d3561b8232a182abfcbb325491 /* ofxOscBundle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 65eefa3da3526e9cdd9c21f90d9b5684 /* ofxOscBundle.cpp */; };
 		7701FDD6187F48FD0092EDD9 /* AppController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7701FDD4187F48FD0092EDD9 /* AppController.cpp */; };
 		7701FDDA187F49EE0092EDD9 /* AppView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7701FDD8187F49EE0092EDD9 /* AppView.cpp */; };
+		7701FDDF18804A3F0092EDD9 /* DebugView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7701FDDD18804A3F0092EDD9 /* DebugView.cpp */; };
 		7748f9f07c993f15f2868e78ad18d494 /* MSAOpenCLProgram.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 09af7bdccc3eb01b0ea4ef80abd6b37c /* MSAOpenCLProgram.cpp */; };
 		775dd568d4b9548749580bc90df8274d /* MSAOpenCL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 025fd7fd4b1c9eb6897a0ea91c36cdd2 /* MSAOpenCL.cpp */; };
 		779B7AFA1860DE1A008B3D26 /* OpenCL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 779B7AF91860DE1A008B3D26 /* OpenCL.framework */; };
@@ -251,6 +252,8 @@
 		7701FDD7187F49750092EDD9 /* AppStates.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppStates.h; sourceTree = "<group>"; };
 		7701FDD8187F49EE0092EDD9 /* AppView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AppView.cpp; sourceTree = "<group>"; };
 		7701FDD9187F49EE0092EDD9 /* AppView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppView.h; sourceTree = "<group>"; };
+		7701FDDD18804A3F0092EDD9 /* DebugView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DebugView.cpp; sourceTree = "<group>"; };
+		7701FDDE18804A3F0092EDD9 /* DebugView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DebugView.h; sourceTree = "<group>"; };
 		779B7AF91860DE1A008B3D26 /* OpenCL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenCL.framework; path = ../../../../../../../System/Library/Frameworks/OpenCL.framework; sourceTree = "<group>"; };
 		77DCBB001871E00E00EB911C /* VectorUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VectorUtils.h; sourceTree = "<group>"; };
 		77DCBB031871E30C00EB911C /* FileList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FileList.h; sourceTree = "<group>"; };
@@ -925,6 +928,8 @@
 		7701FDD3187F48ED0092EDD9 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				7701FDDD18804A3F0092EDD9 /* DebugView.cpp */,
+				7701FDDE18804A3F0092EDD9 /* DebugView.h */,
 				7701FDD8187F49EE0092EDD9 /* AppView.cpp */,
 				7701FDD9187F49EE0092EDD9 /* AppView.h */,
 			);
@@ -1621,6 +1626,7 @@
 				77DCBB181871E36B00EB911C /* NoWarp.cpp in Sources */,
 				7701FDD6187F48FD0092EDD9 /* AppController.cpp in Sources */,
 				7701FDDA187F49EE0092EDD9 /* AppView.cpp in Sources */,
+				7701FDDF18804A3F0092EDD9 /* DebugView.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

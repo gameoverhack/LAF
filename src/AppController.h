@@ -12,8 +12,13 @@
 #include "BaseController.h"
 #include "AppModel.h"
 #include "AppView.h"
+#include "DebugView.h"
+
+#define NUM_PLAYERS 12
 
 class AppController : public BaseController{
+    
+public:
     
     AppController();
     ~AppController();
@@ -36,6 +41,7 @@ class AppController : public BaseController{
 protected:
     
     AppView * appView;
+    DebugView * debugView;
     
 };
 

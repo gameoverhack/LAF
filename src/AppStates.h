@@ -23,6 +23,13 @@ enum {
 };
 
 enum {
+    kAPPVIEW_SHOWWINDOWS = 0,
+    kAPPVIEW_SHOWPLAYERS,
+    kAPPVIEW_SHOWRECTS,
+    kAPPVIEW_SHOWWARP
+};
+
+enum {
     kANALYZEVIEW_SHOW = 0
 };
 
@@ -31,10 +38,6 @@ enum {
     kPLAYCONTROLLER_MAKE,
     kPLAYCONTROLLER_PLAY,
     kPLAYCONTROLLER_STOP
-};
-
-enum {
-    kAPPVIEW_SHOWWARP = 0,
 };
 
 #endif
