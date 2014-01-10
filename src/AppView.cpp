@@ -131,7 +131,10 @@ void AppView::update(){
          *****************************************************/
         
         if(appViewStates.getState(kAPPVIEW_SHOWRECTS)){
-            
+            for(int i = 0; i < players.size(); i++){
+                ofNoFill();
+                ofRect(players[i]->getBounding());
+            }
         }
         
         /******************************************************
@@ -147,8 +150,8 @@ void AppView::update(){
             for(int i = 0; i < players.size(); i++){
                 glPushMatrix();
                 
-//                glTranslatef(players[i]->getPosition().x, players[i]->getPosition().y, players[i]->getPosition().z);
-//                glScalef(players[i]->getDrawScale(), players[i]->getDrawScale(), 1.0f);
+                glTranslatef(players[i]->getPosition().x, players[i]->getPosition().y, players[i]->getPosition().z);
+                glScalef(players[i]->getDrawScale(), players[i]->getDrawScale(), 1.0f);
                 
                 players[i]->getView().drawParticles();
                 
@@ -162,8 +165,8 @@ void AppView::update(){
             for(int i = 0; i < players.size(); i++){
                 glPushMatrix();
                 
-//                glTranslatef(players[i]->getPosition().x, players[i]->getPosition().y, players[i]->getPosition().z);
-//                glScalef(players[i]->getDrawScale(), players[i]->getDrawScale(), 1.0f);
+                glTranslatef(players[i]->getPosition().x, players[i]->getPosition().y, players[i]->getPosition().z);
+                glScalef(players[i]->getDrawScale(), players[i]->getDrawScale(), 1.0f);
                 
                 players[i]->getView().drawImage();
                 

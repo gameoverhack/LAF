@@ -35,14 +35,23 @@ public:
     
     //--------------------------------------------------------------
     void createPlayer(string name){
-        ofxLogNotice() << "Creating player of type: " << name << endl;;
-//        createPlayerModel(name);
-//        PlayerController* p = new PlayerController;
-//        p->setup(getPlayerModel(name));
-//        p->getModel().setMotionGraph(motionGraph);
-//        p->getModel().setDirectionGraph(directionGraph);
-//        p->getModel().setWindowPositions(windows);
-//        players.push_back(p);
+        
+        map<string, PlayerModel>::iterator it = playerModels.find(name);
+        
+        if(it == playerModels.end()){
+            
+            ofxLogError() << "No player template " << name << endl;
+            assert(false);
+            
+        }else{
+            
+            ofxLogNotice() << "Creating player of type: " << name << endl;;
+            PlayerController* p = new PlayerController;
+            p->setup(getPlayerModel(name));
+            players.push_back(p);
+            
+        }
+  
     }
     
     //--------------------------------------------------------------

@@ -24,7 +24,7 @@ DebugView::DebugView(){
     
     debugViewStates.setState(kDEBUGVIEW_SHOWINFO, true);
     debugViewStates.setState(kDEBUGVIEW_SHOWSTATES, false);
-    debugViewStates.setState(kDEBUGVIEW_SHOWPROPS, true);
+    debugViewStates.setState(kDEBUGVIEW_SHOWPROPS, false);
     
 }
 

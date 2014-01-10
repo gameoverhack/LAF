@@ -53,21 +53,35 @@ void AnalyzeController::update(){
         case kANALYZECONTROLER_LOAD:
         {
             
+            // check if we've aready scanned for media folders...
             if(mediaDirectory.size() == 0){
                 
+                // load all the folder names in the MediaPath
                 mediaDirectory.listDir(appModel->getProperty<string>("MediaPath"));
                 
                 for(int i = 0; i < mediaDirectory.size(); i++){
+                    
+                    // if it's a directory we assume this is media for a player
                     if(mediaDirectory.getFile(i).isDirectory()){
+                        
                         string name = mediaDirectory.getFile(i).getFileName();
                         string path = mediaDirectory.getFile(i).getAbsolutePath();
+                        
                         ofxLogNotice() << "Initializing model for " << name << endl;
+                        
+                        // get/create a template model for this player
                         PlayerModel & m = appModel->getPlayerModel(name);
+                        
+                        // if it's been serialized then it will know what to do with the filelisting
+                        // we can also either force it to check all files or force it to re-list the
+                        // directory - this last is used when copying files to a new directory
                         m.checkFileList(name, path, appModel->getProperty<bool>("ForceFileListCheck"), appModel->getProperty<bool>("ForceFileListUpdate"));
+                        
+                        // check if we need analysis
                         if(m.getNeedsAnalysis()){
                             m.loadKeyFrames();
                             m.loadKeyXMP();
-                            appModel->setProperty("AnalyseName", (string)name);
+                            appModel->setProperty("AnalyseName", (string)name); // just setting here to init for analysis
                             appModel->setProperty("AnalysePlayers", appModel->getProperty<int>("AnalysePlayers") + 1);
                         }
                     }
@@ -75,6 +89,7 @@ void AnalyzeController::update(){
                 
             }
             
+            // if anything needs analysis set the controller to begin doing it!
             if(appModel->getProperty<int>("AnalysePlayers") > 0){
                 analyzeControllerStates.setState(kANALYZECONTROLER_ANALYZE);
             }else{

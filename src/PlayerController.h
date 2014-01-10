@@ -31,108 +31,143 @@ public:
     
     void setup(PlayerModel & playerModel){
         
-//        bTransition = false;
-//        
-//        model = playerModel;
-//        model.reset();
-//        
-//        view.setup(model.getWidth(), model.getHeight(), 2);
-//        view.setTransitionLength(12);
-//        
-//        video.setPixelFormat(OF_PIXELS_BGRA);
-//        
-//        loadMovie(model.getNextMovieInfo());
+        ofxLogNotice() << "Setting up PlayerController with " << playerModel.getPlayerName() << endl;
+     
+        model = playerModel;
+       
+        view.setup(model.getWidth(), model.getHeight(), 2);
+        view.setTransitionLength(12);
+
+        video.setPixelFormat(OF_PIXELS_BGRA);
+        
+        movieCue.push_back(model.getStartMovie());
+        
+        bCueTransition = false;
         
     }
     
     void update(){
         
-//        video.update();
-//        model.updateMovie(video);
-//        
-//        MovieInfo& mInfo = model.getCurrentMovieInfo();
-//                
-//        if(mInfo.isFrameNew){
-//            view.setPixels(video.getPixelsRef());
-//        }
-//        
-//        view.update();
-//        
-//        if(!mInfo.isMovieDirty && model.nextMovieNeeded() && bCueTransition){
-//            cout << mInfo.frame << " " << mInfo.name << endl;
-//            view.setTransitionEndPixels(video.getPixelsRef());
-//            view.setRenderMode(RENDER_TRANSITION);
-//            bCueTransition = false;
-//            bTransition = true;
-//        }
-//        
-//        if(!mInfo.isMovieDirty && model.nextMovieNeeded() && bTransition){
-//            cout << "Transition over" << endl;
-//            bCueTransition = bTransition = false;
-//            model.resetMovieNeeded();
-//        }
-//        
-//        if(!mInfo.isMovieDirty && model.nextMovieNeeded() && !bCueTransition && !bTransition){
-//            bCueTransition = true;
-//            view.setTransitionStartPixels(video.getPixelsRef());
-//            MovieInfo& nInfo = model.getNextMovieInfo();
-//            cout << "Set video to go: " << nInfo.frame << " " << nInfo.name << endl;
-//            if(nInfo.name == mInfo.name){
-//                video.setFrame(nInfo.frame);
-//            }else{
-//                loadMovie(nInfo);
-//            }
-//        }
+        video.update();
+
+        currentMovie.isMovieDirty = (video.getQueueSize() > 0);
         
+        if(!currentMovie.isMovieDirty){
+            
+            currentMovie.frame = video.getCurrentFrame();
+            currentMovie.totalframes = video.getTotalNumFrames();
+            currentMovie.speed = video.getSpeed();
+            currentMovie.name = ofSplitString(video.getMovieName(), ".mov")[0];
+            currentMovie.path = video.getMoviePath();
+            currentMovie.isFrameNew = video.isFrameNew();
+
+            if(currentMovie.isFrameNew){
+                view.setPixels(video.getPixelsRef());
+                
+                ofPoint kFrame = model.getKeyFrame(currentMovie.name, currentMovie.frame);
+                currentMovie.position = pNormal - (kFrame - kNormal) * scale;
+                pNormal = currentMovie.position;
+                kNormal = kFrame;
+                
+                currentMovie.bounding = model.getScaledRectFrame(currentMovie.name, currentMovie.frame, currentMovie.position, scale);
+            }
 
         
+            if(bCueTransition){
+                view.setTransitionEndPixels(video.getPixelsRef());
+                view.setRenderMode(RENDER_TRANSITION);
+                bCueTransition = false;
+            }
+
+            if(currentMovie.frame >= currentMovie.genframe || currentMovie.name == ""){
+                
+                if(movieCue.size() > 0 && !bCueTransition){
+                    
+                    bCueTransition = true;
+                    view.setTransitionStartPixels(video.getPixelsRef());
+                    loadMovie(movieCue[0]);
+//                    movieCue.pop_front();
+                    
+                }else if(currentMovie.name != ""){ //if(movieCue.size() > 0){
+                    
+                    video.setFrame(currentMovie.startframe);
+                    
+                }
+            }
+            
+        }
+        
+
+        view.update();
+        
     }
     
-    float getWidth(){
-        return model.getWidth();
+    //--------------------------------------------------------------
+    void setDrawScale(float s){
+        scale = s;
     }
     
-    float getHeight(){
-        return model.getHeight();
+    //--------------------------------------------------------------
+    float getDrawScale(){
+        return scale;
+    }
+
+    //--------------------------------------------------------------
+    ofRectangle& getBounding(){
+        return currentMovie.bounding;
+    }
+
+    //--------------------------------------------------------------
+    ofPoint& getPosition(){
+        return currentMovie.position;
     }
     
-//    float getDrawScale(){
-//        return model.getDrawScale();
-//    }
-//    
-//    ofRectangle& getBounding(){
-//        return model.getBounding();
-//    }
-//    
-//    ofPoint& getPosition(){
-//        return model.getPosition();
-//    }
-    
+    //--------------------------------------------------------------
     PlayerModel& getModel(){
         return model;
     }
     
+    //--------------------------------------------------------------
     PlayerView& getView(){
         return view;
     }
     
+    //--------------------------------------------------------------
+    MovieInfo& getCurrentMovieInfo(){
+        return currentMovie;
+    }
+    
+    void setNormalPosition(ofPoint p){
+        ofRectangle r = model.getRectFrame(model.getStartMovie().name, 1);
+        pNormal = p;
+        pNormal.y -= (r.height + r.y) * scale + 14;
+    }
+    
 protected:
     
-//    void loadMovie(MovieInfo& m){
-//        
-//        cout << "Load Movie: " << m.path << "   " << m.frame << endl;
-//        
-//        video.loadMovie(m.path);
-//        video.setLoopState(OF_LOOP_NONE);
-//        video.play();
-//        video.setFrame(m.frame);
-//        video.setSpeed(m.speed);
-//        
-//        model.updateMovie(video);
-//        
-//    }
+    void loadMovie(MovieInfo& m){
+        
+        cout << "Load Movie: " << m << endl;
+        
+        m.position = currentMovie.position;
+        m.bounding = currentMovie.bounding;
+        currentMovie = m;
+
+        video.loadMovie(m.path);
+        video.setLoopState(OF_LOOP_NONE);
+        video.play();
+        video.setFrame(m.frame);
+        video.setSpeed(m.speed);
+
+    }
     
-    bool bTransition, bCueTransition;
+    MovieInfo currentMovie;
+    deque<MovieInfo> movieCue;
+    
+    bool bCueTransition;
+    
+    ofPoint pNormal, kNormal, oNormal;
+    float scale;
     
     ofxThreadedVideo    video;
     

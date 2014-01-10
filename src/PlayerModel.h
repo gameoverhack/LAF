@@ -16,6 +16,7 @@
 #include "VectorUtils.h"
 #include "ofxXMP.h"
 #include "ofxLogger.h"
+#include "MovieInfo.h"
 
 class PlayerModel{
     
@@ -208,6 +209,20 @@ public:
         
     }
     
+    MovieInfo getStartMovie(){
+
+        MovieInfo mi;
+        mi.name = "STND_TODO_CRCH_TODO_STND_TODO_00_" + playerName;
+        mi.path = playerFolder + mi.name + ".mov";
+        mi.speed = 2.0;
+        mi.frame = 0;
+        mi.startframe = 0;
+        mi.genframe = metadata[mi.name].getNextMarker(mi.startframe + 1).getStartFrame();
+        
+        return mi;
+        
+    }
+    
     //--------------------------------------------------------------
     float setDimensions(float w, float h){
         width = w; height = h;
@@ -224,18 +239,12 @@ public:
     }
     
     //--------------------------------------------------------------
-    void setDrawScale(float s){
-        scale = s;
-    }
-    
-    //--------------------------------------------------------------
-    float getDrawScale(){
-        return scale;
-    }
-    
-    //--------------------------------------------------------------
     bool getNeedsAnalysis(){
         return (filePaths.size() > 0);
+    }
+    
+    string getPlayerName(){
+        return playerName;
     }
     
     //--------------------------------------------------------------
@@ -253,6 +262,27 @@ public:
         return rectframes;
     }
     
+    ofRectangle getScaledRectFrame(string name, int frame, ofPoint& p, float scale){
+        ofRectangle r = getRectFrame(name, frame);
+        r.x = r.x * scale + p.x;
+        r.y = r.y * scale + p.y;
+        r.width = r.width * scale;
+        r.height = r.height * scale;
+        return r;
+    }
+    
+    ofRectangle getRectFrame(string name, int frame){
+        vector<ofRectangle> & r = rectframes[name];
+        frame = CLAMP(frame, 0, r.size());
+        return r[frame];
+    }
+    
+    ofPoint getKeyFrame(string name, int frame){
+        vector<ofPoint> & k = keyframes[name];
+        frame = CLAMP(frame, 0, k.size());
+        return k[frame];
+    }
+    
 protected:
     
     vector<string> fileNames;
@@ -262,7 +292,7 @@ protected:
     string playerFolder;
     FileList fileList;
     
-    float width, height, scale;
+    float width, height;
     
     map<string, vector<ofRectangle> >   rectframes;
     map<string, vector<ofPoint> >       keyframes;

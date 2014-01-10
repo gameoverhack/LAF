@@ -23,7 +23,7 @@ void AppController::setup(){
     
     // set log levels
     ofxLogSetLogLevel(LOG_VERBOSE);
-    ofSetLogLevel(OF_LOG_NOTICE);
+    ofSetLogLevel(OF_LOG_VERBOSE);
     
     ofxLogNotice() << "AppController start setup" << endl;
     

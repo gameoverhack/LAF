@@ -42,6 +42,7 @@ void PlayController::update(){
     StateGroup & appControllerStates = appModel->getStateGroup("AppControllerStates");
     StateGroup & playControllerStates = appModel->getStateGroup("PlayControllerStates");
     
+    vector<ofRectangle> & windowPositions = appModel->getWindows();
     vector<PlayerController*> & players = appModel->getPlayers();
     
     switch (playControllerStates.getState()) {
@@ -49,20 +50,36 @@ void PlayController::update(){
         {
             
             ofxLogNotice() << "PLAYCONTROLLER INIT" << endl;
-            playControllerStates.setState(kPLAYCONTROLLER_PLAY);
+            playControllerStates.setState(kPLAYCONTROLLER_MAKE);
             
         }
             break;
         case kPLAYCONTROLLER_MAKE:
         {
+            players.clear();
+            for(int i = 0; i < appModel->getProperty<int>("NumberPlayers"); i++){
+                appModel->createPlayer("MARTINW");
+            }
             
+            players = appModel->getPlayers();
+            for(int i = 0; i < players.size(); i++){
+                players[i]->setDrawScale(200.0/550.0);
+                players[i]->setNormalPosition(ofPoint(windowPositions[i].x + windowPositions[i].width / 2.0f,
+                                                      windowPositions[i].y, 0.0f));
+            }
+            
+            
+            playControllerStates.setState(kPLAYCONTROLLER_PLAY);
         }
             break;
         case kPLAYCONTROLLER_PLAY:
         {
+            ostringstream os; os << endl;
             for(int i = 0; i < players.size(); i++){
                 players[i]->update();
+                os << players[i]->getCurrentMovieInfo() << endl;
             }
+            appModel->setProperty("MovieInfo", os.str());
         }
             break;
         case kPLAYCONTROLLER_STOP:
