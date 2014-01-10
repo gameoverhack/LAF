@@ -12,6 +12,7 @@
 #define USE_OPENFRAMEWORKS_TYPES 1
 
 #include "BaseModel.h"
+#include "AppStates.h"
 #include "PlayerModel.h"
 #include "VectorUtils.h"
 #include "FileList.h"

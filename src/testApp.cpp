@@ -127,17 +127,6 @@ void testApp::draw(){
     
     ofEnableBlendMode(OF_BLENDMODE_SCREEN);
     
-    for(int i = 0; i < players.size(); i++){
-        glPushMatrix();
-
-        glTranslatef(players[i]->getPosition().x, players[i]->getPosition().y, players[i]->getPosition().z);
-        glScalef(players[i]->getDrawScale(), players[i]->getDrawScale(), 1.0f);
-
-        players[i]->getView().drawImage();
-        
-        glPopMatrix();
-    }
-    
     if(bShowInfo){
         
         for(int i = 0; i < players.size(); i++){
@@ -246,6 +235,16 @@ void testApp::draw(){
     
     ofSetColor(255, 255, 255);
 
+    for(int i = 0; i < players.size(); i++){
+        glPushMatrix();
+        
+        glTranslatef(players[i]->getPosition().x, players[i]->getPosition().y, players[i]->getPosition().z);
+        glScalef(players[i]->getDrawScale(), players[i]->getDrawScale(), 1.0f);
+        
+        players[i]->getView().drawImage();
+        
+        glPopMatrix();
+    }
     
     ofDisableBlendMode();
     

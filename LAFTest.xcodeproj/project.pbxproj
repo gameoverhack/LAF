@@ -35,6 +35,8 @@
 		67fe4c7b15c2f0478c8126c28fa6aad0 /* NetworkingUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3b361208cd4107e479f04e7bce6d93aa /* NetworkingUtils.cpp */; };
 		6aabab39e82af5cfea23a205b39766e6 /* ContourFinder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5fbb4a8427353aed09174be5d37a593e /* ContourFinder.cpp */; };
 		72a929d3561b8232a182abfcbb325491 /* ofxOscBundle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 65eefa3da3526e9cdd9c21f90d9b5684 /* ofxOscBundle.cpp */; };
+		7701FDD6187F48FD0092EDD9 /* AppController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7701FDD4187F48FD0092EDD9 /* AppController.cpp */; };
+		7701FDDA187F49EE0092EDD9 /* AppView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7701FDD8187F49EE0092EDD9 /* AppView.cpp */; };
 		7748f9f07c993f15f2868e78ad18d494 /* MSAOpenCLProgram.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 09af7bdccc3eb01b0ea4ef80abd6b37c /* MSAOpenCLProgram.cpp */; };
 		775dd568d4b9548749580bc90df8274d /* MSAOpenCL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 025fd7fd4b1c9eb6897a0ea91c36cdd2 /* MSAOpenCL.cpp */; };
 		779B7AFA1860DE1A008B3D26 /* OpenCL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 779B7AF91860DE1A008B3D26 /* OpenCL.framework */; };
@@ -244,6 +246,11 @@
 		758f19335d4e46a5e0de449ff93829ac /* kdtree_single_index.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = kdtree_single_index.h; path = ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/kdtree_single_index.h; sourceTree = SOURCE_ROOT; };
 		7673f0aa19794a4c9517cf1408f2df5b /* ts.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = ts.hpp; path = ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/ts/ts.hpp; sourceTree = SOURCE_ROOT; };
 		7689f8a0f3d0b7635a8c310487cd0928 /* ofxOscArg.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = ofxOscArg.h; path = ../../../addons/ofxOsc/src/ofxOscArg.h; sourceTree = SOURCE_ROOT; };
+		7701FDD4187F48FD0092EDD9 /* AppController.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AppController.cpp; sourceTree = "<group>"; };
+		7701FDD5187F48FD0092EDD9 /* AppController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppController.h; sourceTree = "<group>"; };
+		7701FDD7187F49750092EDD9 /* AppStates.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppStates.h; sourceTree = "<group>"; };
+		7701FDD8187F49EE0092EDD9 /* AppView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AppView.cpp; sourceTree = "<group>"; };
+		7701FDD9187F49EE0092EDD9 /* AppView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppView.h; sourceTree = "<group>"; };
 		779B7AF91860DE1A008B3D26 /* OpenCL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenCL.framework; path = ../../../../../../../System/Library/Frameworks/OpenCL.framework; sourceTree = "<group>"; };
 		77DCBB001871E00E00EB911C /* VectorUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VectorUtils.h; sourceTree = "<group>"; };
 		77DCBB031871E30C00EB911C /* FileList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FileList.h; sourceTree = "<group>"; };
@@ -889,6 +896,41 @@
 			name = include;
 			sourceTree = "<group>";
 		};
+		7701FDD0187F48C70092EDD9 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				77E63E9818771D020003A224 /* AppModel.h */,
+			);
+			name = Models;
+			sourceTree = "<group>";
+		};
+		7701FDD1187F48D20092EDD9 /* DataTypes */ = {
+			isa = PBXGroup;
+			children = (
+				77EF15EC187760AB00104A92 /* MotionGraph.h */,
+				7701FDD7187F49750092EDD9 /* AppStates.h */,
+			);
+			name = DataTypes;
+			sourceTree = "<group>";
+		};
+		7701FDD2187F48E70092EDD9 /* Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				7701FDD4187F48FD0092EDD9 /* AppController.cpp */,
+				7701FDD5187F48FD0092EDD9 /* AppController.h */,
+			);
+			name = Controllers;
+			sourceTree = "<group>";
+		};
+		7701FDD3187F48ED0092EDD9 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				7701FDD8187F49EE0092EDD9 /* AppView.cpp */,
+				7701FDD9187F49EE0092EDD9 /* AppView.h */,
+			);
+			name = Views;
+			sourceTree = "<group>";
+		};
 		77DCBB041871E36B00EB911C /* ofxMVC */ = {
 			isa = PBXGroup;
 			children = (
@@ -981,8 +1023,10 @@
 		77EF15D81877250000104A92 /* MVC */ = {
 			isa = PBXGroup;
 			children = (
-				77EF15EC187760AB00104A92 /* MotionGraph.h */,
-				77E63E9818771D020003A224 /* AppModel.h */,
+				7701FDD3187F48ED0092EDD9 /* Views */,
+				7701FDD2187F48E70092EDD9 /* Controllers */,
+				7701FDD1187F48D20092EDD9 /* DataTypes */,
+				7701FDD0187F48C70092EDD9 /* Models */,
 			);
 			name = MVC;
 			sourceTree = "<group>";
@@ -1575,6 +1619,8 @@
 				77DCBB161871E36B00EB911C /* BaseView.cpp in Sources */,
 				77DCBB171871E36B00EB911C /* BaseWarp.cpp in Sources */,
 				77DCBB181871E36B00EB911C /* NoWarp.cpp in Sources */,
+				7701FDD6187F48FD0092EDD9 /* AppController.cpp in Sources */,
+				7701FDDA187F49EE0092EDD9 /* AppView.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
