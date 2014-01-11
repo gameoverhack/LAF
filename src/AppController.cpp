@@ -41,7 +41,7 @@ void AppController::setup(){
     // load the config file
     
     appModel->load("config", ARCHIVE_BINARY);
-    //appModel->backup("config", ARCHIVE_BINARY);
+//    appModel->backup("config", ARCHIVE_BINARY);
     
 //    appModel->removeAllProperties();
     
@@ -51,11 +51,14 @@ void AppController::setup(){
 //    appModel->setProperty("Ortho", true);
 //    
 //    appModel->setProperty("MediaPath", (string)"/Users/gameover/Desktop/LOTE/TESTRENDERS/media");
-//    appModel->setProperty("NumberPlayers", 12);
-//    
-//    appModel->setProperty("ForceFileListUpdate", false);
-//    appModel->setProperty("ForceFileListCheck", false);
-//    
+    appModel->setProperty("NumberPlayers", 1);
+//
+    appModel->setProperty("ForceFileListUpdate", false);
+    appModel->setProperty("ForceFileListCheck", false);
+    appModel->setProperty("CheckKeyFrames", false);
+    appModel->setProperty("CheckXMP", false);
+    appModel->setProperty("CheckRects", false);
+//
 //    appModel->setProperty("ContourMinArea", 10);
 //    appModel->setProperty("ContourMaxArea", 1200);
 //    appModel->setProperty("ContourThreshold", 11);
@@ -69,7 +72,8 @@ void AppController::setup(){
     ofxLogSetLogToFile(appModel->getProperty<bool>("LogToFile"), ofToDataPath("log_" + ofGetTimestampString() + ".log"));
     
 //    appModel->loadWindowPositions("WindowPositions.txt");
-//    appModel->loadMotionGraph("MotionGraph.txt");
+//    appModel->loadForwardMotionGraph("ForwardMotionGraph.txt");
+//    appModel->loadBackwardMotionGraph("BackwardMotionGraph.txt");
 //    appModel->loadDirectionGraph("DirectionGraph.txt");
     
     // create appView windows
@@ -248,7 +252,22 @@ void AppController::keyPressed(ofKeyEventArgs & e){
         case ' ':
         {
             vector<PlayerController*> & players = appModel->getPlayers();
-//            players[0]->getModel().generateAllPossibleTransitions();
+            //players[0]->generatePossibleMotions(players[0]->getCurrentMovieInfo());
+            
+//            players[0]->generateMoviesBetween("STND_FRNT", "CLIM_UPPP");
+            vector<string> alphabet = appModel->getForwardMotionGraph().getAlphabet();
+            string m1 = alphabet[(int)ofRandom(alphabet.size())];
+            string m2 = alphabet[(int)ofRandom(alphabet.size())];
+//            players[0]->generateMoviesBetween(m1, m2, true);
+//            players[0]->generateMoviesBetween(m1, m2, false);
+            
+            players[0]->generateMoviesBetween("STND_FRNT", "WALK_LEFT", true);
+            players[0]->generateMoviesBetween("WALK_LEFT", "CLIM_UPPP", true);
+            players[0]->generateMoviesBetween("CLIM_UPPP", "FALL_BACK", true);
+            
+            players[0]->generateMoviesBetween("STND_FRNT", "CLIM_UPPP", true);
+            players[0]->generateMoviesBetween("CLIM_UPPP", "HUGG_FRNT", true);
+
         }
             
             break;

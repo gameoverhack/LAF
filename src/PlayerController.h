@@ -29,12 +29,15 @@ public:
         
     }
     
-    void setup(PlayerModel & playerModel){
+    void setup(PlayerModel & pModel, MotionGraph & fmGraph, MotionGraph & bmGraph, MotionGraph & dGraph){
         
-        ofxLogNotice() << "Setting up PlayerController with " << playerModel.getPlayerName() << endl;
+        ofxLogNotice() << "Setting up PlayerController with " << pModel.getPlayerName() << endl;
      
-        model = playerModel;
-       
+        model = pModel;
+        forwardMotionGraph = fmGraph;
+        backwardMotionGraph = bmGraph;
+        directionGraph = dGraph;
+        
         view.setup(model.getWidth(), model.getHeight(), 2);
         view.setTransitionLength(12);
 
@@ -43,7 +46,7 @@ public:
         movieCue.push_back(model.getStartMovie());
         
         bCueTransition = false;
-        
+        bFirstLoad = true;
     }
     
     void update(){
@@ -86,11 +89,12 @@ public:
                     bCueTransition = true;
                     view.setTransitionStartPixels(video.getPixelsRef());
                     loadMovie(movieCue[0]);
-//                    movieCue.pop_front();
+                    movieCue.pop_front();
                     
                 }else if(currentMovie.name != ""){ //if(movieCue.size() > 0){
                     
                     video.setFrame(currentMovie.startframe);
+//                    cueRandomTransition();
                     
                 }
             }
@@ -100,6 +104,321 @@ public:
 
         view.update();
         
+    }
+    
+    //--------------------------------------------------------------
+    bool generateMoviesBetween(string m1, string m2, bool bForward){
+        
+        ofSeedRandom();
+        
+        string tab = "";
+
+        MotionGraph motionGraph;
+        vector<string> allPossibleTransitions;
+        string startMotion, endMotion;
+        
+        if(bForward){
+            motionGraph = forwardMotionGraph;
+            startMotion = m1;
+            endMotion = m2;
+        }else{
+            motionGraph = backwardMotionGraph;
+            startMotion = m2;
+            endMotion = m1;
+        }
+        
+        cout << tab << startMotion << " -> " << endMotion << endl;
+        
+        allPossibleTransitions = motionGraph.getPossibleTransitions(startMotion);
+        
+        vector< vector<string> > solutions;
+        for(int i = 0; i < allPossibleTransitions.size(); i++){
+            if(allPossibleTransitions[i] == endMotion){
+                //cout << "FOUND SOLUTION: " << allPossibleTransitions[i] << endl;
+                vector<string> transitions;
+                transitions.push_back(allPossibleTransitions[i]);
+                solutions.push_back(transitions);
+            }else{
+                vector<string> allPossibleTransitions2 = motionGraph.getPossibleTransitions(allPossibleTransitions[i]);
+                for(int j = 0; j < allPossibleTransitions2.size(); j++){
+                    if(allPossibleTransitions2[j] == endMotion){
+                        //cout << "FOUND SOLUTION: " << allPossibleTransitions[i] << " -> " << allPossibleTransitions2[j] << endl;
+                        vector<string> transitions;
+                        transitions.push_back(allPossibleTransitions[i]);
+                        transitions.push_back(allPossibleTransitions2[j]);
+                        solutions.push_back(transitions);
+                    }else{
+                        vector<string> allPossibleTransitions3 = motionGraph.getPossibleTransitions(allPossibleTransitions2[j]);
+                        for(int k = 0; k < allPossibleTransitions3.size(); k++){
+                            if(allPossibleTransitions3[k] == endMotion){
+                                //cout << "FOUND SOLUTION: " << allPossibleTransitions[i] << " -> " << allPossibleTransitions2[j] << " -> " << allPossibleTransitions3[k] << endl;
+                                vector<string> transitions;
+                                transitions.push_back(allPossibleTransitions[i]);
+                                transitions.push_back(allPossibleTransitions2[j]);
+                                transitions.push_back(allPossibleTransitions3[k]);
+                                solutions.push_back(transitions);
+                            }else{
+                                vector<string> allPossibleTransitions4 = motionGraph.getPossibleTransitions(allPossibleTransitions3[k]);
+                                for(int m = 0; m < allPossibleTransitions4.size(); m++){
+                                    if(allPossibleTransitions4[m] == endMotion){
+                                        //cout << "FOUND SOLUTION: " << allPossibleTransitions[i] << " -> " << allPossibleTransitions2[j] << " -> " << allPossibleTransitions3[k] << " -> " << allPossibleTransitions4[m] << endl;
+                                        vector<string> transitions;
+                                        transitions.push_back(allPossibleTransitions[i]);
+                                        transitions.push_back(allPossibleTransitions2[j]);
+                                        transitions.push_back(allPossibleTransitions3[k]);
+                                        transitions.push_back(allPossibleTransitions4[m]);
+                                        solutions.push_back(transitions);
+                                    }else{
+                                        vector<string> allPossibleTransitions5 = motionGraph.getPossibleTransitions(allPossibleTransitions4[m]);
+                                        for(int n = 0; n < allPossibleTransitions5.size(); n++){
+                                            if(allPossibleTransitions5[n] == endMotion){
+                                                //cout << "FOUND SOLUTION: " << allPossibleTransitions[i] << " -> " << allPossibleTransitions2[j] << " -> " << allPossibleTransitions3[k] << " -> " << allPossibleTransitions4[m] << " -> " << allPossibleTransitions5[n] << endl;
+                                                vector<string> transitions;
+                                                transitions.push_back(allPossibleTransitions[i]);
+                                                transitions.push_back(allPossibleTransitions2[j]);
+                                                transitions.push_back(allPossibleTransitions3[k]);
+                                                transitions.push_back(allPossibleTransitions4[m]);
+                                                transitions.push_back(allPossibleTransitions5[n]);
+                                                solutions.push_back(transitions);
+                                            }else{
+                                                vector<string> allPossibleTransitions6 = motionGraph.getPossibleTransitions(allPossibleTransitions5[n]);
+                                                for(int o = 0; o < allPossibleTransitions6.size(); o++){
+                                                    if(allPossibleTransitions6[o] == endMotion){
+                                                        //cout << "FOUND SOLUTION: " << allPossibleTransitions[i] << " -> " << allPossibleTransitions2[j] << " -> " << allPossibleTransitions3[k] << " -> " << allPossibleTransitions4[m] << " -> " << allPossibleTransitions5[n] << " -> " << allPossibleTransitions6[o] << endl;
+                                                        vector<string> transitions;
+                                                        transitions.push_back(allPossibleTransitions[i]);
+                                                        transitions.push_back(allPossibleTransitions2[j]);
+                                                        transitions.push_back(allPossibleTransitions3[k]);
+                                                        transitions.push_back(allPossibleTransitions4[m]);
+                                                        transitions.push_back(allPossibleTransitions5[n]);
+                                                        transitions.push_back(allPossibleTransitions6[o]);
+                                                        solutions.push_back(transitions);
+                                                    }else{
+                                                        vector<string> allPossibleTransitions7 = motionGraph.getPossibleTransitions(allPossibleTransitions6[o]);
+                                                        for(int p = 0; p < allPossibleTransitions7.size(); p++){
+                                                            if(allPossibleTransitions6[o] == endMotion){
+                                                                //cout << "FOUND SOLUTION: " << allPossibleTransitions[i] << " -> " << allPossibleTransitions2[j] << " -> " << allPossibleTransitions3[k] << " -> " << allPossibleTransitions4[m] << " -> " << allPossibleTransitions5[n] << " -> " << allPossibleTransitions6[o] << " -> " << allPossibleTransitions6[p] << endl;
+                                                                vector<string> transitions;
+                                                                transitions.push_back(allPossibleTransitions[i]);
+                                                                transitions.push_back(allPossibleTransitions2[j]);
+                                                                transitions.push_back(allPossibleTransitions3[k]);
+                                                                transitions.push_back(allPossibleTransitions4[m]);
+                                                                transitions.push_back(allPossibleTransitions5[n]);
+                                                                transitions.push_back(allPossibleTransitions6[o]);
+                                                                transitions.push_back(allPossibleTransitions7[p]);
+                                                                solutions.push_back(transitions);
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        std::random_shuffle(solutions.begin(), solutions.end());
+        int shortest = INFINITY; int index = -1;
+        for(int i = 0; i < solutions.size(); i++){
+            if(solutions[i].size() < shortest){
+                index = i;
+                shortest = solutions[i].size();
+            }
+        }
+        
+        if(index == -1){
+            
+            cout << "NO SOLUTION" << endl;
+            
+        }else{
+            
+            cout << "SOLUTION: " << solutions[index] << endl;
+        }
+    
+    }
+    
+    //--------------------------------------------------------------
+    void cueRandomTransition(){
+        generatePossibleMotions(currentMovie);
+        movieCue.push_back(currentMovie.possibleTransitions[(int)ofRandom(currentMovie.possibleTransitions.size())]);
+    }
+    
+    //--------------------------------------------------------------
+    void generatePossibleMotions(MovieInfo& cMovie){
+        
+        ofSeedRandom();
+        
+        string tab = "";
+        
+        cout << tab << cMovie << endl;
+        
+        string motion = getEndMotionFromString(cMovie.motion);
+        vector<string> allPossibleTransitions = forwardMotionGraph.getPossibleTransitions(motion);
+        
+        map<string, vector<string> > & markDictionary = model.getMarkerDictionary();
+        map<string, ofxXMP> & metadata = model.getMetaData();
+        
+        for(int i = 0; i < allPossibleTransitions.size(); i++){
+            
+            string sMotion = motion + "_" + allPossibleTransitions[i];
+
+            map<string, vector<string> >::iterator it = markDictionary.find(sMotion);
+            
+            if(it == markDictionary.end()){
+                
+                cout << tab << "No such marker exists currently, ignoring: " << sMotion << endl;
+                
+            }else{
+                
+                cout << tab << "Compiling all movies with " << sMotion << endl;
+                
+                vector<string> uniqueMovies = it->second;
+                
+                for(int j = 0; j < uniqueMovies.size(); j++){
+                    
+                    vector<ofxXMPMarker> mTs = metadata[uniqueMovies[j]].getMarkers(sMotion);
+                    
+                    for(int k = 0; k < mTs.size(); k++){
+                        ofxXMPMarker& mT = mTs[k];
+                        ofxXMPMarker& nT = metadata[uniqueMovies[j]].getNextMarker(mT.getStartFrame() + 1);
+//                        cout << tab << "       Goto: " << mT << endl;
+                        
+                        int interestingFrame = -1;
+                        while(!isLoopMarker(mT) && isLoopMarker(nT)){
+//                            cout << tab << "           Finding next loop marker...after " << nT << endl;
+                            if(interestingFrame == nT.getStartFrame()){
+//                                cout << tab << "          That's the end of the movie" << endl;
+                                break;
+                            }
+                            interestingFrame = nT.getStartFrame();
+                            nT = metadata[uniqueMovies[j]].getNextMarker(nT.getStartFrame() + 1);
+                        }
+                        
+                        MovieInfo mI;
+                        mI.name = uniqueMovies[j];
+                        mI.path = model.getPlayerFolder() + uniqueMovies[j] + ".mov";
+                        mI.startframe = mI.frame = mT.getStartFrame();
+                        mI.genframe = nT.getStartFrame();
+                        mI.speed = cMovie.speed;
+                        mI.isMovieDirty = true;
+                        mI.isFrameNew = false;
+                        mI.motion = sMotion;
+                        mI.position = cMovie.position;
+                        mI.predictedBounding = model.getProjectedRects(mI, cMovie, scale);
+//                        mI.intersectionFrames.assign(windowPositions.size(), mI.startframe + mI.predictedBounding.size());
+//                        mI.intersectedTransition = false;
+                        
+//                        cout << tab << "Check : " << mI.name << " " << mI.frame << " " << mI.genframe << " " << mI.predictedBounding.size() << " " << sMotion << endl;
+//                        
+//                        int minIntersection = mI.startframe + mI.predictedBounding.size();
+//                        
+//                        for(int w = 0; w < windowPositions.size(); w++){
+//                            for(int f = 0; f < mI.predictedBounding.size(); f++){
+//                                if(mI.predictedBounding[f].width != 0 && mI.predictedBounding[f].height != 0 && mI.predictedBounding[f].intersects(windowPositions[w])){
+//                                    mI.intersectionFrames[w] = mI.startframe + f;
+//                                    minIntersection = MIN(minIntersection, mI.startframe + f);
+//                                    break;
+//                                }
+//                            }
+//                        }
+//                        
+//                        bool addMovieInfo = true;
+//                        
+//                        if(minIntersection != mI.startframe + mI.predictedBounding.size()){
+//                            
+//                            addMovieInfo = false;
+//                            
+//                            if(iteration < iterations){
+//                                
+//                                iteration++;
+//                                
+//                                cout << tab << "ITCHECKING: " << mI.name << " " << minIntersection << endl;
+//                                
+//                                minIntersection -= 500;
+//                                
+//                                for(int f = minIntersection; f > mI.startframe; f = f - 50){
+//                                    
+//                                    cout << tab << "Frame generating: " << minIntersection << " " << f << " " << minIntersection - mI.startframe << endl;
+//                                    
+//                                    MovieInfo pI = mI;
+//                                    
+//                                    pI.frame = f;
+//                                    pI.position = mI.predictedPosition[pI.frame - mI.startframe];
+//                                    
+//                                    generateAllPossibleTransitions(pI, iteration, iterations);
+//                                    
+//                                    cout << tab << "Possible transitions at target frame " << f << " == " << pI.possibleTransitions.size() << endl;
+//                                    
+//                                    if(pI.possibleTransitions.size() > 0){
+//                                        addMovieInfo = true;
+//                                        mI.possibleTransitions = pI.possibleTransitions;
+//                                        mI.impossibleTransitions = pI.impossibleTransitions;
+//                                        mI.genframe = f;
+//                                        cMovie.intersectedTransition = true;
+//                                        break;
+//                                    }
+//                                    
+//                                }
+//                            }
+//                        }
+                        
+                        bool addMovieInfo = true;
+                        if(addMovieInfo){
+                            cout << tab << "Adding: " << mI.name << " " << mI.frame << " " << mI.genframe << " " << mI.predictedBounding.size() << " " << sMotion << endl;
+                            cMovie.possibleTransitions.push_back(mI);
+                        }else{
+                            cout << tab << "Reject: " << mI.name << " " << mI.frame << " " << mI.genframe << " " << mI.predictedBounding.size() << " " << sMotion << endl;
+                            cMovie.impossibleTransitions.push_back(mI);
+                        }
+                        
+                    }
+                    
+                }
+                
+            }
+            
+        }
+        
+    }
+    
+    //--------------------------------------------------------------
+    bool isLoopMarker(ofxXMPMarker marker){
+        vector<string> markerParts = ofSplitString(marker.getName(), "_");
+        if(markerParts.size() != 4) return true;
+        return (markerParts[0] + "_" + markerParts[1] == markerParts[2] + "_" + markerParts[3]);
+    }
+    
+    //--------------------------------------------------------------
+    string getStartMotionFromMarker(ofxXMPMarker& m){
+        vector<string> mP = ofSplitString(m.getName(), "_");
+        if(mP.size() < 4) return "";
+        return string(mP[0] + "_" + mP[1]);
+    }
+    
+    //--------------------------------------------------------------
+    string getEndMotionFromMarker(ofxXMPMarker& m){
+        vector<string> mP = ofSplitString(m.getName(), "_");
+        if(mP.size() < 4) return "";
+        return string(mP[2] + "_" + mP[3]);
+    }
+    
+    //--------------------------------------------------------------
+    string getStartMotionFromString(string m){
+        vector<string> mP = ofSplitString(m, "_");
+        if(mP.size() < 4) return "";
+        return string(mP[0] + "_" + mP[1]);
+    }
+    
+    //--------------------------------------------------------------
+    string getEndMotionFromString(string m){
+        vector<string> mP = ofSplitString(m, "_");
+        if(mP.size() < 4) return "";
+        return string(mP[2] + "_" + mP[3]);
     }
     
     //--------------------------------------------------------------
@@ -140,7 +459,8 @@ public:
     void setNormalPosition(ofPoint p){
         ofRectangle r = model.getRectFrame(model.getStartMovie().name, 1);
         pNormal = p;
-        pNormal.y -= (r.height + r.y) * scale + 14;
+        pNormal.x -= (r.x + r.width / 2.0f) * scale;
+        pNormal.y -= (r.y + r.height) * scale + 4;
     }
     
 protected:
@@ -152,20 +472,27 @@ protected:
         m.position = currentMovie.position;
         m.bounding = currentMovie.bounding;
         currentMovie = m;
-
+        if(!bFirstLoad) pNormal = currentMovie.position;
+        kNormal = model.getKeyFrame(m.name, m.startframe);
+        
         video.loadMovie(m.path);
         video.setLoopState(OF_LOOP_NONE);
         video.play();
         video.setFrame(m.frame);
         video.setSpeed(m.speed);
 
+        bFirstLoad = false;
     }
+    
+    MotionGraph forwardMotionGraph;
+    MotionGraph backwardMotionGraph;
+    MotionGraph directionGraph;
     
     MovieInfo currentMovie;
     deque<MovieInfo> movieCue;
     
     bool bCueTransition;
-    
+    bool bFirstLoad;
     ofPoint pNormal, kNormal, oNormal;
     float scale;
     

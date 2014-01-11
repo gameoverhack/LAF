@@ -79,8 +79,8 @@ void AnalyzeController::update(){
                         
                         // check if we need analysis
                         if(m.getNeedsAnalysis()){
-                            m.loadKeyFrames();
-                            m.loadKeyXMP();
+                            if(appModel->getProperty<bool>("CheckKeyFrames")) m.loadKeyFrames();
+                            if(appModel->getProperty<bool>("CheckXMP")) m.loadKeyXMP();
                             appModel->setProperty("AnalyseName", (string)name); // just setting here to init for analysis
                             appModel->setProperty("AnalysePlayers", appModel->getProperty<int>("AnalysePlayers") + 1);
                         }
@@ -121,21 +121,42 @@ void AnalyzeController::update(){
                     vector<string>& fileNames = m.getFileNames();
                     vector<string>& filePaths = m.getFilePaths();
                     
+                    string fileName = fileNames[0];
+                    string filePath = filePaths[0];
+                    
                     // check if we've got a video loaded
-                    if(video.getMoviePath() != filePaths[0]){
+                    if(video.getMoviePath() != filePath){
                         
                         // load the movie
                         video.loadMovie(filePaths[0]);
                         video.setLoopState(OF_LOOP_NONE);
                         
                         // set some props for feedback and tracking
-                        appModel->setProperty("AnalysisFrameF", (string)fileNames[0]);
+                        appModel->setProperty("AnalysisFrameF", (string)fileName);
                         appModel->setProperty("AnalysisFrameC", -1);
                         appModel->setProperty("AnalysisFrameT", video.getTotalNumFrames());
                         
                         // make sure we clear any data for this movies rect frames
                         map<string, vector<ofRectangle> >& rectFrames = m.getRectFrames();
-                        rectFrames.clear();
+                        vector<ofRectangle> & rects = rectFrames[fileName];
+                        
+                        bool checkRects = false;
+                        if(appModel->getProperty<bool>("CheckRects")){
+                            if(rects.size() != video.getTotalNumFrames()){
+                                checkRects = true;
+                                cout << "WRONG NUMBER OF FRAMES " << rects.size() << " " << video.getTotalNumFrames() << endl;
+                            }else{
+                                cout << "RIGHT NUMBER OF FRAMES " << rects.size() << " " << video.getTotalNumFrames() << endl;
+                            }
+                        }
+                        
+                        if(checkRects){
+                            rects.clear();
+                        }else{
+                            video.close();
+                            eraseAt(fileNames, 0);
+                            eraseAt(filePaths, 0);
+                        }
                         
                         // set dimensions if not already done
                         if(m.getWidth() != video.getWidth() || m.getHeight() != video.getHeight()){
@@ -156,42 +177,38 @@ void AnalyzeController::update(){
                             video.setFrame(analysisFrame);
                             video.update();
                             
-                            // analyse the frame if it's new
-                            if(video.isFrameNew()){
-                                
-                                // set contour finder props - bit overzealous doing it every frame?
-                                contourFinder.setMinAreaRadius(appModel->getProperty<int>("ContourMinArea"));
-                                contourFinder.setMaxAreaRadius(appModel->getProperty<int>("ContourMaxArea"));
-                                contourFinder.setThreshold(appModel->getProperty<int>("ContourThreshold"));
-                                
-                                // find the contour
-                                contourFinder.findContours(video);
-                                
-                                // get rectangle reference
-                                ofRectangle& r = appModel->getAnalysisRectangle();
-                                
-                                // reset rectangle to inverse bounds
-                                r.x = video.getWidth();
-                                r.y = video.getHeight();
-                                r.width = 0;
-                                r.height = 0;
-                                
-                                // find max and minima
-                                for(int i = 0; i < contourFinder.getContours().size(); i++){
-                                    vector<cv::Point> pts = contourFinder.getContours()[i];
-                                    for(int j = 0; j < pts.size(); j++){
-                                        r.x = MIN(pts[j].x, r.x);
-                                        r.y = MIN(pts[j].y, r.y);
-                                        r.width = MAX(pts[j].x, r.width + r.x) - r.x;
-                                        r.height = MAX(pts[j].y, r.height + r.y) - r.y;
-                                    }
+                            // set contour finder props - bit overzealous doing it every frame?
+                            contourFinder.setMinAreaRadius(appModel->getProperty<int>("ContourMinArea"));
+                            contourFinder.setMaxAreaRadius(appModel->getProperty<int>("ContourMaxArea"));
+                            contourFinder.setThreshold(appModel->getProperty<int>("ContourThreshold"));
+                            
+                            // find the contour
+                            contourFinder.findContours(video);
+                            
+                            // get rectangle reference
+                            ofRectangle& r = appModel->getAnalysisRectangle();
+                            
+                            // reset rectangle to inverse bounds
+                            r.x = video.getWidth();
+                            r.y = video.getHeight();
+                            r.width = 0;
+                            r.height = 0;
+                            
+                            // find max and minima
+                            for(int i = 0; i < contourFinder.getContours().size(); i++){
+                                vector<cv::Point> pts = contourFinder.getContours()[i];
+                                for(int j = 0; j < pts.size(); j++){
+                                    r.x = MIN(pts[j].x, r.x);
+                                    r.y = MIN(pts[j].y, r.y);
+                                    r.width = MAX(pts[j].x, r.width + r.x) - r.x;
+                                    r.height = MAX(pts[j].y, r.height + r.y) - r.y;
                                 }
-                                
-                                // store the frame rect in the player model
-                                map<string, vector<ofRectangle> >& rectFrames = m.getRectFrames();
-                                rectFrames[fileNames[0]].push_back(r);
-                                
                             }
+                            
+                            // store the frame rect in the player model
+                            map<string, vector<ofRectangle> >& rectFrames = m.getRectFrames();
+                            rectFrames[fileName].push_back(r);
+                            //cout << rectFrames[fileName].size() << " " << video.getCurrentFrame() << " " << analysisFrame << endl;
                             
                         }else{
                             

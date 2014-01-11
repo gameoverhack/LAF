@@ -127,6 +127,8 @@ public:
     //--------------------------------------------------------------
     void loadKeyFrames(){
         
+        keyframes.clear();
+        
         // read keyframe data
         ofBuffer b = ofBufferFromFile(ofToDataPath(playerFolder + playerName + ".txt"));
         
@@ -169,6 +171,10 @@ public:
     //--------------------------------------------------------------
     void loadKeyXMP(){
         
+        metadata.clear();
+        fileDictionary.clear();
+        markDictionary.clear();
+        
         for(int i = 0; i < fileNames.size(); i++){
             
             string fileName = fileNames[i];
@@ -202,7 +208,7 @@ public:
                     vector<string> & files = markDictionary[transition];
                     
                     transitions.push_back(transition);
-                    files.push_back(fileName);
+                    if(!contains(files, fileName)) files.push_back(fileName);
                 }
             }
         }
@@ -217,6 +223,7 @@ public:
         mi.speed = 2.0;
         mi.frame = 0;
         mi.startframe = 0;
+        mi.motion = metadata[mi.name].getLastMarker(mi.startframe).getName();
         mi.genframe = metadata[mi.name].getNextMarker(mi.startframe + 1).getStartFrame();
         
         return mi;
@@ -243,6 +250,10 @@ public:
         return (filePaths.size() > 0);
     }
     
+    string getPlayerFolder(){
+        return playerFolder;
+    }
+    
     string getPlayerName(){
         return playerName;
     }
@@ -262,8 +273,38 @@ public:
         return rectframes;
     }
     
-    ofRectangle getScaledRectFrame(string name, int frame, ofPoint& p, float scale){
-        ofRectangle r = getRectFrame(name, frame);
+    //--------------------------------------------------------------
+    vector<ofRectangle> getProjectedRects(MovieInfo& pMovie, MovieInfo& cMovie, float scale){
+        if(pMovie.genframe < pMovie.frame) return vector<ofRectangle>(0);
+        pMovie.predictedPosition.resize(pMovie.genframe - pMovie.startframe);
+        vector<ofRectangle> pRects(pMovie.genframe - pMovie.frame);
+        ofPoint pN = cMovie.position;
+        ofPoint kN = getKeyFrame(pMovie.name, pMovie.frame);
+        for(int i = pMovie.frame; i < pMovie.genframe; i++){
+            ofRectangle r = rectframes[pMovie.name][i];
+            ofPoint k = getKeyFrame(pMovie.name, i);
+            pMovie.predictedPosition[i - pMovie.startframe] = pN - (k - kN) * scale;
+            pN = pMovie.predictedPosition[i - pMovie.startframe]; kN = k;
+            r = getScaledRectTransform(r, pMovie.predictedPosition[i - pMovie.startframe], scale);
+            pRects[i - pMovie.frame] = r;
+        }
+        return pRects;
+    }
+    
+    //--------------------------------------------------------------
+    ofPoint getPredictedPosition(string movieName, int startFrame, int endFrame, ofPoint startingPoint, float scale){
+        ofPoint p;
+        ofPoint pN = startingPoint;
+        ofPoint kN = getKeyFrame(movieName, startFrame);
+        for(int i = startFrame; i < endFrame; i++){
+            ofPoint k = getKeyFrame(movieName, i);
+            p = pN - (k - kN) * scale;
+            pN = p; kN = k;
+        }
+        return p;
+    }
+    
+    ofRectangle getScaledRectTransform(ofRectangle& r, ofPoint& p, float scale){
         r.x = r.x * scale + p.x;
         r.y = r.y * scale + p.y;
         r.width = r.width * scale;
@@ -271,16 +312,29 @@ public:
         return r;
     }
     
+    ofRectangle getScaledRectFrame(string name, int frame, ofPoint& p, float scale){
+        ofRectangle r = getRectFrame(name, frame);
+        return getScaledRectTransform(r, p, scale);
+    }
+    
     ofRectangle getRectFrame(string name, int frame){
         vector<ofRectangle> & r = rectframes[name];
-        frame = CLAMP(frame, 0, r.size());
+        frame = CLAMP(frame, 0, r.size() - 1);
         return r[frame];
     }
     
     ofPoint getKeyFrame(string name, int frame){
         vector<ofPoint> & k = keyframes[name];
-        frame = CLAMP(frame, 0, k.size());
+        frame = CLAMP(frame, 0, k.size() - 1);
         return k[frame];
+    }
+    
+    map<string, vector<string> >& getMarkerDictionary(){
+        return markDictionary;
+    }
+    
+    map<string, ofxXMP>& getMetaData(){
+        return metadata;
     }
     
 protected:

@@ -47,7 +47,7 @@ public:
             
             ofxLogNotice() << "Creating player of type: " << name << endl;;
             PlayerController* p = new PlayerController;
-            p->setup(getPlayerModel(name));
+            p->setup(getPlayerModel(name), forwardMotionGraph, backwardMotionGraph, directionGraph);
             players.push_back(p);
             
         }
@@ -99,13 +99,23 @@ public:
     }
     
     //--------------------------------------------------------------
-    void loadMotionGraph(string path){
-        motionGraph.setup(path);
+    void loadForwardMotionGraph(string path){
+        forwardMotionGraph.setup(path);
     }
     
     //--------------------------------------------------------------
-    MotionGraph& getMotionGraph(){
-        return motionGraph;
+    void loadBackwardMotionGraph(string path){
+        backwardMotionGraph.setup(path);
+    }
+    
+    //--------------------------------------------------------------
+    MotionGraph& getForwardMotionGraph(){
+        return forwardMotionGraph;
+    }
+    
+    //--------------------------------------------------------------
+    MotionGraph& getBackwardMotionGraph(){
+        return backwardMotionGraph;
     }
     
     //--------------------------------------------------------------
@@ -162,7 +172,8 @@ protected:
     
     vector<ofRectangle> windows;
     
-    MotionGraph motionGraph;
+    MotionGraph forwardMotionGraph;
+    MotionGraph backwardMotionGraph;
     MotionGraph directionGraph;
     
     friend class boost::serialization::access;
@@ -170,15 +181,14 @@ protected:
 	void serialize(Archive & ar, const unsigned int version){
         ar & BOOST_SERIALIZATION_NVP(playerModels);
 		ar & BOOST_SERIALIZATION_NVP(windows);
-        ar & BOOST_SERIALIZATION_NVP(motionGraph);
-        if(version == 1){
-            ar & BOOST_SERIALIZATION_NVP(directionGraph);
-        }
+        ar & BOOST_SERIALIZATION_NVP(directionGraph);
+        ar & BOOST_SERIALIZATION_NVP(forwardMotionGraph);
+        ar & BOOST_SERIALIZATION_NVP(backwardMotionGraph);
 	}
     
 };
 
-BOOST_CLASS_VERSION(AppModel, 1)
+BOOST_CLASS_VERSION(AppModel, 2)
 
 typedef Singleton<AppModel> AppModelSingleton;					// Global declaration
 
