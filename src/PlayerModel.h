@@ -186,6 +186,7 @@ public:
             
             xmp.setup();
             xmp.setNormaliseMarkers(true);
+            xmp.setAllowDoubles(true);
             xmp.loadXMP(filePath);
             xmp.listMarkers();
             //xmp.dumpDynamicMetaData();
@@ -217,16 +218,17 @@ public:
     
     MovieInfo getStartMovie(){
 
-        MovieInfo mi;
-        mi.name = "STND_TODO_CRCH_TODO_STND_TODO_00_" + playerName;
-        mi.path = playerFolder + mi.name + ".mov";
-        mi.speed = 2.0;
-        mi.frame = 0;
-        mi.startframe = 0;
-        mi.motion = metadata[mi.name].getLastMarker(mi.startframe).getName();
-        mi.genframe = metadata[mi.name].getNextMarker(mi.startframe + 1).getStartFrame();
+        MovieInfo mI;
+        mI.name = "STND_TODO_CRCH_TODO_STND_TODO_00_" + playerName;
+        mI.path = playerFolder + mI.name + ".mov";
+        mI.speed = 2.0;
+        mI.frame = 0;
+        mI.startframe = 0;
+        mI.motion = metadata[mI.name].getLastMarker(mI.startframe).getName();
+        mI.genframe = metadata[mI.name].getNextMarker(mI.startframe + 1).getStartFrame();
+        mI.predictedBounding = getProjectedRects(mI, mI, 200.0/550.0);
         
-        return mi;
+        return mI;
         
     }
     
@@ -335,6 +337,14 @@ public:
     
     map<string, ofxXMP>& getMetaData(){
         return metadata;
+    }
+    
+    float printKeyDifferences(){
+        for(map<string, vector<ofPoint> >::iterator it = keyframes.begin(); it != keyframes.end(); ++it){
+            string movie = it->first;
+            vector<ofPoint>& k = it->second;
+            cout << movie << "   " << k[k.size() - 1] - k[0] << endl;
+        }
     }
     
 protected:

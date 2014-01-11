@@ -13,10 +13,11 @@
 
 #include "BaseModel.h"
 #include "AppStates.h"
-#include "PlayerModel.h"
 #include "VectorUtils.h"
 #include "FileList.h"
 #include "MotionGraph.h"
+#include "PlayerView.h"
+#include "PlayerModel.h"
 #include "PlayerController.h"
 #include "ofxCv.h"
 #include "ofVideoPlayer.h"
@@ -36,6 +37,15 @@ public:
     //--------------------------------------------------------------
     void createPlayer(string name){
         
+        if(views.size() == 0){
+            for(int i = 0; i < getProperty<int>("NumberPlayers"); i++){
+                PlayerView* v = new PlayerView;
+                v->setup(getProperty<float>("VideoWidth"), getProperty<float>("VideoWidth"), 2);
+                v->setTransitionLength(getProperty<int>("TransitionLength"));
+                views.push_back(v);
+            }
+        }
+        
         map<string, PlayerModel>::iterator it = playerModels.find(name);
         
         if(it == playerModels.end()){
@@ -47,7 +57,7 @@ public:
             
             ofxLogNotice() << "Creating player of type: " << name << endl;;
             PlayerController* p = new PlayerController;
-            p->setup(getPlayerModel(name), forwardMotionGraph, backwardMotionGraph, directionGraph);
+            p->setup(&getPlayerModel(name), views[players.size()], &forwardMotionGraph, &backwardMotionGraph, &directionGraph);
             players.push_back(p);
             
         }
@@ -77,6 +87,8 @@ public:
     void loadWindowPositions(string path){
         
         ofxLogNotice() << "Setting up windows with: " << path << endl;
+        
+        windows.clear();
         
         ofBuffer b = ofBufferFromFile(ofToDataPath(path));
         
@@ -168,6 +180,7 @@ protected:
     ofxCv::ContourFinder    analysisContourFinder;
     
     vector<PlayerController*>   players;
+    vector<PlayerView*>        views;
     map<string, PlayerModel>    playerModels;
     
     vector<ofRectangle> windows;

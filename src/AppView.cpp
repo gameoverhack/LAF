@@ -133,7 +133,13 @@ void AppView::update(){
         if(appViewStates.getState(kAPPVIEW_SHOWRECTS)){
             for(int i = 0; i < players.size(); i++){
                 ofNoFill();
+                ofSetColor(127, 0, 0);
                 ofRect(players[i]->getBounding());
+                vector<ofRectangle>& chainRects = players[i]->getPredictedChainRects();
+                ofSetColor(0, 10, 10);
+                for(int j = 0; j < chainRects.size(); j++){
+                    ofRect(chainRects[j]);
+                }
             }
         }
         
@@ -142,6 +148,8 @@ void AppView::update(){
          *****************************************************/
         
         if(appViewStates.getState(kAPPVIEW_SHOWPLAYERS)){
+            
+            ofSetColor(255, 255, 255);
             
             glPushAttrib(GL_ENABLE_BIT);
             glEnable(GL_DEPTH_TEST);
@@ -153,7 +161,7 @@ void AppView::update(){
                 glTranslatef(players[i]->getPosition().x, players[i]->getPosition().y, players[i]->getPosition().z);
                 glScalef(players[i]->getDrawScale(), players[i]->getDrawScale(), 1.0f);
                 
-                players[i]->getView().drawParticles();
+                players[i]->getView()->drawParticles();
                 
                 glPopMatrix();
             }
@@ -168,7 +176,7 @@ void AppView::update(){
                 glTranslatef(players[i]->getPosition().x, players[i]->getPosition().y, players[i]->getPosition().z);
                 glScalef(players[i]->getDrawScale(), players[i]->getDrawScale(), 1.0f);
                 
-                players[i]->getView().drawImage();
+                players[i]->getView()->drawImage();
                 
                 glPopMatrix();
             }

@@ -56,7 +56,13 @@ void PlayController::update(){
             break;
         case kPLAYCONTROLLER_MAKE:
         {
+            
+            for(int i = 0; i < players.size(); i++){
+                delete players[i];
+            }
+            
             players.clear();
+            
             for(int i = 0; i < appModel->getProperty<int>("NumberPlayers"); i++){
                 appModel->createPlayer("MARTINW");
             }
@@ -64,8 +70,9 @@ void PlayController::update(){
             players = appModel->getPlayers();
             for(int i = 0; i < players.size(); i++){
                 players[i]->setDrawScale(200.0/550.0);
-                players[i]->setNormalPosition(ofPoint(windowPositions[i].x + windowPositions[i].width / 2.0f,
-                                                      windowPositions[i].y, 0.0f));
+                players[i]->setNormalPosition(ofPoint(0,0,0));
+//                players[i]->setNormalPosition(ofPoint(windowPositions[8].x + windowPositions[8].width / 2.0f,
+//                                                      windowPositions[8].y, 0.0f));
             }
             
             

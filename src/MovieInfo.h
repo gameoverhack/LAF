@@ -36,7 +36,7 @@ public:
     int totalframes = 0;
     float speed = 2.0;
     bool isFrameNew = false;
-    bool isMovieDirty = false;
+    bool isMovieDirty = true;
     string motion = "";
     ofRectangle bounding;
     ofPoint position = ofPoint(0,0,0);

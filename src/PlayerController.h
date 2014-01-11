@@ -14,8 +14,6 @@
 #include "ofxXMP.h"
 #include "ofxThreadedVideo.h"
 #include "AppModel.h"
-#include "PlayerModel.h"
-#include "PlayerView.h"
 
 class PlayerController{
     
@@ -26,24 +24,23 @@ public:
     }
     
     ~PlayerController(){
-        
+        ofxLogVerbose() << "Destroying PlayerController with " << model->getPlayerName() << endl;
+        video.close();
     }
     
-    void setup(PlayerModel & pModel, MotionGraph & fmGraph, MotionGraph & bmGraph, MotionGraph & dGraph){
+    void setup(PlayerModel * pModel, PlayerView * pView, MotionGraph * fmGraph, MotionGraph * bmGraph, MotionGraph * dGraph){
         
-        ofxLogNotice() << "Setting up PlayerController with " << pModel.getPlayerName() << endl;
+        ofxLogNotice() << "Setting up PlayerController with " << pModel->getPlayerName() << endl;
      
         model = pModel;
+        view = pView;
         forwardMotionGraph = fmGraph;
         backwardMotionGraph = bmGraph;
         directionGraph = dGraph;
-        
-        view.setup(model.getWidth(), model.getHeight(), 2);
-        view.setTransitionLength(12);
 
         video.setPixelFormat(OF_PIXELS_BGRA);
         
-        movieCue.push_back(model.getStartMovie());
+        movieCue.push_back(model->getStartMovie());
         
         bCueTransition = false;
         bFirstLoad = true;
@@ -65,20 +62,20 @@ public:
             currentMovie.isFrameNew = video.isFrameNew();
 
             if(currentMovie.isFrameNew){
-                view.setPixels(video.getPixelsRef());
+                view->setPixels(video.getPixelsRef());
                 
-                ofPoint kFrame = model.getKeyFrame(currentMovie.name, currentMovie.frame);
+                ofPoint kFrame = model->getKeyFrame(currentMovie.name, currentMovie.frame);
                 currentMovie.position = pNormal - (kFrame - kNormal) * scale;
                 pNormal = currentMovie.position;
                 kNormal = kFrame;
                 
-                currentMovie.bounding = model.getScaledRectFrame(currentMovie.name, currentMovie.frame, currentMovie.position, scale);
+                currentMovie.bounding = model->getScaledRectFrame(currentMovie.name, currentMovie.frame, currentMovie.position, scale);
             }
 
         
             if(bCueTransition){
-                view.setTransitionEndPixels(video.getPixelsRef());
-                view.setRenderMode(RENDER_TRANSITION);
+                view->setTransitionEndPixels(video.getPixelsRef());
+                view->setRenderMode(RENDER_TRANSITION);
                 bCueTransition = false;
             }
 
@@ -87,7 +84,7 @@ public:
                 if(movieCue.size() > 0 && !bCueTransition){
                     
                     bCueTransition = true;
-                    view.setTransitionStartPixels(video.getPixelsRef());
+                    view->setTransitionStartPixels(video.getPixelsRef());
                     loadMovie(movieCue[0]);
                     movieCue.pop_front();
                     
@@ -102,32 +99,146 @@ public:
         }
         
 
-        view.update();
+        view->update();
+        
+    }
+    
+    void generateMoviesFromMotions(vector<string> motions){
+        
+        vector<string> markerNames;
+        map<string, ofxXMP> & metadata = model->getMetaData();
+        map<string, vector<string> > & markDictionary = model->getMarkerDictionary();
+        
+        for(int i = 1; i < motions.size(); i++){
+            string markerName = motions[i - 1] + "_" + motions[i];
+            markerNames.push_back(markerName);
+        }
+        
+        cout << markerNames << endl;
+        
+        MovieInfo lastMovieInfo;
+        vector<MovieInfo> mIChain;
+        
+        for(int i = 0; i < markerNames.size(); i++){
+            
+            cout << markerNames[i] << endl;
+            
+            if(i == 0 && markerNames[i] == currentMovie.motion){
+                cout << "   MATCHED CURRENT " << currentMovie << endl;
+                lastMovieInfo = currentMovie;
+                continue;
+            }
+
+            map<string, vector<string> >::iterator it = markDictionary.find(markerNames[i]);
+            assert(it != markDictionary.end());
+            
+            vector<string> uniqueMovies = it->second;
+            
+            string rMovieName = "";
+            std::random_shuffle(uniqueMovies.begin(), uniqueMovies.end());
+            
+            for(int j = 0; j < uniqueMovies.size(); j++){
+                
+                cout << "   " << j << " " << uniqueMovies[j] << "   " << markerNames[i] << endl;
+                
+                rMovieName = uniqueMovies[j];
+                if(rMovieName == lastMovieInfo.name) break;
+                
+            }
+            
+            vector<ofxXMPMarker> mTs = metadata[rMovieName].getMarkers(markerNames[i]);
+            
+            std::random_shuffle(mTs.begin(), mTs.end());
+            int startFrame = 0; int endFrame = 0;
+            for(int k = 0; k < mTs.size(); k++){
+                
+                ofxXMPMarker& mT = mTs[k];
+                ofxXMPMarker& nT = metadata[rMovieName].getNextMarker(mT.getStartFrame() + 1);
+                
+                cout << "     last " << lastMovieInfo.genframe << endl;
+                cout << "     start " << mT << endl;
+                cout << "     end   " << nT << endl;
+                
+                startFrame = mT.getStartFrame();
+                endFrame = nT.getStartFrame();
+                
+                if(mT.getStartFrame() == lastMovieInfo.genframe) break;
+
+            }
+            
+            MovieInfo mI;
+            mI.name = rMovieName;
+            mI.path = model->getPlayerFolder() + mI.name + ".mov";
+            mI.startframe = mI.frame = startFrame;
+            mI.genframe = endFrame;
+            mI.speed = lastMovieInfo.speed;
+            mI.isMovieDirty = false;
+            mI.isFrameNew = false;
+            mI.motion = markerNames[i];
+            
+            ofPoint kN = model->getKeyFrame(mI.name, mI.startframe);
+            ofPoint kF = model->getKeyFrame(mI.name, mI.genframe);
+            mI.position = lastMovieInfo.position - (kF - kN) * scale;
+            
+            mI.predictedBounding = model->getProjectedRects(mI, lastMovieInfo, scale);
+            
+            mIChain.push_back(mI);
+            
+            lastMovieInfo = mI;
+            
+        }
+        
+        cout << mIChain << endl;
+        
+        predictedChainRects.clear();
+        predictedChainPositions.clear();
+        
+        for(int i = 0; i < mIChain.size(); i++){
+            for(int j = 0; j < mIChain[i].predictedBounding.size(); j++){
+                predictedChainRects.push_back(mIChain[i].predictedBounding[j]);
+                predictedChainPositions.push_back(mIChain[i].predictedPosition[j]);
+            }
+            movieCue.push_back(mIChain[i]);
+        }
+        
         
     }
     
     //--------------------------------------------------------------
-    bool generateMoviesBetween(string m1, string m2, bool bForward){
+    void setTargetPosition(ofPoint startPosition){
+        ofPoint endPosition = predictedChainPositions[predictedChainPositions.size() - 1];
+        pNormal -= (endPosition - startPosition);
+        ofRectangle r = model->getRectFrame(model->getStartMovie().name, 1);
+        pNormal.x -= (r.x + r.width / 2.0f) * scale;
+        pNormal.y -= (r.y + r.height) * scale + 4;
+        
+        for(int i = 0; i < predictedChainPositions.size(); i++){
+            predictedChainPositions[i] = predictedChainPositions[i] - startPosition;
+            predictedChainRects[i].x = (predictedChainRects[i].x + pNormal.x) + (r.x + r.width / 2.0f) * scale;
+            predictedChainRects[i].y = (predictedChainRects[i].y + pNormal.y) + (r.y + r.height) * scale + 4;
+        }
+    }
+    
+    //--------------------------------------------------------------
+    void generateMotionsBetween(string m1, string m2, bool bForward, vector<string>& motions){
         
         ofSeedRandom();
-        
-        string tab = "";
 
         MotionGraph motionGraph;
         vector<string> allPossibleTransitions;
         string startMotion, endMotion;
         
         if(bForward){
-            motionGraph = forwardMotionGraph;
+            motionGraph = *forwardMotionGraph;
             startMotion = m1;
             endMotion = m2;
         }else{
-            motionGraph = backwardMotionGraph;
+            motionGraph = *backwardMotionGraph;
             startMotion = m2;
             endMotion = m1;
         }
         
-        cout << tab << startMotion << " -> " << endMotion << endl;
+        cout << startMotion << " -> " << endMotion << endl;
         
         allPossibleTransitions = motionGraph.getPossibleTransitions(startMotion);
         
@@ -136,6 +247,7 @@ public:
             if(allPossibleTransitions[i] == endMotion){
                 //cout << "FOUND SOLUTION: " << allPossibleTransitions[i] << endl;
                 vector<string> transitions;
+                transitions.push_back(startMotion);
                 transitions.push_back(allPossibleTransitions[i]);
                 solutions.push_back(transitions);
             }else{
@@ -144,6 +256,7 @@ public:
                     if(allPossibleTransitions2[j] == endMotion){
                         //cout << "FOUND SOLUTION: " << allPossibleTransitions[i] << " -> " << allPossibleTransitions2[j] << endl;
                         vector<string> transitions;
+                        transitions.push_back(startMotion);
                         transitions.push_back(allPossibleTransitions[i]);
                         transitions.push_back(allPossibleTransitions2[j]);
                         solutions.push_back(transitions);
@@ -153,6 +266,7 @@ public:
                             if(allPossibleTransitions3[k] == endMotion){
                                 //cout << "FOUND SOLUTION: " << allPossibleTransitions[i] << " -> " << allPossibleTransitions2[j] << " -> " << allPossibleTransitions3[k] << endl;
                                 vector<string> transitions;
+                                transitions.push_back(startMotion);
                                 transitions.push_back(allPossibleTransitions[i]);
                                 transitions.push_back(allPossibleTransitions2[j]);
                                 transitions.push_back(allPossibleTransitions3[k]);
@@ -163,6 +277,7 @@ public:
                                     if(allPossibleTransitions4[m] == endMotion){
                                         //cout << "FOUND SOLUTION: " << allPossibleTransitions[i] << " -> " << allPossibleTransitions2[j] << " -> " << allPossibleTransitions3[k] << " -> " << allPossibleTransitions4[m] << endl;
                                         vector<string> transitions;
+                                        transitions.push_back(startMotion);
                                         transitions.push_back(allPossibleTransitions[i]);
                                         transitions.push_back(allPossibleTransitions2[j]);
                                         transitions.push_back(allPossibleTransitions3[k]);
@@ -174,6 +289,7 @@ public:
                                             if(allPossibleTransitions5[n] == endMotion){
                                                 //cout << "FOUND SOLUTION: " << allPossibleTransitions[i] << " -> " << allPossibleTransitions2[j] << " -> " << allPossibleTransitions3[k] << " -> " << allPossibleTransitions4[m] << " -> " << allPossibleTransitions5[n] << endl;
                                                 vector<string> transitions;
+                                                transitions.push_back(startMotion);
                                                 transitions.push_back(allPossibleTransitions[i]);
                                                 transitions.push_back(allPossibleTransitions2[j]);
                                                 transitions.push_back(allPossibleTransitions3[k]);
@@ -186,6 +302,7 @@ public:
                                                     if(allPossibleTransitions6[o] == endMotion){
                                                         //cout << "FOUND SOLUTION: " << allPossibleTransitions[i] << " -> " << allPossibleTransitions2[j] << " -> " << allPossibleTransitions3[k] << " -> " << allPossibleTransitions4[m] << " -> " << allPossibleTransitions5[n] << " -> " << allPossibleTransitions6[o] << endl;
                                                         vector<string> transitions;
+                                                        transitions.push_back(startMotion);
                                                         transitions.push_back(allPossibleTransitions[i]);
                                                         transitions.push_back(allPossibleTransitions2[j]);
                                                         transitions.push_back(allPossibleTransitions3[k]);
@@ -199,6 +316,7 @@ public:
                                                             if(allPossibleTransitions6[o] == endMotion){
                                                                 //cout << "FOUND SOLUTION: " << allPossibleTransitions[i] << " -> " << allPossibleTransitions2[j] << " -> " << allPossibleTransitions3[k] << " -> " << allPossibleTransitions4[m] << " -> " << allPossibleTransitions5[n] << " -> " << allPossibleTransitions6[o] << " -> " << allPossibleTransitions6[p] << endl;
                                                                 vector<string> transitions;
+                                                                transitions.push_back(startMotion);
                                                                 transitions.push_back(allPossibleTransitions[i]);
                                                                 transitions.push_back(allPossibleTransitions2[j]);
                                                                 transitions.push_back(allPossibleTransitions3[k]);
@@ -222,10 +340,22 @@ public:
             }
         }
         
+        map<string, vector<string> > & markDictionary = model->getMarkerDictionary();
         std::random_shuffle(solutions.begin(), solutions.end());
         int shortest = INFINITY; int index = -1;
         for(int i = 0; i < solutions.size(); i++){
-            if(solutions[i].size() < shortest){
+            
+            bool legal = true;
+            for(int j = 1; j < solutions[i].size(); j++){
+                string sMotion = solutions[i][j - 1] + "_" + solutions[i][j];
+                map<string, vector<string> >::iterator it = markDictionary.find(sMotion);
+                if(it == markDictionary.end()){
+                    legal = false;
+                    break;
+                }
+            }
+            
+            if(solutions[i].size() < shortest && legal){
                 index = i;
                 shortest = solutions[i].size();
             }
@@ -234,12 +364,17 @@ public:
         if(index == -1){
             
             cout << "NO SOLUTION" << endl;
+            assert(false);
             
         }else{
             
             cout << "SOLUTION: " << solutions[index] << endl;
+            for(int i = 0; i < solutions[index].size(); i++){
+                motions.push_back(solutions[index][i]);
+            }
+            
         }
-    
+
     }
     
     //--------------------------------------------------------------
@@ -258,10 +393,10 @@ public:
         cout << tab << cMovie << endl;
         
         string motion = getEndMotionFromString(cMovie.motion);
-        vector<string> allPossibleTransitions = forwardMotionGraph.getPossibleTransitions(motion);
+        vector<string> allPossibleTransitions = forwardMotionGraph->getPossibleTransitions(motion);
         
-        map<string, vector<string> > & markDictionary = model.getMarkerDictionary();
-        map<string, ofxXMP> & metadata = model.getMetaData();
+        map<string, vector<string> > & markDictionary = model->getMarkerDictionary();
+        map<string, ofxXMP> & metadata = model->getMetaData();
         
         for(int i = 0; i < allPossibleTransitions.size(); i++){
             
@@ -301,7 +436,7 @@ public:
                         
                         MovieInfo mI;
                         mI.name = uniqueMovies[j];
-                        mI.path = model.getPlayerFolder() + uniqueMovies[j] + ".mov";
+                        mI.path = model->getPlayerFolder() + uniqueMovies[j] + ".mov";
                         mI.startframe = mI.frame = mT.getStartFrame();
                         mI.genframe = nT.getStartFrame();
                         mI.speed = cMovie.speed;
@@ -309,7 +444,7 @@ public:
                         mI.isFrameNew = false;
                         mI.motion = sMotion;
                         mI.position = cMovie.position;
-                        mI.predictedBounding = model.getProjectedRects(mI, cMovie, scale);
+                        mI.predictedBounding = model->getProjectedRects(mI, cMovie, scale);
 //                        mI.intersectionFrames.assign(windowPositions.size(), mI.startframe + mI.predictedBounding.size());
 //                        mI.intersectedTransition = false;
                         
@@ -442,12 +577,12 @@ public:
     }
     
     //--------------------------------------------------------------
-    PlayerModel& getModel(){
+    PlayerModel* getModel(){
         return model;
     }
     
     //--------------------------------------------------------------
-    PlayerView& getView(){
+    PlayerView* getView(){
         return view;
     }
     
@@ -457,10 +592,14 @@ public:
     }
     
     void setNormalPosition(ofPoint p){
-        ofRectangle r = model.getRectFrame(model.getStartMovie().name, 1);
+        ofRectangle r = model->getRectFrame(model->getStartMovie().name, 1);
         pNormal = p;
         pNormal.x -= (r.x + r.width / 2.0f) * scale;
         pNormal.y -= (r.y + r.height) * scale + 4;
+    }
+    
+    vector<ofRectangle>& getPredictedChainRects(){
+        return predictedChainRects;
     }
     
 protected:
@@ -473,7 +612,7 @@ protected:
         m.bounding = currentMovie.bounding;
         currentMovie = m;
         if(!bFirstLoad) pNormal = currentMovie.position;
-        kNormal = model.getKeyFrame(m.name, m.startframe);
+        kNormal = model->getKeyFrame(m.name, m.startframe);
         
         video.loadMovie(m.path);
         video.setLoopState(OF_LOOP_NONE);
@@ -484,12 +623,11 @@ protected:
         bFirstLoad = false;
     }
     
-    MotionGraph forwardMotionGraph;
-    MotionGraph backwardMotionGraph;
-    MotionGraph directionGraph;
-    
     MovieInfo currentMovie;
     deque<MovieInfo> movieCue;
+    
+    vector<ofRectangle> predictedChainRects;
+    vector<ofPoint> predictedChainPositions;
     
     bool bCueTransition;
     bool bFirstLoad;
@@ -498,8 +636,11 @@ protected:
     
     ofxThreadedVideo    video;
     
-    PlayerModel         model;
-    PlayerView          view;
+    MotionGraph*         forwardMotionGraph;
+    MotionGraph*         backwardMotionGraph;
+    MotionGraph*         directionGraph;
+    PlayerModel*         model;
+    PlayerView*          view;
     
 };
 

@@ -51,7 +51,7 @@ void AppController::setup(){
 //    appModel->setProperty("Ortho", true);
 //    
 //    appModel->setProperty("MediaPath", (string)"/Users/gameover/Desktop/LOTE/TESTRENDERS/media");
-    appModel->setProperty("NumberPlayers", 1);
+    appModel->setProperty("NumberPlayers", 11);
 //
     appModel->setProperty("ForceFileListUpdate", false);
     appModel->setProperty("ForceFileListCheck", false);
@@ -65,13 +65,14 @@ void AppController::setup(){
 //    
 //    appModel->setProperty("VideoWidth", 550.0f);
 //    appModel->setProperty("VideoHeight", 550.0f);
+    appModel->setProperty("TransitionLength", 12);
 //    
 //    appModel->setProperty("OutputWidth", 1920.0f);
 //    appModel->setProperty("OutputHeight", 1080.0f);
     
     ofxLogSetLogToFile(appModel->getProperty<bool>("LogToFile"), ofToDataPath("log_" + ofGetTimestampString() + ".log"));
     
-//    appModel->loadWindowPositions("WindowPositions.txt");
+    appModel->loadWindowPositions("WindowPositions.txt");
 //    appModel->loadForwardMotionGraph("ForwardMotionGraph.txt");
 //    appModel->loadBackwardMotionGraph("BackwardMotionGraph.txt");
 //    appModel->loadDirectionGraph("DirectionGraph.txt");
@@ -216,6 +217,7 @@ void AppController::keyPressed(ofKeyEventArgs & e){
     
     StateGroup & debugViewStates = appModel->getStateGroup("DebugViewStates");
     StateGroup & appViewStates = appModel->getStateGroup("AppViewStates");
+    StateGroup & playControllerStates = appModel->getStateGroup("PlayControllerStates");
 //    StateGroup & playControllerStates = appModel->getStateGroup("PlayControllerStates");
     
 //    BezierWarp & warp0 = appViews[0]->getWarp<BezierWarp>();
@@ -255,25 +257,172 @@ void AppController::keyPressed(ofKeyEventArgs & e){
             //players[0]->generatePossibleMotions(players[0]->getCurrentMovieInfo());
             
 //            players[0]->generateMoviesBetween("STND_FRNT", "CLIM_UPPP");
-            vector<string> alphabet = appModel->getForwardMotionGraph().getAlphabet();
-            string m1 = alphabet[(int)ofRandom(alphabet.size())];
-            string m2 = alphabet[(int)ofRandom(alphabet.size())];
+//            vector<string> alphabet = appModel->getForwardMotionGraph().getAlphabet();
+//            string m1 = alphabet[(int)ofRandom(alphabet.size())];
+//            string m2 = alphabet[(int)ofRandom(alphabet.size())];
 //            players[0]->generateMoviesBetween(m1, m2, true);
 //            players[0]->generateMoviesBetween(m1, m2, false);
             
-            players[0]->generateMoviesBetween("STND_FRNT", "WALK_LEFT", true);
-            players[0]->generateMoviesBetween("WALK_LEFT", "CLIM_UPPP", true);
-            players[0]->generateMoviesBetween("CLIM_UPPP", "FALL_BACK", true);
             
-            players[0]->generateMoviesBetween("STND_FRNT", "CLIM_UPPP", true);
-            players[0]->generateMoviesBetween("CLIM_UPPP", "HUGG_FRNT", true);
+            
+            
+//            motions.push_back("STND_FRNT");
+//            players[0]->generateMotionsBetween("STND_FRNT", "WALK_LEFT", true, motions);
+//            players[0]->generateMotionsBetween("WALK_LEFT", "CLIM_UPPP", true, motions);
+//            players[0]->generateMotionsBetween("CLIM_UPPP", "FALL_BACK", true, motions);
+//            
+//            players[0]->generateMoviesFromMotions(motions);
+//            
+            
+//            motions.clear();
+//
+            
+            vector<int> windows;
+            windows.push_back(0);
+            windows.push_back(2);
+            windows.push_back(3);
+            windows.push_back(4);
+            windows.push_back(5);
+            windows.push_back(6);
+            windows.push_back(7);
+            windows.push_back(9);
+            windows.push_back(10);
+            windows.push_back(11);
+            windows.push_back(13);
+            
+            for(int i = 0; i < players.size(); i++){
+                
+                vector<string> motions;
+                
+                int windowIndex = ofRandom(windows.size());
+                int window = windows[windowIndex];
+                eraseAt(windows, windowIndex);
+                
+                vector<string> movements;
+                
+                switch (window) {
+                    case 0:
+                    case 2:
+                        movements.push_back("WALK_RIGT");
+                        movements.push_back("TRAV_RIGT");
+                        movements.push_back("CLIM_UPPP");
+                        movements.push_back("CLIM_DOWN");
+                        movements.push_back("CRWL_RIGT");
+                        movements.push_back("CREP_RIGT");
+                        break;
+                    case 3:
+                    case 5:
+                        movements.push_back("WALK_RIGT");
+                        movements.push_back("TRAV_RIGT");
+                        movements.push_back("CLIM_UPPP");
+                        movements.push_back("CLIM_DOWN");
+                        movements.push_back("CRWL_RIGT");
+                        movements.push_back("CREP_RIGT");
+                        break;
+                    case 4:
+                        movements.push_back("CLIM_UPPP");
+                        movements.push_back("CLIM_DOWN");
+                        break;
+                    case 6:
+                        movements.push_back("TRAV_LEFT");
+                        movements.push_back("TRAV_RIGT");
+                        movements.push_back("CLIM_UPPP");
+                        movements.push_back("CLIM_DOWN");
+                        break;
+                    case 7:
+                    case 9:
+                    case 10:
+                    case 11:
+                    case 13:
+                        movements.push_back("CLIM_UPPP");
+                        movements.push_back("CLIM_DOWN");
+                        break;
+                    default:
+                        break;
+                }
+                
+                
+//                movements.push_back("WALK_LEFT");
+//                
+//                movements.push_back("TRAV_LEFT");
+//                
+//                
+//                movements.push_back("CREP_LEFT");
+//                
+//                movements.push_back("CRWL_LEFT");
+                
+                
+                vector<string> ends;
+                ends.push_back("FALL_BACK");
+                ends.push_back("HUGG_FRNT");
+                
+                string m1 = movements[(int)ofRandom(movements.size())];
+                string e1 = ends[(int)ofRandom(ends.size())];
+                
+                vector<string> mParts = ofSplitString(m1, "_");
+                
+                int inserts = 0;
+                int averageDiff = 0;
+                
+                if(mParts[0] == "CRWL" || mParts[0] == "CREP" || mParts[0] == "WALK"){
+                    
+                    averageDiff = 850 * (200.0f / 550.0f);
+                    
+                    if(mParts[1] == "RIGT"){
+                        inserts = ceil(windowPositions[window].x / averageDiff);
+                        cout << "xR: " << windowPositions[window].x << " " << averageDiff << " " << inserts << endl;
+                    }else{
+                        inserts = ceil((ofGetWidth() - windowPositions[window].x + windowPositions[window].width) / averageDiff) + 1;
+                        cout << "xL: " << (ofGetWidth() - windowPositions[window].x) << " " << averageDiff << " " << inserts << endl;
+                    }
 
+                    
+                    
+                }else{
+                    
+                    averageDiff = 450 * (200.0f / 550.0f);
+                    
+                    if(mParts[1] == "DOWN"){
+                        inserts = ceil(windowPositions[window].y / averageDiff);
+                        cout << "yD: " << windowPositions[window].y << " " << averageDiff << " " << inserts << endl;
+                    }else{
+                        inserts = ceil((ofGetHeight() - windowPositions[window].y + windowPositions[window].height) / averageDiff) + 1;
+                        cout << "yU: " << (ofGetHeight() - windowPositions[window].y) << " " << averageDiff << " " << inserts << endl;
+                    }
+
+                    
+                }
+                
+                
+                
+                motions.push_back("STND_FRNT");
+                players[i]->generateMotionsBetween("STND_FRNT", m1, true, motions);
+                
+                for(int j = 0; j < inserts + 1; j++){
+                    motions.push_back(m1);
+                }
+                
+                players[i]->generateMotionsBetween(m1, e1, true, motions);
+                
+                players[i]->generateMoviesFromMotions(motions);
+                
+                
+                
+                players[i]->setTargetPosition(ofPoint(windowPositions[window].x + windowPositions[window].width / 2.0f,
+                                                      windowPositions[window].y, 0.0f));
+                
+                players[i]->getModel()->printKeyDifferences();
+
+            }
+            
+            
+            
         }
             
             break;
         case 'x':
         {
-            
+            playControllerStates.setState(kPLAYCONTROLLER_MAKE);
         }
             break;
 //        case OF_KEY_LEFT:

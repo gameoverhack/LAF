@@ -104,6 +104,14 @@ inline ostream& operator<<(ostream& os, vector<T> &v){
 };
 
 template<typename T>
+inline ostream& operator<<(ostream& os, deque<T> &d){
+    for(int i = 0; i < d.size(); i++){
+        os << d[i] << (i == d.size() - 1 ? "" : ", ");
+    }
+    return os;
+};
+        
+template<typename T>
 inline void printVector(vector<T> v){
     cout << v;
 };
