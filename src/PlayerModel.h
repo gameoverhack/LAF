@@ -221,7 +221,7 @@ public:
         MovieInfo mI;
         mI.name = "STND_TODO_CRCH_TODO_STND_TODO_00_" + playerName;
         mI.path = playerFolder + mI.name + ".mov";
-        mI.speed = 2.0;
+        mI.speed = ofRandom(1.0, 3.0);
         mI.frame = 0;
         mI.startframe = 0;
         mI.motion = metadata[mI.name].getLastMarker(mI.startframe).getName();

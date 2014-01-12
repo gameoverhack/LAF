@@ -342,16 +342,6 @@ void AppController::keyPressed(ofKeyEventArgs & e){
                 }
                 
                 
-//                movements.push_back("WALK_LEFT");
-//                
-//                movements.push_back("TRAV_LEFT");
-//                
-//                
-//                movements.push_back("CREP_LEFT");
-//                
-//                movements.push_back("CRWL_LEFT");
-                
-                
                 vector<string> ends;
                 ends.push_back("FALL_BACK");
                 ends.push_back("HUGG_FRNT");
@@ -366,28 +356,32 @@ void AppController::keyPressed(ofKeyEventArgs & e){
                 
                 if(mParts[0] == "CRWL" || mParts[0] == "CREP" || mParts[0] == "WALK"){
                     
-                    averageDiff = 850 * (200.0f / 550.0f);
+                    averageDiff = 900 * (200.0f / 550.0f);
                     
                     if(mParts[1] == "RIGT"){
-                        inserts = ceil(windowPositions[window].x / averageDiff);
-                        cout << "xR: " << windowPositions[window].x << " " << averageDiff << " " << inserts << endl;
+                        float dX = 550.0 + windowPositions[window].x;
+                        inserts = ceil(dX / averageDiff);
+                        cout << "xR: " << dX << " " << averageDiff << " " << inserts << endl;
                     }else{
-                        inserts = ceil((ofGetWidth() - windowPositions[window].x + windowPositions[window].width) / averageDiff) + 1;
-                        cout << "xL: " << (ofGetWidth() - windowPositions[window].x) << " " << averageDiff << " " << inserts << endl;
+                        float dX = 550.0 + (ofGetWidth() - windowPositions[window].x);
+                        inserts = ceil(dX/ averageDiff);
+                        cout << "xL: " << dX << " " << averageDiff << " " << inserts << endl;
                     }
 
                     
                     
                 }else{
                     
-                    averageDiff = 450 * (200.0f / 550.0f);
+                    averageDiff = 500 * (200.0f / 550.0f);
                     
                     if(mParts[1] == "DOWN"){
-                        inserts = ceil(windowPositions[window].y / averageDiff);
-                        cout << "yD: " << windowPositions[window].y << " " << averageDiff << " " << inserts << endl;
+                        float dY = 550.0 + windowPositions[window].y;
+                        inserts = ceil(dY / averageDiff);
+                        cout << "yD: " << dY << " " << averageDiff << " " << inserts << endl;
                     }else{
-                        inserts = ceil((ofGetHeight() - windowPositions[window].y + windowPositions[window].height) / averageDiff) + 1;
-                        cout << "yU: " << (ofGetHeight() - windowPositions[window].y) << " " << averageDiff << " " << inserts << endl;
+                        float dY = 550.0 + (ofGetHeight() - windowPositions[window].y);
+                        inserts = ceil(dY / averageDiff);
+                        cout << "yU: " << dY << " " << averageDiff << " " << inserts << endl;
                     }
 
                     
@@ -398,20 +392,64 @@ void AppController::keyPressed(ofKeyEventArgs & e){
                 motions.push_back("STND_FRNT");
                 players[i]->generateMotionsBetween("STND_FRNT", m1, true, motions);
                 
-                for(int j = 0; j < inserts + 1; j++){
+                for(int j = 0; j < inserts; j++){
                     motions.push_back(m1);
                 }
                 
                 players[i]->generateMotionsBetween(m1, e1, true, motions);
                 
+                if(e1 == "HUGG_FRNT") motions.push_back("STND_FRNT");
+                
                 players[i]->generateMoviesFromMotions(motions);
-                
-                
-                
+
                 players[i]->setTargetPosition(ofPoint(windowPositions[window].x + windowPositions[window].width / 2.0f,
                                                       windowPositions[window].y, 0.0f));
                 
-                players[i]->getModel()->printKeyDifferences();
+                if(e1 == "HUGG_FRNT"){
+                    motions.clear();
+                    motions.push_back("STND_FRNT");
+                    if(m1 == "WALK_RIGT"){
+                        m1 = "WALK_LEFT";
+                    }else if(m1 == "WALK_LEFT"){
+                        m1 = "WALK_RIGT";
+                    }
+                    if(m1 == "CREP_RIGT"){
+                        m1 = "CREP_LEFT";
+                    }else if(m1 == "CREP_LEFT"){
+                        m1 = "CREP_RIGT";
+                    }
+                    if(m1 == "CRWL_RIGT"){
+                        m1 = "CRWL_LEFT";
+                    }else if(m1 == "CRWL_LEFT"){
+                        m1 = "CRWL_RIGT";
+                    }
+                    if(m1 == "TRAV_LEFT"){
+                        m1 = "TRAV_RIGT";
+                    }else if(m1 == "TRAV_RIGT"){
+                        m1 = "TRAV_LEFT";
+                    }
+                    if(m1 == "CLIM_UPPP"){
+                        m1 = "CLIM_DOWN";
+                    }else if(m1 == "CLIM_DOWN"){
+                        m1 = "CLIM_UPPP";
+                    }
+                    players[i]->generateMotionsBetween("STND_FRNT", m1, true, motions);
+                    for(int j = 0; j < inserts; j++){
+                        motions.push_back(m1);
+                    }
+                    players[i]->generateMotionsBetween(m1, "FALL_BACK", true, motions);
+                    
+                    players[i]->generateMoviesFromMotions(motions);
+
+                }
+                
+                
+                
+                
+                
+                
+                
+                //players[i]->getModel()->printKeyDifferences();
 
             }
             

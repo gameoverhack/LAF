@@ -44,6 +44,7 @@ public:
         
         bCueTransition = false;
         bFirstLoad = true;
+        bFinsished = false;
     }
     
     void update(){
@@ -62,6 +63,9 @@ public:
             currentMovie.isFrameNew = video.isFrameNew();
 
             if(currentMovie.isFrameNew){
+                
+                bFirstLoad = false;
+                
                 view->setPixels(video.getPixelsRef());
                 
                 ofPoint kFrame = model->getKeyFrame(currentMovie.name, currentMovie.frame);
@@ -89,9 +93,15 @@ public:
                     movieCue.pop_front();
                     
                 }else if(currentMovie.name != ""){ //if(movieCue.size() > 0){
-                    
-                    video.setFrame(currentMovie.startframe);
-//                    cueRandomTransition();
+                    cout << currentMovie.motion << endl;
+                    if(currentMovie.motion == "STND_FRNT_FALL_BACK"){
+                        cout << "FALLING" << endl;
+                        bFinsished = true;
+                    }else if(currentMovie.motion == "STND_FRNT_HUGG_FRNT"){
+                        cout << "HUGGING" << endl;
+                    }else{
+                        video.setFrame(currentMovie.startframe);
+                    }
                     
                 }
             }
@@ -111,6 +121,7 @@ public:
         
         for(int i = 1; i < motions.size(); i++){
             string markerName = motions[i - 1] + "_" + motions[i];
+            if(markerName == "HUGG_FRNT_STND_FRNT") markerName = "STND_FRNT_STND_FRNT";
             markerNames.push_back(markerName);
         }
         
@@ -190,8 +201,8 @@ public:
         
         cout << mIChain << endl;
         
-        predictedChainRects.clear();
-        predictedChainPositions.clear();
+//        predictedChainRects.clear();
+//        predictedChainPositions.clear();
         
         for(int i = 0; i < mIChain.size(); i++){
             for(int j = 0; j < mIChain[i].predictedBounding.size(); j++){
@@ -602,6 +613,14 @@ public:
         return predictedChainRects;
     }
     
+    bool getIsLoaded(){
+        return !bFirstLoad;
+    }
+    
+    bool getIsFinished(){
+        return bFinsished;
+    }
+    
 protected:
     
     void loadMovie(MovieInfo& m){
@@ -620,7 +639,7 @@ protected:
         video.setFrame(m.frame);
         video.setSpeed(m.speed);
 
-        bFirstLoad = false;
+        
     }
     
     MovieInfo currentMovie;
@@ -630,7 +649,7 @@ protected:
     vector<ofPoint> predictedChainPositions;
     
     bool bCueTransition;
-    bool bFirstLoad;
+    bool bFirstLoad, bFinsished;
     ofPoint pNormal, kNormal, oNormal;
     float scale;
     

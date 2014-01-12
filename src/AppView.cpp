@@ -45,6 +45,7 @@ void AppView::resetCamera(){
     cout << cam.getX() << " " << cam.getY() << " " << cam.getZ() << " " << cam.getRoll() << " " << cam.getPitch() << " " << cam.getHeading() << endl;
     cam.enableMouseInput();
     cam.resetTransform();
+    cam.setPosition(0, 5.02717e-05, -575.041);
     setCameraOrtho(appModel->getProperty<bool>("Ortho"));
     cam.tilt(180);
     cam.setTranslationKey('z');
@@ -111,10 +112,12 @@ void AppView::update(){
             ofTranslate(-ofGetWidth() / 2.0, -ofGetHeight() / 2.0);
         }
         
+        ofEnableBlendMode(OF_BLENDMODE_SCREEN);
+        
         /******************************************************
          *******            Draw Windows                *******
          *****************************************************/
-        
+
         if(appViewStates.getState(kAPPVIEW_SHOWWINDOWS)){
             ofNoFill();
             ofSetColor(255, 255, 255);
@@ -168,8 +171,6 @@ void AppView::update(){
             
             glPopAttrib();
             
-            ofEnableBlendMode(OF_BLENDMODE_SCREEN);
-            
             for(int i = 0; i < players.size(); i++){
                 glPushMatrix();
                 
@@ -181,9 +182,9 @@ void AppView::update(){
                 glPopMatrix();
             }
             
-            ofDisableBlendMode();
-            
         }
+        
+        ofDisableBlendMode();
         
         cam.end();
         

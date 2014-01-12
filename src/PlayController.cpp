@@ -82,11 +82,17 @@ void PlayController::update(){
         case kPLAYCONTROLLER_PLAY:
         {
             ostringstream os; os << endl;
+            vector<int> finished;
             for(int i = 0; i < players.size(); i++){
                 players[i]->update();
+                if(players[i]->getIsFinished()) finished.push_back(i);
                 os << players[i]->getCurrentMovieInfo() << endl;
             }
             appModel->setProperty("MovieInfo", os.str());
+            for(int i = 0; i < finished.size(); i++){
+                delete players[finished[i]];
+                eraseAt(players, finished[i]);
+            }
         }
             break;
         case kPLAYCONTROLLER_STOP:
