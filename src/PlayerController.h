@@ -74,6 +74,8 @@ public:
                 kNormal = kFrame;
                 
                 currentMovie.bounding = model->getScaledRectFrame(currentMovie.name, currentMovie.frame, currentMovie.position, scale);
+                playerCentre = currentMovie.bounding.getCenter();
+                distance = playerCentre.distance(windowCentre);
             }
 
         
@@ -97,11 +99,14 @@ public:
                     
                     if(m.name == currentMovie.name){
                         if(m.startframe - currentMovie.genframe != 0){
+                            cout << "Load Marker (frame   ): " << m << endl;
                             tFrame = m.startframe;
                         }else{
+                            cout << "Load Marker (continue): " << m << endl;
                             bCueTransition = false;
                         }
                     }else{
+                        cout << "Load Marker (load    ): " << m << endl;
                         bLoad = true;
                     }
                     
@@ -111,8 +116,16 @@ public:
                     if(!bFirstLoad) pNormal = currentMovie.position;
                     kNormal = model->getKeyFrame(m.name, m.startframe);
                     
-                    if(bLoad) loadMovie(m); 
-                    if(tFrame > -1) video.setFrame(tFrame);
+                    if(bLoad){
+                        video.loadMovie(m.path);
+                        video.setLoopState(OF_LOOP_NONE);
+                        video.play();
+                        video.setFrame(m.frame);
+                        video.setSpeed(m.speed);
+                    }
+                    if(tFrame > -1){
+                        video.setFrame(tFrame);
+                    }
                     
                     movieCue.pop_front();
                     
@@ -636,6 +649,7 @@ public:
         return currentMovie;
     }
     
+    //--------------------------------------------------------------
     void setNormalPosition(ofPoint p){
         ofRectangle r = model->getRectFrame(model->getStartMovie().name, 1);
         pNormal = p;
@@ -643,53 +657,59 @@ public:
         pNormal.y -= (r.y + r.height) * scale + 4;
     }
     
+    //--------------------------------------------------------------
     vector<ofRectangle>& getPredictedChainRects(){
         return predictedChainRects;
     }
     
+    //--------------------------------------------------------------
     bool getIsLoaded(){
         return !bFirstLoad;
     }
     
+    //--------------------------------------------------------------
     bool getIsFinished(){
         return bFinsished;
     }
-    
-    ofPoint getPlayerCentre(){
-        return getBounding().getCenter();
+
+    //--------------------------------------------------------------
+    float& getDistanceToTarget(){
+        return distance;
     }
     
-    ofPoint getTargetCentre(){
-        return targetWindow.getCenter();
+    //--------------------------------------------------------------
+    ofPoint& getPlayerCentre(){
+        return playerCentre;
     }
     
-    float getDistanceToTarget(){
-        return getPlayerCentre().distance(getTargetCentre());
+    //--------------------------------------------------------------
+    ofPoint& getTargetCentre(){
+        return windowCentre;
     }
     
-    ofRectangle& getTargetWindow(){
-        return targetWindow;
+    //--------------------------------------------------------------
+    ofRectangle& getTargetWindowRectangle(){
+        return windowRectangle;
     }
     
-    void setTargetWindow(ofRectangle& r){
-        targetWindow = r;
+    int getTargetWindowIndex(){
+        return windowIndex;
+    }
+    
+    //--------------------------------------------------------------
+    void setTargetWindow(ofRectangle& r, int wIndex){
+        windowRectangle = r;
+        windowCentre = r.getCenter();
+        windowIndex = wIndex;
     }
     
 protected:
     
-    void loadMovie(MovieInfo& m){
-        
-        cout << "Load Movie: " << m << endl;
-
-        video.loadMovie(m.path);
-        video.setLoopState(OF_LOOP_NONE);
-        video.play();
-        video.setFrame(m.frame);
-        video.setSpeed(m.speed);
-
-    }
-    
-    ofRectangle targetWindow;
+    ofPoint playerCentre;
+    ofPoint windowCentre;
+    ofRectangle windowRectangle;
+    int windowIndex;
+    float distance;
     
     MovieInfo currentMovie;
     deque<MovieInfo> movieCue;

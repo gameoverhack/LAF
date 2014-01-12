@@ -914,7 +914,6 @@
 		7701FDD1187F48D20092EDD9 /* DataTypes */ = {
 			isa = PBXGroup;
 			children = (
-				77EF15EB187758B900104A92 /* Player */,
 				77EF15EC187760AB00104A92 /* MotionGraph.h */,
 				7701FDD7187F49750092EDD9 /* AppStates.h */,
 			);
@@ -1037,6 +1036,7 @@
 		77EF15D81877250000104A92 /* MVC */ = {
 			isa = PBXGroup;
 			children = (
+				77EF15EB187758B900104A92 /* Player */,
 				7701FDD3187F48ED0092EDD9 /* Views */,
 				7701FDD2187F48E70092EDD9 /* Controllers */,
 				7701FDD1187F48D20092EDD9 /* DataTypes */,

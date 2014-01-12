@@ -405,7 +405,7 @@ void AppController::keyPressed(ofKeyEventArgs & e){
                 players[i]->setTargetPosition(ofPoint(windowPositions[window].x + windowPositions[window].width / 2.0f,
                                                       windowPositions[window].y, 0.0f));
                 
-                players[i]->setTargetWindow(windowPositions[window]);
+                players[i]->setTargetWindow(windowPositions[window], window);
                 
                 if(e1 == "HUGG_FRNT"){
                     motions.clear();

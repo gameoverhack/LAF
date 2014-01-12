@@ -175,11 +175,10 @@ void AppView::update(){
                 ofFill();
                 float c = 127 * CLAMP((1.0 - d / dT), 0.0f, 1.0f);
                 ofSetColor(c, c, c);
-                ofRect(players[i]->getTargetWindow());
+                ofRect(players[i]->getTargetWindowRectangle());
             }
             
         }
-        
         
         /******************************************************
          *******            Draw Players                *******
