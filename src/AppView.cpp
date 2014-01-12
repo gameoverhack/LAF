@@ -17,6 +17,7 @@ AppView::AppView(){
     newAppViewStates.addState(State(kAPPVIEW_SHOWWINDOWS, "kAPPVIEW_SHOWWINDOWS"));
     newAppViewStates.addState(State(kAPPVIEW_SHOWPLAYERS, "kAPPVIEW_SHOWPLAYERS"));
     newAppViewStates.addState(State(kAPPVIEW_SHOWRECTS, "kAPPVIEW_SHOWRECTS"));
+    newAppViewStates.addState(State(kAPPVIEW_SHOWCENTRES, "kAPPVIEW_SHOWCENTRES"));
     newAppViewStates.addState(State(kAPPVIEW_SHOWWARP, "kAPPVIEW_SHOWWARP"));
     
     // add them to the model
@@ -25,9 +26,10 @@ AppView::AppView(){
     // get them back from the model so that changes go live
     StateGroup & appViewStates = appModel->getStateGroup("AppViewStates");
     
-    appViewStates.setState(kAPPVIEW_SHOWWINDOWS, true);
+    appViewStates.setState(kAPPVIEW_SHOWWINDOWS, false);
     appViewStates.setState(kAPPVIEW_SHOWPLAYERS, true);
-    appViewStates.setState(kAPPVIEW_SHOWRECTS, true);
+    appViewStates.setState(kAPPVIEW_SHOWRECTS, false);
+    appViewStates.setState(kAPPVIEW_SHOWCENTRES, false);
     appViewStates.setState(kAPPVIEW_SHOWWARP, false);
     
     resetCamera();
@@ -118,23 +120,40 @@ void AppView::update(){
          *******            Draw Windows                *******
          *****************************************************/
 
-        if(appViewStates.getState(kAPPVIEW_SHOWWINDOWS)){
-            ofNoFill();
-            ofSetColor(255, 255, 255);
-            for(int i = 0; i < windowPositions.size(); i++){
+        
+        ofNoFill();
+        ofSetColor(255, 255, 255);
+        for(int i = 0; i < windowPositions.size(); i++){
+            
+            /******************************************************
+             *******            Draw WindowInfo             *******
+             *****************************************************/
+            
+            if(appViewStates.getState(kAPPVIEW_SHOWWINDOWS)){
                 ostringstream os;
                 os << i << ": " << windowPositions[i].x << ", " << windowPositions[i].y << ", " << windowPositions[i].width << ", " << windowPositions[i].height;
                 ofDrawBitmapString(os.str(), windowPositions[i].x, windowPositions[i].y - 14);
-                ofRect(windowPositions[i]);
             }
+            ofRect(windowPositions[i]);
         }
         
-        /******************************************************
-         *******            Draw Rects                  *******
-         *****************************************************/
         
-        if(appViewStates.getState(kAPPVIEW_SHOWRECTS)){
-            for(int i = 0; i < players.size(); i++){
+        for(int i = 0; i < players.size(); i++){
+            ofNoFill();
+            ofSetColor(127, 0, 0);
+            
+            /******************************************************
+             *******            Draw Centres                *******
+             *****************************************************/
+            
+            if(appViewStates.getState(kAPPVIEW_SHOWCENTRES)) ofLine(players[i]->getPlayerCentre(), players[i]->getTargetCentre());
+            
+            /******************************************************
+             *******            Draw Rects                  *******
+             *****************************************************/
+            
+            if(appViewStates.getState(kAPPVIEW_SHOWRECTS)){
+                
                 ofNoFill();
                 ofSetColor(127, 0, 0);
                 ofRect(players[i]->getBounding());
@@ -143,8 +162,24 @@ void AppView::update(){
                 for(int j = 0; j < chainRects.size(); j++){
                     ofRect(chainRects[j]);
                 }
+                
             }
+            
+            /******************************************************
+             *******            Draw TargetWindow           *******
+             *****************************************************/
+            
+            float d = players[i]->getDistanceToTarget() - 100.0f;
+            float dT = 200.0f;
+            if(d < dT){
+                ofFill();
+                float c = 127 * CLAMP((1.0 - d / dT), 0.0f, 1.0f);
+                ofSetColor(c, c, c);
+                ofRect(players[i]->getTargetWindow());
+            }
+            
         }
+        
         
         /******************************************************
          *******            Draw Players                *******
@@ -153,6 +188,7 @@ void AppView::update(){
         if(appViewStates.getState(kAPPVIEW_SHOWPLAYERS)){
             
             ofSetColor(255, 255, 255);
+            ofNoFill();
             
             glPushAttrib(GL_ENABLE_BIT);
             glEnable(GL_DEPTH_TEST);

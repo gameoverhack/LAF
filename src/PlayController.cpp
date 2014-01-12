@@ -86,7 +86,7 @@ void PlayController::update(){
             for(int i = 0; i < players.size(); i++){
                 players[i]->update();
                 if(players[i]->getIsFinished()) finished.push_back(i);
-                os << players[i]->getCurrentMovieInfo() << endl;
+                os << players[i]->getCurrentMovieInfo() << "   " << players[i]->getDistanceToTarget() << endl;
             }
             appModel->setProperty("MovieInfo", os.str());
             for(int i = 0; i < finished.size(); i++){

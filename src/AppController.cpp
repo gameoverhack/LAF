@@ -359,11 +359,11 @@ void AppController::keyPressed(ofKeyEventArgs & e){
                     averageDiff = 900 * (200.0f / 550.0f);
                     
                     if(mParts[1] == "RIGT"){
-                        float dX = 550.0 + windowPositions[window].x;
+                        float dX = 200.0 + windowPositions[window].x;
                         inserts = ceil(dX / averageDiff);
                         cout << "xR: " << dX << " " << averageDiff << " " << inserts << endl;
                     }else{
-                        float dX = 550.0 + (ofGetWidth() - windowPositions[window].x);
+                        float dX = 200.0 + (ofGetWidth() - windowPositions[window].x);
                         inserts = ceil(dX/ averageDiff);
                         cout << "xL: " << dX << " " << averageDiff << " " << inserts << endl;
                     }
@@ -375,12 +375,12 @@ void AppController::keyPressed(ofKeyEventArgs & e){
                     averageDiff = 500 * (200.0f / 550.0f);
                     
                     if(mParts[1] == "DOWN"){
-                        float dY = 550.0 + windowPositions[window].y;
+                        float dY = 200.0 + windowPositions[window].y;
                         inserts = ceil(dY / averageDiff);
                         cout << "yD: " << dY << " " << averageDiff << " " << inserts << endl;
                     }else{
-                        float dY = 550.0 + (ofGetHeight() - windowPositions[window].y);
-                        inserts = ceil(dY / averageDiff);
+                        float dY = 200.0 + (ofGetHeight() - windowPositions[window].y);
+                        inserts = ceil(dY / averageDiff) + 1; // i don't know why but it needs it!
                         cout << "yU: " << dY << " " << averageDiff << " " << inserts << endl;
                     }
 
@@ -404,6 +404,8 @@ void AppController::keyPressed(ofKeyEventArgs & e){
 
                 players[i]->setTargetPosition(ofPoint(windowPositions[window].x + windowPositions[window].width / 2.0f,
                                                       windowPositions[window].y, 0.0f));
+                
+                players[i]->setTargetWindow(windowPositions[window]);
                 
                 if(e1 == "HUGG_FRNT"){
                     motions.clear();

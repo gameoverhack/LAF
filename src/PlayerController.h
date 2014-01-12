@@ -89,14 +89,45 @@ public:
                     
                     bCueTransition = true;
                     view->setTransitionStartPixels(video.getPixelsRef());
-                    loadMovie(movieCue[0]);
+                    
+                    MovieInfo& m = movieCue[0];
+                    
+                    bool bLoad = false;
+                    int tFrame = -1;
+                    
+                    if(m.name == currentMovie.name){
+                        if(m.startframe - currentMovie.genframe != 0){
+                            tFrame = m.startframe;
+                        }else{
+                            bCueTransition = false;
+                        }
+                    }else{
+                        bLoad = true;
+                    }
+                    
+                    m.position = currentMovie.position;
+                    m.bounding = currentMovie.bounding;
+                    currentMovie = m;
+                    if(!bFirstLoad) pNormal = currentMovie.position;
+                    kNormal = model->getKeyFrame(m.name, m.startframe);
+                    
+                    if(bLoad) loadMovie(m); 
+                    if(tFrame > -1) video.setFrame(tFrame);
+                    
                     movieCue.pop_front();
                     
                 }else if(currentMovie.name != ""){ //if(movieCue.size() > 0){
                     cout << currentMovie.motion << endl;
                     if(currentMovie.motion == "STND_FRNT_FALL_BACK"){
                         cout << "FALLING" << endl;
-                        bFinsished = true;
+                        
+                        if(getDistanceToTarget() < 300.0){
+                            pNormal.y += 8.0f;
+                            currentMovie.bounding.y += 8.0f;
+                        }else{
+                            bFinsished = true;
+                        }
+                        
                     }else if(currentMovie.motion == "STND_FRNT_HUGG_FRNT"){
                         cout << "HUGGING" << endl;
                     }else{
@@ -113,7 +144,7 @@ public:
         
     }
     
-    void generateMoviesFromMotions(vector<string> motions){
+    void generateMoviesFromMotions(vector<string> motions, bool bClearCue = false){
         
         vector<string> markerNames;
         map<string, ofxXMP> & metadata = model->getMetaData();
@@ -201,9 +232,12 @@ public:
         
         cout << mIChain << endl;
         
-//        predictedChainRects.clear();
-//        predictedChainPositions.clear();
-        
+        if(bClearCue){
+            movieCue.clear();
+            predictedChainRects.clear();
+            predictedChainPositions.clear();
+        }
+
         for(int i = 0; i < mIChain.size(); i++){
             for(int j = 0; j < mIChain[i].predictedBounding.size(); j++){
                 predictedChainRects.push_back(mIChain[i].predictedBounding[j]);
@@ -621,26 +655,41 @@ public:
         return bFinsished;
     }
     
+    ofPoint getPlayerCentre(){
+        return getBounding().getCenter();
+    }
+    
+    ofPoint getTargetCentre(){
+        return targetWindow.getCenter();
+    }
+    
+    float getDistanceToTarget(){
+        return getPlayerCentre().distance(getTargetCentre());
+    }
+    
+    ofRectangle& getTargetWindow(){
+        return targetWindow;
+    }
+    
+    void setTargetWindow(ofRectangle& r){
+        targetWindow = r;
+    }
+    
 protected:
     
     void loadMovie(MovieInfo& m){
         
         cout << "Load Movie: " << m << endl;
-        
-        m.position = currentMovie.position;
-        m.bounding = currentMovie.bounding;
-        currentMovie = m;
-        if(!bFirstLoad) pNormal = currentMovie.position;
-        kNormal = model->getKeyFrame(m.name, m.startframe);
-        
+
         video.loadMovie(m.path);
         video.setLoopState(OF_LOOP_NONE);
         video.play();
         video.setFrame(m.frame);
         video.setSpeed(m.speed);
 
-        
     }
+    
+    ofRectangle targetWindow;
     
     MovieInfo currentMovie;
     deque<MovieInfo> movieCue;

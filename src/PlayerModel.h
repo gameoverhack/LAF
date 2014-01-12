@@ -331,6 +331,11 @@ public:
         return k[frame];
     }
     
+    int getTotalKeyFrames(string name){
+        vector<ofPoint> & k = keyframes[name];
+        return k.size();
+    }
+    
     map<string, vector<string> >& getMarkerDictionary(){
         return markDictionary;
     }
