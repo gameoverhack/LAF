@@ -300,7 +300,6 @@
 		77EBC7641870E66700D86F91 /* libXMPCoreStatic.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libXMPCoreStatic.a; sourceTree = "<group>"; };
 		77EBC7651870E66700D86F91 /* libXMPFilesStatic.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libXMPFilesStatic.a; sourceTree = "<group>"; };
 		77EBC7691871C82400D86F91 /* PlayerView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PlayerView.h; sourceTree = "<group>"; };
-		77EF15EA18773CC900104A92 /* PlayerModelOLD.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PlayerModelOLD.h; sourceTree = "<group>"; };
 		77EF15EC187760AB00104A92 /* MotionGraph.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MotionGraph.h; path = "../../LAFTest-ParticleEffectsRenderer/src/MotionGraph.h"; sourceTree = "<group>"; };
 		78c3fff9884db60ce1449d8e7b789e36 /* MSAPingPong.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = MSAPingPong.h; path = ../../../addons/ofxMSAPingPong/src/MSAPingPong.h; sourceTree = SOURCE_ROOT; };
 		78d67a00eb899fac0943059784f8212a /* ofxLabel.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 30; name = ofxLabel.cpp; path = ../../../addons/ofxGui/src/ofxLabel.cpp; sourceTree = SOURCE_ROOT; };
@@ -1051,7 +1050,6 @@
 			children = (
 				771C8CEE188065F800B7859B /* PlayerModel.h */,
 				77DA2C4718808DB9004A5F5C /* MovieInfo.h */,
-				77EF15EA18773CC900104A92 /* PlayerModelOLD.h */,
 				77DCDC14187233C300EB911C /* PlayerController.h */,
 				77EBC7691871C82400D86F91 /* PlayerView.h */,
 			);
