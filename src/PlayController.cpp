@@ -49,13 +49,6 @@ void PlayController::update(){
         {
 
             ofxLogNotice() << "PLAYCONTROLLER INIT" << endl;
-//            for(int i = 0; i < playerViews.size(); i++){
-//                ofxLogNotice() << "Creating Player View: " << i << endl;
-//                PlayerView* v = new PlayerView;
-//                v->setup(appModel->getProperty<float>("VideoWidth"), appModel->getProperty<float>("VideoWidth"), 2);
-//                v->setTransitionLength(appModel->getProperty<int>("TransitionLength"));
-//                playerViews[i] = v;
-//            }
             playControllerStates.setState(kPLAYCONTROLLER_MAKE);
             
         }
@@ -80,8 +73,27 @@ void PlayController::update(){
         {
             
             vector<int> finished;
+            vector<int> slavestart;
             
             appModel->clearIntersected();
+            
+            for(int i = 0; i < masters.size(); i++){
+                PlayerModel * playerModelM = appModel->getPlayerModel(masters[i]);
+                if(playerModelM->getPredictedFrameCurrent() >= playerModelM->getSlaveFrame()){
+                    cout << "SYNCING" << endl;
+                    cout << players[playerModelM->getSlaveID()]->getPaused() << endl;
+                    players[playerModelM->getSlaveID()]->setPaused(false);
+                    cout << playerModelM->getPredictedFrameSync() << " " << playerModelM->getSlaveFrame() << endl;
+                    cout << appModel->getPlayerModel(playerModelM->getSlaveID())->getPredictedFrameSync() << endl;
+                    
+                    cout << players[playerModelM->getSlaveID()]->getPaused() << endl;
+                    slavestart.push_back(i);
+                }
+            }
+            
+            for(int i = 0; i < slavestart.size(); i++){
+                eraseAt(masters, slavestart[i]);
+            }
             
             for(int i = 0; i < players.size(); i++){
                 
@@ -152,6 +164,7 @@ void PlayController::createPlayer(string name){
     
     PlayerModel playerTemplate = appModel->getPlayerTemplate(name);
     PlayerModel * playerModel = appModel->getPlayerModel(playerID);
+    
     std::swap(*playerModel, playerTemplate);
     
     playerModel->setup(playerID);
@@ -169,4 +182,9 @@ void PlayController::createPlayer(string name){
 //--------------------------------------------------------------
 vector<Player*>& PlayController::getPlayers(){
     return players;
+}
+
+//--------------------------------------------------------------
+vector<int>& PlayController::getMasters(){
+    return masters;
 }

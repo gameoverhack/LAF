@@ -25,10 +25,12 @@ public:
     
     void createPlayer(string name);
     vector<Player*>& getPlayers();
+    vector<int>& getMasters();
     
 protected:
 	
     vector<Player*>   players;
+    vector<int>       masters;
     
 private:
 	

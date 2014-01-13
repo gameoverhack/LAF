@@ -44,7 +44,7 @@ void AppController::setup(){
 //    appModel->backup("config", ARCHIVE_BINARY);
     
 //    appModel->removeAllProperties();
-    
+//    appModel->removeProperty<string>("MovieInfo");
 //    appModel->setProperty("LogToFile", false);
 //    
 //    appModel->setProperty("VerticalSync", true);
@@ -303,52 +303,110 @@ void AppController::keyPressed(ofKeyEventArgs & e){
             windows.push_back(11);
             windows.push_back(13);
             
+            int windowIndex;
+            int window;
+            
             for(int i = 0; i < players.size(); i++){
                 
                 vector<string> motions;
                 
                 PlayerModel * playerModel = appModel->getPlayerModel(i);
+                players[i]->setPausedSquence(true);
+                players[i]->setFrame(251);
                 
-                int windowIndex = ofRandom(windows.size());
-                int window = windows[windowIndex];
-                eraseAt(windows, windowIndex);
-                
+//                if(i % 2 == 0){
+                    windowIndex = ofRandom(windows.size());
+                    window = windows[windowIndex];
+                    eraseAt(windows, windowIndex);
+//                }
+
                 vector<string> movements;
+                
+//                switch (window) {
+//                    case 0:
+//                    case 2:
+//                        movements.push_back("TRAV_RIGT");
+//                        movements.push_back("WALK_RIGT");
+//                        movements.push_back("TRAV_RIGT");
+//                        movements.push_back("CLIM_UPPP");
+//                        movements.push_back("CLIM_DOWN");
+//                        movements.push_back("CRWL_RIGT");
+//                        movements.push_back("CREP_RIGT");
+//                        break;
+//                    case 3:
+//                    case 5:
+//                        movements.push_back("WALK_RIGT");
+//                        movements.push_back("TRAV_RIGT");
+//                        movements.push_back("CLIM_UPPP");
+//                        movements.push_back("CLIM_DOWN");
+//                        movements.push_back("CRWL_RIGT");
+//                        movements.push_back("CREP_RIGT");
+//                        break;
+//                    case 4:
+//                        movements.push_back("CLIM_UPPP");
+//                        movements.push_back("CLIM_DOWN");
+//                        break;
+//                    case 6:
+//                        movements.push_back("TRAV_LEFT");
+//                        movements.push_back("TRAV_RIGT");
+//                        movements.push_back("CLIM_UPPP");
+//                        movements.push_back("CLIM_DOWN");
+//                        break;
+//                    case 7:
+//                    case 9:
+//                    case 10:
+//                        movements.push_back("CLIM_UPPP");
+//                        movements.push_back("CLIM_DOWN");
+//                        break;
+//                    case 11:
+//                    case 13:
+//                        movements.push_back("TRAV_LEFT");
+//                        movements.push_back("WALK_LEFT");
+//                        movements.push_back("TRAV_LEFT");
+//                        movements.push_back("CLIM_UPPP");
+//                        movements.push_back("CLIM_DOWN");
+//                        movements.push_back("CRWL_LEFT");
+//                        movements.push_back("CREP_LEFT");
+//                        break;
+//                    default:
+//                        break;
+//                }
                 
                 switch (window) {
                     case 0:
                     case 2:
-                        movements.push_back("WALK_RIGT");
-                        movements.push_back("TRAV_RIGT");
-                        movements.push_back("CLIM_UPPP");
-                        movements.push_back("CLIM_DOWN");
-                        movements.push_back("CRWL_RIGT");
-                        movements.push_back("CREP_RIGT");
-                        break;
                     case 3:
                     case 5:
+                    case 4:
                         movements.push_back("WALK_RIGT");
                         movements.push_back("TRAV_RIGT");
-                        movements.push_back("CLIM_UPPP");
-                        movements.push_back("CLIM_DOWN");
                         movements.push_back("CRWL_RIGT");
                         movements.push_back("CREP_RIGT");
-                        break;
-                    case 4:
                         movements.push_back("CLIM_UPPP");
                         movements.push_back("CLIM_DOWN");
                         break;
                     case 6:
                         movements.push_back("TRAV_LEFT");
+                        movements.push_back("WALK_LEFT");
+                        movements.push_back("CRWL_LEFT");
+                        movements.push_back("CREP_LEFT");
+                        movements.push_back("WALK_RIGT");
                         movements.push_back("TRAV_RIGT");
+                        movements.push_back("CRWL_RIGT");
+                        movements.push_back("CREP_RIGT");
                         movements.push_back("CLIM_UPPP");
                         movements.push_back("CLIM_DOWN");
                         break;
                     case 7:
                     case 9:
-                    case 10:
                     case 11:
+                    case 10:
                     case 13:
+                    case 18:
+                        movements.push_back("TRAV_LEFT");
+                        movements.push_back("WALK_LEFT");
+                        movements.push_back("CRWL_LEFT");
+                        movements.push_back("CREP_LEFT");
                         movements.push_back("CLIM_UPPP");
                         movements.push_back("CLIM_DOWN");
                         break;
@@ -356,13 +414,14 @@ void AppController::keyPressed(ofKeyEventArgs & e){
                         break;
                 }
                 
-                
                 vector<string> ends;
                 ends.push_back("FALL_BACK");
                 ends.push_back("HUGG_FRNT");
                 
                 string m1 = movements[(int)ofRandom(movements.size())];
-                string e1 = ends[(int)ofRandom(ends.size())];
+//                string e1 = ends[(int)ofRandom(ends.size())];
+                string e1 = ends[i % 2];
+
                 
                 vector<string> mParts = ofSplitString(m1, "_");
                 
@@ -460,6 +519,48 @@ void AppController::keyPressed(ofKeyEventArgs & e){
                 playerModel->normalisePredictedChains(startPosition);
                 
                 
+            }
+            
+            vector<int>& masters = playController->getMasters();
+            masters.clear();
+            
+            for(int i = 0; i < players.size(); i = i + 2){
+                
+                PlayerModel * playerModelA = appModel->getPlayerModel(players[i + 0]->getPlayerID());
+                PlayerModel * playerModelB = appModel->getPlayerModel(players[i + 1]->getPlayerID());
+                
+                cout << "A : " << playerModelA->getPredictedFrameSync() << "  " << playerModelA->getPredictedFrameGoal() << endl;
+                cout << "B : " << playerModelB->getPredictedFrameSync() << "  " << playerModelB->getPredictedFrameGoal() << endl;
+                
+                int syncFrame;
+                if(playerModelA->getPredictedFrameSync() > playerModelB->getPredictedFrameSync()){
+                    cout << "Slave B to A" << endl;
+                    syncFrame = playerModelA->getPredictedFrameSync() - playerModelB->getPredictedFrameSync();
+                    cout << "Start B when A is at " << syncFrame << endl;
+                    playerModelA->setSlave(playerModelB->getPlayerID(), syncFrame);
+                    masters.push_back(playerModelA->getPlayerID());
+                    players[i + 1]->setPaused(true);
+                }else{
+                    cout << "Slave A to B" << endl;
+                    syncFrame = playerModelB->getPredictedFrameSync() - playerModelA->getPredictedFrameSync();
+                    cout << "Start A when B is at " << syncFrame << endl;
+                    playerModelB->setSlave(playerModelA->getPlayerID(), syncFrame);
+                    masters.push_back(playerModelB->getPlayerID());
+                    players[i + 0]->setPaused(true);
+                }
+                
+                cout << "As: " << playerModelA->getPredictedFrameSync() - syncFrame << endl;
+                cout << "Bs: " << playerModelB->getPredictedFrameSync() - syncFrame << endl;
+                
+            }
+            
+            for(int i = 0; i < masters.size(); i++){
+                PlayerModel * playerModelM = appModel->getPlayerModel(masters[i]);
+                players[masters[i]]->setPaused(false);
+                cout << playerModelM->getPredictedFrameSync() << " " << playerModelM->getSlaveFrame() << endl;
+                cout << appModel->getPlayerModel(playerModelM->getSlaveID())->getPredictedFrameSync() << endl;
+            
+                cout << players[playerModelM->getSlaveID()]->getPaused() << endl;
             }
             
             

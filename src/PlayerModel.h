@@ -221,6 +221,9 @@ public:
     void setup(int pID){
         cout << "Setting up model: " << pID << endl;
         playerID = pID;
+        slaveID = -1;
+        slaveFrame = -1;
+        distance = 10000;
         bFirstLoad = true;
         movieCue.push_back(getStartMovie());
         predictedFramesPlayed = predictedFrameCurrent = 0;
@@ -274,6 +277,8 @@ public:
     }
     
     void clearChains(){
+        slaveID = -1;
+        slaveFrame = -1;
         movieCue.clear();
         predictedChainRects.clear();
         predictedChainPositions.clear();
@@ -642,7 +647,25 @@ public:
         return playerID;
     }
     
+    //--------------------------------------------------------------
+    void setSlave(int sID, int sFrame){
+        slaveID = sID;
+        slaveFrame = sFrame;
+    }
+    
+    //--------------------------------------------------------------
+    int getSlaveID(){
+        return slaveID;
+    }
+    
+    //--------------------------------------------------------------
+    int getSlaveFrame(){
+        return slaveFrame;
+    }
+    
 protected:
+    
+    int slaveID, slaveFrame;
     
     bool bFirstLoad;
     ofPoint floorOffset;

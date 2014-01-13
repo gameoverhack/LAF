@@ -39,6 +39,7 @@ public:
 
         video.setPixelFormat(OF_PIXELS_BGRA);
         
+        bPausedSequence = false;
         bCueTransition = false;
         bFinsished = false;
     }
@@ -54,6 +55,10 @@ public:
         
         MovieInfo& currentMovie = model->getCurrentMovieInfo();
         currentMovie.isMovieDirty = (video.getQueueSize() > 0);
+        
+        cout << movieCue.size() << endl;
+        
+        if(bPausedSequence) return;
         
         if(!currentMovie.isMovieDirty){
             
@@ -417,6 +422,13 @@ public:
     }
     
     //--------------------------------------------------------------
+    void setFrame(int f){
+        cout << "Frame: " << f << endl;
+        video.setFrame(f);
+        video.finish();
+    }
+    
+    //--------------------------------------------------------------
     void setPaused(bool b){
         cout << "Pause: " << b << endl;
         video.setPaused(b);
@@ -451,8 +463,14 @@ public:
         currentMovie.speed = s;
     }
     
+    void setPausedSquence(bool b){
+        bPausedSequence = b;
+        setPaused(b);
+    }
+    
 protected:
     
+    bool bPausedSequence;
     int playerID;    
     bool bCueTransition, bFinsished;
     
