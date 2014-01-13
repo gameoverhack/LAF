@@ -18,7 +18,6 @@
 #include "MotionGraph.h"
 #include "PlayerView.h"
 #include "PlayerModel.h"
-#include "PlayerController.h"
 #include "ofxCv.h"
 #include "ofVideoPlayer.h"
 
@@ -35,42 +34,7 @@ public:
     }
     
     //--------------------------------------------------------------
-    void createPlayer(string name){
-        
-        if(views.size() == 0){
-            for(int i = 0; i < getProperty<int>("NumberPlayers"); i++){
-                PlayerView* v = new PlayerView;
-                v->setup(getProperty<float>("VideoWidth"), getProperty<float>("VideoWidth"), 2);
-                v->setTransitionLength(getProperty<int>("TransitionLength"));
-                views.push_back(v);
-            }
-        }
-        
-        map<string, PlayerModel>::iterator it = playerModels.find(name);
-        
-        if(it == playerModels.end()){
-            
-            ofxLogError() << "No player template " << name << endl;
-            assert(false);
-            
-        }else{
-            
-            ofxLogNotice() << "Creating player of type: " << name << endl;;
-            PlayerController* p = new PlayerController;
-            p->setup(&getPlayerModel(name), views[players.size()], &forwardMotionGraph, &backwardMotionGraph, &directionGraph);
-            players.push_back(p);
-            
-        }
-  
-    }
-    
-    //--------------------------------------------------------------
-    vector<PlayerController*>& getPlayers(){
-        return players;
-    }
-    
-    //--------------------------------------------------------------
-    PlayerModel& getPlayerModel(string name){
+    PlayerModel& getPlayerTemplate(string name){
         map<string, PlayerModel>::iterator it = playerModels.find(name);
         if(it == playerModels.end()){
             ofxLogNotice() << "Creating new template model for " << name << endl;
@@ -79,7 +43,7 @@ public:
     }
     
     //--------------------------------------------------------------
-    map<string, PlayerModel>& getPlayerModels(){
+    map<string, PlayerModel>& getPlayerTemplates(){
         return playerModels;
     }
     
@@ -189,6 +153,56 @@ public:
         intersected.insert(secondIndex);
     }
     
+    //--------------------------------------------------------------
+    PlayerView* getPlayerView(int playerID){
+        map<int, PlayerView*>::iterator it = views.find(playerID);
+        PlayerView * v;
+        if(it == views.end()){
+            ofxLogNotice() << "Creating view for PlayerID " << playerID << endl;
+            v = new PlayerView;
+            v->setup(getProperty<float>("VideoWidth"), getProperty<float>("VideoWidth"), 2);
+            v->setTransitionLength(getProperty<int>("TransitionLength"));
+            views[playerID] = v;
+        }else{
+            v = it->second;
+        }
+        return v;
+    }
+    
+    //--------------------------------------------------------------
+    PlayerModel* getPlayerModel(int playerID){
+        map<int, PlayerModel*>::iterator it = models.find(playerID);
+        PlayerModel * m;
+        if(it == models.end()){
+            ofxLogNotice() << "Creating model for PlayerID " << playerID << endl;
+            m = new PlayerModel;
+            models[playerID] = m;
+        }else{
+            m = it->second;
+        }
+        return m;
+    }
+    
+    //--------------------------------------------------------------
+    void deletePlayerModel(int playerID){
+        map<int, PlayerModel*>::iterator it = models.find(playerID);
+        if(it == models.end()){
+            ofxLogNotice() << "Error no model for PlayerID " << playerID << endl;
+        }else{
+            models.erase(it);
+        }
+    }
+    
+    //--------------------------------------------------------------
+    int getNumPlayerViews(){
+        return views.size();
+    }
+    
+    //--------------------------------------------------------------
+    int getNumPlayerModels(){
+        return models.size();
+    }
+    
 protected:
     
     set<int>                intersected;
@@ -197,8 +211,9 @@ protected:
     ofRectangle             analysisRectangle;
     ofxCv::ContourFinder    analysisContourFinder;
     
-    vector<PlayerController*>   players;
-    vector<PlayerView*>         views;
+    map<int, PlayerView*>       views;
+    map<int, PlayerModel*>      models;
+    
     map<string, PlayerModel>    playerModels;
     
     vector<ofRectangle> windows;

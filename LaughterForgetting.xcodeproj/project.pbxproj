@@ -295,7 +295,7 @@
 		77DCBB2A1871E37700EB911C /* libboost_unit_test_framework-xgcc42-mt-1_46_1.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "libboost_unit_test_framework-xgcc42-mt-1_46_1.a"; sourceTree = "<group>"; };
 		77DCBB2B1871E37700EB911C /* libboost_wave-xgcc42-mt-1_46_1.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "libboost_wave-xgcc42-mt-1_46_1.a"; sourceTree = "<group>"; };
 		77DCBB2C1871E37700EB911C /* libboost_wserialization-xgcc42-mt-1_46_1.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "libboost_wserialization-xgcc42-mt-1_46_1.a"; sourceTree = "<group>"; };
-		77DCDC14187233C300EB911C /* PlayerController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PlayerController.h; sourceTree = "<group>"; };
+		77DCDC14187233C300EB911C /* Player.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Player.h; sourceTree = "<group>"; };
 		77E63E9818771D020003A224 /* AppModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppModel.h; sourceTree = "<group>"; };
 		77EBC7641870E66700D86F91 /* libXMPCoreStatic.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libXMPCoreStatic.a; sourceTree = "<group>"; };
 		77EBC7651870E66700D86F91 /* libXMPFilesStatic.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libXMPFilesStatic.a; sourceTree = "<group>"; };
@@ -914,6 +914,8 @@
 		7701FDD1187F48D20092EDD9 /* DataTypes */ = {
 			isa = PBXGroup;
 			children = (
+				77EF15EB187758B900104A92 /* Player */,
+				77DA2C4718808DB9004A5F5C /* MovieInfo.h */,
 				77EF15EC187760AB00104A92 /* MotionGraph.h */,
 				7701FDD7187F49750092EDD9 /* AppStates.h */,
 			);
@@ -1036,7 +1038,6 @@
 		77EF15D81877250000104A92 /* MVC */ = {
 			isa = PBXGroup;
 			children = (
-				77EF15EB187758B900104A92 /* Player */,
 				7701FDD3187F48ED0092EDD9 /* Views */,
 				7701FDD2187F48E70092EDD9 /* Controllers */,
 				7701FDD1187F48D20092EDD9 /* DataTypes */,
@@ -1048,9 +1049,8 @@
 		77EF15EB187758B900104A92 /* Player */ = {
 			isa = PBXGroup;
 			children = (
+				77DCDC14187233C300EB911C /* Player.h */,
 				771C8CEE188065F800B7859B /* PlayerModel.h */,
-				77DA2C4718808DB9004A5F5C /* MovieInfo.h */,
-				77DCDC14187233C300EB911C /* PlayerController.h */,
 				77EBC7691871C82400D86F91 /* PlayerView.h */,
 			);
 			name = Player;

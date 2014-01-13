@@ -10,6 +10,7 @@
 #define __H_PLAYCONTROLLER
 
 #include "BaseController.h"
+#include "Player.h"
 #include "AppModel.h"
 
 class PlayController : public BaseController {
@@ -22,8 +23,12 @@ public:
     void setup();
     void update();
     
+    void createPlayer(string name);
+    vector<Player*>& getPlayers();
+    
 protected:
 	
+    vector<Player*>   players;
     
 private:
 	

@@ -17,6 +17,7 @@
 #include "ofxXMP.h"
 #include "ofxLogger.h"
 #include "MovieInfo.h"
+#include "ofxThreadedVideo.h"
 
 class PlayerModel{
     
@@ -217,20 +218,172 @@ public:
     }
     
     //--------------------------------------------------------------
+    void setup(){
+        cout << "Setting up model" << endl;
+        bFirstLoad = true;
+        movieCue.push_back(getStartMovie());
+        predictedFramesPlayed = predictedFrameCurrent = 0;
+    }
+    
+    //--------------------------------------------------------------
+    void update(ofxThreadedVideo& video){
+        
+        currentMovie.frame = video.getCurrentFrame();
+        currentMovie.totalframes = video.getTotalNumFrames();
+        currentMovie.speed = video.getSpeed();
+        currentMovie.name = ofSplitString(video.getMovieName(), ".mov")[0];
+        currentMovie.path = video.getMoviePath();
+        currentMovie.isFrameNew = video.isFrameNew();
+        predictedFrameCurrent = predictedFramesPlayed + currentMovie.frame - currentMovie.startframe;
+        
+        if(currentMovie.isFrameNew){
+            
+            bFirstLoad = false;
+            
+            ofPoint kFrame = getKeyFrame(currentMovie.name, currentMovie.frame);
+            currentMovie.position = pNormal - (kFrame - kNormal) * scale;
+            pNormal = currentMovie.position;
+            kNormal = kFrame;
+            
+            currentMovie.bounding = getScaledRectFrame(currentMovie.name, currentMovie.frame, currentMovie.position);
+            currentMovie.bounding.x -= floorOffset.x;
+            currentMovie.bounding.y -= floorOffset.y;
+            
+            playerCentre = currentMovie.bounding.getCenter();
+            distance = playerCentre.distance(windowCentre);
+            
+        }
+    }
+    
+    //--------------------------------------------------------------
     MovieInfo getStartMovie(){
-
+        
         MovieInfo mI;
         mI.name = "STND_TODO_CRCH_TODO_STND_TODO_00_" + playerName;
         mI.path = playerFolder + mI.name + ".mov";
-        mI.speed = ofRandom(1.0, 3.0);
+        mI.speed = 3.0;
         mI.frame = 0;
         mI.startframe = 0;
         mI.motion = metadata[mI.name].getLastMarker(mI.startframe).getName();
         mI.genframe = metadata[mI.name].getNextMarker(mI.startframe + 1).getStartFrame();
-        mI.predictedBounding = getProjectedRects(mI, mI, 200.0/550.0);
+        mI.predictedBounding = getProjectedRects(mI, mI);
         
         return mI;
         
+    }
+    
+    void clearChains(){
+        movieCue.clear();
+        predictedChainRects.clear();
+        predictedChainPositions.clear();
+        normalisedChainRects.clear();
+        normalisedChainPositions.clear();
+    }
+    
+    //--------------------------------------------------------------
+    void normalisePredictedChains(ofPoint pN){
+        
+        normalisedChainRects = predictedChainRects;
+        normalisedChainPositions = predictedChainPositions;
+        
+        float pX;
+        float pY;
+        
+        for(int i = 0; i < predictedChainPositions.size(); i++){
+            
+            if(i < predictedFrameGoal){
+                pX = pNormal.x;
+                pY = pNormal.y;
+            }else{
+                pX = pNormal.x + predictedChainPositions[predictedFrameGoal].x + floorOffset.x;
+                pY = pNormal.y + predictedChainPositions[predictedFrameGoal].y + floorOffset.y;
+            }
+            
+            normalisedChainPositions[i].x += pX;
+            normalisedChainPositions[i].y += pY;
+            normalisedChainRects[i].x += pX;
+            normalisedChainRects[i].y += pY;
+        }
+        
+    }
+    
+    //--------------------------------------------------------------
+    void setPosition(ofPoint p){
+        pNormal = p - floorOffset;
+    }
+    
+    //--------------------------------------------------------------
+    void setCurrentMovie(MovieInfo& m){
+        m.position = currentMovie.position;
+        m.bounding = currentMovie.bounding;
+        currentMovie = m;
+        if(!bFirstLoad) pNormal = currentMovie.position;
+        kNormal = getKeyFrame(m.name, m.startframe);
+        if(predictedFramesPlayed == -1) predictedFrameCurrent = 0;
+        predictedFramesPlayed = predictedFrameCurrent;
+    }
+    
+    //--------------------------------------------------------------
+    bool isLoopMarker(ofxXMPMarker marker){
+        vector<string> markerParts = ofSplitString(marker.getName(), "_");
+        if(markerParts.size() != 4) return true;
+        return (markerParts[0] + "_" + markerParts[1] == markerParts[2] + "_" + markerParts[3]);
+    }
+    
+    //--------------------------------------------------------------
+    string getStartMotionFromMarker(ofxXMPMarker& m){
+        vector<string> mP = ofSplitString(m.getName(), "_");
+        if(mP.size() < 4) return "";
+        return string(mP[0] + "_" + mP[1]);
+    }
+    
+    //--------------------------------------------------------------
+    string getEndMotionFromMarker(ofxXMPMarker& m){
+        vector<string> mP = ofSplitString(m.getName(), "_");
+        if(mP.size() < 4) return "";
+        return string(mP[2] + "_" + mP[3]);
+    }
+    
+    //--------------------------------------------------------------
+    string getStartMotionFromString(string m){
+        vector<string> mP = ofSplitString(m, "_");
+        if(mP.size() < 4) return "";
+        return string(mP[0] + "_" + mP[1]);
+    }
+    
+    //--------------------------------------------------------------
+    string getEndMotionFromString(string m){
+        vector<string> mP = ofSplitString(m, "_");
+        if(mP.size() < 4) return "";
+        return string(mP[2] + "_" + mP[3]);
+    }
+    
+    //--------------------------------------------------------------
+    void setDrawScale(float s){
+        scale = s;
+        ofRectangle r = getRectFrame(getStartMovie().name, 1);
+        floorOffset.x = (r.x + r.width / 2.0f) * scale;
+        floorOffset.y = (r.y + r.height) * scale + 4;
+    }
+    
+    //--------------------------------------------------------------
+    ofPoint& getFloorOffset(){
+        return floorOffset;
+    }
+    
+    //--------------------------------------------------------------
+    float getDrawScale(){
+        return scale;
+    }
+    
+    //--------------------------------------------------------------
+    ofRectangle& getBounding(){
+        return currentMovie.bounding;
+    }
+    
+    //--------------------------------------------------------------
+    ofPoint& getPosition(){
+        return currentMovie.position;
     }
     
     //--------------------------------------------------------------
@@ -253,10 +406,12 @@ public:
         return (filePaths.size() > 0);
     }
     
+    //--------------------------------------------------------------
     string getPlayerFolder(){
         return playerFolder;
     }
     
+    //--------------------------------------------------------------
     string getPlayerName(){
         return playerName;
     }
@@ -277,7 +432,7 @@ public:
     }
     
     //--------------------------------------------------------------
-    vector<ofRectangle> getProjectedRects(MovieInfo& pMovie, MovieInfo& cMovie, float scale){
+    vector<ofRectangle> getProjectedRects(MovieInfo& pMovie, MovieInfo& cMovie){
         if(pMovie.genframe < pMovie.frame) return vector<ofRectangle>(0);
         pMovie.predictedPosition.resize(pMovie.genframe - pMovie.startframe);
         vector<ofRectangle> pRects(pMovie.genframe - pMovie.frame);
@@ -288,7 +443,7 @@ public:
             ofPoint k = getKeyFrame(pMovie.name, i);
             pMovie.predictedPosition[i - pMovie.startframe] = pN - (k - kN) * scale;
             pN = pMovie.predictedPosition[i - pMovie.startframe]; kN = k;
-            r = getScaledRectTransform(r, pMovie.predictedPosition[i - pMovie.startframe], scale);
+            r = getScaledRectTransform(r, pMovie.predictedPosition[i - pMovie.startframe]);
             pRects[i - pMovie.frame] = r;
         }
         return pRects;
@@ -308,7 +463,7 @@ public:
     }
     
     //--------------------------------------------------------------
-    ofRectangle getScaledRectTransform(ofRectangle& r, ofPoint& p, float scale){
+    ofRectangle getScaledRectTransform(ofRectangle& r, ofPoint& p){
         r.x = r.x * scale + p.x;
         r.y = r.y * scale + p.y;
         r.width = r.width * scale;
@@ -317,9 +472,9 @@ public:
     }
     
     //--------------------------------------------------------------
-    ofRectangle getScaledRectFrame(string name, int frame, ofPoint& p, float scale){
+    ofRectangle getScaledRectFrame(string name, int frame, ofPoint& p){
         ofRectangle r = getRectFrame(name, frame);
-        return getScaledRectTransform(r, p, scale);
+        return getScaledRectTransform(r, p);
     }
     
     //--------------------------------------------------------------
@@ -361,7 +516,155 @@ public:
         }
     }
     
+    //--------------------------------------------------------------
+    MovieInfo& getCurrentMovieInfo(){
+        return currentMovie;
+    }
+    
+    //--------------------------------------------------------------
+    vector<ofPoint>& getPredictedChainPositions(){
+        return predictedChainPositions;
+    }
+    
+    //--------------------------------------------------------------
+    vector<ofPoint>& getNormalisedChainPositions(){
+        return normalisedChainPositions;
+    }
+    
+    //--------------------------------------------------------------
+    vector<ofRectangle>& getPredictedChainRects(){
+        return predictedChainRects;
+    }
+    
+    //--------------------------------------------------------------
+    vector<ofRectangle>& getNormalisedChainRects(){
+        return normalisedChainRects;
+    }
+    
+    //--------------------------------------------------------------
+    float& getDistanceToTarget(){
+        return distance;
+    }
+    
+    //--------------------------------------------------------------
+    ofPoint& getPlayerCentre(){
+        return playerCentre;
+    }
+    
+    //--------------------------------------------------------------
+    ofPoint& getTargetCentre(){
+        return windowCentre;
+    }
+    
+    //--------------------------------------------------------------
+    ofRectangle& getTargetWindowRectangle(){
+        return windowRectangle;
+    }
+    
+    int getTargetWindowIndex(){
+        return windowIndex;
+    }
+    
+    //--------------------------------------------------------------
+    void setTargetWindow(ofRectangle& r, int wIndex){
+        cout << "SETTTING WINDOW: " << r << endl;
+        windowRectangle = r;
+        windowCentre = r.getCenter();
+        windowIndex = wIndex;
+    }
+    
+    //--------------------------------------------------------------
+    int getPredictedFrameCurrent(){
+        return predictedFrameCurrent;
+    }
+    
+    //--------------------------------------------------------------
+    int getPredictedFrameTotal(){
+        return predictedChainRects.size();
+    }
+    
+    //--------------------------------------------------------------
+    int getPredictedFrameGoal(){
+        return predictedFrameGoal;
+    }
+    
+    //--------------------------------------------------------------
+    int getPredictedFrameSync(){
+        return predictedFrameSync;
+    }
+    
+    //--------------------------------------------------------------
+    void setPredictedFrameGoal(int f){
+        
+        predictedFrameGoal = f;
+        MovieInfo& m = movieCue[movieCue.size() - 1];
+        
+        cout << "SET FRAME GOAL: " << "    " << m << endl;
+        
+        ofxXMPMarker marker = metadata[m.name].getMarker("STND_FRNT_FALL_BACK");
+        
+        if(marker != NoMarker){
+            cout << "FALLING" << endl;
+        }else{
+            marker = metadata[m.name].getMarker("STND_FRNT_HUGG_FRNT");
+            cout << "HUGGING" << endl;
+        }
+        
+        assert(marker != NoMarker);
+        
+        cout << marker << endl;
+        
+        // in the case of the fall predictedFrameSync already equals predictedFrameGoal
+        // but for HUGGING and other continuous actions we need to calculate an offset:
+        predictedFrameSync = predictedFrameGoal - m.startframe + marker.getStartFrame();
+        
+        cout << predictedFrameGoal << " =?= " << predictedFrameSync << endl;
+    }
+
+    //--------------------------------------------------------------
+    void setPredictedFramesPlayed(int f){
+        predictedFramesPlayed = f;
+    }
+    
+    //--------------------------------------------------------------
+    int getPredictedFramesPlayed(){
+        return predictedFramesPlayed;
+    }
+    
+    deque<MovieInfo>& getMovieCue(){
+        return movieCue;
+    }
+    
 protected:
+    
+    bool bFirstLoad;
+    ofPoint floorOffset;
+    ofPoint targetPosition;
+    
+    ofPoint playerCentre;
+    ofPoint windowCentre;
+    ofRectangle windowRectangle;
+    int windowIndex;
+    float distance;
+    
+    MovieInfo currentMovie;
+    deque<MovieInfo> movieCue;
+    
+    vector<ofRectangle> normalisedChainRects;
+    vector<ofPoint> normalisedChainPositions;
+    
+    vector<ofRectangle> predictedChainRects;
+    vector<ofPoint> predictedChainPositions;
+    
+    int predictedFrameCurrent;
+    int predictedFramesPlayed;
+    int predictedFrameGoal;
+    int predictedFrameSync;
+
+    ofPoint pNormal, kNormal, oNormal;
+    float scale;
+    
+    //============================================
     
     vector<string> fileNames;
     vector<string> filePaths;

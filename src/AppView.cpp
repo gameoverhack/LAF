@@ -29,7 +29,7 @@ AppView::AppView(){
     appViewStates.setState(kAPPVIEW_SHOWWINDOWS, false);
     appViewStates.setState(kAPPVIEW_SHOWPLAYERS, true);
     appViewStates.setState(kAPPVIEW_SHOWRECTS, true);
-    appViewStates.setState(kAPPVIEW_SHOWCENTRES, false);
+    appViewStates.setState(kAPPVIEW_SHOWCENTRES, true);
     appViewStates.setState(kAPPVIEW_SHOWWARP, false);
     
     resetCamera();
@@ -100,7 +100,6 @@ void AppView::update(){
     StateGroup & appViewStates = appModel->getStateGroup("AppViewStates");
     
     vector<ofRectangle> & windowPositions = appModel->getWindows();
-    vector<PlayerController*> & players = appModel->getPlayers();
     
     begin();
     {
@@ -137,15 +136,17 @@ void AppView::update(){
             ofRect(windowPositions[i]);
         }
         
-        for(int i = 0; i < players.size(); i++){
+        for(int i = 0; i < appModel->getNumPlayerModels(); i++){
             ofNoFill();
             ofSetColor(127, 0, 0);
+            
+            PlayerModel * playerModel = appModel->getPlayerModel(i);
             
             /******************************************************
              *******            Draw Centres                *******
              *****************************************************/
             
-            if(appViewStates.getState(kAPPVIEW_SHOWCENTRES)) ofLine(players[i]->getPlayerCentre(), players[i]->getTargetCentre());
+            if(appViewStates.getState(kAPPVIEW_SHOWCENTRES)) ofLine(playerModel->getPlayerCentre(), playerModel->getTargetCentre());
             
             /******************************************************
              *******            Draw Rects                  *******
@@ -158,17 +159,17 @@ void AppView::update(){
                 
                 if(appModel->isIntersected(i)) ofFill();
                 
-                ofRect(players[i]->getBounding());
+                ofRect(playerModel->getBounding());
                 
                 ofNoFill();
-                vector<ofRectangle>& chainRects = players[i]->getNormalisedChainRects();
+                vector<ofRectangle>& chainRects = playerModel->getNormalisedChainRects();
                 
                 int range = appModel->getProperty<int>("RectTrail");
-                int startFrame = MAX(players[i]->getPredictedFrameCurrent() - range, 0);
-                int endFrame = MIN(players[i]->getPredictedFrameCurrent() + range, chainRects.size());
+                int startFrame = MAX(playerModel->getPredictedFrameCurrent() - range, 0);
+                int endFrame = MIN(playerModel->getPredictedFrameCurrent() + range, chainRects.size());
 
                 for(int j = startFrame; j < endFrame; j++){
-                    if(j < players[i]->getPredictedFrameGoal()){
+                    if(j < playerModel->getPredictedFrameGoal()){
                         ofSetColor(0, 10, 10);
                     }else{
                         ofSetColor(10, 10, 0);
@@ -182,13 +183,13 @@ void AppView::update(){
              *******            Draw TargetWindow           *******
              *****************************************************/
             
-            float d = players[i]->getDistanceToTarget() - 100.0f;
+            float d = playerModel->getDistanceToTarget() - 100.0f;
             float dT = 200.0f;
             if(d < dT){
                 ofFill();
                 float c = 127 * CLAMP((1.0 - d / dT), 0.0f, 1.0f);
                 ofSetColor(c, c, c);
-                ofRect(players[i]->getTargetWindowRectangle());
+                ofRect(playerModel->getTargetWindowRectangle());
             }
             
         }
@@ -205,31 +206,37 @@ void AppView::update(){
             glPushAttrib(GL_ENABLE_BIT);
             glEnable(GL_DEPTH_TEST);
             glEnable(GL_CULL_FACE);
-            
-            
-            
-            for(int i = 0; i < players.size(); i++){
+
+            for(int i = 0; i < appModel->getNumPlayerModels(); i++){
+
+                PlayerModel * playerModel = appModel->getPlayerModel(i);
+                PlayerView * playerView = appModel->getPlayerView(i);
+                
                 glPushMatrix();
                 
-                glTranslatef(-players[i]->getFloorOffset().x, -players[i]->getFloorOffset().y, -players[i]->getFloorOffset().z);
-                glTranslatef(players[i]->getPosition().x, players[i]->getPosition().y, players[i]->getPosition().z);
-                glScalef(players[i]->getDrawScale(), players[i]->getDrawScale(), 1.0f);
+                glTranslatef(-playerModel->getFloorOffset().x, -playerModel->getFloorOffset().y, -playerModel->getFloorOffset().z);
+                glTranslatef(playerModel->getPosition().x, playerModel->getPosition().y, playerModel->getPosition().z);
+                glScalef(playerModel->getDrawScale(), playerModel->getDrawScale(), 1.0f);
                 
-                players[i]->getView()->drawParticles();
+                playerView->drawParticles();
                 
                 glPopMatrix();
             }
             
             glPopAttrib();
             
-            for(int i = 0; i < players.size(); i++){
+            for(int i = 0; i < appModel->getNumPlayerModels(); i++){
+                
+                PlayerModel * playerModel = appModel->getPlayerModel(i);
+                PlayerView * playerView = appModel->getPlayerView(i);
+                
                 glPushMatrix();
                 
-                glTranslatef(-players[i]->getFloorOffset().x, -players[i]->getFloorOffset().y, -players[i]->getFloorOffset().z);
-                glTranslatef(players[i]->getPosition().x, players[i]->getPosition().y, players[i]->getPosition().z);
-                glScalef(players[i]->getDrawScale(), players[i]->getDrawScale(), 1.0f);
+                glTranslatef(-playerModel->getFloorOffset().x, -playerModel->getFloorOffset().y, -playerModel->getFloorOffset().z);
+                glTranslatef(playerModel->getPosition().x, playerModel->getPosition().y, playerModel->getPosition().z);
+                glScalef(playerModel->getDrawScale(), playerModel->getDrawScale(), 1.0f);
                 
-                players[i]->getView()->drawImage();
+                playerView->drawImage();
                 
                 glPopMatrix();
             }

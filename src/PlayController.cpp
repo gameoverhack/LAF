@@ -43,13 +43,19 @@ void PlayController::update(){
     StateGroup & playControllerStates = appModel->getStateGroup("PlayControllerStates");
     
     vector<ofRectangle> & windowPositions = appModel->getWindows();
-    vector<PlayerController*> & players = appModel->getPlayers();
     
     switch (playControllerStates.getState()) {
         case kPLAYCONTROLLER_INIT:
         {
-            
+
             ofxLogNotice() << "PLAYCONTROLLER INIT" << endl;
+//            for(int i = 0; i < playerViews.size(); i++){
+//                ofxLogNotice() << "Creating Player View: " << i << endl;
+//                PlayerView* v = new PlayerView;
+//                v->setup(appModel->getProperty<float>("VideoWidth"), appModel->getProperty<float>("VideoWidth"), 2);
+//                v->setTransitionLength(appModel->getProperty<int>("TransitionLength"));
+//                playerViews[i] = v;
+//            }
             playControllerStates.setState(kPLAYCONTROLLER_MAKE);
             
         }
@@ -64,18 +70,9 @@ void PlayController::update(){
             players.clear();
             
             for(int i = 0; i < appModel->getProperty<int>("NumberPlayers"); i++){
-                appModel->createPlayer("MARTINW");
+                createPlayer("MARTINW");
             }
-            
-            players = appModel->getPlayers();
-            for(int i = 0; i < players.size(); i++){
-                players[i]->setDrawScale(200.0/550.0);
-                players[i]->setPosition(ofPoint(0,0,0));
-//                players[i]->setNormalPosition(ofPoint(windowPositions[8].x + windowPositions[8].width / 2.0f,
-//                                                      windowPositions[8].y, 0.0f));
-            }
-            
-            
+
             playControllerStates.setState(kPLAYCONTROLLER_PLAY);
         }
             break;
@@ -88,14 +85,19 @@ void PlayController::update(){
             
             for(int i = 0; i < players.size(); i++){
                 
+                PlayerModel * playerModelA = appModel->getPlayerModel(i);
+                
                 players[i]->update();
                 
                 if(players[i]->getIsFinished()) finished.push_back(i);
                 
-                ofRectangle& b1 = players[i]->getBounding();
+                ofRectangle& b1 = playerModelA->getBounding();
                 for(int j = 0; j < players.size(); j++){
-                    if(j != i && !appModel->isIntersected(j)){
-                        ofRectangle& b2 = players[j]->getBounding();
+                    
+                    PlayerModel * playerModelB = appModel->getPlayerModel(j);
+                    
+                    if(j != i && !appModel->isIntersected(j) && !appModel->isIntersected(i)){
+                        ofRectangle& b2 = playerModelB->getBounding();
                         if(b1.intersects(b2)){
 //                            if(!players[i]->getPaused() && !players[j]->getPaused()){
 //                                if(players[i]->getDistanceToTarget() > 100 && players[j]->getDistanceToTarget() > 100){
@@ -113,18 +115,20 @@ void PlayController::update(){
                 
 //                if(players[i]->getPaused() && !appModel->isIntersected(i)) players[i]->setPaused(false);
                 
-                os  << players[i]->getCurrentMovieInfo() << "   " << endl
-                    << players[i]->getDistanceToTarget() << " "
-                    << players[i]->getPredictedFrameCurrent() << " / "
-                    << players[i]->getPredictedFrameTotal() << "  "
-                    << players[i]->getPredictedFrameGoal() << "   "
+                os  << playerModelA->getCurrentMovieInfo() << "   " << endl
+                    << playerModelA->getDistanceToTarget() << " "
+                    << playerModelA->getPredictedFrameCurrent() << " / "
+                    << playerModelA->getPredictedFrameTotal() << "  "
+                    << playerModelA->getPredictedFrameGoal() << "   "
                     << players[i]->getPaused() << " - " << appModel->isIntersected(i) << endl;
             }
             appModel->setProperty("MovieInfo", os.str());
             
             for(int i = 0; i < finished.size(); i++){
+                int playerID = players[finished[i]]->getPlayerID();
                 delete players[finished[i]];
                 eraseAt(players, finished[i]);
+                appModel->deletePlayerModel(playerID);
             }
             
         }
@@ -136,4 +140,30 @@ void PlayController::update(){
             break;
     }
     
+}
+
+//--------------------------------------------------------------
+void PlayController::createPlayer(string name){
+
+    int playerID = players.size();
+    
+    PlayerModel playerTemplate = appModel->getPlayerTemplate(name);
+    PlayerModel * playerModel = appModel->getPlayerModel(playerID);
+    std::swap(*playerModel, playerTemplate);
+    
+    playerModel->setup();
+    playerModel->clearChains();
+    playerModel->setDrawScale(200.0/550.0);
+    playerModel->setPosition(ofPoint(0,0,0));
+    
+    Player* p = new Player;
+    p->setup(playerID);
+    players.push_back(p);
+
+    
+}
+
+//--------------------------------------------------------------
+vector<Player*>& PlayController::getPlayers(){
+    return players;
 }

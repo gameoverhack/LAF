@@ -228,7 +228,7 @@ void AppController::keyPressed(ofKeyEventArgs & e){
 //    ofxLogVerbose() << e.key << endl;
     
     vector<ofRectangle> & windowPositions = appModel->getWindows();
-    vector<PlayerController*> & players = appModel->getPlayers();
+    vector<Player*> & players = playController->getPlayers();
     
     switch(e.key) {
         case 'd':
@@ -262,7 +262,7 @@ void AppController::keyPressed(ofKeyEventArgs & e){
             break;
         case ' ':
         {
-            vector<PlayerController*> & players = appModel->getPlayers();
+            
             //players[0]->generatePossibleMotions(players[0]->getCurrentMovieInfo());
             
 //            players[0]->generateMoviesBetween("STND_FRNT", "CLIM_UPPP");
@@ -302,6 +302,8 @@ void AppController::keyPressed(ofKeyEventArgs & e){
             for(int i = 0; i < players.size(); i++){
                 
                 vector<string> motions;
+                
+                PlayerModel * playerModel = appModel->getPlayerModel(i);
                 
                 int windowIndex = ofRandom(windows.size());
                 int window = windows[windowIndex];
@@ -352,7 +354,7 @@ void AppController::keyPressed(ofKeyEventArgs & e){
                 
                 
                 vector<string> ends;
-                ends.push_back("HUGG_FRNT");
+                ends.push_back("FALL_BACK");
                 ends.push_back("HUGG_FRNT");
                 
                 string m1 = movements[(int)ofRandom(movements.size())];
@@ -363,8 +365,7 @@ void AppController::keyPressed(ofKeyEventArgs & e){
                 ofPoint startPosition = ofPoint(windowPositions[window].x + windowPositions[window].width / 2.0f,
                                                 windowPositions[window].y, 0.0f);
                 
-                players[i]->setTargetWindow(windowPositions[window], window);
-                
+                playerModel->setTargetWindow(windowPositions[window], window);
 
                 float target;
                 if(mParts[1] == "RIGT") target = windowPositions[window].x;
@@ -385,10 +386,10 @@ void AppController::keyPressed(ofKeyEventArgs & e){
                     inserts++;
                     motions.push_back(m1);
 
-                    players[i]->clearChains();
-                    players[i]->generateMoviesFromMotions(motions, true);
+                    playerModel->clearChains();
+                    players[i]->generateMoviesFromMotions(motions, false);
 
-                    vector<ofRectangle>& pRectangles = players[i]->getPredictedChainRects();
+                    vector<ofRectangle>& pRectangles = playerModel->getPredictedChainRects();
                     ofRectangle startRectangle = pRectangles[0];
                     ofRectangle endRectangle = pRectangles[pRectangles.size() - 1];
                     
@@ -405,12 +406,12 @@ void AppController::keyPressed(ofKeyEventArgs & e){
                 
                 if(e1 == "HUGG_FRNT") motions.push_back("STND_FRNT");
                 
-                players[i]->clearChains();
+                playerModel->clearChains();
                 players[i]->generateMoviesFromMotions(motions, true);
 
-                vector<ofPoint>& pPositions = players[i]->getPredictedChainPositions();
+                vector<ofPoint>& pPositions = playerModel->getPredictedChainPositions();
                 ofPoint endPoint = pPositions[pPositions.size() - 1];
-                players[i]->setPredictedFrameGoal(pPositions.size() - 1);
+                playerModel->setPredictedFrameGoal(pPositions.size() - 1);
                 
                 if(e1 == "HUGG_FRNT"){
                     motions.clear();
@@ -451,19 +452,26 @@ void AppController::keyPressed(ofKeyEventArgs & e){
 
                 }
                 
-                players[i]->setPosition(startPosition - endPoint);
-                players[i]->normalisePredictedChains(startPosition);
+                playerModel->setPosition(startPosition - endPoint);
+                playerModel->normalisePredictedChains(startPosition);
                 
-
+                
             }
-            
             
             
         }
             
             break;
         case 'm':
-            for(int i = 0; i < players.size(); i++) players[i]->setPaused(false);
+        {
+            
+//            for(int i = 0; i < players.size(); i++){
+//                PlayerModel * playerModel = appModel->getPlayerModels()[i];
+//                cout << playerModel->getTargetWindowRectangle() << endl;
+//                
+//            }
+        }
+            
             
             break;
         case 'x':
@@ -474,7 +482,7 @@ void AppController::keyPressed(ofKeyEventArgs & e){
 //        case OF_KEY_LEFT:
 //        {
 //            for(int i = 0; i < players.size(); i++){
-//                players[i]->getModel().setDirectionLEFT();
+//                playerModel.setDirectionLEFT();
 //            }
 //        }
 //            break;
@@ -482,14 +490,14 @@ void AppController::keyPressed(ofKeyEventArgs & e){
 //        case OF_KEY_RIGHT:
 //        {
 //            for(int i = 0; i < players.size(); i++){
-//                players[i]->getModel().setDirectionRIGHT();
+//                playerModel.setDirectionRIGHT();
 //            }
 //        }
 //            break;
 //        case OF_KEY_UP:
 //        {
 //            for(int i = 0; i < players.size(); i++){
-//                players[i]->getModel().setDirectionUP();
+//                playerModel.setDirectionUP();
 //            }
 //        }
 //            break;
@@ -497,14 +505,14 @@ void AppController::keyPressed(ofKeyEventArgs & e){
 //        case OF_KEY_DOWN:
 //        {
 //            for(int i = 0; i < players.size(); i++){
-//                players[i]->getModel().setDirectionDOWN();
+//                playerModel.setDirectionDOWN();
 //            }
 //        }
 //            break;
 //        case '/':
 //        {
 //            for(int i = 0; i < players.size(); i++){
-//                players[i]->getModel().setDirectionEVENUP();
+//                playerModel.setDirectionEVENUP();
 //            }
 //        }
 //            break;

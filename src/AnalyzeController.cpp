@@ -47,7 +47,7 @@ void AnalyzeController::update(){
     StateGroup & analyzeControllerStates = appModel->getStateGroup("AnalyzeControllerStates");
     
     vector<ofRectangle> & windowPositions = appModel->getWindows();
-    vector<PlayerController*> & players = appModel->getPlayers();
+//    vector<PlayerController*> & players = appModel->getPlayers();
     
     switch (analyzeControllerStates.getState()) {
         case kANALYZECONTROLER_LOAD:
@@ -70,7 +70,7 @@ void AnalyzeController::update(){
                         ofxLogNotice() << "Initializing model for " << name << endl;
                         
                         // get/create a template model for this player
-                        PlayerModel & m = appModel->getPlayerModel(name);
+                        PlayerModel & m = appModel->getPlayerTemplate(name);
                         
                         // if it's been serialized then it will know what to do with the filelisting
                         // we can also either force it to check all files or force it to re-list the
@@ -103,13 +103,13 @@ void AnalyzeController::update(){
             
             ofVideoPlayer & video = appModel->getAnalysisVideo();
             ofxCv::ContourFinder& contourFinder = appModel->getAnalysisContourFinder();
-            map<string, PlayerModel>& playerModels = appModel->getPlayerModels();
+            map<string, PlayerModel>& playerModels = appModel->getPlayerTemplates();
             
             string name = appModel->getProperty<string>("AnalyseName");
             
             if(name != ""){
                 
-                PlayerModel & m = appModel->getPlayerModel(name);
+                PlayerModel & m = appModel->getPlayerTemplate(name);
                 
                 if(!m.getNeedsAnalysis()){
                     
