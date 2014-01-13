@@ -70,7 +70,7 @@ void PlayController::update(){
             players = appModel->getPlayers();
             for(int i = 0; i < players.size(); i++){
                 players[i]->setDrawScale(200.0/550.0);
-                players[i]->setNormalPosition(ofPoint(0,0,0));
+                players[i]->setPosition(ofPoint(0,0,0));
 //                players[i]->setNormalPosition(ofPoint(windowPositions[8].x + windowPositions[8].width / 2.0f,
 //                                                      windowPositions[8].y, 0.0f));
             }
@@ -83,16 +83,50 @@ void PlayController::update(){
         {
             ostringstream os; os << endl;
             vector<int> finished;
+            
+            appModel->clearIntersected();
+            
             for(int i = 0; i < players.size(); i++){
+                
                 players[i]->update();
+                
                 if(players[i]->getIsFinished()) finished.push_back(i);
-                os << players[i]->getCurrentMovieInfo() << "   " << players[i]->getDistanceToTarget() << endl;
+                
+                ofRectangle& b1 = players[i]->getBounding();
+                for(int j = 0; j < players.size(); j++){
+                    if(j != i && !appModel->isIntersected(j)){
+                        ofRectangle& b2 = players[j]->getBounding();
+                        if(b1.intersects(b2)){
+//                            if(!players[i]->getPaused() && !players[j]->getPaused()){
+//                                if(players[i]->getDistanceToTarget() > 100 && players[j]->getDistanceToTarget() > 100){
+//                                    players[i]->setPaused(true);
+//                                }else if(players[i]->getDistanceToTarget() > 100 && players[j]->getDistanceToTarget() < 100){
+//                                    players[i]->setPaused(true);
+//                                }else if(players[i]->getDistanceToTarget() < 100 && players[j]->getDistanceToTarget() > 100){
+//                                    players[j]->setPaused(true);
+//                                }
+//                            }
+                            appModel->addIntersected(i, j);
+                        }
+                    }
+                }
+                
+//                if(players[i]->getPaused() && !appModel->isIntersected(i)) players[i]->setPaused(false);
+                
+                os  << players[i]->getCurrentMovieInfo() << "   " << endl
+                    << players[i]->getDistanceToTarget() << " "
+                    << players[i]->getPredictedFrameCurrent() << " / "
+                    << players[i]->getPredictedFrameTotal() << "  "
+                    << players[i]->getPredictedFrameGoal() << "   "
+                    << players[i]->getPaused() << " - " << appModel->isIntersected(i) << endl;
             }
             appModel->setProperty("MovieInfo", os.str());
+            
             for(int i = 0; i < finished.size(); i++){
                 delete players[finished[i]];
                 eraseAt(players, finished[i]);
             }
+            
         }
             break;
         case kPLAYCONTROLLER_STOP:

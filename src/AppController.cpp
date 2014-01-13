@@ -52,12 +52,13 @@ void AppController::setup(){
 //    
 //    appModel->setProperty("MediaPath", (string)"/Users/gameover/Desktop/LOTE/TESTRENDERS/media");
     appModel->setProperty("NumberPlayers", 11);
+    appModel->setProperty("RectTrail", 200);
 //
-    appModel->setProperty("ForceFileListUpdate", false);
-    appModel->setProperty("ForceFileListCheck", false);
-    appModel->setProperty("CheckKeyFrames", false);
-    appModel->setProperty("CheckXMP", false);
-    appModel->setProperty("CheckRects", false);
+//    appModel->setProperty("ForceFileListUpdate", false);
+//    appModel->setProperty("ForceFileListCheck", false);
+//    appModel->setProperty("CheckKeyFrames", false);
+//    appModel->setProperty("CheckXMP", false);
+//    appModel->setProperty("CheckRects", false);
 //
 //    appModel->setProperty("ContourMinArea", 10);
 //    appModel->setProperty("ContourMaxArea", 1200);
@@ -248,6 +249,14 @@ void AppController::keyPressed(ofKeyEventArgs & e){
         case 'w':
             appViewStates.toggleState(kAPPVIEW_SHOWWINDOWS);
             break;
+        case 'a':
+            if(appModel->getProperty<int>("RectTrail") == 200){
+                appModel->setProperty("RectTrail", 1000000);
+            }else{
+                appModel->setProperty("RectTrail", 200);
+            }
+            
+            break;
         case 'o':
             appView->toggleCameraOrtho();
             break;
@@ -343,7 +352,7 @@ void AppController::keyPressed(ofKeyEventArgs & e){
                 
                 
                 vector<string> ends;
-                ends.push_back("FALL_BACK");
+                ends.push_back("HUGG_FRNT");
                 ends.push_back("HUGG_FRNT");
                 
                 string m1 = movements[(int)ofRandom(movements.size())];
@@ -351,61 +360,57 @@ void AppController::keyPressed(ofKeyEventArgs & e){
                 
                 vector<string> mParts = ofSplitString(m1, "_");
                 
+                ofPoint startPosition = ofPoint(windowPositions[window].x + windowPositions[window].width / 2.0f,
+                                                windowPositions[window].y, 0.0f);
+                
+                players[i]->setTargetWindow(windowPositions[window], window);
+                
+
+                float target;
+                if(mParts[1] == "RIGT") target = windowPositions[window].x;
+                if(mParts[1] == "LEFT") target = 200 + (ofGetWidth() - windowPositions[window].x);
+                if(mParts[1] == "DOWN") target = windowPositions[window].y;
+                if(mParts[1] == "UPPP") target = 200 + (ofGetHeight() - windowPositions[window].y);
+                
+                float distance = target - 1;
                 int inserts = 0;
-                int averageDiff = 0;
                 
-                if(mParts[0] == "CRWL" || mParts[0] == "CREP" || mParts[0] == "WALK"){
-                    
-                    averageDiff = 900 * (200.0f / 550.0f);
-                    
-                    if(mParts[1] == "RIGT"){
-                        float dX = 200.0 + windowPositions[window].x;
-                        inserts = ceil(dX / averageDiff);
-                        cout << "xR: " << dX << " " << averageDiff << " " << inserts << endl;
-                    }else{
-                        float dX = 200.0 + (ofGetWidth() - windowPositions[window].x);
-                        inserts = ceil(dX/ averageDiff);
-                        cout << "xL: " << dX << " " << averageDiff << " " << inserts << endl;
-                    }
+                cout << "INSERTRECT0: " << distance << " " << target << endl;
 
-                    
-                    
-                }else{
-                    
-                    averageDiff = 500 * (200.0f / 550.0f);
-                    
-                    if(mParts[1] == "DOWN"){
-                        float dY = 200.0 + windowPositions[window].y;
-                        inserts = ceil(dY / averageDiff);
-                        cout << "yD: " << dY << " " << averageDiff << " " << inserts << endl;
-                    }else{
-                        float dY = 200.0 + (ofGetHeight() - windowPositions[window].y);
-                        inserts = ceil(dY / averageDiff) + 1; // i don't know why but it needs it!
-                        cout << "yU: " << dY << " " << averageDiff << " " << inserts << endl;
-                    }
-
-                    
-                }
-                
-                
-                
                 motions.push_back("STND_FRNT");
                 players[i]->generateMotionsBetween("STND_FRNT", m1, true, motions);
+                motions.push_back(m1);
                 
-                for(int j = 0; j < inserts; j++){
+                while(distance < target){
+                    inserts++;
                     motions.push_back(m1);
+
+                    players[i]->clearChains();
+                    players[i]->generateMoviesFromMotions(motions, true);
+
+                    vector<ofRectangle>& pRectangles = players[i]->getPredictedChainRects();
+                    ofRectangle startRectangle = pRectangles[0];
+                    ofRectangle endRectangle = pRectangles[pRectangles.size() - 1];
+                    
+                    if(mParts[1] == "RIGT") distance = ABS(endRectangle.position.x - startRectangle.position.x);
+                    if(mParts[1] == "LEFT") distance = ABS(endRectangle.position.x - startRectangle.position.x);
+                    if(mParts[1] == "DOWN") distance = ABS(endRectangle.position.y - startRectangle.position.y);
+                    if(mParts[1] == "UPPP") distance = ABS(endRectangle.position.y - startRectangle.position.y);
+                    
+                    cout << "INSERTRECT" << inserts << ": " << distance << " " << target << endl;
                 }
                 
                 players[i]->generateMotionsBetween(m1, e1, true, motions);
+                players[i]->generateMoviesFromMotions(motions, true);
                 
                 if(e1 == "HUGG_FRNT") motions.push_back("STND_FRNT");
                 
-                players[i]->generateMoviesFromMotions(motions);
+                players[i]->clearChains();
+                players[i]->generateMoviesFromMotions(motions, true);
 
-                players[i]->setTargetPosition(ofPoint(windowPositions[window].x + windowPositions[window].width / 2.0f,
-                                                      windowPositions[window].y, 0.0f));
-                
-                players[i]->setTargetWindow(windowPositions[window], window);
+                vector<ofPoint>& pPositions = players[i]->getPredictedChainPositions();
+                ofPoint endPoint = pPositions[pPositions.size() - 1];
+                players[i]->setPredictedFrameGoal(pPositions.size() - 1);
                 
                 if(e1 == "HUGG_FRNT"){
                     motions.clear();
@@ -436,28 +441,29 @@ void AppController::keyPressed(ofKeyEventArgs & e){
                         m1 = "CLIM_UPPP";
                     }
                     players[i]->generateMotionsBetween("STND_FRNT", m1, true, motions);
+                    motions.push_back(m1);
                     for(int j = 0; j < inserts; j++){
                         motions.push_back(m1);
                     }
                     players[i]->generateMotionsBetween(m1, "FALL_BACK", true, motions);
                     
-                    players[i]->generateMoviesFromMotions(motions);
+                    players[i]->generateMoviesFromMotions(motions, true);
 
                 }
                 
+                players[i]->setPosition(startPosition - endPoint);
+                players[i]->normalisePredictedChains(startPosition);
                 
-                
-                
-                
-                
-                
-                //players[i]->getModel()->printKeyDifferences();
 
             }
             
             
             
         }
+            
+            break;
+        case 'm':
+            for(int i = 0; i < players.size(); i++) players[i]->setPaused(false);
             
             break;
         case 'x':

@@ -28,7 +28,7 @@ AppView::AppView(){
     
     appViewStates.setState(kAPPVIEW_SHOWWINDOWS, false);
     appViewStates.setState(kAPPVIEW_SHOWPLAYERS, true);
-    appViewStates.setState(kAPPVIEW_SHOWRECTS, false);
+    appViewStates.setState(kAPPVIEW_SHOWRECTS, true);
     appViewStates.setState(kAPPVIEW_SHOWCENTRES, false);
     appViewStates.setState(kAPPVIEW_SHOWWARP, false);
     
@@ -137,7 +137,6 @@ void AppView::update(){
             ofRect(windowPositions[i]);
         }
         
-        
         for(int i = 0; i < players.size(); i++){
             ofNoFill();
             ofSetColor(127, 0, 0);
@@ -154,12 +153,26 @@ void AppView::update(){
             
             if(appViewStates.getState(kAPPVIEW_SHOWRECTS)){
                 
-                ofNoFill();
+                
                 ofSetColor(127, 0, 0);
+                
+                if(appModel->isIntersected(i)) ofFill();
+                
                 ofRect(players[i]->getBounding());
-                vector<ofRectangle>& chainRects = players[i]->getPredictedChainRects();
-                ofSetColor(0, 10, 10);
-                for(int j = 0; j < chainRects.size(); j++){
+                
+                ofNoFill();
+                vector<ofRectangle>& chainRects = players[i]->getNormalisedChainRects();
+                
+                int range = appModel->getProperty<int>("RectTrail");
+                int startFrame = MAX(players[i]->getPredictedFrameCurrent() - range, 0);
+                int endFrame = MIN(players[i]->getPredictedFrameCurrent() + range, chainRects.size());
+
+                for(int j = startFrame; j < endFrame; j++){
+                    if(j < players[i]->getPredictedFrameGoal()){
+                        ofSetColor(0, 10, 10);
+                    }else{
+                        ofSetColor(10, 10, 0);
+                    }
                     ofRect(chainRects[j]);
                 }
                 
@@ -193,9 +206,12 @@ void AppView::update(){
             glEnable(GL_DEPTH_TEST);
             glEnable(GL_CULL_FACE);
             
+            
+            
             for(int i = 0; i < players.size(); i++){
                 glPushMatrix();
                 
+                glTranslatef(-players[i]->getFloorOffset().x, -players[i]->getFloorOffset().y, -players[i]->getFloorOffset().z);
                 glTranslatef(players[i]->getPosition().x, players[i]->getPosition().y, players[i]->getPosition().z);
                 glScalef(players[i]->getDrawScale(), players[i]->getDrawScale(), 1.0f);
                 
@@ -209,6 +225,7 @@ void AppView::update(){
             for(int i = 0; i < players.size(); i++){
                 glPushMatrix();
                 
+                glTranslatef(-players[i]->getFloorOffset().x, -players[i]->getFloorOffset().y, -players[i]->getFloorOffset().z);
                 glTranslatef(players[i]->getPosition().x, players[i]->getPosition().y, players[i]->getPosition().z);
                 glScalef(players[i]->getDrawScale(), players[i]->getDrawScale(), 1.0f);
                 

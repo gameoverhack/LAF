@@ -173,14 +173,32 @@ public:
         BaseModel::load(filename + "_props", archiveType);
     }
     
+    //--------------------------------------------------------------
+    bool isIntersected(int index){
+        return (intersected.find(index) != intersected.end());
+    }
+    
+    //--------------------------------------------------------------
+    void clearIntersected(){
+        intersected.clear();
+    }
+    
+    //--------------------------------------------------------------
+    void addIntersected(int firstIndex, int secondIndex){
+        intersected.insert(firstIndex);
+        intersected.insert(secondIndex);
+    }
+    
 protected:
+    
+    set<int>                intersected;
     
     ofVideoPlayer           analysisVideo;
     ofRectangle             analysisRectangle;
     ofxCv::ContourFinder    analysisContourFinder;
     
     vector<PlayerController*>   players;
-    vector<PlayerView*>        views;
+    vector<PlayerView*>         views;
     map<string, PlayerModel>    playerModels;
     
     vector<ofRectangle> windows;

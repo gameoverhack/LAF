@@ -216,6 +216,7 @@ public:
         
     }
     
+    //--------------------------------------------------------------
     MovieInfo getStartMovie(){
 
         MovieInfo mI;
@@ -306,6 +307,7 @@ public:
         return p;
     }
     
+    //--------------------------------------------------------------
     ofRectangle getScaledRectTransform(ofRectangle& r, ofPoint& p, float scale){
         r.x = r.x * scale + p.x;
         r.y = r.y * scale + p.y;
@@ -314,36 +316,43 @@ public:
         return r;
     }
     
+    //--------------------------------------------------------------
     ofRectangle getScaledRectFrame(string name, int frame, ofPoint& p, float scale){
         ofRectangle r = getRectFrame(name, frame);
         return getScaledRectTransform(r, p, scale);
     }
     
+    //--------------------------------------------------------------
     ofRectangle getRectFrame(string name, int frame){
         vector<ofRectangle> & r = rectframes[name];
         frame = CLAMP(frame, 0, r.size() - 1);
         return r[frame];
     }
     
+    //--------------------------------------------------------------
     ofPoint getKeyFrame(string name, int frame){
         vector<ofPoint> & k = keyframes[name];
         frame = CLAMP(frame, 0, k.size() - 1);
         return k[frame];
     }
     
+    //--------------------------------------------------------------
     int getTotalKeyFrames(string name){
         vector<ofPoint> & k = keyframes[name];
         return k.size();
     }
     
+    //--------------------------------------------------------------
     map<string, vector<string> >& getMarkerDictionary(){
         return markDictionary;
     }
     
+    //--------------------------------------------------------------
     map<string, ofxXMP>& getMetaData(){
         return metadata;
     }
     
+    //--------------------------------------------------------------
     float printKeyDifferences(){
         for(map<string, vector<ofPoint> >::iterator it = keyframes.begin(); it != keyframes.end(); ++it){
             string movie = it->first;

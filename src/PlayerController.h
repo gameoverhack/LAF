@@ -28,6 +28,7 @@ public:
         video.close();
     }
     
+    //--------------------------------------------------------------
     void setup(PlayerModel * pModel, PlayerView * pView, MotionGraph * fmGraph, MotionGraph * bmGraph, MotionGraph * dGraph){
         
         ofxLogNotice() << "Setting up PlayerController with " << pModel->getPlayerName() << endl;
@@ -41,12 +42,14 @@ public:
         video.setPixelFormat(OF_PIXELS_BGRA);
         
         movieCue.push_back(model->getStartMovie());
+        predictedFramesPlayed = predictedFrameCurrent = 0;
         
         bCueTransition = false;
         bFirstLoad = true;
         bFinsished = false;
     }
     
+    //--------------------------------------------------------------
     void update(){
         
         video.update();
@@ -61,7 +64,8 @@ public:
             currentMovie.name = ofSplitString(video.getMovieName(), ".mov")[0];
             currentMovie.path = video.getMoviePath();
             currentMovie.isFrameNew = video.isFrameNew();
-
+            predictedFrameCurrent = predictedFramesPlayed + currentMovie.frame - currentMovie.startframe;
+            
             if(currentMovie.isFrameNew){
                 
                 bFirstLoad = false;
@@ -74,8 +78,14 @@ public:
                 kNormal = kFrame;
                 
                 currentMovie.bounding = model->getScaledRectFrame(currentMovie.name, currentMovie.frame, currentMovie.position, scale);
+                currentMovie.bounding.x -= floorOffset.x;
+                currentMovie.bounding.y -= floorOffset.y;
+                
                 playerCentre = currentMovie.bounding.getCenter();
                 distance = playerCentre.distance(windowCentre);
+                
+                
+                
             }
 
         
@@ -129,11 +139,14 @@ public:
                     
                     movieCue.pop_front();
                     
+                    if(predictedFramesPlayed == -1) predictedFrameCurrent = 0;
+                    predictedFramesPlayed = predictedFrameCurrent;
+                    
                 }else if(currentMovie.name != ""){ //if(movieCue.size() > 0){
                     cout << currentMovie.motion << endl;
                     if(currentMovie.motion == "STND_FRNT_FALL_BACK"){
                         cout << "FALLING" << endl;
-                        
+                        predictedFrameCurrent = 0;
                         if(getDistanceToTarget() < 300.0){
                             pNormal.y += 8.0f;
                             currentMovie.bounding.y += 8.0f;
@@ -152,12 +165,12 @@ public:
             
         }
         
-
         view->update();
         
     }
     
-    void generateMoviesFromMotions(vector<string> motions, bool bClearCue = false){
+    //--------------------------------------------------------------
+    void generateMoviesFromMotions(vector<string> motions, bool bAddToCue){
         
         vector<string> markerNames;
         map<string, ofxXMP> & metadata = model->getMetaData();
@@ -181,9 +194,12 @@ public:
             if(i == 0 && markerNames[i] == currentMovie.motion){
                 cout << "   MATCHED CURRENT " << currentMovie << endl;
                 lastMovieInfo = currentMovie;
+                lastMovieInfo.position = -floorOffset;
                 continue;
             }
-
+            
+            if(i == 0) lastMovieInfo.position = -floorOffset;
+            
             map<string, vector<string> >::iterator it = markDictionary.find(markerNames[i]);
             assert(it != markDictionary.end());
             
@@ -244,37 +260,25 @@ public:
         }
         
         cout << mIChain << endl;
-        
-        if(bClearCue){
-            movieCue.clear();
-            predictedChainRects.clear();
-            predictedChainPositions.clear();
-        }
 
         for(int i = 0; i < mIChain.size(); i++){
             for(int j = 0; j < mIChain[i].predictedBounding.size(); j++){
                 predictedChainRects.push_back(mIChain[i].predictedBounding[j]);
                 predictedChainPositions.push_back(mIChain[i].predictedPosition[j]);
             }
-            movieCue.push_back(mIChain[i]);
+            if(bAddToCue) movieCue.push_back(mIChain[i]);
         }
         
-        
+        predictedFrameCurrent = 0;
+        predictedFramesPlayed = -1;
     }
     
-    //--------------------------------------------------------------
-    void setTargetPosition(ofPoint startPosition){
-        ofPoint endPosition = predictedChainPositions[predictedChainPositions.size() - 1];
-        pNormal -= (endPosition - startPosition);
-        ofRectangle r = model->getRectFrame(model->getStartMovie().name, 1);
-        pNormal.x -= (r.x + r.width / 2.0f) * scale;
-        pNormal.y -= (r.y + r.height) * scale + 4;
-        
-        for(int i = 0; i < predictedChainPositions.size(); i++){
-            predictedChainPositions[i] = predictedChainPositions[i] - startPosition;
-            predictedChainRects[i].x = (predictedChainRects[i].x + pNormal.x) + (r.x + r.width / 2.0f) * scale;
-            predictedChainRects[i].y = (predictedChainRects[i].y + pNormal.y) + (r.y + r.height) * scale + 4;
-        }
+    void clearChains(){
+        movieCue.clear();
+        predictedChainRects.clear();
+        predictedChainPositions.clear();
+        normalisedChainRects.clear();
+        normalisedChainPositions.clear();
     }
     
     //--------------------------------------------------------------
@@ -436,147 +440,35 @@ public:
     }
     
     //--------------------------------------------------------------
-    void cueRandomTransition(){
-        generatePossibleMotions(currentMovie);
-        movieCue.push_back(currentMovie.possibleTransitions[(int)ofRandom(currentMovie.possibleTransitions.size())]);
+    void normalisePredictedChains(ofPoint pN){
+        
+        normalisedChainRects = predictedChainRects;
+        normalisedChainPositions = predictedChainPositions;
+
+        float pX;
+        float pY;
+        
+        for(int i = 0; i < predictedChainPositions.size(); i++){
+            
+            if(i < predictedFrameGoal){
+                pX = pNormal.x;
+                pY = pNormal.y;
+            }else{
+                pX = pNormal.x + predictedChainPositions[predictedFrameGoal].x + floorOffset.x;
+                pY = pNormal.y + predictedChainPositions[predictedFrameGoal].y + floorOffset.y;
+            }
+            
+            normalisedChainPositions[i].x += pX;
+            normalisedChainPositions[i].y += pY;
+            normalisedChainRects[i].x += pX;
+            normalisedChainRects[i].y += pY;
+        }
+
     }
     
     //--------------------------------------------------------------
-    void generatePossibleMotions(MovieInfo& cMovie){
-        
-        ofSeedRandom();
-        
-        string tab = "";
-        
-        cout << tab << cMovie << endl;
-        
-        string motion = getEndMotionFromString(cMovie.motion);
-        vector<string> allPossibleTransitions = forwardMotionGraph->getPossibleTransitions(motion);
-        
-        map<string, vector<string> > & markDictionary = model->getMarkerDictionary();
-        map<string, ofxXMP> & metadata = model->getMetaData();
-        
-        for(int i = 0; i < allPossibleTransitions.size(); i++){
-            
-            string sMotion = motion + "_" + allPossibleTransitions[i];
-
-            map<string, vector<string> >::iterator it = markDictionary.find(sMotion);
-            
-            if(it == markDictionary.end()){
-                
-                cout << tab << "No such marker exists currently, ignoring: " << sMotion << endl;
-                
-            }else{
-                
-                cout << tab << "Compiling all movies with " << sMotion << endl;
-                
-                vector<string> uniqueMovies = it->second;
-                
-                for(int j = 0; j < uniqueMovies.size(); j++){
-                    
-                    vector<ofxXMPMarker> mTs = metadata[uniqueMovies[j]].getMarkers(sMotion);
-                    
-                    for(int k = 0; k < mTs.size(); k++){
-                        ofxXMPMarker& mT = mTs[k];
-                        ofxXMPMarker& nT = metadata[uniqueMovies[j]].getNextMarker(mT.getStartFrame() + 1);
-//                        cout << tab << "       Goto: " << mT << endl;
-                        
-                        int interestingFrame = -1;
-                        while(!isLoopMarker(mT) && isLoopMarker(nT)){
-//                            cout << tab << "           Finding next loop marker...after " << nT << endl;
-                            if(interestingFrame == nT.getStartFrame()){
-//                                cout << tab << "          That's the end of the movie" << endl;
-                                break;
-                            }
-                            interestingFrame = nT.getStartFrame();
-                            nT = metadata[uniqueMovies[j]].getNextMarker(nT.getStartFrame() + 1);
-                        }
-                        
-                        MovieInfo mI;
-                        mI.name = uniqueMovies[j];
-                        mI.path = model->getPlayerFolder() + uniqueMovies[j] + ".mov";
-                        mI.startframe = mI.frame = mT.getStartFrame();
-                        mI.genframe = nT.getStartFrame();
-                        mI.speed = cMovie.speed;
-                        mI.isMovieDirty = true;
-                        mI.isFrameNew = false;
-                        mI.motion = sMotion;
-                        mI.position = cMovie.position;
-                        mI.predictedBounding = model->getProjectedRects(mI, cMovie, scale);
-//                        mI.intersectionFrames.assign(windowPositions.size(), mI.startframe + mI.predictedBounding.size());
-//                        mI.intersectedTransition = false;
-                        
-//                        cout << tab << "Check : " << mI.name << " " << mI.frame << " " << mI.genframe << " " << mI.predictedBounding.size() << " " << sMotion << endl;
-//                        
-//                        int minIntersection = mI.startframe + mI.predictedBounding.size();
-//                        
-//                        for(int w = 0; w < windowPositions.size(); w++){
-//                            for(int f = 0; f < mI.predictedBounding.size(); f++){
-//                                if(mI.predictedBounding[f].width != 0 && mI.predictedBounding[f].height != 0 && mI.predictedBounding[f].intersects(windowPositions[w])){
-//                                    mI.intersectionFrames[w] = mI.startframe + f;
-//                                    minIntersection = MIN(minIntersection, mI.startframe + f);
-//                                    break;
-//                                }
-//                            }
-//                        }
-//                        
-//                        bool addMovieInfo = true;
-//                        
-//                        if(minIntersection != mI.startframe + mI.predictedBounding.size()){
-//                            
-//                            addMovieInfo = false;
-//                            
-//                            if(iteration < iterations){
-//                                
-//                                iteration++;
-//                                
-//                                cout << tab << "ITCHECKING: " << mI.name << " " << minIntersection << endl;
-//                                
-//                                minIntersection -= 500;
-//                                
-//                                for(int f = minIntersection; f > mI.startframe; f = f - 50){
-//                                    
-//                                    cout << tab << "Frame generating: " << minIntersection << " " << f << " " << minIntersection - mI.startframe << endl;
-//                                    
-//                                    MovieInfo pI = mI;
-//                                    
-//                                    pI.frame = f;
-//                                    pI.position = mI.predictedPosition[pI.frame - mI.startframe];
-//                                    
-//                                    generateAllPossibleTransitions(pI, iteration, iterations);
-//                                    
-//                                    cout << tab << "Possible transitions at target frame " << f << " == " << pI.possibleTransitions.size() << endl;
-//                                    
-//                                    if(pI.possibleTransitions.size() > 0){
-//                                        addMovieInfo = true;
-//                                        mI.possibleTransitions = pI.possibleTransitions;
-//                                        mI.impossibleTransitions = pI.impossibleTransitions;
-//                                        mI.genframe = f;
-//                                        cMovie.intersectedTransition = true;
-//                                        break;
-//                                    }
-//                                    
-//                                }
-//                            }
-//                        }
-                        
-                        bool addMovieInfo = true;
-                        if(addMovieInfo){
-                            cout << tab << "Adding: " << mI.name << " " << mI.frame << " " << mI.genframe << " " << mI.predictedBounding.size() << " " << sMotion << endl;
-                            cMovie.possibleTransitions.push_back(mI);
-                        }else{
-                            cout << tab << "Reject: " << mI.name << " " << mI.frame << " " << mI.genframe << " " << mI.predictedBounding.size() << " " << sMotion << endl;
-                            cMovie.impossibleTransitions.push_back(mI);
-                        }
-                        
-                    }
-                    
-                }
-                
-            }
-            
-        }
-        
+    void setPosition(ofPoint p){
+        pNormal = p - floorOffset;
     }
     
     //--------------------------------------------------------------
@@ -617,6 +509,14 @@ public:
     //--------------------------------------------------------------
     void setDrawScale(float s){
         scale = s;
+        ofRectangle r = model->getRectFrame(model->getStartMovie().name, 1);
+        floorOffset.x = (r.x + r.width / 2.0f) * scale;
+        floorOffset.y = (r.y + r.height) * scale + 4;
+    }
+    
+    //--------------------------------------------------------------
+    ofPoint& getFloorOffset(){
+        return floorOffset;
     }
     
     //--------------------------------------------------------------
@@ -648,18 +548,25 @@ public:
     MovieInfo& getCurrentMovieInfo(){
         return currentMovie;
     }
+
+    //--------------------------------------------------------------
+    vector<ofPoint>& getPredictedChainPositions(){
+        return predictedChainPositions;
+    }
     
     //--------------------------------------------------------------
-    void setNormalPosition(ofPoint p){
-        ofRectangle r = model->getRectFrame(model->getStartMovie().name, 1);
-        pNormal = p;
-        pNormal.x -= (r.x + r.width / 2.0f) * scale;
-        pNormal.y -= (r.y + r.height) * scale + 4;
+    vector<ofPoint>& getNormalisedChainPositions(){
+        return normalisedChainPositions;
     }
     
     //--------------------------------------------------------------
     vector<ofRectangle>& getPredictedChainRects(){
         return predictedChainRects;
+    }
+    
+    //--------------------------------------------------------------
+    vector<ofRectangle>& getNormalisedChainRects(){
+        return normalisedChainRects;
     }
     
     //--------------------------------------------------------------
@@ -703,7 +610,42 @@ public:
         windowIndex = wIndex;
     }
     
+    //--------------------------------------------------------------
+    int getPredictedFrameCurrent(){
+        return predictedFrameCurrent;
+    }
+    
+    //--------------------------------------------------------------
+    int getPredictedFrameTotal(){
+        return predictedChainRects.size();
+    }
+    
+    //--------------------------------------------------------------
+    int getPredictedFrameGoal(){
+        return predictedFrameGoal;
+    }
+    
+    //--------------------------------------------------------------
+    void setPredictedFrameGoal(int f){
+        predictedFrameGoal = f;
+    }
+    
+    //--------------------------------------------------------------
+    void setPaused(bool b){
+        cout << "Pause: " << b << endl;
+        video.setPaused(b);
+        video.finish();
+    }
+    
+    //--------------------------------------------------------------
+    bool getPaused(){
+        return video.isPaused();
+    }
+    
 protected:
+    
+    ofPoint floorOffset;
+    ofPoint targetPosition;
     
     ofPoint playerCentre;
     ofPoint windowCentre;
@@ -714,8 +656,15 @@ protected:
     MovieInfo currentMovie;
     deque<MovieInfo> movieCue;
     
+    vector<ofRectangle> normalisedChainRects;
+    vector<ofPoint> normalisedChainPositions;
+    
     vector<ofRectangle> predictedChainRects;
     vector<ofPoint> predictedChainPositions;
+    
+    int predictedFrameCurrent;
+    int predictedFramesPlayed;
+    int predictedFrameGoal;
     
     bool bCueTransition;
     bool bFirstLoad, bFinsished;
