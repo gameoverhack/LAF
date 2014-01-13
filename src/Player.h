@@ -56,8 +56,6 @@ public:
         MovieInfo& currentMovie = model->getCurrentMovieInfo();
         currentMovie.isMovieDirty = (video.getQueueSize() > 0);
         
-        cout << movieCue.size() << endl;
-        
         if(bPausedSequence) return;
         
         if(!currentMovie.isMovieDirty){
@@ -475,7 +473,7 @@ protected:
     bool bCueTransition, bFinsished;
     
     ofxThreadedVideo video;
-
+    
     
 };
 

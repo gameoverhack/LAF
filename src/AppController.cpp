@@ -51,7 +51,7 @@ void AppController::setup(){
 //    appModel->setProperty("Ortho", true);
 //    
 //    appModel->setProperty("MediaPath", (string)"/Users/gameover/Desktop/LOTE/TESTRENDERS/media");
-    appModel->setProperty("NumberPlayers", 11);
+    appModel->setProperty("NumberPlayers", 12);
     appModel->setProperty("RectTrail", 200);
 //
 //    appModel->setProperty("ForceFileListUpdate", false);
@@ -302,6 +302,7 @@ void AppController::keyPressed(ofKeyEventArgs & e){
             windows.push_back(10);
             windows.push_back(11);
             windows.push_back(13);
+            windows.push_back(18);
             
             int windowIndex;
             int window;
@@ -399,8 +400,8 @@ void AppController::keyPressed(ofKeyEventArgs & e){
                         break;
                     case 7:
                     case 9:
-                    case 11:
                     case 10:
+                    case 11:
                     case 13:
                     case 18:
                         movements.push_back("TRAV_LEFT");
@@ -556,7 +557,7 @@ void AppController::keyPressed(ofKeyEventArgs & e){
             
             for(int i = 0; i < masters.size(); i++){
                 PlayerModel * playerModelM = appModel->getPlayerModel(masters[i]);
-                players[masters[i]]->setPaused(false);
+                players[masters[i]]->setPausedSquence(false);
                 cout << playerModelM->getPredictedFrameSync() << " " << playerModelM->getSlaveFrame() << endl;
                 cout << appModel->getPlayerModel(playerModelM->getSlaveID())->getPredictedFrameSync() << endl;
             

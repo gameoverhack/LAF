@@ -81,12 +81,7 @@ void PlayController::update(){
                 PlayerModel * playerModelM = appModel->getPlayerModel(masters[i]);
                 if(playerModelM->getPredictedFrameCurrent() >= playerModelM->getSlaveFrame()){
                     cout << "SYNCING" << endl;
-                    cout << players[playerModelM->getSlaveID()]->getPaused() << endl;
-                    players[playerModelM->getSlaveID()]->setPaused(false);
-                    cout << playerModelM->getPredictedFrameSync() << " " << playerModelM->getSlaveFrame() << endl;
-                    cout << appModel->getPlayerModel(playerModelM->getSlaveID())->getPredictedFrameSync() << endl;
-                    
-                    cout << players[playerModelM->getSlaveID()]->getPaused() << endl;
+                    players[playerModelM->getSlaveID()]->setPausedSquence(false);
                     slavestart.push_back(i);
                 }
             }
