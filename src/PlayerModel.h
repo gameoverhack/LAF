@@ -218,8 +218,9 @@ public:
     }
     
     //--------------------------------------------------------------
-    void setup(){
-        cout << "Setting up model" << endl;
+    void setup(int pID){
+        cout << "Setting up model: " << pID << endl;
+        playerID = pID;
         bFirstLoad = true;
         movieCue.push_back(getStartMovie());
         predictedFramesPlayed = predictedFrameCurrent = 0;
@@ -631,8 +632,14 @@ public:
         return predictedFramesPlayed;
     }
     
+    //--------------------------------------------------------------
     deque<MovieInfo>& getMovieCue(){
         return movieCue;
+    }
+    
+    //--------------------------------------------------------------
+    int getPlayerID(){
+        return playerID;
     }
     
 protected:
@@ -663,6 +670,8 @@ protected:
 
     ofPoint pNormal, kNormal, oNormal;
     float scale;
+    
+    int playerID;
     
     //============================================
     

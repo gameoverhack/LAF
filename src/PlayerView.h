@@ -29,6 +29,7 @@ public:
         
     }
     
+    //--------------------------------------------------------------
     void setup(float w, float h, int s){
         
         renderMode = RENDER_NORMAL;
@@ -83,6 +84,7 @@ public:
         
     }
     
+    //--------------------------------------------------------------
     void setTransitionStartPixels(ofPixels & pixels){
         
         msa::OpenCLKernel *kernel = openCL.kernel("particlize");
@@ -104,6 +106,7 @@ public:
         
     }
     
+    //--------------------------------------------------------------
     void setTransitionEndPixels(ofPixels & pixels){
         
         msa::OpenCLKernel *kernel = openCL.kernel("particlize");
@@ -123,6 +126,7 @@ public:
         
     }
     
+    //--------------------------------------------------------------
     void setPixels(ofPixels & pixels){
         
         if(renderMode == RENDER_TRANSITION) return;
@@ -144,19 +148,23 @@ public:
         
     }
     
+    //--------------------------------------------------------------
     void setTransitionLength(int frames){
         tTotalTime = frames * (1.0f / 25.0f * 1000.0f);
     }
     
+    //--------------------------------------------------------------
     void setRenderMode(RenderMode mode){
         renderMode = mode;
         if(mode == RENDER_TRANSITION) tStartTime = ofGetElapsedTimeMillis();
     }
     
+    //--------------------------------------------------------------
     RenderMode getRenderMode(){
         return renderMode;
     }
     
+    //--------------------------------------------------------------
     void update(){
         
         if(renderMode == RENDER_TRANSITION){
@@ -183,6 +191,7 @@ public:
         
     }
     
+    //--------------------------------------------------------------
     void drawParticles(){
         
         glColor3f(1.0f, 1.0f, 1.0f);
@@ -206,6 +215,7 @@ public:
         
     }
     
+    //--------------------------------------------------------------
     void drawImage(){
         
         glColor3f(1.0f, 1.0f, 1.0f);
@@ -213,14 +223,17 @@ public:
         
     }
     
+    //--------------------------------------------------------------
     void setZDistance(float z){
         zdistance = z;
     }
     
+    //--------------------------------------------------------------
     float getZDistance(){
         return zdistance;
     }
     
+    //--------------------------------------------------------------
     float getTween(){
         return (float)tween;
     }

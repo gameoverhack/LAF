@@ -428,10 +428,12 @@ public:
         return video.isPaused();
     }
     
+    //--------------------------------------------------------------
     int getPlayerID(){
         return playerID;
     }
     
+    //--------------------------------------------------------------
     float getSpeed(){
         PlayerModel * model = appModel->getPlayerModel(playerID);
         MovieInfo& currentMovie = model->getCurrentMovieInfo();
@@ -441,6 +443,7 @@ public:
         return currentMovie.speed;
     }
     
+    //--------------------------------------------------------------
     void setSpeed(float s){
         PlayerModel * model = appModel->getPlayerModel(playerID);
         MovieInfo& currentMovie = model->getCurrentMovieInfo();

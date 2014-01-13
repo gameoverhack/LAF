@@ -249,6 +249,10 @@ void AppController::keyPressed(ofKeyEventArgs & e){
         case 'w':
             appViewStates.toggleState(kAPPVIEW_SHOWWINDOWS);
             break;
+        case 'i':
+            appViewStates.toggleState(kAPPVIEW_SHOWINFO);
+            appViewStates.toggleState(kAPPVIEW_SHOWCENTRES);
+            break;
         case 'a':
             if(appModel->getProperty<int>("RectTrail") == 200){
                 appModel->setProperty("RectTrail", 1000000);

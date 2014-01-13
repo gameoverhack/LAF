@@ -18,6 +18,7 @@ AppView::AppView(){
     newAppViewStates.addState(State(kAPPVIEW_SHOWPLAYERS, "kAPPVIEW_SHOWPLAYERS"));
     newAppViewStates.addState(State(kAPPVIEW_SHOWRECTS, "kAPPVIEW_SHOWRECTS"));
     newAppViewStates.addState(State(kAPPVIEW_SHOWCENTRES, "kAPPVIEW_SHOWCENTRES"));
+    newAppViewStates.addState(State(kAPPVIEW_SHOWINFO, "kAPPVIEW_SHOWINFO"));
     newAppViewStates.addState(State(kAPPVIEW_SHOWWARP, "kAPPVIEW_SHOWWARP"));
     
     // add them to the model
@@ -30,6 +31,7 @@ AppView::AppView(){
     appViewStates.setState(kAPPVIEW_SHOWPLAYERS, true);
     appViewStates.setState(kAPPVIEW_SHOWRECTS, true);
     appViewStates.setState(kAPPVIEW_SHOWCENTRES, true);
+    appViewStates.setState(kAPPVIEW_SHOWINFO, true);
     appViewStates.setState(kAPPVIEW_SHOWWARP, false);
     
     resetCamera();
@@ -241,6 +243,21 @@ void AppView::update(){
                 glPopMatrix();
             }
             
+        }
+        
+        /******************************************************
+         *******            Draw Players                *******
+         *****************************************************/
+        
+        if(appViewStates.getState(kAPPVIEW_SHOWINFO)){
+            ofSetColor(127, 127, 127);
+            for(int i = 0; i < appModel->getNumPlayerModels(); i++){
+                PlayerModel * playerModel = appModel->getPlayerModel(i);
+                if(appModel->hasProperty<string>("MovieInfo_" + ofToString(playerModel->getPlayerID()))){
+                    string info = appModel->getProperty<string>("MovieInfo_" + ofToString(playerModel->getPlayerID()));
+                    ofDrawBitmapString(info, playerModel->getPlayerCentre());
+                }
+            }
         }
         
         ofDisableBlendMode();

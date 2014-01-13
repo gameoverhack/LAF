@@ -78,25 +78,25 @@ void PlayController::update(){
             break;
         case kPLAYCONTROLLER_PLAY:
         {
-            ostringstream os; os << endl;
+            
             vector<int> finished;
             
             appModel->clearIntersected();
             
             for(int i = 0; i < players.size(); i++){
                 
-                PlayerModel * playerModelA = appModel->getPlayerModel(i);
-                
                 players[i]->update();
+                
+                PlayerModel * playerModelA = appModel->getPlayerModel(players[i]->getPlayerID());
                 
                 if(players[i]->getIsFinished()) finished.push_back(i);
                 
                 ofRectangle& b1 = playerModelA->getBounding();
                 for(int j = 0; j < players.size(); j++){
                     
-                    PlayerModel * playerModelB = appModel->getPlayerModel(j);
+                    PlayerModel * playerModelB = appModel->getPlayerModel(players[j]->getPlayerID());
                     
-                    if(j != i && !appModel->isIntersected(j) && !appModel->isIntersected(i)){
+                    if(j != i && !appModel->isIntersected(players[i]->getPlayerID()) && !appModel->isIntersected(players[j]->getPlayerID())){
                         ofRectangle& b2 = playerModelB->getBounding();
                         if(b1.intersects(b2)){
 //                            if(!players[i]->getPaused() && !players[j]->getPaused()){
@@ -108,21 +108,24 @@ void PlayController::update(){
 //                                    players[j]->setPaused(true);
 //                                }
 //                            }
-                            appModel->addIntersected(i, j);
+                            appModel->addIntersected(players[i]->getPlayerID(), players[j]->getPlayerID());
                         }
                     }
                 }
                 
 //                if(players[i]->getPaused() && !appModel->isIntersected(i)) players[i]->setPaused(false);
-                
+                ostringstream os; os << endl;
                 os  << playerModelA->getCurrentMovieInfo() << "   " << endl
                     << playerModelA->getDistanceToTarget() << " "
                     << playerModelA->getPredictedFrameCurrent() << " / "
                     << playerModelA->getPredictedFrameTotal() << "  "
                     << playerModelA->getPredictedFrameGoal() << "   "
-                    << players[i]->getPaused() << " - " << appModel->isIntersected(i) << endl;
+                    << playerModelA->getPredictedFrameSync() << "   "
+                    << players[i]->getPaused() << " - " << appModel->isIntersected(players[i]->getPlayerID()) << endl;
+                
+                appModel->setProperty("MovieInfo_" + ofToString(players[i]->getPlayerID()), os.str());
             }
-            appModel->setProperty("MovieInfo", os.str());
+            
             
             for(int i = 0; i < finished.size(); i++){
                 int playerID = players[finished[i]]->getPlayerID();
@@ -151,7 +154,7 @@ void PlayController::createPlayer(string name){
     PlayerModel * playerModel = appModel->getPlayerModel(playerID);
     std::swap(*playerModel, playerTemplate);
     
-    playerModel->setup();
+    playerModel->setup(playerID);
     playerModel->clearChains();
     playerModel->setDrawScale(200.0/550.0);
     playerModel->setPosition(ofPoint(0,0,0));
