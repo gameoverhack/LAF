@@ -223,7 +223,7 @@ public:
         playerID = pID;
         slaveID = -1;
         slaveFrame = -1;
-        distance = 99999999;
+        distance = INFINITY;
         bFirstLoad = true;
         movieCue.push_back(getStartMovie());
         predictedFramesPlayed = predictedFrameCurrent = 0;
@@ -577,6 +577,8 @@ public:
         windowRectangle = r;
         windowCentre = r.getCenter();
         windowIndex = wIndex;
+        playerCentre = normalisedChainRects[0].getCenter();
+        distance = playerCentre.distance(windowCentre);
     }
     
     //--------------------------------------------------------------

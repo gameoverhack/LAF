@@ -34,20 +34,6 @@ public:
     }
     
     //--------------------------------------------------------------
-    PlayerModel& getPlayerTemplate(string name){
-        map<string, PlayerModel>::iterator it = playerModels.find(name);
-        if(it == playerModels.end()){
-            ofxLogNotice() << "Creating new template model for " << name << endl;
-        }
-        return playerModels[name];
-    }
-    
-    //--------------------------------------------------------------
-    map<string, PlayerModel>& getPlayerTemplates(){
-        return playerModels;
-    }
-    
-    //--------------------------------------------------------------
     void loadWindowPositions(string path){
         
         ofxLogNotice() << "Setting up windows with: " << path << endl;
@@ -154,6 +140,20 @@ public:
     }
     
     //--------------------------------------------------------------
+    PlayerModel& getPlayerTemplate(string name){
+        map<string, PlayerModel>::iterator it = playerModels.find(name);
+        if(it == playerModels.end()){
+            ofxLogNotice() << "Creating new template model for " << name << endl;
+        }
+        return playerModels[name];
+    }
+    
+    //--------------------------------------------------------------
+    map<string, PlayerModel>& getPlayerTemplates(){
+        return playerModels;
+    }
+    
+    //--------------------------------------------------------------
     PlayerView* getPlayerView(int playerID){
         map<int, PlayerView*>::iterator it = views.find(playerID);
         PlayerView * v;
@@ -174,9 +174,8 @@ public:
         map<int, PlayerModel*>::iterator it = models.find(playerID);
         PlayerModel * m;
         if(it == models.end()){
-            ofxLogNotice() << "Creating model for PlayerID " << playerID << endl;
-            m = new PlayerModel;
-            models[playerID] = m;
+            ofxLogError() << "No model for PlayerID " << playerID << endl;
+            assert(false);
         }else{
             m = it->second;
         }
@@ -184,12 +183,23 @@ public:
     }
     
     //--------------------------------------------------------------
+    void createPlayerModel(int playerID, string name){
+        models[playerID] = new PlayerModel;
+        PlayerModel m = playerModels[name];
+        std::swap(*models[playerID], m);
+        playerIDS.push_back(playerID);
+    }
+    
+    //--------------------------------------------------------------
     void deletePlayerModel(int playerID){
         map<int, PlayerModel*>::iterator it = models.find(playerID);
         if(it == models.end()){
-            ofxLogNotice() << "Error no model for PlayerID " << playerID << endl;
+            ofxLogError() << "No model for PlayerID " << playerID << endl;
         }else{
+            ofxLogNotice() << "Erasing playerID " << playerID << " " << models.size() << " " << playerIDS << endl;
             models.erase(it);
+            eraseAll(playerIDS, playerID);
+            ofxLogNotice() << "Erasing playerID " << playerID << " " << models.size() << " " << playerIDS << endl;
         }
     }
     
@@ -201,6 +211,11 @@ public:
     //--------------------------------------------------------------
     int getNumPlayerModels(){
         return models.size();
+    }
+    
+    //--------------------------------------------------------------
+    vector<int>& getPlayerIDS(){
+        return playerIDS;
     }
     
     void loadHugVideo(string name){
@@ -221,16 +236,17 @@ public:
     
 protected:
     
-    ofxThreadedVideo* hugvideo;
+    ofxThreadedVideo*       hugvideo;
     
     set<int>                intersected;
     
     ofVideoPlayer           analysisVideo;
     ofRectangle             analysisRectangle;
     ofxCv::ContourFinder    analysisContourFinder;
-    
+
     map<int, PlayerView*>       views;
     map<int, PlayerModel*>      models;
+    vector<int>                 playerIDS;
     
     map<string, PlayerModel>    playerModels;
     

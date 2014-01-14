@@ -41,30 +41,22 @@ inline float millisToMinutes(int millis){
 }
 
 template<typename T>
-inline void eraseAt(vector<T> &v, int index){
-    v.erase(v.begin() + index);
-}
-
-template<typename T>
-inline void eraseAll(vector<T> &v, T element){
-    for(int i = 0; i < v.size(); i++){
-        if(v[i] == element) eraseAt(v, i); i--;
-    }
-}
-
-template<typename A, typename B>
-inline void eraseAll(map<A, B> &m, A element){
-    m.erase(m.find(element));
-}
-
-template<typename T>
 inline int first(vector<T> &v, T element){
     for(int i = 0; i < v.size(); i++){
         if(v[i] == element) return i;
     }
     return -1;
 }
-
+                      
+template<typename T>
+inline vector<int> indexes(vector<T> &v, T element){
+  vector<int> idx;
+  for(int i = 0; i < v.size(); i++){
+      if(v[i] == element) idx.push_back(i);
+  }
+  return idx;
+}
+                      
 template<typename T>
 inline vector<T> all(vector<T> &v, T element){
     vector<T> r;
@@ -72,6 +64,24 @@ inline vector<T> all(vector<T> &v, T element){
         if(v[i] == element) r.push_back(v[i]);
     }
     return r;
+}
+
+template<typename T>
+inline void eraseAt(vector<T> &v, int index){
+    v.erase(v.begin() + index);
+}
+
+template<typename T>
+inline void eraseAll(vector<T> &v, T element){
+    vector<int> idx = indexes(v, element);
+    for(int i = 0; i < idx.size(); i++){
+        eraseAt(v, idx[i]);
+    }
+}
+
+template<typename A, typename B>
+inline void eraseAll(map<A, B> &m, A element){
+    m.erase(m.find(element));
 }
 
 template<typename T>

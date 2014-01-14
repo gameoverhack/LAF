@@ -49,7 +49,8 @@ void AppView::resetCamera(){
     cout << cam.getX() << " " << cam.getY() << " " << cam.getZ() << " " << cam.getRoll() << " " << cam.getPitch() << " " << cam.getHeading() << endl;
     cam.enableMouseInput();
     cam.resetTransform();
-    cam.setPosition(0, 5.02717e-05, -575.041);
+    cam.setPosition(0, 0, 0);
+//    cam.setPosition(0, 5.02717e-05, -575.041);
     setCameraOrtho(appModel->getProperty<bool>("Ortho"));
     //cam.tilt(180);
     cam.setTranslationKey('z');
@@ -100,8 +101,9 @@ void AppView::update(){
     }
     
     StateGroup & appViewStates = appModel->getStateGroup("AppViewStates");
-    
     vector<ofRectangle> & windowPositions = appModel->getWindows();
+    vector<int> & playerIDS = appModel->getPlayerIDS();
+    
     
     begin();
     {
@@ -138,17 +140,26 @@ void AppView::update(){
             ofRect(windowPositions[i]);
         }
         
-        for(int i = 0; i < appModel->getNumPlayerModels(); i++){
-            ofNoFill();
-            ofSetColor(127, 0, 0);
+        float distance, cFade, iFade, iSmal;
+        float threshold = 200.0f;
+        for(int i = 0; i < playerIDS.size(); i++){
             
-            PlayerModel * playerModel = appModel->getPlayerModel(i);
+            PlayerModel * playerModel = appModel->getPlayerModel(playerIDS[i]);
+            distance = playerModel->getDistanceToTarget() - 100.0f;
+            cFade = 127 * CLAMP((1.0 - distance / threshold), 0.0f, 1.0f);
+            iFade = 127 * CLAMP((      distance / threshold), 0.0f, 1.0f);
+            iSmal = 10  * CLAMP((      distance / threshold), 0.0f, 1.0f);
+
             
             /******************************************************
              *******            Draw Centres                *******
              *****************************************************/
             
-            if(appViewStates.getState(kAPPVIEW_SHOWCENTRES)) ofLine(playerModel->getPlayerCentre(), playerModel->getTargetCentre());
+            if(appViewStates.getState(kAPPVIEW_SHOWCENTRES)){
+                ofNoFill();
+                ofSetColor(iFade, 0, 0);
+                ofLine(playerModel->getPlayerCentre(), playerModel->getTargetCentre());
+            }
             
             /******************************************************
              *******            Draw Rects                  *******
@@ -156,8 +167,8 @@ void AppView::update(){
             
             if(appViewStates.getState(kAPPVIEW_SHOWRECTS)){
                 
-                
-                ofSetColor(127, 0, 0);
+                ofNoFill();
+                ofSetColor(iFade, 0, 0);
                 
                 if(appModel->isIntersected(i)) ofFill();
                 
@@ -172,9 +183,9 @@ void AppView::update(){
 
                 for(int j = startFrame; j < endFrame; j++){
                     if(j < playerModel->getPredictedFrameGoal()){
-                        ofSetColor(0, 10, 10);
+                        ofSetColor(0, iSmal, iSmal);
                     }else{
-                        ofSetColor(10, 10, 0);
+                        ofSetColor(iSmal, iSmal, 0);
                     }
                     ofRect(chainRects[j]);
                 }
@@ -185,15 +196,21 @@ void AppView::update(){
              *******            Draw TargetWindow           *******
              *****************************************************/
             
-            float d = playerModel->getDistanceToTarget() - 100.0f;
-            float dT = 200.0f;
-            if(d < dT){
-                ofFill();
-                float c = 127 * CLAMP((1.0 - d / dT), 0.0f, 1.0f);
-                ofSetColor(c, c, c);
-                ofRect(playerModel->getTargetWindowRectangle());
-            }
+            ofFill();
+            ofSetColor(cFade, cFade, cFade);
+            ofRect(playerModel->getTargetWindowRectangle());
             
+            /******************************************************
+             *******            Draw Info                   *******
+             *****************************************************/
+            
+            if(appViewStates.getState(kAPPVIEW_SHOWINFO)){
+                ofSetColor(iFade, iFade, iFade);
+                if(appModel->hasProperty<string>("MovieInfo_" + ofToString(playerModel->getPlayerID()))){
+                    string info = appModel->getProperty<string>("MovieInfo_" + ofToString(playerModel->getPlayerID()));
+                    ofDrawBitmapString(info, playerModel->getPlayerCentre());
+                }
+            }
         }
         
         /******************************************************
@@ -209,10 +226,10 @@ void AppView::update(){
             glEnable(GL_DEPTH_TEST);
             glEnable(GL_CULL_FACE);
 
-            for(int i = 0; i < appModel->getNumPlayerModels(); i++){
+            for(int i = 0; i < playerIDS.size(); i++){
 
-                PlayerModel * playerModel = appModel->getPlayerModel(i);
-                PlayerView * playerView = appModel->getPlayerView(i);
+                PlayerModel * playerModel = appModel->getPlayerModel(playerIDS[i]);
+                PlayerView * playerView = appModel->getPlayerView(playerIDS[i]);
                 
                 glPushMatrix();
                 
@@ -229,8 +246,8 @@ void AppView::update(){
             
             for(int i = 0; i < appModel->getNumPlayerModels(); i++){
                 
-                PlayerModel * playerModel = appModel->getPlayerModel(i);
-                PlayerView * playerView = appModel->getPlayerView(i);
+                PlayerModel * playerModel = appModel->getPlayerModel(playerIDS[i]);
+                PlayerView * playerView = appModel->getPlayerView(playerIDS[i]);
                 
                 glPushMatrix();
                 
@@ -245,21 +262,6 @@ void AppView::update(){
             
             glDisable(GL_DEPTH_TEST);
             glDisable(GL_CULL_FACE);
-        }
-        
-        /******************************************************
-         *******            Draw Players                *******
-         *****************************************************/
-        
-        if(appViewStates.getState(kAPPVIEW_SHOWINFO)){
-            ofSetColor(127, 127, 127);
-            for(int i = 0; i < appModel->getNumPlayerModels(); i++){
-                PlayerModel * playerModel = appModel->getPlayerModel(i);
-                if(appModel->hasProperty<string>("MovieInfo_" + ofToString(playerModel->getPlayerID()))){
-                    string info = appModel->getProperty<string>("MovieInfo_" + ofToString(playerModel->getPlayerID()));
-                    ofDrawBitmapString(info, playerModel->getPlayerCentre());
-                }
-            }
         }
         
         ofDisableBlendMode();

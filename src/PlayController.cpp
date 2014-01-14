@@ -57,16 +57,22 @@ void PlayController::update(){
         {
             
             for(int i = 0; i < players.size(); i++){
+                int playerID = players[i]->getPlayerID();
                 delete players[i];
+                appModel->deletePlayerModel(playerID);
             }
             
             players.clear();
+            masters.clear();
             
             for(int i = 0; i < appModel->getProperty<int>("NumberPlayers"); i++){
                 createPlayer("MARTINW");
             }
             
-            appModel->loadHugVideo("MARTINW");
+            ofxThreadedVideo* hugVideo = appModel->getHugVideo();
+            
+            if(hugVideo == NULL) appModel->loadHugVideo("MARTINW");
+            
             
             playControllerStates.setState(kPLAYCONTROLLER_PLAY);
         }
@@ -84,17 +90,17 @@ void PlayController::update(){
                 PlayerModel * playerModelS = appModel->getPlayerModel(playerModelM->getSlaveID());
                 if(playerModelM->getPredictedFrameCurrent() >= playerModelM->getSlaveFrame()){
                     cout << "SYNCING" << endl;
+                    cout << masters[i] << " " << playerModelM->getSlaveID() << endl;
+                    cout << masters << endl;
                     players[playerModelM->getSlaveID()]->setPausedSquence(false);
                     slavestart.push_back(i);
-                }else{
-                    if(!players[playerModelM->getSlaveID()]->getPausedSquence() && playerModelS->getDistanceToTarget() != 99999999){
-                        players[playerModelM->getSlaveID()]->setPausedSquence(true);
-                    }
                 }
             }
             
             for(int i = 0; i < slavestart.size(); i++){
+                cout << masters << endl;
                 eraseAt(masters, slavestart[i]);
+                cout << masters << endl;
             }
             
             for(int i = 0; i < players.size(); i++){
@@ -163,11 +169,9 @@ void PlayController::update(){
 void PlayController::createPlayer(string name){
 
     int playerID = players.size();
-    
-    PlayerModel playerTemplate = appModel->getPlayerTemplate(name);
-    PlayerModel * playerModel = appModel->getPlayerModel(playerID);
-    
-    std::swap(*playerModel, playerTemplate);
+
+    appModel->createPlayerModel(playerID, name);
+    PlayerModel* playerModel = appModel->getPlayerModel(playerID);
     
     playerModel->setup(playerID);
     playerModel->clearChains();

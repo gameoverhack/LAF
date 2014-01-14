@@ -44,6 +44,12 @@ void AppController::setup(){
 //    appModel->backup("config", ARCHIVE_BINARY);
     
 //    appModel->removeAllProperties();
+    for(int i = 0; i < 50; i++){
+        string prop = "MovieInfo_" + ofToString(i);
+        if(appModel->hasProperty<string>(prop)){
+            appModel->removeProperty<string>(prop);
+        }
+    }
 //    appModel->removeProperty<string>("MovieInfo");
 //    appModel->setProperty("LogToFile", false);
 //    
@@ -51,7 +57,7 @@ void AppController::setup(){
 //    appModel->setProperty("Ortho", true);
 //    
 //    appModel->setProperty("MediaPath", (string)"/Users/gameover/Desktop/LOTE/TESTRENDERS/media");
-    appModel->setProperty("NumberPlayers", 12);
+    appModel->setProperty("NumberPlayers", 10);
     appModel->setProperty("RectTrail", 200);
 //
 //    appModel->setProperty("ForceFileListUpdate", false);
@@ -196,8 +202,7 @@ void AppController::draw(){
             ofEnableBlendMode(OF_BLENDMODE_SCREEN);
             
             ofxThreadedVideo* hugVideo = appModel->getHugVideo();
-            
-            
+
             if(hugVideo != NULL){
                 
                 hugVideo->update();
@@ -293,7 +298,7 @@ void AppController::keyPressed(ofKeyEventArgs & e){
         {
             ofxThreadedVideo* hugVideo = appModel->getHugVideo();
             hugVideo->clearFades();
-            hugVideo->setFade(hugVideo->getCurrentFrame(), 5000, 1.0f);
+            hugVideo->setFade(hugVideo->getCurrentFrame(), 10000, 1.0f);
             
         }
             break;
@@ -301,7 +306,7 @@ void AppController::keyPressed(ofKeyEventArgs & e){
         {
             ofxThreadedVideo* hugVideo = appModel->getHugVideo();
             hugVideo->clearFades();
-            hugVideo->setFade(hugVideo->getCurrentFrame(), 5000, 0.0f);
+            hugVideo->setFade(hugVideo->getCurrentFrame(), 10000, 0.0f);
             
         }
             break;
@@ -354,11 +359,11 @@ void AppController::keyPressed(ofKeyEventArgs & e){
                 
                 PlayerModel * playerModel = appModel->getPlayerModel(i);
                 
-//                if(i % 2 == 0){
+                if(i % 2 == 0){
                     windowIndex = ofRandom(windows.size());
                     window = windows[windowIndex];
                     eraseAt(windows, windowIndex);
-//                }
+                }
 
                 vector<string> movements;
                 
@@ -467,8 +472,6 @@ void AppController::keyPressed(ofKeyEventArgs & e){
                 
                 ofPoint startPosition = ofPoint(windowPositions[window].x + windowPositions[window].width / 2.0f,
                                                 windowPositions[window].y, 0.0f);
-                
-                playerModel->setTargetWindow(windowPositions[window], window);
 
                 float target;
                 if(mParts[1] == "RIGT") target = windowPositions[window].x;
@@ -557,12 +560,13 @@ void AppController::keyPressed(ofKeyEventArgs & e){
                 
                 playerModel->setPosition(startPosition - endPoint);
                 playerModel->normalisePredictedChains(startPosition);
-                
+                playerModel->setTargetWindow(windowPositions[window], window);
                 
             }
             
             vector<int>& masters = playController->getMasters();
             masters.clear();
+            
             
             for(int i = 0; i < players.size(); i = i + 2){
                 
@@ -579,14 +583,14 @@ void AppController::keyPressed(ofKeyEventArgs & e){
                     cout << "Start B when A is at " << syncFrame << endl;
                     playerModelA->setSlave(playerModelB->getPlayerID(), syncFrame);
                     masters.push_back(playerModelA->getPlayerID());
-//                    players[i + 0]->setPausedSquence(false);
+                    players[i + 1]->setPausedSquence(true);
                 }else{
                     cout << "Slave A to B" << endl;
                     syncFrame = playerModelB->getPredictedFrameSync() - playerModelA->getPredictedFrameSync();
                     cout << "Start A when B is at " << syncFrame << endl;
                     playerModelB->setSlave(playerModelA->getPlayerID(), syncFrame);
                     masters.push_back(playerModelB->getPlayerID());
-//                    players[i + 1]->setPausedSquence(false);
+                    players[i + 0]->setPausedSquence(true);
                 }
                 
                 cout << "As: " << playerModelA->getPredictedFrameSync() - syncFrame << endl;
@@ -603,6 +607,7 @@ void AppController::keyPressed(ofKeyEventArgs & e){
                 cout << players[playerModelM->getSlaveID()]->getPaused() << endl;
             }
             
+            cout << masters << endl;
             
         }
             

@@ -24,8 +24,7 @@ public:
     }
     
     ~Player(){
-        PlayerModel * model = appModel->getPlayerModel(playerID);
-        ofxLogVerbose() << "Destroying Player with " << model->getPlayerName() << endl;
+        ofxLogVerbose() << "Destroying Player" << endl;
         video.close();
     }
     
@@ -421,14 +420,14 @@ public:
     
     //--------------------------------------------------------------
     void setFrame(int f){
-        cout << "Frame: " << f << endl;
+        cout << playerID << " Frame: " << f << endl;
         video.setFrame(f);
         video.finish();
     }
     
     //--------------------------------------------------------------
     void setPaused(bool b){
-        cout << "Pause: " << b << endl;
+        cout << playerID << " Pause: " << b << endl;
         video.setPaused(b);
         video.finish();
     }
