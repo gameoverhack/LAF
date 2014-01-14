@@ -82,7 +82,7 @@ void AppController::setup(){
     appView = new AppView();
     appView->setup(appModel->getProperty<float>("OutputWidth"),
                    appModel->getProperty<float>("OutputHeight"),
-                   ViewOption(),
+                   ViewOption(VIEW_USE_FBO),
                    (string)"output");
     
     // make a debug window
@@ -194,7 +194,32 @@ void AppController::draw(){
         case kAPPCONTROLLER_PLAY:
         {
             ofEnableBlendMode(OF_BLENDMODE_SCREEN);
-            appView->draw();
+            
+            ofxThreadedVideo* hugVideo = appModel->getHugVideo();
+            
+            
+            if(hugVideo != NULL){
+                
+                hugVideo->update();
+
+                float fY = hugVideo->getFade() * hugVideo->getHeight();
+                float dY = (hugVideo->getHeight() - fY) / 2.0;
+                float cY = hugVideo->getFade()*255;
+                float iY = (1 - hugVideo->getFade())*255;
+                
+                ofNoFill();
+                ofSetColor(cY, cY, cY);
+                
+                
+                hugVideo->getTextureReference().drawSubsection(0, dY, hugVideo->getWidth(), fY, 0, dY);
+                ofRect(1, dY + 1, hugVideo->getWidth() - 2, fY - 2);
+                
+                
+                glPushMatrix();
+                ofSetColor(iY, iY, iY);
+                appView->draw();
+                glPopMatrix();
+            }
             
         }
             break;
@@ -264,6 +289,22 @@ void AppController::keyPressed(ofKeyEventArgs & e){
         case 'o':
             appView->toggleCameraOrtho();
             break;
+        case 'b':
+        {
+            ofxThreadedVideo* hugVideo = appModel->getHugVideo();
+            hugVideo->clearFades();
+            hugVideo->setFade(hugVideo->getCurrentFrame(), 5000, 1.0f);
+            
+        }
+            break;
+        case 'n':
+        {
+            ofxThreadedVideo* hugVideo = appModel->getHugVideo();
+            hugVideo->clearFades();
+            hugVideo->setFade(hugVideo->getCurrentFrame(), 5000, 0.0f);
+            
+        }
+            break;
         case ' ':
         {
             
@@ -312,8 +353,6 @@ void AppController::keyPressed(ofKeyEventArgs & e){
                 vector<string> motions;
                 
                 PlayerModel * playerModel = appModel->getPlayerModel(i);
-                players[i]->setPausedSquence(true);
-                players[i]->setFrame(251);
                 
 //                if(i % 2 == 0){
                     windowIndex = ofRandom(windows.size());
@@ -534,20 +573,20 @@ void AppController::keyPressed(ofKeyEventArgs & e){
                 cout << "B : " << playerModelB->getPredictedFrameSync() << "  " << playerModelB->getPredictedFrameGoal() << endl;
                 
                 int syncFrame;
-                if(playerModelA->getPredictedFrameSync() > playerModelB->getPredictedFrameSync()){
+                if(playerModelA->getPredictedFrameSync() >= playerModelB->getPredictedFrameSync()){
                     cout << "Slave B to A" << endl;
                     syncFrame = playerModelA->getPredictedFrameSync() - playerModelB->getPredictedFrameSync();
                     cout << "Start B when A is at " << syncFrame << endl;
                     playerModelA->setSlave(playerModelB->getPlayerID(), syncFrame);
                     masters.push_back(playerModelA->getPlayerID());
-                    players[i + 1]->setPaused(true);
+//                    players[i + 0]->setPausedSquence(false);
                 }else{
                     cout << "Slave A to B" << endl;
                     syncFrame = playerModelB->getPredictedFrameSync() - playerModelA->getPredictedFrameSync();
                     cout << "Start A when B is at " << syncFrame << endl;
                     playerModelB->setSlave(playerModelA->getPlayerID(), syncFrame);
                     masters.push_back(playerModelB->getPlayerID());
-                    players[i + 0]->setPaused(true);
+//                    players[i + 1]->setPausedSquence(false);
                 }
                 
                 cout << "As: " << playerModelA->getPredictedFrameSync() - syncFrame << endl;

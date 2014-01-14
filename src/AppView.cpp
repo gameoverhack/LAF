@@ -51,7 +51,7 @@ void AppView::resetCamera(){
     cam.resetTransform();
     cam.setPosition(0, 5.02717e-05, -575.041);
     setCameraOrtho(appModel->getProperty<bool>("Ortho"));
-    cam.tilt(180);
+    //cam.tilt(180);
     cam.setTranslationKey('z');
     cout << cam.getX() << " " << cam.getY() << " " << cam.getZ() << " " << cam.getRoll() << " " << cam.getPitch() << " " << cam.getHeading() << endl;
 }
@@ -110,7 +110,7 @@ void AppView::update(){
         cam.begin();
         
         if(cam.getOrtho()){
-            ofTranslate(0, -ofGetHeight());
+//            ofTranslate(0, -ofGetHeight());
         }else{
             ofTranslate(-ofGetWidth() / 2.0, -ofGetHeight() / 2.0);
         }
@@ -243,6 +243,8 @@ void AppView::update(){
                 glPopMatrix();
             }
             
+            glDisable(GL_DEPTH_TEST);
+            glDisable(GL_CULL_FACE);
         }
         
         /******************************************************
@@ -264,6 +266,7 @@ void AppView::update(){
         
         cam.end();
         
+
     }
     end();
     

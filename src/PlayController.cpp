@@ -65,7 +65,9 @@ void PlayController::update(){
             for(int i = 0; i < appModel->getProperty<int>("NumberPlayers"); i++){
                 createPlayer("MARTINW");
             }
-
+            
+            appModel->loadHugVideo("MARTINW");
+            
             playControllerStates.setState(kPLAYCONTROLLER_PLAY);
         }
             break;
@@ -79,10 +81,15 @@ void PlayController::update(){
             
             for(int i = 0; i < masters.size(); i++){
                 PlayerModel * playerModelM = appModel->getPlayerModel(masters[i]);
+                PlayerModel * playerModelS = appModel->getPlayerModel(playerModelM->getSlaveID());
                 if(playerModelM->getPredictedFrameCurrent() >= playerModelM->getSlaveFrame()){
                     cout << "SYNCING" << endl;
                     players[playerModelM->getSlaveID()]->setPausedSquence(false);
                     slavestart.push_back(i);
+                }else{
+                    if(!players[playerModelM->getSlaveID()]->getPausedSquence() && playerModelS->getDistanceToTarget() != 99999999){
+                        players[playerModelM->getSlaveID()]->setPausedSquence(true);
+                    }
                 }
             }
             

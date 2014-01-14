@@ -223,7 +223,7 @@ public:
         playerID = pID;
         slaveID = -1;
         slaveFrame = -1;
-        distance = 10000;
+        distance = 99999999;
         bFirstLoad = true;
         movieCue.push_back(getStartMovie());
         predictedFramesPlayed = predictedFrameCurrent = 0;
@@ -662,7 +662,7 @@ public:
     int getSlaveFrame(){
         return slaveFrame;
     }
-    
+
 protected:
     
     int slaveID, slaveFrame;

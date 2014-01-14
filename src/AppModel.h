@@ -19,7 +19,6 @@
 #include "PlayerView.h"
 #include "PlayerModel.h"
 #include "ofxCv.h"
-#include "ofVideoPlayer.h"
 
 class AppModel : public BaseModel{
     
@@ -27,6 +26,7 @@ public:
     
     AppModel(){
         //BaseModel::BaseModel();
+        hugvideo = NULL;
     }
     
     ~AppModel(){
@@ -203,7 +203,25 @@ public:
         return models.size();
     }
     
+    void loadHugVideo(string name){
+        cout << "LOADINGHUGG" << endl;
+        hugvideo = new ofxThreadedVideo;
+        hugvideo->setPixelFormat(OF_PIXELS_BGRA);
+        hugvideo->loadMovie(getProperty<string>("MediaPath") + "/" + name + "HUGG.mov");
+//        hugvideo->setLoopState(OF_LOOP_NONE);
+        hugvideo->setFade(0.0f);
+        hugvideo->play();
+//        hugvideo.setPaused(true);
+//        hugvideo.setFrame(0);
+    }
+    
+    ofxThreadedVideo* getHugVideo(){
+        return hugvideo;
+    }
+    
 protected:
+    
+    ofxThreadedVideo* hugvideo;
     
     set<int>                intersected;
     

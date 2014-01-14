@@ -461,9 +461,17 @@ public:
         currentMovie.speed = s;
     }
     
+    //--------------------------------------------------------------
     void setPausedSquence(bool b){
+        PlayerModel * model = appModel->getPlayerModel(playerID);
+        MovieInfo& currentMovie = model->getCurrentMovieInfo();
         bPausedSequence = b;
         setPaused(b);
+    }
+    
+    //--------------------------------------------------------------
+    bool getPausedSquence(){
+        return bPausedSequence;
     }
     
 protected:
@@ -473,7 +481,6 @@ protected:
     bool bCueTransition, bFinsished;
     
     ofxThreadedVideo video;
-    
     
 };
 
