@@ -44,7 +44,7 @@ void AppController::setup(){
      *****************************************************/
     
     appModel->load("config", ARCHIVE_BINARY);
-//    appModel->backup("config", ARCHIVE_BINARY);
+    appModel->backup("config", ARCHIVE_BINARY);
     
     appModel->removeAllProperties();
     
@@ -264,9 +264,9 @@ void AppController::keyPressed(ofKeyEventArgs & e){
         case ' ':
         {
             vector<int>& targetWindows = appModel->getWindowTargets();
-//            playController->makeSequence("MARTINW", random(targetWindows));
-            playController->makeSequence("BLADIMIRSL", random(targetWindows));
-            
+            playController->makeSequence("MARTINW", random(targetWindows));
+            playController->makeSequence("NATHALIES", random(targetWindows));
+            //appModel->listPlayerTemplates();
         }
             
             break;

@@ -217,6 +217,8 @@ void AnalyzeController::update(){
                             video.close();
                             eraseAt(fileNames, 0);
                             eraseAt(filePaths, 0);
+                            
+                            appModel->save("config", ARCHIVE_BINARY);
                         }
                         
                     }

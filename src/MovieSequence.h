@@ -90,8 +90,9 @@ public:
     
     void updatePosition(){
         if(currentSequenceFrame >= 0 && currentSequenceFrame < positions.size()){
-            currentMovie.position = positions[currentSequenceFrame];
-            currentMovie.bounding = boundings[currentSequenceFrame];
+            currentMovie.position   = spositions[currentSequenceFrame];
+            currentMovie.bounding   = sboundings[currentSequenceFrame];
+            currentMovie.centre     = scentres[currentSequenceFrame];
         }
         
     }
@@ -218,6 +219,7 @@ public:
         // copy positions/boundings
         spositions = positions;
         sboundings = boundings;
+        scentres = centres;
         
         // scale and transform the total bounding box
         stotalBounding = totalBounding;
@@ -230,6 +232,7 @@ public:
             spositions[i] = spositions[i] * scale + pNormal;
             sboundings[i].position = sboundings[i].position * scale + pNormal;
             sboundings[i].scale(scale);
+            scentres[i] = sboundings[i].getCenter();
             
         }
         
@@ -240,8 +243,11 @@ public:
         // set up temp store vars
         ofPoint     position;
         ofRectangle bounding;
+        ofPoint     centre;
+        
         ofPoint     sposition;
         ofRectangle sbounding;
+        ofPoint scentre;
         
         ofPoint mNormal;
         ofPoint lNormal = ofPoint(0,0,0);
@@ -254,8 +260,10 @@ public:
             // clear all the pos/bound storage
             positions.clear();
             boundings.clear();
+            centres.clear();
             spositions.clear();
             sboundings.clear();
+            scentres.clear();
             
 //        }else{
 //            ofxLogVerbose() << "Normalize Part Sequence: " << lastnormalindex << " < " << sequence.size() << endl;
@@ -278,10 +286,12 @@ public:
                 
                 // offset the bounding box by the position
                 bounding.position = bounding.position + position;
+                centre = bounding.getCenter();
                 
                 // store it
                 positions.push_back(position);
                 boundings.push_back(bounding);
+                centres.push_back(centre);
                 
                 // may as well calculate scaled
                 // pos/bounds while we're here
@@ -294,10 +304,12 @@ public:
                 sposition = sposition * scale + pNormal;
                 sbounding.position = sbounding.position * scale + pNormal;
                 sbounding.scale(scale);
+                scentre = sbounding.getCenter();
                 
                 // store 'em
                 spositions.push_back(sposition);
                 sboundings.push_back(sbounding);
+                scentres.push_back(scentre);
                 
                 // calculate a rectangle that would fit all the bounding boxes inside
                 if(i == 0 && j == 0) totalBounding = bounding;
@@ -338,6 +350,10 @@ public:
         return getScaledBoundingAt(currentSequenceFrame);
     }
     
+    ofPoint getScaledCentre(){
+        return getScaledCentreAt(currentSequenceFrame);
+    }
+    
     ofPoint& getScaledPositionAt(int sequenceFrame){
         sequenceFrame = CLAMP(sequenceFrame, 0, positions.size() - 1);
         return spositions[sequenceFrame];
@@ -348,12 +364,21 @@ public:
         return sboundings[sequenceFrame];
     }
     
+    ofPoint& getScaledCentreAt(int sequenceFrame){
+        sequenceFrame = CLAMP(sequenceFrame, 0, positions.size() - 1);
+        return scentres[sequenceFrame];
+    }
+    
     ofPoint& getPosition(){
         return getPositionAt(currentSequenceFrame);
     }
     
     ofRectangle& getBounding(){
         return getBoundingAt(currentSequenceFrame);
+    }
+    
+    ofPoint& getCentre(){
+        return getCentreAt(currentSequenceFrame);
     }
     
     ofPoint& getPositionAt(int sequenceFrame){
@@ -364,6 +389,11 @@ public:
     ofRectangle& getBoundingAt(int sequenceFrame){
         sequenceFrame = CLAMP(sequenceFrame, 0, positions.size() - 1);
         return boundings[sequenceFrame];
+    }
+    
+    ofPoint& getCentreAt(int sequenceFrame){
+        sequenceFrame = CLAMP(sequenceFrame, 0, positions.size() - 1);
+        return centres[sequenceFrame];
     }
     
     ofRectangle& getTotalBounding(){
@@ -431,8 +461,11 @@ protected:
     
     vector<ofPoint>     positions;
     vector<ofRectangle> boundings;
+    vector<ofPoint>     centres;
+    
     vector<ofPoint>     spositions;
     vector<ofRectangle> sboundings;
+    vector<ofPoint>     scentres;
     
     ofRectangle totalBounding;
     ofRectangle stotalBounding;

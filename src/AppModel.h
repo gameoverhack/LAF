@@ -22,6 +22,15 @@
 #include "MovieInfo.h"
 #include "ofxCv.h"
 
+typedef struct{
+    
+    int masterPlayer;
+    int slavePlayer;
+    int syncFrame;
+    int targetWindow;
+    
+} PlayerTargets;
+
 class AppModel : public BaseModel{
     
 public:
@@ -194,6 +203,13 @@ public:
     }
     
     //--------------------------------------------------------------
+    void listPlayerTemplates(){
+        for(map<string, PlayerModel>::iterator it = playerModels.begin(); it != playerModels.end(); ++it){
+            ofxLogNotice() << "Template: " << it->first << endl;
+        }
+    }
+    
+    //--------------------------------------------------------------
     string getRandomPlayerName(){
         int rSelect = (int)ofRandom(playerModels.size());
         int count = 0;
@@ -282,6 +298,8 @@ protected:
     
     vector<ofxThreadedVideo*>   videos;
     vector<MovieSequence*>      sequences;
+    
+    vector<PlayerTargets>   playertargets;
     
     set<int>                todelete;
     set<int>                assigned;

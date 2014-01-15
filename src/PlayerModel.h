@@ -204,13 +204,17 @@ public:
                     
                     string transition = m.getName();
                     
-                    cout << fileName << "  " << m << " == " << transition << endl;
+                    ostringstream os; os << fileName << "  " << m << " == " << transition;
+                    ofxLogVerbose() << "Adding to dictionaries: " << os.str() << endl;
                     
                     vector<string> & transitions = fileDictionary[fileName];
                     vector<string> & files = markDictionary[transition];
                     
                     transitions.push_back(transition);
-                    if(!contains(files, fileName)) files.push_back(fileName);
+                    if(!contains(files, fileName)){
+                        cout << "adding: " << fileName << endl;
+                        files.push_back(fileName);
+                    }
                 }
             }
         }
@@ -376,6 +380,11 @@ public:
         }
     }
 
+    void cunt(string name, string path){
+        playerName = name;
+        playerFolder = path + "/";
+    }
+    
 protected:
     
     vector<string> fileNames;

@@ -262,7 +262,7 @@
 		771C8CEE188065F800B7859B /* PlayerModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PlayerModel.h; sourceTree = "<group>"; };
 		779B7AF91860DE1A008B3D26 /* OpenCL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenCL.framework; path = ../../../../../../../System/Library/Frameworks/OpenCL.framework; sourceTree = "<group>"; };
 		77D988B118861798003926D4 /* MovieSequence.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MovieSequence.h; sourceTree = "<group>"; };
-		77DA2C4618808BEC004A5F5C /* LaughterForgettingDebug.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LaughterForgettingDebug.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		77DA2C4618808BEC004A5F5C /* LaughterForgetting.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = LaughterForgetting.app; path = /Users/gameover/Code/of007/apps/devDONOTDELETE/LaughterAndForgetting/bin/LaughterForgetting.app; sourceTree = "<absolute>"; };
 		77DA2C4718808DB9004A5F5C /* MovieInfo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MovieInfo.h; sourceTree = "<group>"; };
 		77DCBB001871E00E00EB911C /* VectorUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VectorUtils.h; sourceTree = "<group>"; };
 		77DCBB031871E30C00EB911C /* FileList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FileList.h; sourceTree = "<group>"; };
@@ -1215,7 +1215,6 @@
 				E4EEC9E9138DF44700A80321 /* openFrameworks */,
 				BB4B014C10F69532006C3DED /* addons */,
 				E45BE5980E8CC70C009D7055 /* frameworks */,
-				77DA2C4618808BEC004A5F5C /* LaughterForgettingDebug.app */,
 			);
 			sourceTree = "<group>";
 		};
@@ -1492,7 +1491,7 @@
 			);
 			name = LaughterForgetting;
 			productName = myOFApp;
-			productReference = 77DA2C4618808BEC004A5F5C /* LaughterForgettingDebug.app */;
+			productReference = 77DA2C4618808BEC004A5F5C /* LaughterForgetting.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */

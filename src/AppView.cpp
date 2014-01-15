@@ -191,13 +191,14 @@ void AppView::update(){
                     
                     ofSetColor(127, 0, 127);
                     ofRect(sequence->getScaledTotalBounding());
-                    
-                    
+
                     ofSetColor(127, 0, 0);
                     ofRect(sequence->getBounding());
+                    ofCircle(sequence->getCentre(), 4);
                     
                     ofSetColor(0, 127, 0);
                     ofRect(sequence->getScaledBounding());
+                    ofCircle(sequence->getScaledCentre(), 4);
                     
                 }
                 

@@ -63,7 +63,6 @@ void PlayController::update(){
         {
             vector<int>& targetWindows = appModel->getWindowTargets();
             makeSequence(appModel->getRandomPlayerName(), random(targetWindows));
-//            makeSequence("MARTINW", random(targetWindows));
             playControllerStates.setState(kPLAYCONTROLLER_PLAY);
         }
             break;
@@ -209,21 +208,29 @@ void PlayController::getPositionsForMovieSequence(MovieSequence* movieSequence, 
     
     PlayerModel& model = appModel->getPlayerTemplate(name);
     vector<MovieInfo>& sequence = movieSequence->getMovieSequence();
+    
     for(int i = 0; i < sequence.size(); i++){
+        
         MovieInfo& m = sequence[i];
         int totalframes = m.endframe - m.startframe;
         ostringstream os; os << m;
+        
         if(m.positions.size() == totalframes && m.boundings.size() == totalframes){
             ofxLogWarning() << "Assuming positions are the same for " << os.str() << endl;
             continue;
         }
+        
         ofxLogVerbose() << "Getting positions and boundings for " << os.str() << endl;
+        
         m.positions.resize(totalframes);
         m.boundings.resize(totalframes);
+        m.centres.resize(totalframes);
+        
         for(int f = 0; f < totalframes; f++){
             int frame = m.startframe + f;
             m.positions[f] = model.getKeyFrameAt(m.name, frame);
             m.boundings[f] = model.getBoundingAt(m.name, frame);
+            m.centres[f] = m.boundings[f].getCenter();
             
             if(f == 0) m.totalbounding = m.boundings[f];
             m.totalbounding.growToInclude(m.boundings[f]);
@@ -445,6 +452,7 @@ void PlayController::generateMotionsBetween(string m1, string m2, string name, v
     }
     
     map<string, vector<string> >& markDictionary = model.getMarkerDictionary();
+    
     std::random_shuffle(solutions.begin(), solutions.end());
     int shortest = INFINITY; int index = -1;
     for(int i = 0; i < solutions.size(); i++){
@@ -454,6 +462,7 @@ void PlayController::generateMotionsBetween(string m1, string m2, string name, v
             string sMotion = solutions[i][j - 1] + "_" + solutions[i][j];
             map<string, vector<string> >::iterator it = markDictionary.find(sMotion);
             if(it == markDictionary.end()){
+                //ofxLogError() << "Solution is not legal: " << sMotion << "   " << solutions[i] << endl;
                 legal = false;
                 break;
             }

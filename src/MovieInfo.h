@@ -33,10 +33,12 @@ public:
     int endframe = 0; // this is the end frame in the atual video
     float speed = 3.0;
     string markername = "";
-    ofRectangle bounding;
+    ofRectangle bounding = ofRectangle(0,0,0,0);
     ofPoint position = ofPoint(0,0,0);
+    ofPoint centre = ofPoint(0,0,0);
     vector<ofPoint> positions;
     vector<ofRectangle> boundings;
+    vector<ofPoint> centres;
     ofRectangle totalbounding;
 
 };
