@@ -10,10 +10,14 @@
 
 //--------------------------------------------------------------
 DebugView::DebugView(){
+    
     ofxLogNotice() << "Constructing DebugView" << endl;
     
-    StateGroup newDebugViewStates("DebugViewStates", false);
+    /******************************************************
+     *******                States                  *******
+     *****************************************************/
     
+    StateGroup newDebugViewStates("DebugViewStates", false);
     newDebugViewStates.addState(State(kDEBUGVIEW_SHOWINFO, "kDEBUGVIEW_SHOWINFO"));
     newDebugViewStates.addState(State(kDEBUGVIEW_SHOWSTATES, "kDEBUGVIEW_SHOWSTATES"));
     newDebugViewStates.addState(State(kDEBUGVIEW_SHOWPROPS, "kDEBUGVIEW_SHOWPROPS"));

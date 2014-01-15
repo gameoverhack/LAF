@@ -12,7 +12,10 @@
 AppView::AppView(){
     ofxLogNotice() << "Constructing AppView" << endl;
     
-    // register AppController states
+    /******************************************************
+     *******                States                  *******
+     *****************************************************/
+
     StateGroup newAppViewStates("AppViewStates", false);
     newAppViewStates.addState(State(kAPPVIEW_SHOWWINDOWS, "kAPPVIEW_SHOWWINDOWS"));
     newAppViewStates.addState(State(kAPPVIEW_SHOWPLAYERS, "kAPPVIEW_SHOWPLAYERS"));
@@ -21,10 +24,8 @@ AppView::AppView(){
     newAppViewStates.addState(State(kAPPVIEW_SHOWINFO, "kAPPVIEW_SHOWINFO"));
     newAppViewStates.addState(State(kAPPVIEW_SHOWWARP, "kAPPVIEW_SHOWWARP"));
     
-    // add them to the model
     appModel->addStateGroup(newAppViewStates);
     
-    // get them back from the model so that changes go live
     StateGroup & appViewStates = appModel->getStateGroup("AppViewStates");
     
     appViewStates.setState(kAPPVIEW_SHOWWINDOWS, false);
@@ -102,8 +103,6 @@ void AppView::update(){
     
     StateGroup & appViewStates = appModel->getStateGroup("AppViewStates");
     vector<ofRectangle> & windowPositions = appModel->getWindows();
-    vector<int> & playerIDS = appModel->getPlayerIDS();
-    
     
     begin();
     {
@@ -125,92 +124,35 @@ void AppView::update(){
 
         
         ofNoFill();
-        ofSetColor(255, 255, 255);
+        
         for(int i = 0; i < windowPositions.size(); i++){
-            
-            /******************************************************
-             *******            Draw WindowInfo             *******
-             *****************************************************/
+            ofSetColor(255, 255, 255);
             
             if(appViewStates.getState(kAPPVIEW_SHOWWINDOWS)){
+                
+                bool bIsTarget = appModel->isWindowTarget(i);
+                
                 ostringstream os;
-                os << i << ": " << windowPositions[i].x << ", " << windowPositions[i].y << ", " << windowPositions[i].width << ", " << windowPositions[i].height;
+                
+                os  << i
+                    << ": "
+                    << windowPositions[i].x << ", "
+                    << windowPositions[i].y << ", "
+                    << windowPositions[i].width << ", "
+                    << windowPositions[i].height;
+                
+                //if(bIsTarget) os << endl << appModel->getTargetGraph().getPossibleTransitions(ofToString(i));
+                
                 ofDrawBitmapString(os.str(), windowPositions[i].x, windowPositions[i].y - 14);
+                
+                if(bIsTarget){
+                    ofSetColor(255, 0, 255);
+                }else{
+                    ofSetColor(255, 255, 255);
+                }
             }
+            
             ofRect(windowPositions[i]);
-        }
-        
-        float distance, cFade, iFade, iSmal;
-        float threshold = 200.0f;
-        for(int i = 0; i < playerIDS.size(); i++){
-            
-            PlayerModel * playerModel = appModel->getPlayerModel(playerIDS[i]);
-            distance = playerModel->getDistanceToTarget() - 100.0f;
-            cFade = 127 * CLAMP((1.0 - distance / threshold), 0.0f, 1.0f);
-            iFade = 127 * CLAMP((      distance / threshold), 0.0f, 1.0f);
-            iSmal = 10  * CLAMP((      distance / threshold), 0.0f, 1.0f);
-
-            
-            /******************************************************
-             *******            Draw Centres                *******
-             *****************************************************/
-            
-            if(appViewStates.getState(kAPPVIEW_SHOWCENTRES)){
-                ofNoFill();
-                ofSetColor(iFade, 0, 0);
-                ofLine(playerModel->getPlayerCentre(), playerModel->getTargetCentre());
-            }
-            
-            /******************************************************
-             *******            Draw Rects                  *******
-             *****************************************************/
-            
-            if(appViewStates.getState(kAPPVIEW_SHOWRECTS)){
-                
-                ofNoFill();
-                ofSetColor(iFade, 0, 0);
-                
-                if(appModel->isIntersected(i)) ofFill();
-                
-                ofRect(playerModel->getBounding());
-                
-                ofNoFill();
-                vector<ofRectangle>& chainRects = playerModel->getNormalisedChainRects();
-                
-                int range = appModel->getProperty<int>("RectTrail");
-                int startFrame = MAX(playerModel->getPredictedFrameCurrent() - range, 0);
-                int endFrame = MIN(playerModel->getPredictedFrameCurrent() + range, chainRects.size());
-
-                for(int j = startFrame; j < endFrame; j++){
-                    if(j < playerModel->getPredictedFrameGoal()){
-                        ofSetColor(0, iSmal, iSmal);
-                    }else{
-                        ofSetColor(iSmal, iSmal, 0);
-                    }
-                    ofRect(chainRects[j]);
-                }
-                
-            }
-            
-            /******************************************************
-             *******            Draw TargetWindow           *******
-             *****************************************************/
-            
-            ofFill();
-            ofSetColor(cFade, cFade, cFade);
-            ofRect(playerModel->getTargetWindowRectangle());
-            
-            /******************************************************
-             *******            Draw Info                   *******
-             *****************************************************/
-            
-            if(appViewStates.getState(kAPPVIEW_SHOWINFO)){
-                ofSetColor(iFade, iFade, iFade);
-                if(appModel->hasProperty<string>("MovieInfo_" + ofToString(playerModel->getPlayerID()))){
-                    string info = appModel->getProperty<string>("MovieInfo_" + ofToString(playerModel->getPlayerID()));
-                    ofDrawBitmapString(info, playerModel->getPlayerCentre());
-                }
-            }
         }
         
         /******************************************************
@@ -219,49 +161,38 @@ void AppView::update(){
         
         if(appViewStates.getState(kAPPVIEW_SHOWPLAYERS)){
             
-            ofSetColor(255, 255, 255);
-            ofNoFill();
+            vector<MovieSequence*>& sequences = appModel->getSequences();
             
-            glPushAttrib(GL_ENABLE_BIT);
-            glEnable(GL_DEPTH_TEST);
-            glEnable(GL_CULL_FACE);
+            for(int i = 0; i < sequences.size(); i++){
+                
+                ofSetColor(255, 255, 255);
+                MovieSequence* sequence = sequences[i];
+                MovieInfo& currentMovie = sequence->getCurrentMovie();
+                ofxThreadedVideo* video = sequence->getVideo();
+                video->draw(sequence->getPosition().x, sequence->getPosition().y, video->getWidth(), video->getHeight());
+                video->draw(sequence->getScaledPosition().x, sequence->getScaledPosition().y, 200, 200);
+                ofRect(200, 200, 200, 200);
+                ofSetColor(0, 127, 127);
+                ofRect(sequence->getTotalBounding());
+                ofSetColor(127, 0, 127);
+                ofRect(sequence->getScaledTotalBounding());
+                /******************************************************
+                 *******              Draw Rects                *******
+                 *****************************************************/
+                
+                if(appViewStates.getState(kAPPVIEW_SHOWRECTS)){
 
-            for(int i = 0; i < playerIDS.size(); i++){
-
-                PlayerModel * playerModel = appModel->getPlayerModel(playerIDS[i]);
-                PlayerView * playerView = appModel->getPlayerView(playerIDS[i]);
+                    ofNoFill();
+                    ofSetColor(127, 0, 0);
+                    ofRect(sequence->getBounding());
+                    
+                    ofSetColor(0, 127, 0);
+                    ofRect(sequence->getScaledBounding());
+                    
+                }
                 
-                glPushMatrix();
-                
-                glTranslatef(-playerModel->getFloorOffset().x, -playerModel->getFloorOffset().y, -playerModel->getFloorOffset().z);
-                glTranslatef(playerModel->getPosition().x, playerModel->getPosition().y, playerModel->getPosition().z);
-                glScalef(playerModel->getDrawScale(), playerModel->getDrawScale(), 1.0f);
-                
-                playerView->drawParticles();
-                
-                glPopMatrix();
             }
             
-            glPopAttrib();
-            
-            for(int i = 0; i < appModel->getNumPlayerModels(); i++){
-                
-                PlayerModel * playerModel = appModel->getPlayerModel(playerIDS[i]);
-                PlayerView * playerView = appModel->getPlayerView(playerIDS[i]);
-                
-                glPushMatrix();
-                
-                glTranslatef(-playerModel->getFloorOffset().x, -playerModel->getFloorOffset().y, -playerModel->getFloorOffset().z);
-                glTranslatef(playerModel->getPosition().x, playerModel->getPosition().y, playerModel->getPosition().z);
-                glScalef(playerModel->getDrawScale(), playerModel->getDrawScale(), 1.0f);
-                
-                playerView->drawImage();
-                
-                glPopMatrix();
-            }
-            
-            glDisable(GL_DEPTH_TEST);
-            glDisable(GL_CULL_FACE);
         }
         
         ofDisableBlendMode();

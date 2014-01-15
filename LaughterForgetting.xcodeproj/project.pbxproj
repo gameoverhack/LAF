@@ -261,6 +261,7 @@
 		771C8CEB18805D4F00B7859B /* PlayController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlayController.h; sourceTree = "<group>"; };
 		771C8CEE188065F800B7859B /* PlayerModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PlayerModel.h; sourceTree = "<group>"; };
 		779B7AF91860DE1A008B3D26 /* OpenCL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenCL.framework; path = ../../../../../../../System/Library/Frameworks/OpenCL.framework; sourceTree = "<group>"; };
+		77D988B118861798003926D4 /* MovieSequence.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MovieSequence.h; sourceTree = "<group>"; };
 		77DA2C4618808BEC004A5F5C /* LaughterForgettingDebug.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LaughterForgettingDebug.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		77DA2C4718808DB9004A5F5C /* MovieInfo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MovieInfo.h; sourceTree = "<group>"; };
 		77DCBB001871E00E00EB911C /* VectorUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VectorUtils.h; sourceTree = "<group>"; };
@@ -295,7 +296,6 @@
 		77DCBB2A1871E37700EB911C /* libboost_unit_test_framework-xgcc42-mt-1_46_1.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "libboost_unit_test_framework-xgcc42-mt-1_46_1.a"; sourceTree = "<group>"; };
 		77DCBB2B1871E37700EB911C /* libboost_wave-xgcc42-mt-1_46_1.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "libboost_wave-xgcc42-mt-1_46_1.a"; sourceTree = "<group>"; };
 		77DCBB2C1871E37700EB911C /* libboost_wserialization-xgcc42-mt-1_46_1.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "libboost_wserialization-xgcc42-mt-1_46_1.a"; sourceTree = "<group>"; };
-		77DCDC14187233C300EB911C /* Player.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Player.h; sourceTree = "<group>"; };
 		77E63E9818771D020003A224 /* AppModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppModel.h; sourceTree = "<group>"; };
 		77EBC7641870E66700D86F91 /* libXMPCoreStatic.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libXMPCoreStatic.a; sourceTree = "<group>"; };
 		77EBC7651870E66700D86F91 /* libXMPFilesStatic.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libXMPFilesStatic.a; sourceTree = "<group>"; };
@@ -906,6 +906,7 @@
 		7701FDD0187F48C70092EDD9 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				771C8CEE188065F800B7859B /* PlayerModel.h */,
 				77E63E9818771D020003A224 /* AppModel.h */,
 			);
 			name = Models;
@@ -914,8 +915,8 @@
 		7701FDD1187F48D20092EDD9 /* DataTypes */ = {
 			isa = PBXGroup;
 			children = (
-				77EF15EB187758B900104A92 /* Player */,
 				77DA2C4718808DB9004A5F5C /* MovieInfo.h */,
+				77D988B118861798003926D4 /* MovieSequence.h */,
 				77EF15EC187760AB00104A92 /* MotionGraph.h */,
 				7701FDD7187F49750092EDD9 /* AppStates.h */,
 			);
@@ -942,6 +943,7 @@
 				7701FDDE18804A3F0092EDD9 /* DebugView.h */,
 				7701FDD8187F49EE0092EDD9 /* AppView.cpp */,
 				7701FDD9187F49EE0092EDD9 /* AppView.h */,
+				77EBC7691871C82400D86F91 /* PlayerView.h */,
 			);
 			name = Views;
 			sourceTree = "<group>";
@@ -1044,16 +1046,6 @@
 				7701FDD0187F48C70092EDD9 /* Models */,
 			);
 			name = MVC;
-			sourceTree = "<group>";
-		};
-		77EF15EB187758B900104A92 /* Player */ = {
-			isa = PBXGroup;
-			children = (
-				77DCDC14187233C300EB911C /* Player.h */,
-				771C8CEE188065F800B7859B /* PlayerModel.h */,
-				77EBC7691871C82400D86F91 /* PlayerView.h */,
-			);
-			name = Player;
 			sourceTree = "<group>";
 		};
 		7cc1e591490db083fb916812f5aab5cb /* CLD */ = {

@@ -20,46 +20,45 @@ public:
     }
     
     ~MovieInfo(){
-        predictedPosition.clear();
-        possibleTransitions.clear();
-        impossibleTransitions.clear();
-        intersectionFrames.clear();
+        positions.clear();
+        boundings.clear();
     }
     
-    friend ostream& operator<< (ostream &os, MovieInfo &mi);
+    friend ostream& operator<< (ostream &os, MovieInfo &mI);
     
     string name = "";
     string path = "";
-    int frame = 0;
-    int startframe = 0;
-    int genframe = 0;
-    int totalframes = 0;
-    float speed = 2.0;
-    bool isFrameNew = false;
-    bool isMovieDirty = true;
-    string motion = "";
+    int frame = 0; // this is the frame within the loop (ie, 0 == startframe)
+    int startframe = 0; // this is the start frame in the actual video
+    int endframe = 0; // this is the end frame in the atual video
+    float speed = 3.0;
+    string markername = "";
     ofRectangle bounding;
     ofPoint position = ofPoint(0,0,0);
-    vector<ofPoint> predictedPosition;
-    vector<ofRectangle> predictedBounding;
-    vector<MovieInfo> possibleTransitions;
-    vector<MovieInfo> impossibleTransitions;
-    bool intersectedTransition = false;
-    vector<int> intersectionFrames;
-    
+    vector<ofPoint> positions;
+    vector<ofRectangle> boundings;
+    ofRectangle totalbounding;
+
 };
 
+//inline bool operator==(const MovieInfo& lhs, const MovieInfo& rhs){ /* do actual comparison */ }
+//inline bool operator< (const MovieInfo& lhs, const MovieInfo& rhs){ /* do actual comparison */ }
+//inline bool operator!=(const MovieInfo& lhs, const MovieInfo& rhs){return !operator==(lhs,rhs);}
+//inline bool operator> (const MovieInfo& lhs, const MovieInfo& rhs){return  operator< (rhs,lhs);}
+//inline bool operator<=(const MovieInfo& lhs, const MovieInfo& rhs){return !operator> (lhs,rhs);}
+//inline bool operator>=(const MovieInfo& lhs, const MovieInfo& rhs){return !operator< (lhs,rhs);}
 
-inline ostream& operator<<(ostream& os, MovieInfo &mi){
-    os  << mi.name << " "
-        << mi.motion << " "
-        << mi.bounding << " ("
-        << mi.possibleTransitions.size() << ", "
-        << mi.impossibleTransitions.size() << ") ["
-        << mi.startframe << ", "
-        << mi.genframe << "] "
-        << mi.frame;
+inline ostream& operator<<(ostream& os, MovieInfo &mI){
+    os  << mI.markername << " "
+        << mI.name << " "
+        << mI.bounding << " ["
+        << mI.startframe << " -> "
+        << mI.endframe << "] "
+        << mI.frame;
     return os;
 };
-
+   
+    
+static MovieInfo NoMovie;
+    
 #endif

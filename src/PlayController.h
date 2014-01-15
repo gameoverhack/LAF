@@ -10,7 +10,6 @@
 #define __H_PLAYCONTROLLER
 
 #include "BaseController.h"
-#include "Player.h"
 #include "AppModel.h"
 
 class PlayController : public BaseController {
@@ -23,14 +22,13 @@ public:
     void setup();
     void update();
     
-    void createPlayer(string name);
-    vector<Player*>& getPlayers();
-    vector<int>& getMasters();
+    void makeSequence(string name, int window);
     
 protected:
-	
-    vector<Player*>   players;
-    vector<int>       masters;
+    
+    void getPositionsForMovieSequence(MovieSequence* movieSequence, string name);
+    void generateMoviesFromMotions(vector<string>& motionSequence, MovieSequence* movieSequence, string name);
+    void generateMotionsBetween(string m1, string m2, string name, vector<string>& motionSequence, bool bForward = true);
     
 private:
 	

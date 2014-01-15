@@ -141,6 +141,11 @@ inline vector<T> arrayToVec(T * a, int size){
 //}
 
 template<typename T>
+inline T random(vector<T>& v){
+    return v[(int)ofRandom(v.size())];
+};
+        
+template<typename T>
 inline T getRandomElementFromDistribution(vector<float>& distribution, vector<T>& elements, int precision = 100){
     assert(distribution.size() == elements.size());
     float sumdistributions = 0;

@@ -23,20 +23,19 @@ void AnalyzeController::setup(){
     
     ofxLogVerbose() << "Setting Up AnalyzeController" << endl;
     
-    // register AppController states
+    /******************************************************
+     *******                States                  *******
+     *****************************************************/
+
     StateGroup newAnalyzeControllerStates("AnalyzeControllerStates");
     newAnalyzeControllerStates.addState(State(kANALYZECONTROLER_LOAD, "kANALYZECONTROLER_LOAD"));
     newAnalyzeControllerStates.addState(State(kANALYZECONTROLER_ANALYZE, "kANALYZECONTROLER_ANALYZE"));
     newAnalyzeControllerStates.addState(State(kANALYZECONTROLER_DONE, "kANALYZECONTROLER_DONE"));
     
-    // add them to the model
     appModel->addStateGroup(newAnalyzeControllerStates);
     
-    // get them back from the model so that changes go live
     StateGroup & analyzeControllerStates = appModel->getStateGroup("AnalyzeControllerStates");
     
-    appModel->setProperty("AnalysePlayers", 0);
-    appModel->setProperty("AnalyseName", (string)"");
     analyzeControllerStates.setState(kANALYZECONTROLER_LOAD);
     
 }
@@ -137,7 +136,7 @@ void AnalyzeController::update(){
                         appModel->setProperty("AnalysisFrameT", video.getTotalNumFrames());
                         
                         // make sure we clear any data for this movies rect frames
-                        map<string, vector<ofRectangle> >& rectFrames = m.getRectFrames();
+                        map<string, vector<ofRectangle> >& rectFrames = m.getBoundingFrames();
                         vector<ofRectangle> & rects = rectFrames[fileName];
                         
                         bool checkRects = false;
@@ -206,7 +205,7 @@ void AnalyzeController::update(){
                             }
                             
                             // store the frame rect in the player model
-                            map<string, vector<ofRectangle> >& rectFrames = m.getRectFrames();
+                            map<string, vector<ofRectangle> >& rectFrames = m.getBoundingFrames();
                             rectFrames[fileName].push_back(r);
                             //cout << rectFrames[fileName].size() << " " << video.getCurrentFrame() << " " << analysisFrame << endl;
                             
@@ -241,9 +240,7 @@ void AnalyzeController::update(){
                     analyzeControllerStates.setState(kANALYZECONTROLER_DONE);
                 }
             }
-            
-            
-            
+
         }
             break;
         case kANALYZECONTROLER_DONE:
