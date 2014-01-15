@@ -73,7 +73,7 @@ public:
         }
         
         // check if we're done TODO: reverse
-        if(currentMovie.frame + currentMovie.startframe >= currentMovie.endframe) loadNextMovie();
+        if(currentMovie.frame + currentMovie.startframe >= currentMovie.endframe - 1) loadNextMovie();
         
     }
     
