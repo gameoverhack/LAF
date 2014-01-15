@@ -187,6 +187,7 @@ public:
             xmp.setup();
             xmp.setNormaliseMarkers(true);
             xmp.setAllowDoubles(true);
+            xmp.setRemoveCarriageReturns(true);
             xmp.loadXMP(filePath);
             xmp.listMarkers();
             //xmp.dumpDynamicMetaData();

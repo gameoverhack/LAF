@@ -62,7 +62,8 @@ void PlayController::update(){
         case kPLAYCONTROLLER_MAKE:
         {
             vector<int>& targetWindows = appModel->getWindowTargets();
-            makeSequence("MARTINW", random(targetWindows));
+            makeSequence(appModel->getRandomPlayerName(), random(targetWindows));
+//            makeSequence("MARTINW", random(targetWindows));
             playControllerStates.setState(kPLAYCONTROLLER_PLAY);
         }
             break;
@@ -72,7 +73,7 @@ void PlayController::update(){
             for(int i = 0; i < sequences.size(); i++){
                 MovieSequence* sequence = sequences[i];
                 sequence->update();
-                if(sequence->getCurrentSequenceFrame() >= sequence->getTotalSequenceFrames()) appModel->markPlayerForDeletion(i);
+                if(sequence->isSequequenceDone()) appModel->markPlayerForDeletion(i);
                 ostringstream os;
                 os << sequence << endl;
                 appModel->setProperty("MovieInfo_" + ofToString(i), os.str());
@@ -196,6 +197,8 @@ void PlayController::makeSequence(string name, int window){
     
     ofxLogVerbose() << "Adding MovieSequence" << movieSequence->getMovieSequenceAsString() << endl;
     ofxLogVerbose() << "E(nd) Motion: " << emotion << endl;
+    
+    movieSequence->setSpeed(ofRandom(1.0, 3.0));
     
     appModel->addSequence(movieSequence);
     movieSequence->play();

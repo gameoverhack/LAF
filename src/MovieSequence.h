@@ -57,6 +57,10 @@ public:
             return;
         }
         
+        if(video->getSpeed() != speed){
+            video->setSpeed(speed);
+        }
+        
         if(bPaused) return;
         
         if(video->isFrameNew()){
@@ -71,9 +75,9 @@ public:
             //updateRender();
             
         }
-        
+
         // check if we're done TODO: reverse
-        if(currentMovie.frame + currentMovie.startframe >= currentMovie.endframe - 1) loadNextMovie();
+        if(video->getIsMovieDone() || currentMovie.frame + currentMovie.startframe >= currentMovie.endframe) loadNextMovie();
         
     }
     
@@ -133,6 +137,19 @@ public:
     void stop(){
         ofxLogVerbose() << "Stop Sequence" << endl;
         setPaused(true);
+    }
+    
+    bool isSequequenceDone(){
+        if(video == NULL) return false;
+        return (getCurrentSequenceFrame() >= getTotalSequenceFrames());
+    }
+    
+    void setSpeed(float s){
+        speed = s;
+    }
+    
+    float getSpeed(){
+        return speed;
     }
     
     void setPaused(bool b){
@@ -251,7 +268,7 @@ public:
             // store an offset based on first
             // frame of keyframes in this movie/loop
             MovieInfo& m = sequence[i];
-            mNormal = m.positions[0];
+            mNormal = m.positions[1]; //TODO check this first frame issue!!!
             
             for(int j = 0; j < m.positions.size(); j++){
                 
@@ -357,8 +374,6 @@ public:
         return stotalBounding;
     }
     
-    friend ostream& operator<< (ostream &os, MovieSequence &mS);
-    
     vector<MovieInfo>& getMovieSequence(){
         return sequence;
     }
@@ -391,8 +406,11 @@ public:
         return sequence.size();
     }
     
+    friend ostream& operator<< (ostream &os, MovieSequence &mS);
+    
 protected:
     
+    float speed;
     bool bPaused;
     int viewID;
     

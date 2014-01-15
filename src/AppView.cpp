@@ -50,10 +50,10 @@ void AppView::resetCamera(){
     cout << cam.getX() << " " << cam.getY() << " " << cam.getZ() << " " << cam.getRoll() << " " << cam.getPitch() << " " << cam.getHeading() << endl;
     cam.enableMouseInput();
     cam.resetTransform();
-    cam.setPosition(0, 0, 0);
-//    cam.setPosition(0, 5.02717e-05, -575.041);
+//    cam.setPosition(0, 0, 0);
+    cam.setPosition(0, 5.02717e-05, -575.041);
     setCameraOrtho(appModel->getProperty<bool>("Ortho"));
-    //cam.tilt(180);
+    cam.tilt(180);
     cam.setTranslationKey('z');
     cout << cam.getX() << " " << cam.getY() << " " << cam.getZ() << " " << cam.getRoll() << " " << cam.getPitch() << " " << cam.getHeading() << endl;
 }
@@ -83,6 +83,10 @@ void AppView::update(){
     
     StateGroup & analyzeControllerStates = appModel->getStateGroup("AnalyzeControllerStates");
 
+    /******************************************************
+     *******                Analysis                *******
+     *****************************************************/
+    
     if(analyzeControllerStates.getState(kANALYZECONTROLER_ANALYZE)){
         ofVideoPlayer & analysisVideo = appModel->getAnalysisVideo();
         ofRectangle & analysisRectangle = appModel->getAnalysisRectangle();
@@ -111,7 +115,7 @@ void AppView::update(){
         cam.begin();
         
         if(cam.getOrtho()){
-//            ofTranslate(0, -ofGetHeight());
+            ofTranslate(0, -ofGetHeight());
         }else{
             ofTranslate(-ofGetWidth() / 2.0, -ofGetHeight() / 2.0);
         }
@@ -165,24 +169,30 @@ void AppView::update(){
             
             for(int i = 0; i < sequences.size(); i++){
                 
+                ofNoFill();
                 ofSetColor(255, 255, 255);
+                
                 MovieSequence* sequence = sequences[i];
                 MovieInfo& currentMovie = sequence->getCurrentMovie();
                 ofxThreadedVideo* video = sequence->getVideo();
-                video->draw(sequence->getPosition().x, sequence->getPosition().y, video->getWidth(), video->getHeight());
+                
                 video->draw(sequence->getScaledPosition().x, sequence->getScaledPosition().y, 200, 200);
-                ofRect(200, 200, 200, 200);
-                ofSetColor(0, 127, 127);
-                ofRect(sequence->getTotalBounding());
-                ofSetColor(127, 0, 127);
-                ofRect(sequence->getScaledTotalBounding());
+                
                 /******************************************************
                  *******              Draw Rects                *******
                  *****************************************************/
                 
                 if(appViewStates.getState(kAPPVIEW_SHOWRECTS)){
 
-                    ofNoFill();
+                    video->draw(sequence->getPosition().x, sequence->getPosition().y, video->getWidth(), video->getHeight());
+                    
+                    ofSetColor(0, 127, 127);
+                    ofRect(sequence->getTotalBounding());
+                    
+                    ofSetColor(127, 0, 127);
+                    ofRect(sequence->getScaledTotalBounding());
+                    
+                    
                     ofSetColor(127, 0, 0);
                     ofRect(sequence->getBounding());
                     

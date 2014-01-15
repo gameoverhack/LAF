@@ -105,7 +105,7 @@ void AppController::setup(){
     appView = new AppView();
     appView->setup(appModel->getProperty<float>("OutputWidth"),
                    appModel->getProperty<float>("OutputHeight"),
-                   ViewOption(VIEW_USE_FBO),
+                   ViewOption(), //VIEW_USE_FBO
                    (string)"output");
     
     // make a debug window
@@ -264,7 +264,8 @@ void AppController::keyPressed(ofKeyEventArgs & e){
         case ' ':
         {
             vector<int>& targetWindows = appModel->getWindowTargets();
-            playController->makeSequence("MARTINW", random(targetWindows));
+//            playController->makeSequence("MARTINW", random(targetWindows));
+            playController->makeSequence("BLADIMIRSL", random(targetWindows));
             
         }
             

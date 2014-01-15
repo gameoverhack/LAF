@@ -194,6 +194,16 @@ public:
     }
     
     //--------------------------------------------------------------
+    string getRandomPlayerName(){
+        int rSelect = (int)ofRandom(playerModels.size());
+        int count = 0;
+        for(map<string, PlayerModel>::iterator it = playerModels.begin(); it != playerModels.end(); ++it){
+            if(rSelect == count) return it->first;
+            count++;
+        }
+    }
+    
+    //--------------------------------------------------------------
     map<string, PlayerModel>& getPlayerTemplates(){
         return playerModels;
     }
