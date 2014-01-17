@@ -65,6 +65,7 @@
 		77DCDBEA1871E39000EB911C /* libboost_unit_test_framework-xgcc42-mt-1_46_1.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 77DCBB2A1871E37700EB911C /* libboost_unit_test_framework-xgcc42-mt-1_46_1.a */; };
 		77DCDBEB1871E39000EB911C /* libboost_wave-xgcc42-mt-1_46_1.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 77DCBB2B1871E37700EB911C /* libboost_wave-xgcc42-mt-1_46_1.a */; };
 		77DCDBEC1871E39000EB911C /* libboost_wserialization-xgcc42-mt-1_46_1.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 77DCBB2C1871E37700EB911C /* libboost_wserialization-xgcc42-mt-1_46_1.a */; };
+		77E953C71889C96100B96537 /* KeyModifiers.mm in Sources */ = {isa = PBXBuildFile; fileRef = 77E953C61889C96100B96537 /* KeyModifiers.mm */; };
 		77EBC7661870E66700D86F91 /* libXMPCoreStatic.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 77EBC7641870E66700D86F91 /* libXMPCoreStatic.a */; };
 		77EBC7671870E66700D86F91 /* libXMPFilesStatic.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 77EBC7651870E66700D86F91 /* libXMPFilesStatic.a */; };
 		7cdad32be4fa46701e3552c7b6b91e58 /* RunningBackground.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5cbf6aed6a17ac0c17f63cc4b079b0b9 /* RunningBackground.cpp */; };
@@ -296,6 +297,9 @@
 		77DCBB2B1871E37700EB911C /* libboost_wave-xgcc42-mt-1_46_1.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "libboost_wave-xgcc42-mt-1_46_1.a"; sourceTree = "<group>"; };
 		77DCBB2C1871E37700EB911C /* libboost_wserialization-xgcc42-mt-1_46_1.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "libboost_wserialization-xgcc42-mt-1_46_1.a"; sourceTree = "<group>"; };
 		77E63E9818771D020003A224 /* AppModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppModel.h; sourceTree = "<group>"; };
+		77E953C51889C96100B96537 /* KeyModifiers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KeyModifiers.h; sourceTree = "<group>"; };
+		77E953C61889C96100B96537 /* KeyModifiers.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = KeyModifiers.mm; sourceTree = "<group>"; };
+		77E953C81889C98200B96537 /* MouseObj.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MouseObj.h; sourceTree = "<group>"; };
 		77EBC7641870E66700D86F91 /* libXMPCoreStatic.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libXMPCoreStatic.a; sourceTree = "<group>"; };
 		77EBC7651870E66700D86F91 /* libXMPFilesStatic.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libXMPFilesStatic.a; sourceTree = "<group>"; };
 		77EBC7691871C82400D86F91 /* PlayerView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PlayerView.h; sourceTree = "<group>"; };
@@ -915,6 +919,7 @@
 		7701FDD1187F48D20092EDD9 /* DataTypes */ = {
 			isa = PBXGroup;
 			children = (
+				77E953C81889C98200B96537 /* MouseObj.h */,
 				77DA2C4718808DB9004A5F5C /* MovieInfo.h */,
 				77D988B118861798003926D4 /* MovieSequence.h */,
 				77EF15EC187760AB00104A92 /* MotionGraph.h */,
@@ -1016,6 +1021,16 @@
 				77DCBB2C1871E37700EB911C /* libboost_wserialization-xgcc42-mt-1_46_1.a */,
 			);
 			path = mac;
+			sourceTree = "<group>";
+		};
+		77E953C41889C96100B96537 /* ofxKeyModifiers */ = {
+			isa = PBXGroup;
+			children = (
+				77E953C51889C96100B96537 /* KeyModifiers.h */,
+				77E953C61889C96100B96537 /* KeyModifiers.mm */,
+			);
+			name = ofxKeyModifiers;
+			path = ../../../addons/ofxKeyModifiers;
 			sourceTree = "<group>";
 		};
 		77EBC7631870E66700D86F91 /* lib */ = {
@@ -1140,6 +1155,7 @@
 		BB4B014C10F69532006C3DED /* addons */ = {
 			isa = PBXGroup;
 			children = (
+				77E953C41889C96100B96537 /* ofxKeyModifiers */,
 				77DCBB191871E37700EB911C /* ofxBoost */,
 				77DCBB041871E36B00EB911C /* ofxMVC */,
 				6333ac77801c53e62b8a0dc86b0e211e /* ofxBezierWarp */,
@@ -1627,6 +1643,7 @@
 				7701FDDF18804A3F0092EDD9 /* DebugView.cpp in Sources */,
 				771C8CE918805D4300B7859B /* AnalyzeController.cpp in Sources */,
 				771C8CEC18805D4F00B7859B /* PlayController.cpp in Sources */,
+				77E953C71889C96100B96537 /* KeyModifiers.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

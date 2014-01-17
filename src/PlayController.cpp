@@ -98,7 +98,6 @@ void PlayController::update(){
                 appModel->markPlayerForDeletion(sequence->getViewID());
             }
             appModel->deleteMarkedPlayers();
-            playControllerStates.setState(kPLAYCONTROLLER_MAKE);
         }
             break;
     }

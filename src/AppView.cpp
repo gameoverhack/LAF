@@ -23,6 +23,7 @@ AppView::AppView(){
     newAppViewStates.addState(State(kAPPVIEW_SHOWCENTRES, "kAPPVIEW_SHOWCENTRES"));
     newAppViewStates.addState(State(kAPPVIEW_SHOWINFO, "kAPPVIEW_SHOWINFO"));
     newAppViewStates.addState(State(kAPPVIEW_SHOWWARP, "kAPPVIEW_SHOWWARP"));
+    newAppViewStates.addState(State(kAPPVIEW_MAKEWINDOWS, "kAPPVIEW_MAKEWINDOWS"));
     
     appModel->addStateGroup(newAppViewStates);
     
@@ -34,6 +35,7 @@ AppView::AppView(){
     appViewStates.setState(kAPPVIEW_SHOWCENTRES, true);
     appViewStates.setState(kAPPVIEW_SHOWINFO, true);
     appViewStates.setState(kAPPVIEW_SHOWWARP, false);
+    appViewStates.setState(kAPPVIEW_MAKEWINDOWS, false);
     
     resetCamera();
     
@@ -111,6 +113,14 @@ void AppView::update(){
     }
     
     StateGroup & appViewStates = appModel->getStateGroup("AppViewStates");
+    
+    
+    if(appViewStates.getState(kAPPVIEW_MAKEWINDOWS)){
+        
+        
+        return;
+    }
+    
     vector<ofRectangle> & windowPositions = appModel->getWindows();
     
     begin();

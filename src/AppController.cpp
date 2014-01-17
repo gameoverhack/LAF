@@ -34,6 +34,7 @@ void AppController::setup(){
     StateGroup newAppControllerStates("AppControllerStates");
     newAppControllerStates.addState(State(kAPPCONTROLLER_INIT, "kAPPCONTROLLER_INIT"));
     newAppControllerStates.addState(State(kAPPCONTROLLER_PLAY, "kAPPCONTROLLER_PLAY"));
+    newAppControllerStates.addState(State(kAPPCONTROLLER_MAKEWINDOWS, "kAPPCONTROLLER_MAKEWINDOWS"));
     
     appModel->addStateGroup(newAppControllerStates);
     
@@ -160,6 +161,7 @@ void AppController::update(){
     
     StateGroup & appControllerStates = appModel->getStateGroup("AppControllerStates");
     StateGroup & analyzeControllerStates = appModel->getStateGroup("AnalyzeControllerStates");
+    StateGroup & playControllerStates = appModel->getStateGroup("PlayControllerStates");
     
     switch (appControllerStates.getState()) {
             
@@ -167,6 +169,11 @@ void AppController::update(){
         {
             analyzeController->update();
             if(analyzeControllerStates.getState(kANALYZECONTROLER_DONE)) appControllerStates.setState(kAPPCONTROLLER_PLAY);
+        }
+            break;
+        case kAPPCONTROLLER_MAKEWINDOWS:
+        {
+            playController->update();
         }
             break;
         case kAPPCONTROLLER_PLAY:
@@ -183,7 +190,7 @@ void AppController::draw(){
     
     StateGroup & debugViewStates = appModel->getStateGroup("DebugViewStates");
     StateGroup & appControllerStates = appModel->getStateGroup("AppControllerStates");
-//    StateGroup & playControllerStates = appModel->getStateGroup("PlayControllerStates");
+    StateGroup & playControllerStates = appModel->getStateGroup("PlayControllerStates");
     
     appView->update();
     
@@ -195,6 +202,7 @@ void AppController::draw(){
             // nothing to do
         }
             break;
+        case kAPPCONTROLLER_MAKEWINDOWS:
         case kAPPCONTROLLER_PLAY:
         {
             ofEnableBlendMode(OF_BLENDMODE_SCREEN);
@@ -223,6 +231,7 @@ void AppController::keyPressed(ofKeyEventArgs & e){
     StateGroup & debugViewStates = appModel->getStateGroup("DebugViewStates");
     StateGroup & appViewStates = appModel->getStateGroup("AppViewStates");
     StateGroup & playControllerStates = appModel->getStateGroup("PlayControllerStates");
+    StateGroup & appControllerStates = appModel->getStateGroup("AppControllerStates");
     
     switch(e.key) {
         case 'd':
@@ -270,9 +279,7 @@ void AppController::keyPressed(ofKeyEventArgs & e){
         case ' ':
         {
             playControllerStates.setState(kPLAYCONTROLLER_STOP);
-            //vector<int>& targetWindows = appModel->getWindowTargets();
-            //if(appModel->getSequences().size() < appModel->getProperty<int>("NumberPlayers")) playController->makeSequence(appModel->getRandomPlayerName(), random(targetWindows));
-            //appModel->listPlayerTemplates();
+            playControllerStates.setState(kPLAYCONTROLLER_MAKE);
         }
             
             break;
@@ -285,12 +292,18 @@ void AppController::keyPressed(ofKeyEventArgs & e){
         {
             appModel->stopHereo();
         }
-            
-            
             break;
         case 'x':
         {
-            playControllerStates.setState(kPLAYCONTROLLER_MAKE);
+            if(appControllerStates.getState(kAPPCONTROLLER_PLAY)){
+                appViewStates.setState(kAPPVIEW_MAKEWINDOWS, true);
+                playControllerStates.setState(kPLAYCONTROLLER_STOP);
+                appControllerStates.setState(kAPPCONTROLLER_MAKEWINDOWS);
+            }else{
+                appViewStates.setState(kAPPVIEW_MAKEWINDOWS, false);
+                playControllerStates.setState(kPLAYCONTROLLER_MAKE);
+                appControllerStates.setState(kAPPCONTROLLER_PLAY);
+            }
         }
             break;
 //        case OF_KEY_LEFT:
