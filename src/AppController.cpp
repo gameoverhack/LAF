@@ -92,6 +92,8 @@ void AppController::setup(){
     appModel->setProperty("DistanceThreshold", 200.0f);
     appModel->setProperty("FadeTime", 5);
     appModel->setProperty("SyncTime", 2);
+    appModel->setProperty("HeroTime", 80000);
+    appModel->setProperty("HeroFade", 10000);
     
     ofxLogSetLogToFile(appModel->getProperty<bool>("LogToFile"), ofToDataPath("log_" + ofGetTimestampString() + ".log"));
     
@@ -196,9 +198,10 @@ void AppController::draw(){
         case kAPPCONTROLLER_PLAY:
         {
             ofEnableBlendMode(OF_BLENDMODE_SCREEN);
-                
-                appView->draw();
-            
+
+
+            appView->draw();
+
         }
             break;
     }
@@ -264,11 +267,6 @@ void AppController::keyPressed(ofKeyEventArgs & e){
             appModel->setProperty("AutoGenerate", !bAuto);
         }
             break;
-        case 'n':
-        {
-            
-        }
-            break;
         case ' ':
         {
             playControllerStates.setState(kPLAYCONTROLLER_STOP);
@@ -278,9 +276,14 @@ void AppController::keyPressed(ofKeyEventArgs & e){
         }
             
             break;
+        case 'n':
+        {
+            appModel->activateHero();
+        }
+            break;
         case 'm':
         {
-            
+            appModel->stopHereo();
         }
             
             

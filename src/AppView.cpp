@@ -128,6 +128,37 @@ void AppView::update(){
         ofEnableBlendMode(OF_BLENDMODE_SCREEN);
         
         /******************************************************
+         *******              Draw Heros                *******
+         *****************************************************/
+        
+        ofxThreadedVideo* hero = appModel->getCurrentHeroVideo();
+        
+        float iY = 1.0f;
+        
+        if(hero != NULL){
+            
+            hero->update();
+            
+            float fY = hero->getFade() * hero->getHeight();
+            float dY = (hero->getHeight() - fY) / 2.0;
+            float cY = hero->getFade()*255;
+            iY = (1 - hero->getFade());
+            
+            ofNoFill();
+            ofSetColor(cY, cY, cY);
+            
+            
+            hero->getTextureReference().drawSubsection(0, dY, hero->getWidth(), fY, 0, dY);
+            ofRect(1, dY + 1, hero->getWidth() - 2, fY - 2);
+            
+            if(hero->getIsMovieDone() && hero->getQueueSize() == 0){
+                appModel->stopHereo();
+                appModel->resetHeroTimer();
+            }
+            
+        }
+        
+        /******************************************************
          *******            Draw Windows                *******
          *****************************************************/
 
@@ -135,7 +166,7 @@ void AppView::update(){
         ofNoFill();
         
         for(int i = 0; i < windowPositions.size(); i++){
-            ofSetColor(255, 255, 255);
+            ofSetColor(255 * iY, 255 * iY, 255 * iY);
             
             if(appViewStates.getState(kAPPVIEW_SHOWWINDOWS)){
                 
@@ -251,12 +282,12 @@ void AppView::update(){
  
             
             
-            sFade = 255 * CLAMP((      pct1), 0.0f, 1.0f);
-            bFade = 255 * CLAMP((      pct4), 0.0f, 1.0f);
-            cFade = 127 * CLAMP((1.0 - pct3), 0.0f, 1.0f);
-            iFade = 127 * CLAMP((      pct2), 0.0f, 1.0f);
-            tFade = 127 * CLAMP((      pct5), 0.0f, 1.0f);
-            iSmal = 8   * CLAMP((      pct2), 0.0f, 1.0f);
+            sFade = 255 * CLAMP((      pct1), 0.0f, 1.0f) * iY;
+            bFade = 255 * CLAMP((      pct4), 0.0f, 1.0f) * iY;
+            cFade = 127 * CLAMP((1.0 - pct3), 0.0f, 1.0f) * iY;
+            iFade = 127 * CLAMP((      pct2), 0.0f, 1.0f) * iY;
+            tFade = 127 * CLAMP((      pct5), 0.0f, 1.0f) * iY;
+            iSmal = 8   * CLAMP((      pct2), 0.0f, 1.0f) * iY;
 
             
             windowFades[sequence->getWindow()].cFade += cFade;

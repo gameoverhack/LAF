@@ -37,6 +37,7 @@ public:
     
     AppModel(){
         //BaseModel::BaseModel();
+        herovideoindex = -1;
     }
     
     ~AppModel(){
@@ -302,7 +303,91 @@ public:
         return sequences;
     }
     
+    //--------------------------------------------------------------
+    void addHeroVideo(string path){
+        ofxLogNotice() << "Loading hero video: " << path << endl;
+        ofxThreadedVideo* v = new ofxThreadedVideo;
+        v->setPixelFormat(OF_PIXELS_BGRA);
+        v->loadMovie(path);
+        v->play();
+        v->setFade(0.0f);
+        v->setPaused(true);
+        v->setLoopState(OF_LOOP_NONE);
+        v->finish();
+        v->setFade(0, getProperty<int>("HeroFade"), 1.0f);
+        v->setFade(-1, getProperty<int>("HeroFade"), 0.0f);
+        herovideos.push_back(v);
+    }
+    
+    //--------------------------------------------------------------
+    vector<ofxThreadedVideo*>& getHeroVideos(){
+        return herovideos;
+    }
+    
+    void stopHereo(){
+        if(herovideoindex > -1){
+            ofxLogNotice() << "Stopping (stop) hero: " << herovideoindex << endl;
+            herovideos[herovideoindex]->setFade(0.0f);
+            herovideos[herovideoindex]->setPaused(true);
+        }
+        herovideoindex = -1;
+    }
+    
+    void activateHero(){
+        if(herovideos.size() > 0){
+            
+            if(herovideoindex > -1){
+                ofxLogNotice() << "Stopping (activate) hero: " << herovideoindex << endl;
+                herovideos[herovideoindex]->setFade(0.0f);
+                herovideos[herovideoindex]->setPaused(true);
+            }
+            herovideoindex = (int)ofRandom(herovideos.size());
+            ofxLogNotice() << "Activating hero: " << herovideoindex << endl;
+            herovideos[herovideoindex]->setFrame(0);
+            herovideos[herovideoindex]->setPaused(false);
+        }
+    }
+    
+    int getActiveHero(){
+        return herovideoindex;
+    }
+    
+    ofxThreadedVideo* getCurrentHeroVideo(){
+        if(herovideoindex != -1 && herovideos.size() > 0){
+            return herovideos[herovideoindex];
+        }else{
+            return NULL;
+        }
+    }
+    
+    void resetHeroTimer(){
+        heroStartTime = ofGetElapsedTimeMillis();
+        heroStopTime = ofRandom(getProperty<int>("HeroTime"), 2 * getProperty<int>("HeroTime"));
+        ofxLogNotice() << "Setting Hero Time for: " << heroStopTime << " milliseconds from now" << endl;
+    }
+    
+    void stopHeroTimer(){
+        heroStartTime = INFINITY;
+    }
+    
+    bool checkHeroTimer(){
+        if(heroStartTime + heroStopTime < ofGetElapsedTimeMillis()){
+            ofxLogNotice() << "Activate Hero Video" << endl;
+            stopHeroTimer();
+            return true;
+        }else{
+            setProperty("HeroTrigger", string(ofToString(heroStartTime + heroStopTime) + " -> " + ofToString(ofGetElapsedTimeMillis())));
+            return false;
+        }
+    }
+    
 protected:
+    
+    int                         heroStartTime;
+    int                         heroStopTime;
+    
+    vector<ofxThreadedVideo*>   herovideos;
+    int                         herovideoindex;
     
     vector<ofxThreadedVideo*>   videos;
     vector<MovieSequence*>      sequences;

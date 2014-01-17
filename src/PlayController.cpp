@@ -53,6 +53,8 @@ void PlayController::update(){
         {
             ofxLogNotice() << "PLAYCONTROLLER INIT" << endl;
             
+            appModel->resetHeroTimer();
+            
             // make the player views
             appModel->createPlayerViews(appModel->getProperty<int>("NumberPlayers"));
             
@@ -70,6 +72,7 @@ void PlayController::update(){
             break;
         case kPLAYCONTROLLER_PLAY:
         {
+            if(appModel->checkHeroTimer()) appModel->activateHero();
             vector<MovieSequence*>& sequences = appModel->getSequences();
             for(int i = 0; i < sequences.size(); i++){
                 MovieSequence* sequence = sequences[i];

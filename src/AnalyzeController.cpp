@@ -60,12 +60,12 @@ void AnalyzeController::update(){
                 
                 for(int i = 0; i < mediaDirectory.size(); i++){
                     
+                    string name = mediaDirectory.getFile(i).getFileName();
+                    string path = mediaDirectory.getFile(i).getAbsolutePath();
+                    
                     // if it's a directory we assume this is media for a player
                     if(mediaDirectory.getFile(i).isDirectory()){
-                        
-                        string name = mediaDirectory.getFile(i).getFileName();
-                        string path = mediaDirectory.getFile(i).getAbsolutePath();
-                        
+
                         ofxLogNotice() << "Initializing model for " << name << endl;
                         
                         // get/create a template model for this player
@@ -82,6 +82,11 @@ void AnalyzeController::update(){
                             if(appModel->getProperty<bool>("CheckXMP")) m.loadKeyXMP();
                             appModel->setProperty("AnalyseName", (string)name); // just setting here to init for analysis
                             appModel->setProperty("AnalysePlayers", appModel->getProperty<int>("AnalysePlayers") + 1);
+                        }
+                    }else{
+                        if(name.rfind("mov") != string::npos){
+                            ofxLogNotice() << "Loading hero video for " << name << endl;
+                            appModel->addHeroVideo(path);
                         }
                     }
                 }
