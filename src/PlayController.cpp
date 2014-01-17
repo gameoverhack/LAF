@@ -61,8 +61,10 @@ void PlayController::update(){
             break;
         case kPLAYCONTROLLER_MAKE:
         {
-            vector<int>& targetWindows = appModel->getWindowTargets();
-            makeSequence(appModel->getRandomPlayerName(), random(targetWindows));
+            if(appModel->getProperty<bool>("AutoGenerate")){
+                vector<int>& targetWindows = appModel->getWindowTargets();
+                makeSequence(appModel->getRandomPlayerName(), random(targetWindows));
+            }
             playControllerStates.setState(kPLAYCONTROLLER_PLAY);
         }
             break;
@@ -72,21 +74,28 @@ void PlayController::update(){
             for(int i = 0; i < sequences.size(); i++){
                 MovieSequence* sequence = sequences[i];
                 sequence->update();
-                if(sequence->isSequequenceDone()) appModel->markPlayerForDeletion(i);
+                if(sequence->isSequequenceDone()) appModel->markPlayerForDeletion(sequence->getViewID());
                 ostringstream os;
                 os << sequence << endl;
-                appModel->setProperty("MovieInfo_" + ofToString(i), os.str());
+                appModel->setProperty("MovieInfo_" + ofToString(sequence->getViewID()), os.str());
             }
             
             appModel->deleteMarkedPlayers();
             
-            if(sequences.size() < appModel->getProperty<int>("NumberPlayers")) playControllerStates.setState(kPLAYCONTROLLER_MAKE);
+            if(sequences.size() < appModel->getProperty<int>("NumberPlayers") &&
+               appModel->getProperty<bool>("AutoGenerate")) playControllerStates.setState(kPLAYCONTROLLER_MAKE);
             
         }
             break;
         case kPLAYCONTROLLER_STOP:
         {
-            
+            vector<MovieSequence*>& sequences = appModel->getSequences();
+            for(int i = 0; i < sequences.size(); i++){
+                MovieSequence* sequence = sequences[i];
+                appModel->markPlayerForDeletion(sequence->getViewID());
+            }
+            appModel->deleteMarkedPlayers();
+            playControllerStates.setState(kPLAYCONTROLLER_MAKE);
         }
             break;
     }
@@ -100,6 +109,7 @@ void PlayController::makeSequence(string name, int window){
     
     // get the players model
     PlayerModel& model = appModel->getPlayerTemplate(name);
+    map<string, ofxXMP>& xmp = model.getXMP();
     
     // get the possible approach motions for this window
     vector<string>& transitions = appModel->getGraph("TargetGraph").getPossibleTransitions(ofToString(window));
@@ -115,6 +125,7 @@ void PlayController::makeSequence(string name, int window){
     
     // create a new MovieSequence
     MovieSequence* movieSequence = new MovieSequence;
+    movieSequence->setWindow(window);
     movieSequence->push(model.getFirstMovie());
     movieSequence->setNormalPosition(ofPoint(0,0,0));
     movieSequence->setNormalScale(scale); // TODO: store scale on the PlayerModel?
@@ -170,11 +181,23 @@ void PlayController::makeSequence(string name, int window){
     getPositionsForMovieSequence(movieSequence, name);
     movieSequence->normalise();
     
+    // calculate target and syncframes
+    MovieInfo& lastMovieInSequence = movieSequence->getLastMovieInSequence();
+    int goalFrame = movieSequence->getTotalSequenceFrames() - 1;
+    int syncFrame = goalFrame - lastMovieInSequence.startframe + xmp[lastMovieInSequence.name].getMarker(motionSequence[motionSequence.size() - 1]).getStartFrame();
+    
+    movieSequence->setGoalFrame(goalFrame - lastMovieInSequence.endframe - lastMovieInSequence.startframe);
+    movieSequence->setSyncFrame(syncFrame);
+    
     ofPoint floorOffset = movieSequence->getScaledFloorOffset();
     ofPoint targetPosition = ofPoint(windowPositions[window].x + windowPositions[window].width / 2.0, windowPositions[window].y, 0.0f);
-    ofPoint finalSequencePosition = targetPosition - movieSequence->getScaledPositionAt(movieSequence->getTotalSequenceFrames() - 1) - floorOffset;
+    ofPoint finalSequencePosition = targetPosition - movieSequence->getScaledPositionAt(goalFrame) - floorOffset;
     
     if(emotion == "HUGG_FRNT"){
+        
+        movieSequence->setHug(true);
+        
+        // reverse the motion to get back out
         motionSequence.clear();
         motionSequence.push_back("STND_FRNT");
         
@@ -185,10 +208,12 @@ void PlayController::makeSequence(string name, int window){
         if(direction == "UPPP") reversemotion = action + "_DOWN";
         
         generateMotionsBetween("STND_FRNT", reversemotion, name, motionSequence);
-        for(int i = 0; i < inserts; i++) motionSequence.push_back(reversemotion);
+        for(int i = 0; i < inserts + 2; i++) motionSequence.push_back(reversemotion);
         
         generateMoviesFromMotions(motionSequence, movieSequence, name);
         getPositionsForMovieSequence(movieSequence, name);
+    }else{
+        movieSequence->setHug(false);
     }
 
     movieSequence->setNormalPosition(finalSequencePosition);
@@ -201,44 +226,6 @@ void PlayController::makeSequence(string name, int window){
     
     appModel->addSequence(movieSequence);
     movieSequence->play();
-}
-
-//--------------------------------------------------------------
-void PlayController::getPositionsForMovieSequence(MovieSequence* movieSequence, string name){
-    
-    PlayerModel& model = appModel->getPlayerTemplate(name);
-    vector<MovieInfo>& sequence = movieSequence->getMovieSequence();
-    
-    for(int i = 0; i < sequence.size(); i++){
-        
-        MovieInfo& m = sequence[i];
-        int totalframes = m.endframe - m.startframe;
-        ostringstream os; os << m;
-        
-        if(m.positions.size() == totalframes && m.boundings.size() == totalframes){
-            ofxLogWarning() << "Assuming positions are the same for " << os.str() << endl;
-            continue;
-        }
-        
-        ofxLogVerbose() << "Getting positions and boundings for " << os.str() << endl;
-        
-        m.positions.resize(totalframes);
-        m.boundings.resize(totalframes);
-        m.centres.resize(totalframes);
-        
-        for(int f = 0; f < totalframes; f++){
-            int frame = m.startframe + f;
-            m.positions[f] = model.getKeyFrameAt(m.name, frame);
-            m.boundings[f] = model.getBoundingAt(m.name, frame);
-            m.centres[f] = m.boundings[f].getCenter();
-            
-            if(f == 0) m.totalbounding = m.boundings[f];
-            m.totalbounding.growToInclude(m.boundings[f]);
-            
-        }
-        
-    }
- 
 }
 
 //--------------------------------------------------------------
@@ -325,6 +312,42 @@ void PlayController::generateMoviesFromMotions(vector<string>& motionSequence, M
         
     }
     
+}
+
+//--------------------------------------------------------------
+void PlayController::getPositionsForMovieSequence(MovieSequence* movieSequence, string name){
+    
+    PlayerModel& model = appModel->getPlayerTemplate(name);
+    vector<MovieInfo>& sequence = movieSequence->getMovieSequence();
+    
+    for(int i = 0; i < sequence.size(); i++){
+        
+        MovieInfo& m = sequence[i];
+        int totalframes = m.endframe - m.startframe;
+        ostringstream os; os << m;
+        
+        if(m.positions.size() == totalframes && m.boundings.size() == totalframes){
+            ofxLogWarning() << "Assuming positions are the same for " << os.str() << endl;
+            continue;
+        }
+        
+        ofxLogVerbose() << "Getting positions and boundings for " << os.str() << endl;
+        
+        m.positions.resize(totalframes);
+        m.boundings.resize(totalframes);
+        m.centres.resize(totalframes);
+        
+        for(int f = 0; f < totalframes; f++){
+            int frame = m.startframe + f;
+            m.positions[f] = model.getKeyFrameAt(m.name, frame);
+            m.boundings[f] = model.getBoundingAt(m.name, frame);
+            m.centres[f] = m.boundings[f].getCenter();
+            
+            if(f == 0) m.totalbounding = m.boundings[f];
+            m.totalbounding.growToInclude(m.boundings[f]);
+            
+        }
+    }
 }
 
 //--------------------------------------------------------------

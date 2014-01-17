@@ -47,6 +47,11 @@ AppView::~AppView(){
 //--------------------------------------------------------------
 void AppView::resetCamera(){
     
+    videoFBOBig.allocate(appModel->getProperty<float>("VideoWidth"), appModel->getProperty<float>("VideoHeight"));
+    videoFBOSmall.allocate(appModel->getProperty<float>("DrawSize"), appModel->getProperty<float>("DrawSize"));
+    
+    windowFades.resize(appModel->getWindows().size());
+    
     cout << cam.getX() << " " << cam.getY() << " " << cam.getZ() << " " << cam.getRoll() << " " << cam.getPitch() << " " << cam.getHeading() << endl;
     cam.enableMouseInput();
     cam.resetTransform();
@@ -160,50 +165,195 @@ void AppView::update(){
         }
         
         /******************************************************
-         *******            Draw Players                *******
+         *******            Draw Sequences              *******
          *****************************************************/
         
-        if(appViewStates.getState(kAPPVIEW_SHOWPLAYERS)){
+        
             
-            vector<MovieSequence*>& sequences = appModel->getSequences();
+        vector<MovieSequence*>& sequences = appModel->getSequences();
+        
+        for(int i = 0; i < sequences.size(); i++){
             
-            for(int i = 0; i < sequences.size(); i++){
+            ofNoFill();
+            ofSetColor(255, 255, 255);
+            
+            MovieSequence* sequence = sequences[i];
+            MovieInfo& currentMovie = sequence->getCurrentMovie();
+            ofxThreadedVideo* video = sequence->getVideo();
+            
+            /******************************************************
+             *******            Calculate Fades             *******
+             *****************************************************/
+            
+            // TODO: this is all a terrible mess -> should be a cue system a la ofxThreadedVideoFade...but on the sequence...grrrr...
+            
+            // centres
+            ofRectangle& windowRect = windowPositions[sequence->getWindow()];
+            ofPoint wC = windowRect.getCenter(); // need to cache?
+            float distance = sequence->getScaledCentre().distance(wC);
+            float maxDistance = sequence->getScaledCentreAt(1).distance(wC);
+            
+            float pct1 = 1.0f;
+            float pct2 = 1.0f;
+            float pct3 = 1.0f;
+            float pct4 = 1.0f;
+            float pct5 = 1.0f;
+            float sFade = 0.0f;
+            float bFade = 0.0f;
+            float cFade = 0.0f;
+            float iFade = 0.0f;
+            float tFade = 0.0f;
+            float iSmal = 0.0f;
+            float framesFromStart = (25.0f * appModel->getProperty<int>("FadeTime") * sequence->getSpeed());
+            float framesFromEnd = sequence->getTotalSequenceFrames() - (25.0f * appModel->getProperty<int>("FadeTime") * sequence->getSpeed());
+            float framesFromSync = sequence->getSyncFrame() - (25.0f * appModel->getProperty<int>("SyncTime") * sequence->getSpeed());
+            
+            if(sequence->getCurrentSequenceFrame() < framesFromStart){
                 
-                ofNoFill();
-                ofSetColor(255, 255, 255);
+                pct1 = ( (float)sequence->getCurrentSequenceFrame() / framesFromStart );
+                pct2 = pct1;
+                pct3 = 1.0f;
+                pct5 = pct1;
+                //cout << i << " start " << pct1 << "  " << "   " << pct2 << "   " << pct3 << "   " << pct4 << "   " << pct5 << endl;
+            }
+            
+            if(sequence->getCurrentSequenceFrame() >= framesFromEnd){
                 
-                MovieSequence* sequence = sequences[i];
-                MovieInfo& currentMovie = sequence->getCurrentMovie();
-                ofxThreadedVideo* video = sequence->getVideo();
+                pct1 = (float)(sequence->getTotalSequenceFrames() - sequence->getCurrentSequenceFrame()) / (sequence->getTotalSequenceFrames() - framesFromEnd);
+                pct2 = pct1;
+                pct3 = 1.0f;
+                //cout << i << " end  " << pct1 << "  " << "   " << pct2 << "   " << pct3 << "   " << pct4 << "   " << pct5 << endl;
                 
-                video->draw(sequence->getScaledPosition().x, sequence->getScaledPosition().y, 200, 200);
+                if(!sequence->getHug()){
+                    pct3 = 1.0 - pct1;
+                    pct2 = 0.0f;
+                    pct1 = 1.0f;
+                }
+            }
+
+            if(sequence->getCurrentSequenceFrame() > framesFromStart && sequence->getCurrentSequenceFrame() < framesFromEnd){
+                
+                pct5 = pct3 = pct2 = ((distance - 200) / (maxDistance / 2.0) );
+                //cout << i << " dist " << pct1 << "  " << "   " << pct2 << "   " << pct3 << "   " << pct4 << "   " << pct5 << endl;
+            }
+            
+            if(sequence->getCurrentSequenceFrame() >= framesFromSync){
+                
+                pct4 = (float)(sequence->getSyncFrame() - sequence->getCurrentSequenceFrame()) / (sequence->getSyncFrame() - framesFromSync);
+                pct5 = 0.0f;
+                //cout << i << " sync " << pct1 << "  " << "   " << pct2 << "   " << pct3 << "   " << pct4 << "   " << pct5 << endl;
+                
+            }else{
+                
+                pct4 = pct1;
+                //cout << i << " synb " << pct1 << "  " << "   " << pct2 << "   " << pct3 << "   " << pct4 << "   " << pct5 << endl;
+            }
+ 
+            
+            
+            sFade = 255 * CLAMP((      pct1), 0.0f, 1.0f);
+            bFade = 255 * CLAMP((      pct4), 0.0f, 1.0f);
+            cFade = 127 * CLAMP((1.0 - pct3), 0.0f, 1.0f);
+            iFade = 127 * CLAMP((      pct2), 0.0f, 1.0f);
+            tFade = 127 * CLAMP((      pct5), 0.0f, 1.0f);
+            iSmal = 8   * CLAMP((      pct2), 0.0f, 1.0f);
+
+            
+            windowFades[sequence->getWindow()].cFade += cFade;
+            windowFades[sequence->getWindow()].numPlayers ++;
+            
+            /******************************************************
+             *******            Small Draw Players          *******
+             *****************************************************/
+            
+            videoFBOSmall.begin();
+            {
+                ofClear(0, 0, 0);
+                video->draw(0, 0, video->getWidth() * sequence->getNormalScale(), video->getHeight() * sequence->getNormalScale());
+            }
+            videoFBOSmall.end();
+            
+            ofSetColor(sFade, sFade, sFade);
+            videoFBOSmall.draw(sequence->getScaledPosition().x, sequence->getScaledPosition().y);
+            
+            if(appViewStates.getState(kAPPVIEW_SHOWPLAYERS)){
                 
                 /******************************************************
-                 *******              Draw Rects                *******
+                 *******            Big Draw Players            *******
                  *****************************************************/
                 
-                if(appViewStates.getState(kAPPVIEW_SHOWRECTS)){
+                videoFBOBig.begin();
+                {
+                    ofClear(0, 0, 0, 0);
+                    video->draw(0, 0, video->getWidth(), video->getHeight());
+                }
+                videoFBOBig.end();
 
-                    video->draw(sequence->getPosition().x, sequence->getPosition().y, video->getWidth(), video->getHeight());
-                    
-                    ofSetColor(0, 127, 127);
-                    ofRect(sequence->getTotalBounding());
-                    
-                    ofSetColor(127, 0, 127);
-                    ofRect(sequence->getScaledTotalBounding());
+                ofSetColor(bFade, bFade, bFade);
+                videoFBOBig.draw(sequence->getPosition().x, sequence->getPosition().y);
+            }
+            
+            /******************************************************
+             *******              Draw Rects                *******
+             *****************************************************/
+            
+            if(appViewStates.getState(kAPPVIEW_SHOWRECTS)){
 
-                    ofSetColor(127, 0, 0);
-                    ofRect(sequence->getBounding());
-                    ofCircle(sequence->getCentre(), 4);
-                    
-                    ofSetColor(0, 127, 0);
-                    ofRect(sequence->getScaledBounding());
-                    ofCircle(sequence->getScaledCentre(), 4);
-                    
+                // window
+//                ofFill();
+//                ofSetColor(cFade, cFade, cFade);
+//                ofRect(windowRect);
+                ofNoFill();
+                
+                //big player bounding etc
+                ofSetColor(0, tFade, tFade);
+                ofRect(sequence->getTotalBounding());
+//
+//                ofSetColor(fFade / 2.0, 0, 0);
+//                ofRect(sequence->getBounding());
+//                ofCircle(sequence->getCentre(), 4);
+                
+                
+                
+                // small player bounding etc
+                ofSetColor(iFade * 2, 0, 0);
+                ofRect(sequence->getScaledBounding());
+                ofCircle(sequence->getScaledCentre(), 4);
+                
+                ofSetColor(0, iFade, 0);
+                ofLine(sequence->getScaledCentre(), wC);
+                
+                ofSetColor(iFade, 0, iFade / 1.5);
+                ofRect(sequence->getScaledTotalBounding());
+                
+                int range = appModel->getProperty<int>("RectTrail");
+                int startFrame = MAX(sequence->getCurrentSequenceFrame() - range, 0);
+                int endFrame = MIN(sequence->getCurrentSequenceFrame() + range, sequence->getTotalSequenceFrames());
+                
+                for(int j = startFrame; j < endFrame; j++){
+                    ofSetColor(0, iSmal, iSmal);
+                    ofRect(sequence->getScaledBoundingAt(j));
+                    //ofRect(sequence->getBoundingAt(j));
                 }
                 
             }
+
+        }
+        
+        for(int i = 0; i < windowFades.size(); i++){
+            ofRectangle& windowRect = windowPositions[i];
             
+            if(windowFades[i].numPlayers > 0){
+                
+                float cFade = windowFades[i].cFade / (float)windowFades[i].numPlayers;
+//                cout << i << " " << windowFades[i].cFade << " " << windowFades[i].numPlayers << " " << cFade << endl;
+                
+                ofFill();
+                ofSetColor(cFade, cFade, cFade);
+                ofRect(windowRect);
+                ofNoFill();
+            }
+            windowFades[i].cFade = windowFades[i].numPlayers = 0;
         }
         
         ofDisableBlendMode();

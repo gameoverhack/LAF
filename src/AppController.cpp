@@ -63,7 +63,7 @@ void AppController::setup(){
     appModel->setProperty("Ortho", true);
     
     appModel->setProperty("MediaPath", (string)"/Users/gameover/Desktop/LOTE/TESTRENDERS/media");
-    appModel->setProperty("NumberPlayers", 30);
+    appModel->setProperty("NumberPlayers", 14);
     appModel->setProperty("RectTrail", 200);
 
     appModel->setProperty("ForceFileListUpdate", false);
@@ -87,6 +87,11 @@ void AppController::setup(){
     
     appModel->setProperty("AnalysePlayers", 0);
     appModel->setProperty("AnalyseName", (string)"");
+    
+    appModel->setProperty("AutoGenerate", true);
+    appModel->setProperty("DistanceThreshold", 200.0f);
+    appModel->setProperty("FadeTime", 5);
+    appModel->setProperty("SyncTime", 2);
     
     ofxLogSetLogToFile(appModel->getProperty<bool>("LogToFile"), ofToDataPath("log_" + ofGetTimestampString() + ".log"));
     
@@ -239,7 +244,10 @@ void AppController::keyPressed(ofKeyEventArgs & e){
             appViewStates.toggleState(kAPPVIEW_SHOWINFO);
             appViewStates.toggleState(kAPPVIEW_SHOWCENTRES);
             break;
-        case 'a':
+        case 'b':
+            appViewStates.toggleState(kAPPVIEW_SHOWPLAYERS);
+            break;
+        case 'e':
             if(appModel->getProperty<int>("RectTrail") == 200){
                 appModel->setProperty("RectTrail", 1000000);
             }else{
@@ -250,10 +258,10 @@ void AppController::keyPressed(ofKeyEventArgs & e){
         case 'o':
             appView->toggleCameraOrtho();
             break;
-        case 'b':
+        case 'a':
         {
-
-            
+            bool bAuto = appModel->getProperty<bool>("AutoGenerate");
+            appModel->setProperty("AutoGenerate", !bAuto);
         }
             break;
         case 'n':
@@ -263,9 +271,9 @@ void AppController::keyPressed(ofKeyEventArgs & e){
             break;
         case ' ':
         {
-            vector<int>& targetWindows = appModel->getWindowTargets();
-            playController->makeSequence("MARTINW", random(targetWindows));
-            playController->makeSequence("NATHALIES", random(targetWindows));
+            playControllerStates.setState(kPLAYCONTROLLER_STOP);
+            //vector<int>& targetWindows = appModel->getWindowTargets();
+            //if(appModel->getSequences().size() < appModel->getProperty<int>("NumberPlayers")) playController->makeSequence(appModel->getRandomPlayerName(), random(targetWindows));
             //appModel->listPlayerTemplates();
         }
             

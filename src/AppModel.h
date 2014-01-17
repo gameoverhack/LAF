@@ -258,14 +258,22 @@ public:
         if(todelete.size() == 0) return;
         ofxLogNotice() << "Deleting Marked Players" << endl;
         for(set<int>::iterator it = todelete.begin(); it != todelete.end(); ++it){
-            int index = *it;
-            ofxLogVerbose() << "Deleting Marked Player: " << index << endl;
-            MovieSequence* movieSequence = sequences[index];
-            assigned.erase(assigned.find(movieSequence->getViewID()));
-            movieSequence->getVideo()->close();
-            movieSequence->clear();
-            delete movieSequence;
+            int viewID = *it; int index;
+            ofxLogVerbose() << "Deleting Marked Player: " << viewID << endl;
+            MovieSequence* movieSequence;
+            for(int i = 0; i < sequences.size(); i++){
+                movieSequence = sequences[i];
+                if(movieSequence->getViewID() == viewID){
+                    delete movieSequence;
+                    index = i;
+                    break;
+                }
+            }
+            assigned.erase(assigned.find(viewID));
+            string prop = "MovieInfo_" + ofToString(viewID);
+            if(hasProperty<string>(prop)) removeProperty<string>(prop);
             eraseAt(sequences, index);
+            
         }
         todelete.clear();
     }

@@ -12,6 +12,13 @@
 #include "AppModel.h"
 #include "BaseView.h"
 
+typedef struct{
+    
+    float cFade;
+    int numPlayers;
+    
+} WindowFades;
+
 class AppView : public BaseView{
     
 public:
@@ -28,6 +35,10 @@ public:
 protected:
 	
     ofEasyCam cam;
+    ofFbo videoFBOBig;
+    ofFbo videoFBOSmall;
+    
+    vector<WindowFades> windowFades;
     
 };
 

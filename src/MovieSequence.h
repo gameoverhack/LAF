@@ -52,10 +52,10 @@ public:
         if(video->getQueueSize() > 0) return;
         
         // make sure the video paused state is the same as the sequence
-        if(video->isPaused() != bPaused){
-            video->setPaused(bPaused);
-            return;
-        }
+//        if(video->isPaused() != bPaused){
+//            video->setPaused(bPaused);
+//            return;
+//        }
         
         if(video->getSpeed() != speed){
             video->setSpeed(speed);
@@ -77,7 +77,7 @@ public:
         }
 
         // check if we're done TODO: reverse
-        if(video->getIsMovieDone() || currentMovie.frame + currentMovie.startframe >= currentMovie.endframe) loadNextMovie();
+        if((video->getIsMovieDone()) || currentMovie.frame + currentMovie.startframe >= currentMovie.endframe) loadNextMovie();
         
     }
     
@@ -97,17 +97,19 @@ public:
         
     }
     
-    void loadNextMovie(){
+    void loadNextMovie(int frameSeek = 0){
         
         ofxLogVerbose() << "Loading next movie: " << currentSequenceIndex << " -> " << currentSequenceIndex + 1 << " of " << sequence.size() << endl;
         
         // increment sequenceIndex TODO: reverse
         if(currentSequenceIndex + 1 < sequence.size()){
+            bSequenceIsDone = false;
             currentSequenceIndex++;
         }
         else{
             // TODO: add loop?
             //currentSequenceIndex = 0;
+            bSequenceIsDone = true;
             stop();
             return;
         }
@@ -122,7 +124,7 @@ public:
         }else{
             ofxLogVerbose() << "Loading same movie: " << nextMovie.name << " " << nextMovie.startframe << endl;
         }
-        video->setFrame(nextMovie.startframe);
+        video->setFrame(nextMovie.startframe + frameSeek);
         video->setSpeed(nextMovie.speed);
         
         currentMovie = nextMovie;
@@ -132,6 +134,7 @@ public:
     void play(){
         ofxLogVerbose() << "Play Sequence" << endl;
         setPaused(false);
+        bSequenceIsDone = false;
         loadNextMovie();
     }
     
@@ -141,8 +144,19 @@ public:
     }
     
     bool isSequequenceDone(){
-        if(video == NULL) return false;
-        return (getCurrentSequenceFrame() >= getTotalSequenceFrames());
+        return bSequenceIsDone;
+    }
+    
+    void setFrame(int f){
+        int frameSeek = f;
+        for(int i = 0; i < sequenceFrames.size() - 1; i++){
+            frameSeek += sequenceFrames[i];
+            if(f > sequenceFrames[i] && f < sequenceFrames[i + 1]){
+                currentSequenceIndex = i - 1;
+                loadNextMovie(frameSeek);
+            }
+        }
+        
     }
     
     void setSpeed(float s){
@@ -156,6 +170,7 @@ public:
     void setPaused(bool b){
         ofxLogVerbose() << "Pause Sequence: " << b << endl;
         bPaused = b;
+        if(video->isPlaying()) video->setPaused(bPaused);
     }
     
     bool isPlaying(){
@@ -342,7 +357,7 @@ public:
         return sequence[sequence.size() - 1];
     }
     
-    ofPoint getScaledPosition(){
+    ofPoint& getScaledPosition(){
         return getScaledPositionAt(currentSequenceFrame);
     }
     
@@ -350,7 +365,7 @@ public:
         return getScaledBoundingAt(currentSequenceFrame);
     }
     
-    ofPoint getScaledCentre(){
+    ofPoint& getScaledCentre(){
         return getScaledCentreAt(currentSequenceFrame);
     }
     
@@ -438,10 +453,52 @@ public:
     
     friend ostream& operator<< (ostream &os, MovieSequence &mS);
     
+    //============================== \/ these shoudl be track elsewhere or in a class via member/inheritance \/
+    
+    void setGoalFrame(int f){
+        gframe = f;
+    }
+    
+    int getGoalFrame(){
+        return gframe;
+    }
+    
+    void setSyncFrame(int f){
+        sframe = f;
+    }
+    
+    int getSyncFrame(){
+        return sframe;
+    }
+    
+    void setWindow(int w){
+        window = w;
+    }
+    
+    int getWindow(){
+        return window;
+    }
+    
+    void setHug(bool b){
+        bHug = b;
+    }
+    
+    bool getHug(){
+        return bHug;
+    }
+    
 protected:
+    
+    bool bHug;
+    int window;
+    int sframe;
+    int gframe;
+    
+    //============================== /\ these shoudl be track elsewhere or in a class via member/inheritance /\
     
     float speed;
     bool bPaused;
+    bool bSequenceIsDone;
     int viewID;
     
     ofxThreadedVideo * video;
@@ -474,11 +531,19 @@ protected:
 
 inline ostream& operator<<(ostream& os, MovieSequence *mS){
     os << mS->getCurrentMovie() << " || " << mS->getCurrentMovieIndex() << " / " << mS->getSequenceSize() << " " << mS->getCurrentSequenceFrame() << " / " << mS->getTotalSequenceFrames();
+    ofxThreadedVideo * video = mS->getVideo();
+    if(video != NULL){
+        os << "  " << video->getCurrentFrame() << " - " << video->getTotalNumFrames() << "  " << video->getIsMovieDone() << "  " << video->isPaused();
+    }
     return os;
     };
     
     inline ostream& operator<<(ostream& os, MovieSequence &mS){
         os << mS.getCurrentMovie() << " || " << mS.getCurrentMovieIndex() << " / " << mS.getSequenceSize() << " " << mS.getCurrentSequenceFrame() << " / " << mS.getTotalSequenceFrames();
+        ofxThreadedVideo * video = mS.getVideo();
+        if(video != NULL){
+            os << "  " << video->getCurrentFrame() << " - " << video->getTotalNumFrames() << "  " << video->getIsMovieDone() << "  " << video->isPaused();
+        }
         return os;
     };
 
