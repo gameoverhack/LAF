@@ -45,7 +45,7 @@ void AppController::setup(){
      *****************************************************/
     
     appModel->load("config", ARCHIVE_BINARY);
-    appModel->backup("config", ARCHIVE_BINARY);
+    //appModel->backup("config", ARCHIVE_BINARY);
     
     appModel->removeAllProperties();
     
@@ -303,20 +303,31 @@ void AppController::keyPressed(ofKeyEventArgs & e){
             break;
         case 'x':
         {
+            vector<MouseObj>& mouseObjects = appModel->getMouseObjects();
             if(appControllerStates.getState(kAPPCONTROLLER_PLAY)){
+                if(mouseObjects.size() == 0){
+                    vector<ofRectangle>& windows = appModel->getWindows();
+                    
+                    for(int i = 0; i < windows.size(); i++){
+                        MouseObj m;
+                        ofRectangle& r = windows[i];
+                        m.set(r.x, r.y, r.width, r.height);
+                        mouseObjects.push_back(m);
+                    }
+                }
                 appViewStates.setState(kAPPVIEW_MAKEWINDOWS, true);
                 playControllerStates.setState(kPLAYCONTROLLER_STOP);
                 appControllerStates.setState(kAPPCONTROLLER_MAKEWINDOWS);
             }else{
                 appViewStates.setState(kAPPVIEW_MAKEWINDOWS, false);
-                playControllerStates.setState(kPLAYCONTROLLER_MAKE);
+                //playControllerStates.setState(kPLAYCONTROLLER_MAKE);
                 appControllerStates.setState(kAPPCONTROLLER_PLAY);
                 
                 // show me the windows
                 ofxLogNotice() << "NEW WINDOWS" << endl;
-                vector<MouseObj>& mouseObjects = appModel->getMouseObjects();
+                
                 for(int i = 0; i < mouseObjects.size(); i++){
-                    cout << i << "  " << mouseObjects[i].getPosition().x << ", " << mouseObjects[i].getPosition().y << ", " << mouseObjects[i].getWidth() << ", " << mouseObjects[i].getHeight() << endl;
+                    cout << mouseObjects[i].getPosition().x << "," << mouseObjects[i].getPosition().y << "," << mouseObjects[i].getWidth() << "," << mouseObjects[i].getHeight() << endl;
                 }
             }
         }
