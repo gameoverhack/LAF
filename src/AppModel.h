@@ -21,6 +21,8 @@
 #include "MovieSequence.h"
 #include "MovieInfo.h"
 #include "ofxCv.h"
+#include "MouseObj.h"
+#include "KeyModifiers.h"
 
 typedef struct{
     
@@ -381,7 +383,23 @@ public:
         }
     }
     
+    vector<MouseObj>& getMouseObjects(){
+        return mouseObjects;
+    }
+    
+    int& getCurrentMouseObject(){
+        return currentObject;
+    }
+    
+    KeyModifiers& getKeyModifiers(){
+        return keyModifiers;
+    }
+    
 protected:
+    
+    KeyModifiers                keyModifiers;
+    vector<MouseObj>            mouseObjects;
+    int                         currentObject;
     
     int                         heroStartTime;
     int                         heroStopTime;

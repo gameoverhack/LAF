@@ -64,7 +64,7 @@ void AppController::setup(){
     appModel->setProperty("Ortho", true);
     
     appModel->setProperty("MediaPath", (string)"/Users/gameover/Desktop/LOTE/TESTRENDERS/media");
-    appModel->setProperty("NumberPlayers", 14);
+    appModel->setProperty("NumberPlayers", 8);
     appModel->setProperty("RectTrail", 200);
 
     appModel->setProperty("ForceFileListUpdate", false);
@@ -144,6 +144,11 @@ void AppController::setup(){
     
     //ofHideCursor();
     //ofSetFullscreen(true);
+    
+    int& currentObject = appModel->getCurrentMouseObject();
+    resize = false;
+    currentObject = -1;
+    offsetX = offsetY = 0.0f;
     
     ofBackground(0, 0, 0);
     ofSetVerticalSync(appModel->getProperty<bool>("VerticalSync"));
@@ -278,8 +283,11 @@ void AppController::keyPressed(ofKeyEventArgs & e){
             break;
         case ' ':
         {
-            playControllerStates.setState(kPLAYCONTROLLER_STOP);
-            playControllerStates.setState(kPLAYCONTROLLER_MAKE);
+            if(playControllerStates.getState(kPLAYCONTROLLER_PLAY)){
+                playControllerStates.setState(kPLAYCONTROLLER_STOP);
+            }else{
+                playControllerStates.setState(kPLAYCONTROLLER_MAKE);
+            }
         }
             
             break;
@@ -303,6 +311,13 @@ void AppController::keyPressed(ofKeyEventArgs & e){
                 appViewStates.setState(kAPPVIEW_MAKEWINDOWS, false);
                 playControllerStates.setState(kPLAYCONTROLLER_MAKE);
                 appControllerStates.setState(kAPPCONTROLLER_PLAY);
+                
+                // show me the windows
+                ofxLogNotice() << "NEW WINDOWS" << endl;
+                vector<MouseObj>& mouseObjects = appModel->getMouseObjects();
+                for(int i = 0; i < mouseObjects.size(); i++){
+                    cout << i << "  " << mouseObjects[i].getPosition().x << ", " << mouseObjects[i].getPosition().y << ", " << mouseObjects[i].getWidth() << ", " << mouseObjects[i].getHeight() << endl;
+                }
             }
         }
             break;
@@ -345,15 +360,66 @@ void AppController::mouseMoved(ofMouseEventArgs & e){
 
 //--------------------------------------------------------------
 void AppController::mouseDragged(ofMouseEventArgs & e){
-
+    StateGroup & appControllerStates = appModel->getStateGroup("AppControllerStates");
+    if(!appControllerStates.getState(kAPPCONTROLLER_MAKEWINDOWS)) return;
+    int& currentObject = appModel->getCurrentMouseObject();
+    vector<MouseObj>& mouseObjects = appModel->getMouseObjects();
+    if(currentObject != -1 && currentObject < mouseObjects.size()){ // sanity check
+        if(!resize) mouseObjects[currentObject].setPosition(e.x + offsetX, e.y + offsetY);
+        if(resize) mouseObjects[currentObject].setSize(e.x + offsetX, e.y + offsetY);
+    }
 }
 
 //--------------------------------------------------------------
 void AppController::mousePressed(ofMouseEventArgs & e){
-
+    StateGroup & appControllerStates = appModel->getStateGroup("AppControllerStates");
+    if(!appControllerStates.getState(kAPPCONTROLLER_MAKEWINDOWS)) return;
+    int& currentObject = appModel->getCurrentMouseObject();
+    vector<MouseObj>& mouseObjects = appModel->getMouseObjects();
+    KeyModifiers& keyModifiers = appModel->getKeyModifiers();
+    currentObject = -1;
+    
+    for(int i = 0; i < mouseObjects.size(); i++){
+        if(mouseObjects[i].inside(e.x, e.y)){
+            currentObject = i;
+            break;
+        }
+    }
+    if(currentObject == -1){
+        // make a new one
+        MouseObj m = MouseObj(e.x, e.y, 50, 50);
+        mouseObjects.push_back(m);
+        currentObject = mouseObjects.size() - 1;
+    }else{
+        // we're inside one so calculate the offset
+        ofPoint p = mouseObjects[currentObject].getPosition();
+        float w = mouseObjects[currentObject].getWidth();
+        float h = mouseObjects[currentObject].getHeight();
+        ofRectangle r = ofRectangle(p.x + w - 5, p.y + h - 5, 5, 5);
+        
+        if(keyModifiers.getAppleControlModifier()){
+            mouseObjects.erase(mouseObjects.begin() + currentObject);
+            currentObject = -1;
+            offsetX = offsetY = 0;
+        }else{
+            if(r.inside(e.x, e.y)){
+                resize = true;
+                offsetX =  - p.x;
+                offsetY =  - p.y;
+            }else{
+                resize = false;
+                offsetX = p.x - e.x;
+                offsetY = p.y - e.y;
+            }
+        }
+        
+    }
 }
 
 //--------------------------------------------------------------
 void AppController::mouseReleased(ofMouseEventArgs & e){
-
+    int& currentObject = appModel->getCurrentMouseObject();
+    resize = false;
+    currentObject = -1;
+    offsetX = offsetY = 0.0f;
 }

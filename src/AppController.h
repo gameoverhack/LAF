@@ -40,6 +40,9 @@ public:
     
 protected:
     
+    bool resize;
+    float offsetX, offsetY;
+    
     AppView * appView;
     DebugView * debugView;
     
