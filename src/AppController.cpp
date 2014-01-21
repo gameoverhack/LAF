@@ -63,7 +63,8 @@ void AppController::setup(){
     appModel->setProperty("VerticalSync", false);
     appModel->setProperty("Ortho", true);
     
-    appModel->setProperty("MediaPath", (string)"/Users/gameover/Desktop/LOTE/TESTRENDERS/media");
+    appModel->setProperty("MediaPath", (string)"/Users/gameoverlf/Desktop/LAF/media");
+    //appModel->setProperty("MediaPath", (string)"/Users/gameover/Desktop/LOTE/TESTRENDERS/media");
     appModel->setProperty("NumberPlayers", 20);
     appModel->setProperty("RectTrail", 200);
 
