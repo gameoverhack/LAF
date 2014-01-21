@@ -72,7 +72,11 @@ void PlayController::update(){
             break;
         case kPLAYCONTROLLER_PLAY:
         {
-            if(appModel->checkHeroTimer()) appModel->activateHero();
+            
+            if(appModel->getProperty<bool>("ShowHeroVideos")){
+                if(appModel->checkHeroTimer()) appModel->activateHero();
+            }
+
             vector<MovieSequence*>& sequences = appModel->getSequences();
             for(int i = 0; i < sequences.size(); i++){
                 MovieSequence* sequence = sequences[i];

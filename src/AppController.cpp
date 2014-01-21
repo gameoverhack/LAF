@@ -47,7 +47,7 @@ void AppController::setup(){
     appModel->load("config", ARCHIVE_BINARY);
     //appModel->backup("config", ARCHIVE_BINARY);
     
-    appModel->removeAllProperties();
+//    appModel->removeAllProperties();
     
     for(int i = 0; i < 50; i++){
         string prop = "MovieInfo_" + ofToString(i);
@@ -60,11 +60,11 @@ void AppController::setup(){
 
     appModel->setProperty("LogToFile", false);
     
-    appModel->setProperty("VerticalSync", true);
+    appModel->setProperty("VerticalSync", false);
     appModel->setProperty("Ortho", true);
     
     appModel->setProperty("MediaPath", (string)"/Users/gameover/Desktop/LOTE/TESTRENDERS/media");
-    appModel->setProperty("NumberPlayers", 8);
+    appModel->setProperty("NumberPlayers", 20);
     appModel->setProperty("RectTrail", 200);
 
     appModel->setProperty("ForceFileListUpdate", false);
@@ -95,6 +95,23 @@ void AppController::setup(){
     appModel->setProperty("SyncTime", 2);
     appModel->setProperty("HeroTime", 80000);
     appModel->setProperty("HeroFade", 10000);
+    
+//    appModel->setProperty("ShowWindowTargets", true);
+//    appModel->setProperty("ShowWindowOutline", true);
+//    appModel->setProperty("ShowWindowInfo", true);
+//    appModel->setProperty("ShowAvatarsLarge", true);
+//    appModel->setProperty("ShowAvatarsSmall", true);
+//    appModel->setProperty("ShowTotalBoundsLarge", true);
+//    appModel->setProperty("ShowTotalBoundsSmall", true);
+//    //appModel->setProperty("ShowTrailBoundsLarge", true);
+//    appModel->setProperty("ShowTrailBoundsSmall", true);
+//    //appModel->setProperty("ShowCurrentBoundsLarge", true);
+//    appModel->setProperty("ShowCurrentBoundsSmall", true);
+//    //appModel->setProperty("ShowDistanceLarge", true);
+//    appModel->setProperty("ShowDistanceSmall", true);
+//    //appModel->setProperty("ShowInfoLarge", true);
+//    appModel->setProperty("ShowInfoSmall", true);
+//    appModel->setProperty("ShowHeroVideos", true);
     
     ofxLogSetLogToFile(appModel->getProperty<bool>("LogToFile"), ofToDataPath("log_" + ofGetTimestampString() + ".log"));
     
@@ -212,7 +229,6 @@ void AppController::draw(){
         {
             ofEnableBlendMode(OF_BLENDMODE_SCREEN);
 
-
             appView->draw();
 
         }
@@ -239,6 +255,61 @@ void AppController::keyPressed(ofKeyEventArgs & e){
     StateGroup & appControllerStates = appModel->getStateGroup("AppControllerStates");
     
     switch(e.key) {
+            
+        case '1':
+            appModel->toggleProperty("ShowAvatarsSmall");
+            break;
+        case '!':
+            appModel->toggleProperty("ShowAvatarsLarge");
+            break;
+        case '2':
+            appModel->toggleProperty("ShowTotalBoundsSmall");
+            break;
+        case '@':
+            appModel->toggleProperty("ShowTotalBoundsLarge");
+            break;
+        case '3':
+            appModel->toggleProperty("ShowTrailBoundsSmall");
+            break;
+        case '$':
+            //appModel->toggleProperty("ShowTrailBoundsLarge");
+            break;
+        case '5':
+            appModel->toggleProperty("ShowCurrentBoundsSmall");
+            break;
+        case '%':
+            //appModel->toggleProperty("ShowCurrentBoundsLarge");
+            break;
+        case '6':
+            appModel->toggleProperty("ShowDistanceSmall");
+            break;
+        case '^':
+            //appModel->toggleProperty("ShowDistanceLarge");
+            break;
+        case '7':
+            appModel->toggleProperty("ShowInfoSmall");
+            break;
+        case '&':
+            //appModel->toggleProperty("ShowInfoLarge");
+            break;
+        case '8':
+            appModel->toggleProperty("ShowHeroVideos");
+            break;
+        case '*':
+            
+            break;
+        case '9':
+            appModel->toggleProperty("ShowWindowTargets");
+            break;
+        case '(':
+            
+            break;
+        case '0':
+            appModel->toggleProperty("ShowWindowOutline");
+            break;
+        case ')':
+            appModel->toggleProperty("ShowWindowInfo");
+            break;
         case 'd':
             debugViewStates.toggleState(kDEBUGVIEW_SHOWINFO);
             break;
@@ -250,19 +321,6 @@ void AppController::keyPressed(ofKeyEventArgs & e){
             break;
         case 'c':
             appView->resetCamera();
-            break;
-        case 'r':
-            appViewStates.toggleState(kAPPVIEW_SHOWRECTS);
-            break;
-        case 'w':
-            appViewStates.toggleState(kAPPVIEW_SHOWWINDOWS);
-            break;
-        case 'i':
-            appViewStates.toggleState(kAPPVIEW_SHOWINFO);
-            appViewStates.toggleState(kAPPVIEW_SHOWCENTRES);
-            break;
-        case 'b':
-            appViewStates.toggleState(kAPPVIEW_SHOWPLAYERS);
             break;
         case 'e':
             if(appModel->getProperty<int>("RectTrail") == 200){
@@ -371,23 +429,30 @@ void AppController::mouseMoved(ofMouseEventArgs & e){
 
 //--------------------------------------------------------------
 void AppController::mouseDragged(ofMouseEventArgs & e){
+    
     StateGroup & appControllerStates = appModel->getStateGroup("AppControllerStates");
     if(!appControllerStates.getState(kAPPCONTROLLER_MAKEWINDOWS)) return;
+    
     int& currentObject = appModel->getCurrentMouseObject();
     vector<MouseObj>& mouseObjects = appModel->getMouseObjects();
+    
     if(currentObject != -1 && currentObject < mouseObjects.size()){ // sanity check
         if(!resize) mouseObjects[currentObject].setPosition(e.x + offsetX, e.y + offsetY);
         if(resize) mouseObjects[currentObject].setSize(e.x + offsetX, e.y + offsetY);
     }
+    
 }
 
 //--------------------------------------------------------------
 void AppController::mousePressed(ofMouseEventArgs & e){
+    
     StateGroup & appControllerStates = appModel->getStateGroup("AppControllerStates");
     if(!appControllerStates.getState(kAPPCONTROLLER_MAKEWINDOWS)) return;
+    
     int& currentObject = appModel->getCurrentMouseObject();
     vector<MouseObj>& mouseObjects = appModel->getMouseObjects();
     KeyModifiers& keyModifiers = appModel->getKeyModifiers();
+    
     currentObject = -1;
     
     for(int i = 0; i < mouseObjects.size(); i++){
@@ -396,6 +461,7 @@ void AppController::mousePressed(ofMouseEventArgs & e){
             break;
         }
     }
+    
     if(currentObject == -1){
         // make a new one
         MouseObj m = MouseObj(e.x, e.y, 50, 50);
@@ -423,14 +489,17 @@ void AppController::mousePressed(ofMouseEventArgs & e){
                 offsetY = p.y - e.y;
             }
         }
-        
     }
+    
 }
 
 //--------------------------------------------------------------
 void AppController::mouseReleased(ofMouseEventArgs & e){
+    
     int& currentObject = appModel->getCurrentMouseObject();
+    
     resize = false;
     currentObject = -1;
     offsetX = offsetY = 0.0f;
+    
 }

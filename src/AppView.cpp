@@ -16,26 +16,15 @@ AppView::AppView(){
      *******                States                  *******
      *****************************************************/
 
-    StateGroup newAppViewStates("AppViewStates", false);
-    newAppViewStates.addState(State(kAPPVIEW_SHOWWINDOWS, "kAPPVIEW_SHOWWINDOWS"));
-    newAppViewStates.addState(State(kAPPVIEW_SHOWPLAYERS, "kAPPVIEW_SHOWPLAYERS"));
-    newAppViewStates.addState(State(kAPPVIEW_SHOWRECTS, "kAPPVIEW_SHOWRECTS"));
-    newAppViewStates.addState(State(kAPPVIEW_SHOWCENTRES, "kAPPVIEW_SHOWCENTRES"));
-    newAppViewStates.addState(State(kAPPVIEW_SHOWINFO, "kAPPVIEW_SHOWINFO"));
-    newAppViewStates.addState(State(kAPPVIEW_SHOWWARP, "kAPPVIEW_SHOWWARP"));
+    StateGroup newAppViewStates("AppViewStates", true);
+    newAppViewStates.addState(State(kAPPVIEW_NORMAL, "kAPPVIEW_NORMAL"));
     newAppViewStates.addState(State(kAPPVIEW_MAKEWINDOWS, "kAPPVIEW_MAKEWINDOWS"));
     
     appModel->addStateGroup(newAppViewStates);
     
     StateGroup & appViewStates = appModel->getStateGroup("AppViewStates");
     
-    appViewStates.setState(kAPPVIEW_SHOWWINDOWS, false);
-    appViewStates.setState(kAPPVIEW_SHOWPLAYERS, true);
-    appViewStates.setState(kAPPVIEW_SHOWRECTS, true);
-    appViewStates.setState(kAPPVIEW_SHOWCENTRES, true);
-    appViewStates.setState(kAPPVIEW_SHOWINFO, true);
-    appViewStates.setState(kAPPVIEW_SHOWWARP, false);
-    appViewStates.setState(kAPPVIEW_MAKEWINDOWS, false);
+    appViewStates.setState(kAPPVIEW_NORMAL);
     
     resetCamera();
     
@@ -149,75 +138,77 @@ void AppView::update(){
          *******              Draw Heros                *******
          *****************************************************/
         
-        ofxThreadedVideo* hero = appModel->getCurrentHeroVideo();
-        
         float iY = 1.0f;
         
-        if(hero != NULL){
+        if(appModel->getProperty<bool>("ShowHeroVideos")){
             
-            hero->update();
+            ofxThreadedVideo* hero = appModel->getCurrentHeroVideo();
             
-            float fY = hero->getFade() * hero->getHeight();
-            float dY = (hero->getHeight() - fY) / 2.0;
-            float cY = hero->getFade()*255;
-            iY = (1 - hero->getFade());
-            
-            ofNoFill();
-            ofSetColor(cY, cY, cY);
-            
-            
-            hero->getTextureReference().drawSubsection(0, dY, hero->getWidth(), fY, 0, dY);
-            ofRect(1, dY + 1, hero->getWidth() - 2, fY - 2);
-            
-            if(hero->getIsMovieDone() && hero->getQueueSize() == 0){
-                appModel->stopHereo();
-                appModel->resetHeroTimer();
+            if(hero != NULL){
+                
+                hero->update();
+                
+                float fY = hero->getFade() * hero->getHeight();
+                float dY = (hero->getHeight() - fY) / 2.0;
+                float cY = hero->getFade()*255;
+                iY = (1 - hero->getFade());
+                
+                ofNoFill();
+                ofSetColor(cY, cY, cY);
+                
+                
+                hero->getTextureReference().drawSubsection(0, dY, hero->getWidth(), fY, 0, dY);
+                ofRect(1, dY + 1, hero->getWidth() - 2, fY - 2);
+                
+                if(hero->getIsMovieDone() && hero->getQueueSize() == 0){
+                    appModel->stopHereo();
+                    appModel->resetHeroTimer();
+                }
+                
             }
-            
         }
         
         /******************************************************
          *******            Draw Windows                *******
          *****************************************************/
-
         
         ofNoFill();
         
-        for(int i = 0; i < windowPositions.size(); i++){
-            ofSetColor(255 * iY, 255 * iY, 255 * iY);
-            
-            if(appViewStates.getState(kAPPVIEW_SHOWWINDOWS)){
+        if(appModel->getProperty<bool>("ShowWindowOutline")){
+            for(int i = 0; i < windowPositions.size(); i++){
+                ofSetColor(255 * iY, 255 * iY, 255 * iY);
                 
-                bool bIsTarget = appModel->isWindowTarget(i);
-                
-                ostringstream os;
-                
-                os  << i
+                if(appModel->getProperty<bool>("ShowWindowInfo")){
+                    
+                    bool bIsTarget = appModel->isWindowTarget(i);
+                    
+                    ostringstream os;
+                    
+                    os  << i
                     << ": "
                     << windowPositions[i].x << ", "
                     << windowPositions[i].y << ", "
                     << windowPositions[i].width << ", "
                     << windowPositions[i].height;
-                
-                //if(bIsTarget) os << endl << appModel->getTargetGraph().getPossibleTransitions(ofToString(i));
-                
-                ofDrawBitmapString(os.str(), windowPositions[i].x, windowPositions[i].y - 14);
-                
-                if(bIsTarget){
-                    ofSetColor(255, 0, 255);
-                }else{
-                    ofSetColor(255, 255, 255);
+                    
+                    //if(bIsTarget) os << endl << appModel->getTargetGraph().getPossibleTransitions(ofToString(i));
+                    
+                    ofDrawBitmapString(os.str(), windowPositions[i].x, windowPositions[i].y - 14);
+                    
+                    if(bIsTarget){
+                        ofSetColor(255, 0, 255);
+                    }else{
+                        ofSetColor(255, 255, 255);
+                    }
                 }
+                
+                ofRect(windowPositions[i]);
             }
-            
-            ofRect(windowPositions[i]);
         }
         
         /******************************************************
          *******            Draw Sequences              *******
          *****************************************************/
-        
-        
             
         vector<MovieSequence*>& sequences = appModel->getSequences();
         
@@ -315,21 +306,25 @@ void AppView::update(){
              *******            Small Draw Players          *******
              *****************************************************/
             
-            videoFBOSmall.begin();
-            {
-                ofClear(0, 0, 0);
-                video->draw(0, 0, video->getWidth() * sequence->getNormalScale(), video->getHeight() * sequence->getNormalScale());
-            }
-            videoFBOSmall.end();
-            
-            ofSetColor(sFade, sFade, sFade);
-            videoFBOSmall.draw(sequence->getScaledPosition().x, sequence->getScaledPosition().y);
-            
-            if(appViewStates.getState(kAPPVIEW_SHOWPLAYERS)){
+            if(appModel->getProperty<bool>("ShowAvatarsSmall")){
                 
-                /******************************************************
-                 *******            Big Draw Players            *******
-                 *****************************************************/
+                videoFBOSmall.begin();
+                {
+                    ofClear(0, 0, 0);
+                    video->draw(0, 0, video->getWidth() * sequence->getNormalScale(), video->getHeight() * sequence->getNormalScale());
+                }
+                videoFBOSmall.end();
+                
+                ofSetColor(sFade, sFade, sFade);
+                videoFBOSmall.draw(sequence->getScaledPosition().x, sequence->getScaledPosition().y);
+                
+            }
+            
+            /******************************************************
+             *******            Big Draw Players            *******
+             *****************************************************/
+            
+            if(appModel->getProperty<bool>("ShowAvatarsLarge")){
                 
                 videoFBOBig.begin();
                 {
@@ -337,43 +332,56 @@ void AppView::update(){
                     video->draw(0, 0, video->getWidth(), video->getHeight());
                 }
                 videoFBOBig.end();
-
+                
                 ofSetColor(bFade, bFade, bFade);
                 videoFBOBig.draw(sequence->getPosition().x, sequence->getPosition().y);
+                
             }
             
             /******************************************************
-             *******              Draw Rects                *******
+             *******            Draw Large Rects            *******
              *****************************************************/
             
-            if(appViewStates.getState(kAPPVIEW_SHOWRECTS)){
 
-                // window
-//                ofFill();
-//                ofSetColor(cFade, cFade, cFade);
-//                ofRect(windowRect);
-                ofNoFill();
-                
-                //big player bounding etc
+            ofNoFill();
+            
+            if(appModel->getProperty<bool>("ShowTotalBoundsLarge")){
                 ofSetColor(0, tFade, tFade);
                 ofRect(sequence->getTotalBounding());
-//
-//                ofSetColor(fFade / 2.0, 0, 0);
+            }
+
+//            if(appModel->getProperty<bool>("ShowCurrentBoundsLarge")){
+//                ofSetColor(iFade * 2, 0, 0);
 //                ofRect(sequence->getBounding());
 //                ofCircle(sequence->getCentre(), 4);
-                
-                
-                
-                // small player bounding etc
-                ofSetColor(iFade * 2, 0, 0);
-                ofRect(sequence->getScaledBounding());
-                ofCircle(sequence->getScaledCentre(), 4);
-                
-                ofSetColor(0, iFade, 0);
-                ofLine(sequence->getScaledCentre(), wC);
-                
+//            }
+            
+            /******************************************************
+             *******            Draw Small Rects            *******
+             *****************************************************/
+            
+            if(appModel->getProperty<bool>("ShowTotalBoundsSmall")){
                 ofSetColor(iFade, 0, iFade / 1.5);
                 ofRect(sequence->getScaledTotalBounding());
+            }
+            
+            if(appModel->getProperty<bool>("ShowCurrentBoundsSmall")){
+                ofSetColor(iFade * 2, 0, 0);
+                ofRect(sequence->getScaledBounding());
+            }
+            
+            if(appModel->getProperty<bool>("ShowDistanceSmall")){
+                ofSetColor(0, iFade, 0);
+                ofCircle(sequence->getScaledCentre(), 4);
+                ofLine(sequence->getScaledCentre(), wC);
+            }
+            
+            if(appModel->getProperty<bool>("ShowInfoSmall") && appModel->hasProperty<string>("MovieInfo_" + ofToString(sequence->getViewID()))){
+                ofSetColor(iFade, iFade, iFade);
+                ofDrawBitmapString(appModel->getProperty<string>("MovieInfo_" + ofToString(sequence->getViewID())), sequence->getScaledCentre());
+            }
+            
+            if(appModel->getProperty<bool>("ShowTrailBoundsSmall")){
                 
                 int range = appModel->getProperty<int>("RectTrail");
                 int startFrame = MAX(sequence->getCurrentSequenceFrame() - range, 0);
@@ -389,22 +397,23 @@ void AppView::update(){
 
         }
         
-        for(int i = 0; i < windowFades.size(); i++){
-            ofRectangle& windowRect = windowPositions[i];
-            
-            if(windowFades[i].numPlayers > 0){
+        if(appModel->getProperty<bool>("ShowWindowTargets")){
+            for(int i = 0; i < windowFades.size(); i++){
+                ofRectangle& windowRect = windowPositions[i];
                 
-                float cFade = windowFades[i].cFade / (float)windowFades[i].numPlayers;
-//                cout << i << " " << windowFades[i].cFade << " " << windowFades[i].numPlayers << " " << cFade << endl;
-                
-                ofFill();
-                ofSetColor(cFade, cFade, cFade);
-                ofRect(windowRect);
-                ofNoFill();
+                if(windowFades[i].numPlayers > 0){
+                    
+                    float cFade = windowFades[i].cFade / (float)windowFades[i].numPlayers;
+                    
+                    ofFill();
+                    ofSetColor(cFade, cFade, cFade);
+                    ofRect(windowRect);
+                    ofNoFill();
+                }
+                windowFades[i].cFade = windowFades[i].numPlayers = 0;
             }
-            windowFades[i].cFade = windowFades[i].numPlayers = 0;
         }
-        
+
         ofDisableBlendMode();
         
         cam.end();

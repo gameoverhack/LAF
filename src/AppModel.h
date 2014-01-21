@@ -345,8 +345,8 @@ public:
             }
             herovideoindex = (int)ofRandom(herovideos.size());
             ofxLogNotice() << "Activating hero: " << herovideoindex << endl;
-            herovideos[herovideoindex]->setFrame(0);
             herovideos[herovideoindex]->setPaused(false);
+            herovideos[herovideoindex]->setFrame(1);
         }
     }
     
