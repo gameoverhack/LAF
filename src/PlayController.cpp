@@ -118,8 +118,14 @@ void PlayController::makeSequence(string name, int window){
     map<string, ofxXMP>& xmp = model.getXMP();
     
     // get the possible approach motions for this window
-    vector<string>& transitions = appModel->getGraph("TargetGraph").getPossibleTransitions(ofToString(window));
+    vector<string> transitions = appModel->getGraph("TargetGraph").getPossibleTransitions(ofToString(window));
     
+    // CARA's hack -> she doesn't have TRAV_LEFT or TRAV_RIGT
+    if(name == "CARAS"){
+        eraseAll(transitions, (string)"TRAV_LEFT");
+        eraseAll(transitions, (string)"TRAV_RIGT");
+    }
+
     // randomly get a motion TODO: make this so that we don't have double approaches
     string motion = transitions[(int)ofRandom(transitions.size())];
     
@@ -177,11 +183,16 @@ void PlayController::makeSequence(string name, int window){
     
     motionSequence.clear();
     
-    vector<string>& endMotions = appModel->getGraph("EndGraph").getPossibleTransitions("SYNCMOTIONS");
+    // randomise SYNCMOTIONS or WAITMOTIONS TODO: make this selectable
+    vector<string> vEndMotionType(2);
+    vEndMotionType[0] = "SYNCMOTIONS";
+    vEndMotionType[1] = "WAITMOTIONS";
+    string endMotionType = random(vEndMotionType);
+    
+    vector<string>& endMotions = appModel->getGraph("EndGraph").getPossibleTransitions(endMotionType);
     string emotion = random(endMotions);
     
     generateMotionsBetween(motion, emotion, name, motionSequence);
-    
     
     generateMoviesFromMotions(motionSequence, movieSequence, name);
     getPositionsForMovieSequence(movieSequence, name);
@@ -199,12 +210,24 @@ void PlayController::makeSequence(string name, int window){
     ofPoint targetPosition = ofPoint(windowPositions[window].x + windowPositions[window].width / 2.0, windowPositions[window].y, 0.0f);
     ofPoint finalSequencePosition = targetPosition - movieSequence->getScaledPositionAt(goalFrame) - floorOffset;
     
-    if(emotion == "HUGG_FRNT"){
+    if(emotion != "FALL_BACK"){
         
         movieSequence->setHug(true);
         
         // reverse the motion to get back out
         motionSequence.clear();
+        
+        if(emotion == "LWNG_FRNT"){
+            motionSequence.push_back("LWNG_FRNT");
+            motionSequence.push_back("LWNG_FRNT");
+        }
+        
+        if(emotion == "SITT_FRNT"){
+            motionSequence.push_back("SITT_FRNT");
+            motionSequence.push_back("SITT_FRNT");
+            motionSequence.push_back("CRCH_FRNT");
+        }
+        
         motionSequence.push_back("STND_FRNT");
         
         string reversemotion;
@@ -213,7 +236,12 @@ void PlayController::makeSequence(string name, int window){
         if(direction == "DOWN") reversemotion = action + "_UPPP";
         if(direction == "UPPP") reversemotion = action + "_DOWN";
         
-        generateMotionsBetween("STND_FRNT", reversemotion, name, motionSequence);
+        if(emotion == "SITT_FRNT"){
+            generateMotionsBetween("CRCH_FRNT", reversemotion, name, motionSequence);
+        }else{
+            generateMotionsBetween("STND_FRNT", reversemotion, name, motionSequence);
+        }
+        
         for(int i = 0; i < inserts + 2; i++) motionSequence.push_back(reversemotion);
         
         generateMoviesFromMotions(motionSequence, movieSequence, name);
@@ -226,7 +254,7 @@ void PlayController::makeSequence(string name, int window){
     movieSequence->normalise();
     
     ofxLogVerbose() << "Adding MovieSequence" << movieSequence->getMovieSequenceAsString() << endl;
-    ofxLogVerbose() << "E(nd) Motion: " << emotion << endl;
+    ofxLogVerbose() << "E(nd) Motion: " << endMotionType << " of " << emotion << endl;
     
     movieSequence->setSpeed(ofRandom(1.0, 3.0));
     
@@ -453,8 +481,8 @@ void PlayController::generateMotionsBetween(string m1, string m2, string name, v
                                                 }else{
                                                     vector<string> allPossibleTransitions7 = motionGraph.getPossibleTransitions(allPossibleTransitions6[o]);
                                                     for(int p = 0; p < allPossibleTransitions7.size(); p++){
-                                                        if(allPossibleTransitions6[o] == endMotion){
-                                                            //cout << "FOUND SOLUTION: " << allPossibleTransitions[i] << " -> " << allPossibleTransitions2[j] << " -> " << allPossibleTransitions3[k] << " -> " << allPossibleTransitions4[m] << " -> " << allPossibleTransitions5[n] << " -> " << allPossibleTransitions6[o] << " -> " << allPossibleTransitions6[p] << endl;
+                                                        if(allPossibleTransitions7[p] == endMotion){
+                                                            //cout << "FOUND SOLUTION: " << allPossibleTransitions[i] << " -> " << allPossibleTransitions2[j] << " -> " << allPossibleTransitions3[k] << " -> " << allPossibleTransitions4[m] << " -> " << allPossibleTransitions5[n] << " -> " << allPossibleTransitions6[o] << " -> " << allPossibleTransitions7[p] << endl;
                                                             vector<string> transitions;
                                                             transitions.push_back(startMotion);
                                                             transitions.push_back(allPossibleTransitions[i]);
@@ -466,6 +494,44 @@ void PlayController::generateMotionsBetween(string m1, string m2, string name, v
                                                             transitions.push_back(allPossibleTransitions7[p]);
                                                             solutions.push_back(transitions);
                                                         }
+//                                                        else{
+//                                                            vector<string> allPossibleTransitions8 = motionGraph.getPossibleTransitions(allPossibleTransitions7[p]);
+//                                                            for(int q = 0; q < allPossibleTransitions8.size(); q++){
+//                                                                if(allPossibleTransitions8[q] == endMotion){
+//                                                                    cout << "FOUND SOLUTION: " << allPossibleTransitions[i] << " -> " << allPossibleTransitions2[j] << " -> " << allPossibleTransitions3[k] << " -> " << allPossibleTransitions4[m] << " -> " << allPossibleTransitions5[n] << " -> " << allPossibleTransitions6[o] << " -> " << allPossibleTransitions7[p] << " -> " << allPossibleTransitions8[q] << endl;
+//                                                                    vector<string> transitions;
+//                                                                    transitions.push_back(startMotion);
+//                                                                    transitions.push_back(allPossibleTransitions[i]);
+//                                                                    transitions.push_back(allPossibleTransitions2[j]);
+//                                                                    transitions.push_back(allPossibleTransitions3[k]);
+//                                                                    transitions.push_back(allPossibleTransitions4[m]);
+//                                                                    transitions.push_back(allPossibleTransitions5[n]);
+//                                                                    transitions.push_back(allPossibleTransitions6[o]);
+//                                                                    transitions.push_back(allPossibleTransitions7[p]);
+//                                                                    transitions.push_back(allPossibleTransitions8[q]);
+//                                                                    solutions.push_back(transitions);
+//                                                                }else{
+//                                                                    vector<string> allPossibleTransitions9 = motionGraph.getPossibleTransitions(allPossibleTransitions8[q]);
+//                                                                    for(int r = 0; r < allPossibleTransitions9.size(); r++){
+//                                                                        if(allPossibleTransitions9[r] == endMotion){
+//                                                                            cout << "FOUND SOLUTION: " << allPossibleTransitions[i] << " -> " << allPossibleTransitions2[j] << " -> " << allPossibleTransitions3[k] << " -> " << allPossibleTransitions4[m] << " -> " << allPossibleTransitions5[n] << " -> " << allPossibleTransitions6[o] << " -> " << allPossibleTransitions7[p] << " -> " << allPossibleTransitions8[q] << " -> " << allPossibleTransitions9[r] << endl;
+//                                                                            vector<string> transitions;
+//                                                                            transitions.push_back(startMotion);
+//                                                                            transitions.push_back(allPossibleTransitions[i]);
+//                                                                            transitions.push_back(allPossibleTransitions2[j]);
+//                                                                            transitions.push_back(allPossibleTransitions3[k]);
+//                                                                            transitions.push_back(allPossibleTransitions4[m]);
+//                                                                            transitions.push_back(allPossibleTransitions5[n]);
+//                                                                            transitions.push_back(allPossibleTransitions6[o]);
+//                                                                            transitions.push_back(allPossibleTransitions7[p]);
+//                                                                            transitions.push_back(allPossibleTransitions8[q]);
+//                                                                            transitions.push_back(allPossibleTransitions9[r]);
+//                                                                            solutions.push_back(transitions);
+//                                                                        }
+//                                                                    }
+//                                                                }
+//                                                            }
+//                                                        }
                                                     }
                                                 }
                                             }

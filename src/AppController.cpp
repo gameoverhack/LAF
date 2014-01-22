@@ -60,7 +60,7 @@ void AppController::setup(){
 
     appModel->setProperty("LogToFile", false);
     
-    appModel->setProperty("VerticalSync", false);
+    appModel->setProperty("VerticalSync", true);
     appModel->setProperty("Ortho", true);
     
     //appModel->setProperty("MediaPath", (string)"/Users/gameoverlf/Desktop/LAF/media");
