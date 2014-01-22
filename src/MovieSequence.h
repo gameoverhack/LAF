@@ -349,7 +349,7 @@ public:
         ofRectangle r = getScaledBoundingAt(1); //TODO: there's a bug with frame 0!!!
         ofPoint floorOffset;
         floorOffset.x = (r.x + r.width / 2.0);
-        floorOffset.y = (r.y + r.height) + 4;
+        floorOffset.y = (r.y + r.height) + 0; // TODDO: needs a plus if i'm doing collisions!
         return floorOffset;
     }
     

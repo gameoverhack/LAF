@@ -28,6 +28,10 @@ AppView::AppView(){
     
     resetCamera();
     
+#ifdef USE_PRORES
+    shader.load(ofToDataPath("yuyvtorgba"));
+#endif
+    
 }
 
 //--------------------------------------------------------------
@@ -40,6 +44,10 @@ void AppView::resetCamera(){
     
     videoFBOBig.allocate(appModel->getProperty<float>("VideoWidth"), appModel->getProperty<float>("VideoHeight"));
     videoFBOSmall.allocate(appModel->getProperty<float>("DrawSize"), appModel->getProperty<float>("DrawSize"));
+    
+#ifdef USE_PRORES
+    videoFBOHero.allocate(ofGetWidth(), ofGetHeight());
+#endif
     
     windowFades.resize(appModel->getWindows().size());
     
@@ -151,13 +159,25 @@ void AppView::update(){
                 float fY = hero->getFade() * hero->getHeight();
                 float dY = (hero->getHeight() - fY) / 2.0;
                 float cY = hero->getFade()*255;
-                iY = (1 - hero->getFade());
-                
+                iY = CLAMP((1 - hero->getFade()), 0.0f, 1.0f);
+
                 ofNoFill();
                 ofSetColor(cY, cY, cY);
                 
-                
+#ifdef USE_PRORES
+                videoFBOHero.begin();
+                ofClear(0, 0, 0);
+                videoFBOHero.end();
+                shader.begin();
+                shader.setUniformTexture("yuvTex", hero->getTextureReference(), 1);
+                shader.setUniform1i("conversionType", (true ? 709 : 601));
+                shader.setUniform1f("fade", hero->getFade());
+                videoFBOHero.getTextureReference().drawSubsection(0, dY, hero->getWidth(), fY, 0, dY);
+                shader.end();
+#else
                 hero->getTextureReference().drawSubsection(0, dY, hero->getWidth(), fY, 0, dY);
+#endif
+
                 ofRect(1, dY + 1, hero->getWidth() - 2, fY - 2);
                 
                 if(hero->getIsMovieDone() && hero->getQueueSize() == 0){
@@ -315,8 +335,17 @@ void AppView::update(){
                 }
                 videoFBOSmall.end();
                 
+#ifdef USE_PRORES
+                shader.begin();
+                shader.setUniformTexture("yuvTex", videoFBOSmall.getTextureReference(), 1);
+                shader.setUniform1i("conversionType", (true ? 709 : 601));
+                shader.setUniform1f("fade", CLAMP(pct1, 0.0f, 1.0f) * iY);
+                videoFBOSmall.draw(sequence->getScaledPosition().x, sequence->getScaledPosition().y);
+                shader.end();
+#else
                 ofSetColor(sFade, sFade, sFade);
                 videoFBOSmall.draw(sequence->getScaledPosition().x, sequence->getScaledPosition().y);
+#endif
                 
             }
             
@@ -333,9 +362,18 @@ void AppView::update(){
                 }
                 videoFBOBig.end();
                 
+#ifdef USE_PRORES
+                shader.begin();
+                shader.setUniformTexture("yuvTex", videoFBOBig.getTextureReference(), 1);
+                shader.setUniform1i("conversionType", (true ? 709 : 601));
+                shader.setUniform1f("fade", CLAMP(pct4, 0.0f, 1.0f) * iY);
+                videoFBOBig.draw(sequence->getPosition().x, sequence->getPosition().y);
+                shader.end();
+#else
                 ofSetColor(bFade, bFade, bFade);
                 videoFBOBig.draw(sequence->getPosition().x, sequence->getPosition().y);
-                
+#endif
+
             }
             
             /******************************************************

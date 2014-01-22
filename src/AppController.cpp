@@ -63,16 +63,16 @@ void AppController::setup(){
     appModel->setProperty("VerticalSync", true);
     appModel->setProperty("Ortho", true);
     
-    //appModel->setProperty("MediaPath", (string)"/Users/gameoverlf/Desktop/LAF/media");
-    appModel->setProperty("MediaPath", (string)"/Users/gameover/Desktop/LOTE/TESTRENDERS/media");
+    appModel->setProperty("MediaPath", (string)"/Users/gameoverlf/Desktop/LAF/media");
+    //appModel->setProperty("MediaPath", (string)"/Users/gameover/Desktop/LOTE/TESTRENDERS/media");
     appModel->setProperty("NumberPlayers", 20);
     appModel->setProperty("RectTrail", 200);
 
     appModel->setProperty("ForceFileListUpdate", false);
     appModel->setProperty("ForceFileListCheck", false);
-    appModel->setProperty("CheckKeyFrames", true);
-    appModel->setProperty("CheckXMP", true);
-    appModel->setProperty("CheckRects", true);
+    appModel->setProperty("CheckKeyFrames", false);
+    appModel->setProperty("CheckXMP", false);
+    appModel->setProperty("CheckRects", false);
 
     appModel->setProperty("ContourMinArea", 10);
     appModel->setProperty("ContourMaxArea", 1200);

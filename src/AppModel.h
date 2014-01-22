@@ -10,6 +10,7 @@
 #define __H_APPMODEL
 
 #define USE_OPENFRAMEWORKS_TYPES 1
+#define USE_PRORES
 
 #include "BaseModel.h"
 #include "AppStates.h"
@@ -233,7 +234,11 @@ public:
         for(int i = 0; i < number; i++){
             ofxLogVerbose() << "Creating PlayerView " << i << endl;
             ofxThreadedVideo* video = new ofxThreadedVideo;
+#ifdef USE_PRORES
+            video->setPixelFormat(OF_PIXELS_2YUV);
+#else
             video->setPixelFormat(OF_PIXELS_BGRA);
+#endif
             videos.push_back(video);
         }
     }
@@ -309,7 +314,11 @@ public:
     void addHeroVideo(string path){
         ofxLogNotice() << "Loading hero video: " << path << endl;
         ofxThreadedVideo* v = new ofxThreadedVideo;
+#ifdef USE_PRORES
+        v->setPixelFormat(OF_PIXELS_2YUV);
+#else
         v->setPixelFormat(OF_PIXELS_BGRA);
+#endif
         v->loadMovie(path);
         v->play();
         v->setFade(0.0f);

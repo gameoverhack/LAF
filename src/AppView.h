@@ -37,6 +37,9 @@ protected:
     ofEasyCam cam;
     ofFbo videoFBOBig;
     ofFbo videoFBOSmall;
+    ofFbo videoFBOHero;
+    
+    ofShader shader;
     
     vector<WindowFades> windowFades;
     
