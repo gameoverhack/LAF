@@ -24,6 +24,7 @@
 #include "ofxCv.h"
 #include "MouseObj.h"
 #include "KeyModifiers.h"
+#include "Pointer.h"
 
 typedef struct{
     

@@ -142,7 +142,7 @@ void PlayController::makeSequence(string name, int window){
     vector<string> transitions = appModel->getGraph("TargetGraph").getPossibleTransitions(ofToString(window));
     
     // CARA's hack -> she doesn't have TRAV_LEFT or TRAV_RIGT
-    if(name == "CARAS"){
+    if(name == "CARAS" || name == "MEGANHG"){
         eraseAll(transitions, (string)"TRAV_LEFT");
         eraseAll(transitions, (string)"TRAV_RIGT");
     }

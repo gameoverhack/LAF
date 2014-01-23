@@ -151,6 +151,9 @@ void AppController::setup(){
     playController = new PlayController();
     playController->setup();
     
+    deviceController = new DeviceController();
+    deviceController->setup();
+    
     /******************************************************
      *******              Mouse/Screen              *******
      *****************************************************/
@@ -203,6 +206,7 @@ void AppController::update(){
         case kAPPCONTROLLER_PLAY:
         {
             playController->update();
+            deviceController->update();
         }
             break;
     }
@@ -232,7 +236,8 @@ void AppController::draw(){
             ofEnableBlendMode(OF_BLENDMODE_SCREEN);
 
             appView->draw();
-
+            deviceController->draw();
+            
         }
             break;
     }
