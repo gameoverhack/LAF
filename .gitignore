@@ -7,6 +7,9 @@
 *.bak
 *.log
 
+recordings/*.*
+csv/*.*
+
 # Compiled Object files
 *.slo
 *.lo
