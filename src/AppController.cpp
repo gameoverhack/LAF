@@ -169,6 +169,7 @@ void AppController::setup(){
     offsetX = offsetY = 0.0f;
     
     ofBackground(0, 0, 0);
+    ofSetFrameRate(60.0);
     ofSetVerticalSync(appModel->getProperty<bool>("VerticalSync"));
     
     // register key/mouse events (this way we get them from any window)

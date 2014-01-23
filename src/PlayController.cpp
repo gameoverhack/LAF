@@ -53,6 +53,7 @@ void PlayController::update(){
         {
             ofxLogNotice() << "PLAYCONTROLLER INIT" << endl;
             
+            appModel->resetUniqueTargets();
             appModel->resetHeroTimer();
             
             // make the player views
@@ -65,8 +66,10 @@ void PlayController::update(){
         {
             if(appModel->getProperty<bool>("AutoGenerate")){
                 vector<int>& targetWindows = appModel->getWindowTargets();
-                makeSequence(appModel->getRandomPlayerName(), random(targetWindows));
+                int wTarget = appModel->getUniqueWindowTarget();
+                if(wTarget != -1) makeSequence(appModel->getRandomPlayerName(), wTarget);
             }
+            
             playControllerStates.setState(kPLAYCONTROLLER_PLAY);
         }
             break;
@@ -90,7 +93,16 @@ void PlayController::update(){
             appModel->deleteMarkedPlayers();
             
             if(sequences.size() < appModel->getProperty<int>("NumberPlayers") &&
-               appModel->getProperty<bool>("AutoGenerate")) playControllerStates.setState(kPLAYCONTROLLER_MAKE);
+               appModel->getProperty<bool>("AutoGenerate") &&
+               appModel->hasUniqueWindowTargets()) playControllerStates.setState(kPLAYCONTROLLER_MAKE);
+            
+            ofxThreadedVideo* hero = appModel->getCurrentHeroVideo();
+            
+            if(hero != NULL){
+                if(hero->getFade() > 0.95 && sequences.size() > 0){
+                    playControllerStates.setState(kPLAYCONTROLLER_STOP);
+                }
+            }
             
         }
             break;
@@ -102,6 +114,15 @@ void PlayController::update(){
                 appModel->markPlayerForDeletion(sequence->getViewID());
             }
             appModel->deleteMarkedPlayers();
+            
+            ofxThreadedVideo* hero = appModel->getCurrentHeroVideo();
+            
+            if(hero != NULL){
+                if(hero->getFade() < 0.95 && sequences.size() == 0){
+                    playControllerStates.setState(kPLAYCONTROLLER_MAKE);
+                }
+            }
+            
         }
             break;
     }

@@ -91,14 +91,36 @@ public:
         
     }
     
-//    //--------------------------------------------------------------
-//    vector<ofRectangle>& getWindowTargets(){
-//        return targets;
-//    }
-    
     //--------------------------------------------------------------
     vector<int>& getWindowTargets(){
         return targetwindows;
+    }
+    
+    //--------------------------------------------------------------
+    vector<int>& getUniqueWindowTargets(){
+        return targetunique;
+    }
+    
+    //--------------------------------------------------------------
+    int getUniqueWindowTarget(){
+        int tWindow = -1;
+        cout << "Unique request: " << targetunique.size() << endl;
+        if(targetunique.size() > 0){
+            tWindow = random(targetunique);
+            eraseAll(targetunique, tWindow);
+            cout << "Unique request: " << targetunique.size() << " giving " << tWindow << endl;
+        }
+        return tWindow;
+    }
+    
+    //--------------------------------------------------------------
+    void resetUniqueTargets(){
+        targetunique = targetwindows;
+    }
+    
+    //--------------------------------------------------------------
+    bool hasUniqueWindowTargets(){
+        return (targetunique.size() > 0);
     }
     
     //--------------------------------------------------------------
@@ -272,6 +294,7 @@ public:
             for(int i = 0; i < sequences.size(); i++){
                 movieSequence = sequences[i];
                 if(movieSequence->getViewID() == viewID){
+                    targetunique.push_back(movieSequence->getWindow());
                     delete movieSequence;
                     index = i;
                     break;
@@ -433,6 +456,7 @@ protected:
     
     vector<ofRectangle> windows;
     vector<ofRectangle> targets;
+    vector<int>         targetunique;
     vector<int>         targetwindows;
     
     map<string, MotionGraph> motionGraphs;
