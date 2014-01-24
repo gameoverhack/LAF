@@ -16,7 +16,7 @@ static int lastTime = ofGetElapsedTimeMillis();
 void DeviceController::setup() {
     
     oscReceiver.setup(6666);
-    oscSender.setup("192.168.42.101", 8000);
+    //oscSender.setup("192.168.42.101", 8000);
     
     bNormConnected = false;
     
@@ -343,7 +343,7 @@ void DeviceController::keyPressed(int key){
             m.addIntArg(6666);
             m.addIntArg(-1);
             m.addIntArg(15);
-            oscSender.sendMessage(m);
+            //oscSender.sendMessage(m);
             break;
         }
         case 's':
@@ -353,7 +353,7 @@ void DeviceController::keyPressed(int key){
             m.setAddress("/server");
             m.addStringArg("count");
             m.addIntArg(6666);
-            oscSender.sendMessage(m);
+            //oscSender.sendMessage(m);
             break;
         }
         default:

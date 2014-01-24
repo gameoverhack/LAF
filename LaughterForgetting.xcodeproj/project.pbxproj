@@ -305,7 +305,6 @@
 		77EBC7641870E66700D86F91 /* libXMPCoreStatic.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libXMPCoreStatic.a; sourceTree = "<group>"; };
 		77EBC7651870E66700D86F91 /* libXMPFilesStatic.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libXMPFilesStatic.a; sourceTree = "<group>"; };
 		77EBC7691871C82400D86F91 /* PlayerView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PlayerView.h; sourceTree = "<group>"; };
-		77EF15EC187760AB00104A92 /* MotionGraph.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MotionGraph.h; path = "../../LAFTest-ParticleEffectsRenderer/src/MotionGraph.h"; sourceTree = "<group>"; };
 		77F9D7401888C33B005AC6FD /* LaughterForgettingDebug.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LaughterForgettingDebug.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		78c3fff9884db60ce1449d8e7b789e36 /* MSAPingPong.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = MSAPingPong.h; path = ../../../addons/ofxMSAPingPong/src/MSAPingPong.h; sourceTree = SOURCE_ROOT; };
 		78d67a00eb899fac0943059784f8212a /* ofxLabel.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 30; name = ofxLabel.cpp; path = ../../../addons/ofxGui/src/ofxLabel.cpp; sourceTree = SOURCE_ROOT; };
@@ -354,6 +353,7 @@
 		DCAC66DC1890AEF600316A1F /* Kalman.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Kalman.cpp; sourceTree = "<group>"; };
 		DCAC66DD1890AEF600316A1F /* Kalman.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Kalman.h; sourceTree = "<group>"; };
 		DCAC66DF1890AF3A00316A1F /* Pointer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Pointer.h; sourceTree = "<group>"; };
+		DCAC66E01891ECDB00316A1F /* MotionGraph.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MotionGraph.h; sourceTree = "<group>"; };
 		E4328143138ABC890047C5CB /* openFrameworksLib.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = openFrameworksLib.xcodeproj; path = ../../../libs/openFrameworksCompiled/project/osx/openFrameworksLib.xcodeproj; sourceTree = SOURCE_ROOT; };
 		E45BE9710E8CC7DD009D7055 /* AGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AGL.framework; path = /System/Library/Frameworks/AGL.framework; sourceTree = "<absolute>"; };
 		E45BE9720E8CC7DD009D7055 /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = /System/Library/Frameworks/ApplicationServices.framework; sourceTree = "<absolute>"; };
@@ -926,10 +926,10 @@
 		7701FDD1187F48D20092EDD9 /* DataTypes */ = {
 			isa = PBXGroup;
 			children = (
+				DCAC66E01891ECDB00316A1F /* MotionGraph.h */,
 				77E953C81889C98200B96537 /* MouseObj.h */,
 				77DA2C4718808DB9004A5F5C /* MovieInfo.h */,
 				77D988B118861798003926D4 /* MovieSequence.h */,
-				77EF15EC187760AB00104A92 /* MotionGraph.h */,
 				7701FDD7187F49750092EDD9 /* AppStates.h */,
 				DCAC66DF1890AF3A00316A1F /* Pointer.h */,
 			);

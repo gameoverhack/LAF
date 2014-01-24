@@ -166,6 +166,8 @@ void AppController::setup(){
     //ofHideCursor();
     //ofSetFullscreen(true);
     
+    ofSetWindowPosition(0, 1080.0/4.0);
+    
     int& currentObject = appModel->getCurrentMouseObject();
     resize = false;
     currentObject = -1;

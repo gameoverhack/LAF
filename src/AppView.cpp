@@ -156,8 +156,8 @@ void AppView::update(){
                 
                 hero->update();
                 
-                float fY = hero->getFade() * hero->getHeight();
-                float dY = (hero->getHeight() - fY) / 2.0;
+                float fY = hero->getFade() * ofGetHeight();
+                float dY = (ofGetHeight() - fY) / 2.0;
                 float cY = hero->getFade()*255;
                 iY = CLAMP((1 - hero->getFade()), 0.0f, 1.0f);
 
