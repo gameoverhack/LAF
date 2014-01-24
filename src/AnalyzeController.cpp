@@ -150,6 +150,7 @@ void AnalyzeController::update(){
                                 checkRects = true;
                                 cout << "WRONG NUMBER OF FRAMES " << rects.size() << " " << video.getTotalNumFrames() << endl;
                             }else{
+                                if(appModel->getProperty<bool>("ForceCheckRects")) checkRects = true;
                                 cout << "RIGHT NUMBER OF FRAMES " << rects.size() << " " << video.getTotalNumFrames() << endl;
                             }
                         }
