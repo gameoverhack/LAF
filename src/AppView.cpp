@@ -117,7 +117,7 @@ void AppView::update(){
         int& currentObject = appModel->getCurrentMouseObject();
         for(int i = 0; i < mouseObjects.size(); i++){
             if(currentObject != -1 && currentObject == i){
-                ofSetColor(255, 0, 0);
+                ofSetColor(255, 255, 255);
             }else{
                 ofSetColor(255, 255, 255);
             }

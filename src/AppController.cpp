@@ -63,8 +63,8 @@ void AppController::setup(){
     appModel->setProperty("VerticalSync", true);
     appModel->setProperty("Ortho", true);
     
-    //appModel->setProperty("MediaPath", (string)"/Users/gameoverlf/Desktop/LAF/media");
-    appModel->setProperty("MediaPath", (string)"/Users/gameover/Desktop/LOTE/media");
+    appModel->setProperty("MediaPath", (string)"/Users/gameoverlf/Desktop/LAF/media");
+    //appModel->setProperty("MediaPath", (string)"/Users/gameover/Desktop/LOTE/media");
     appModel->setProperty("NumberPlayers", 20);
     appModel->setProperty("RectTrail", 200);
 
@@ -383,11 +383,11 @@ void AppController::keyPressed(ofKeyEventArgs & e){
                         mouseObjects.push_back(m);
                     }
                 }
-                appViewStates.setState(kAPPVIEW_MAKEWINDOWS, true);
+                appViewStates.setState(kAPPVIEW_MAKEWINDOWS);
                 playControllerStates.setState(kPLAYCONTROLLER_STOP);
                 appControllerStates.setState(kAPPCONTROLLER_MAKEWINDOWS);
             }else{
-                appViewStates.setState(kAPPVIEW_MAKEWINDOWS, false);
+                appViewStates.setState(kAPPVIEW_NORMAL);
                 //playControllerStates.setState(kPLAYCONTROLLER_MAKE);
                 appControllerStates.setState(kAPPCONTROLLER_PLAY);
                 
