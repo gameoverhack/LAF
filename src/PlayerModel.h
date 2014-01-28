@@ -379,11 +379,6 @@ public:
             cout << movie << "   " << k[k.size() - 1] - k[0] << endl;
         }
     }
-
-    void cunt(string name, string path){
-        playerName = name;
-        playerFolder = path + "/";
-    }
     
 protected:
     

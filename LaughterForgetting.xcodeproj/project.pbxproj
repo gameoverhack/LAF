@@ -42,6 +42,7 @@
 		771C8CEC18805D4F00B7859B /* PlayController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 771C8CEA18805D4F00B7859B /* PlayController.cpp */; };
 		7748f9f07c993f15f2868e78ad18d494 /* MSAOpenCLProgram.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 09af7bdccc3eb01b0ea4ef80abd6b37c /* MSAOpenCLProgram.cpp */; };
 		775dd568d4b9548749580bc90df8274d /* MSAOpenCL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 025fd7fd4b1c9eb6897a0ea91c36cdd2 /* MSAOpenCL.cpp */; };
+		7761E65318984442005EF134 /* KeyModifiers.mm in Sources */ = {isa = PBXBuildFile; fileRef = 7761E65218984442005EF134 /* KeyModifiers.mm */; };
 		779B7AFA1860DE1A008B3D26 /* OpenCL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 779B7AF91860DE1A008B3D26 /* OpenCL.framework */; };
 		77DCBB141871E36B00EB911C /* BaseController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 77DCBB071871E36B00EB911C /* BaseController.cpp */; };
 		77DCBB151871E36B00EB911C /* BaseModel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 77DCBB091871E36B00EB911C /* BaseModel.cpp */; };
@@ -65,7 +66,6 @@
 		77DCDBEA1871E39000EB911C /* libboost_unit_test_framework-xgcc42-mt-1_46_1.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 77DCBB2A1871E37700EB911C /* libboost_unit_test_framework-xgcc42-mt-1_46_1.a */; };
 		77DCDBEB1871E39000EB911C /* libboost_wave-xgcc42-mt-1_46_1.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 77DCBB2B1871E37700EB911C /* libboost_wave-xgcc42-mt-1_46_1.a */; };
 		77DCDBEC1871E39000EB911C /* libboost_wserialization-xgcc42-mt-1_46_1.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 77DCBB2C1871E37700EB911C /* libboost_wserialization-xgcc42-mt-1_46_1.a */; };
-		77E953C71889C96100B96537 /* KeyModifiers.mm in Sources */ = {isa = PBXBuildFile; fileRef = 77E953C61889C96100B96537 /* KeyModifiers.mm */; };
 		77EBC7661870E66700D86F91 /* libXMPCoreStatic.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 77EBC7641870E66700D86F91 /* libXMPCoreStatic.a */; };
 		77EBC7671870E66700D86F91 /* libXMPFilesStatic.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 77EBC7651870E66700D86F91 /* libXMPFilesStatic.a */; };
 		7cdad32be4fa46701e3552c7b6b91e58 /* RunningBackground.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5cbf6aed6a17ac0c17f63cc4b079b0b9 /* RunningBackground.cpp */; };
@@ -263,6 +263,8 @@
 		771C8CEA18805D4F00B7859B /* PlayController.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PlayController.cpp; sourceTree = "<group>"; };
 		771C8CEB18805D4F00B7859B /* PlayController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlayController.h; sourceTree = "<group>"; };
 		771C8CEE188065F800B7859B /* PlayerModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PlayerModel.h; sourceTree = "<group>"; };
+		7761E65118984442005EF134 /* KeyModifiers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KeyModifiers.h; sourceTree = "<group>"; };
+		7761E65218984442005EF134 /* KeyModifiers.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = KeyModifiers.mm; sourceTree = "<group>"; };
 		779B7AF91860DE1A008B3D26 /* OpenCL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenCL.framework; path = ../../../../../../../System/Library/Frameworks/OpenCL.framework; sourceTree = "<group>"; };
 		77D988B118861798003926D4 /* MovieSequence.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MovieSequence.h; sourceTree = "<group>"; };
 		77DA2C4718808DB9004A5F5C /* MovieInfo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MovieInfo.h; sourceTree = "<group>"; };
@@ -299,8 +301,6 @@
 		77DCBB2B1871E37700EB911C /* libboost_wave-xgcc42-mt-1_46_1.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "libboost_wave-xgcc42-mt-1_46_1.a"; sourceTree = "<group>"; };
 		77DCBB2C1871E37700EB911C /* libboost_wserialization-xgcc42-mt-1_46_1.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "libboost_wserialization-xgcc42-mt-1_46_1.a"; sourceTree = "<group>"; };
 		77E63E9818771D020003A224 /* AppModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppModel.h; sourceTree = "<group>"; };
-		77E953C51889C96100B96537 /* KeyModifiers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KeyModifiers.h; sourceTree = "<group>"; };
-		77E953C61889C96100B96537 /* KeyModifiers.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = KeyModifiers.mm; sourceTree = "<group>"; };
 		77E953C81889C98200B96537 /* MouseObj.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MouseObj.h; sourceTree = "<group>"; };
 		77EBC7641870E66700D86F91 /* libXMPCoreStatic.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libXMPCoreStatic.a; sourceTree = "<group>"; };
 		77EBC7651870E66700D86F91 /* libXMPFilesStatic.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libXMPFilesStatic.a; sourceTree = "<group>"; };
@@ -963,6 +963,15 @@
 			name = Views;
 			sourceTree = "<group>";
 		};
+		7761E65018984442005EF134 /* src */ = {
+			isa = PBXGroup;
+			children = (
+				7761E65118984442005EF134 /* KeyModifiers.h */,
+				7761E65218984442005EF134 /* KeyModifiers.mm */,
+			);
+			path = src;
+			sourceTree = "<group>";
+		};
 		77DCBB041871E36B00EB911C /* ofxMVC */ = {
 			isa = PBXGroup;
 			children = (
@@ -1036,8 +1045,7 @@
 		77E953C41889C96100B96537 /* ofxKeyModifiers */ = {
 			isa = PBXGroup;
 			children = (
-				77E953C51889C96100B96537 /* KeyModifiers.h */,
-				77E953C61889C96100B96537 /* KeyModifiers.mm */,
+				7761E65018984442005EF134 /* src */,
 			);
 			name = ofxKeyModifiers;
 			path = ../../../addons/ofxKeyModifiers;
@@ -1169,19 +1177,19 @@
 			children = (
 				77E953C41889C96100B96537 /* ofxKeyModifiers */,
 				77DCBB191871E37700EB911C /* ofxBoost */,
+				c0f8008525aa1b08a9ccb1dee9fb7d39 /* ofxThreadedVideo */,
 				77DCBB041871E36B00EB911C /* ofxMVC */,
+				0e7735ac3e057354c9e2e6bc30e52ab9 /* ofxXMP */,
 				6333ac77801c53e62b8a0dc86b0e211e /* ofxBezierWarp */,
-				6025faf6414c2ca589764d26b59a2f04 /* ofxCv */,
-				480a780d8d0308ae4a3688014739cb6d /* ofxGui */,
 				6be44e8b1683abba3967738540a5213b /* ofxLogger */,
 				0ada4d4f0f7c44a3f3d294d25eb5f7a9 /* ofxMSAOpenCL */,
 				214c099e37313db7e06e3834226e0a94 /* ofxMSAPingPong */,
-				18240ecce4076fb0833a8578697ffa74 /* ofxNetwork */,
+				6025faf6414c2ca589764d26b59a2f04 /* ofxCv */,
 				a0b90d3b0adb9c1716816714bf7f212b /* ofxOpenCv */,
 				e6053ab7fec63d5f83825b880ce53c41 /* ofxOsc */,
-				c0f8008525aa1b08a9ccb1dee9fb7d39 /* ofxThreadedVideo */,
+				18240ecce4076fb0833a8578697ffa74 /* ofxNetwork */,
 				1f4fb5c423662b96adfdcc0badec1cb0 /* ofxXmlSettings */,
-				0e7735ac3e057354c9e2e6bc30e52ab9 /* ofxXMP */,
+				480a780d8d0308ae4a3688014739cb6d /* ofxGui */,
 			);
 			name = addons;
 			sourceTree = "<group>";
@@ -1528,8 +1536,6 @@
 /* Begin PBXProject section */
 		E4B69B4C0A3A1720003C02F2 /* Project object */ = {
 			isa = PBXProject;
-			attributes = {
-			};
 			buildConfigurationList = E4B69B4D0A3A1720003C02F2 /* Build configuration list for PBXProject "LaughterForgetting" */;
 			compatibilityVersion = "Xcode 2.4";
 			developmentRegion = English;
@@ -1659,7 +1665,7 @@
 				7701FDDF18804A3F0092EDD9 /* DebugView.cpp in Sources */,
 				771C8CE918805D4300B7859B /* AnalyzeController.cpp in Sources */,
 				771C8CEC18805D4F00B7859B /* PlayController.cpp in Sources */,
-				77E953C71889C96100B96537 /* KeyModifiers.mm in Sources */,
+				7761E65318984442005EF134 /* KeyModifiers.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
