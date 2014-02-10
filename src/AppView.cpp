@@ -408,10 +408,16 @@ void AppView::update(){
                 ofRect(sequence->getScaledBounding());
             }
             
-            if(appModel->getProperty<bool>("ShowDistanceSmall")){
+            if(appModel->getProperty<bool>("ShowDistanceSmall")){ // Omid
                 ofSetColor(0, iFade, 0);
                 ofCircle(sequence->getScaledCentre(), 4);
-                ofLine(sequence->getScaledCentre(), wC);
+                ofPoint playCenter = sequence->getScaledCentre();
+                ofPoint distanceTrailCenter;
+                if (currentMovie.getCurrentDirection() == "LEFT" || currentMovie.getCurrentDirection() == "RIGT" )
+                    distanceTrailCenter.set(wC.x, playCenter.y);
+                else
+                    distanceTrailCenter.set(playCenter.x, wC.y);
+                ofLine(sequence->getScaledCentre(), distanceTrailCenter);
             }
             
             if(appModel->getProperty<bool>("ShowInfoSmall") && appModel->hasProperty<string>("MovieInfo_" + ofToString(sequence->getViewID()))){

@@ -40,6 +40,14 @@ public:
     vector<ofRectangle> boundings;
     vector<ofPoint> centres;
     ofRectangle totalbounding;
+    
+    string currentDirection; //Omid
+    
+    string getCurrentDirection() { //Omid
+        // markername
+        
+        return ofSplitString(markername, "_")[1];
+    }
 
 };
 
@@ -59,6 +67,8 @@ inline ostream& operator<<(ostream& os, MovieInfo &mI){
         << mI.frame;
     return os;
 };
+
+
    
     
 static MovieInfo NoMovie;

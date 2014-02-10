@@ -64,8 +64,9 @@ void AppController::setup(){
     appModel->setProperty("Ortho", true);
     
     //appModel->setProperty("MediaPath", (string)"/Users/gameoverlf/Desktop/LAF/media");
-    appModel->setProperty("MediaPath", (string)"/Users/gameover/Desktop/LOTE/media");
+    //appModel->setProperty("MediaPath", (string)"/Users/gameover/Desktop/LOTE/media");
     //appModel->setProperty("MediaPath", (string)"/Volumes/LongingAndForgetting02/LOTE/TESTRENDERS/mediaANIME");
+    appModel->setProperty("MediaPath", (string)"/Users/omid/Desktop/LAF/media");
     appModel->setProperty("NumberPlayers", 20);
     appModel->setProperty("RectTrail", 200);
 
@@ -102,7 +103,7 @@ void AppController::setup(){
 //    appModel->setProperty("ShowWindowTargets", true);
 //    appModel->setProperty("ShowWindowOutline", true);
 //    appModel->setProperty("ShowWindowInfo", true);
-//    appModel->setProperty("ShowAvatarsLarge", true);
+    appModel->setProperty("ShowAvatarsLarge", false);
 //    appModel->setProperty("ShowAvatarsSmall", true);
 //    appModel->setProperty("ShowTotalBoundsLarge", true);
 //    appModel->setProperty("ShowTotalBoundsSmall", true);
@@ -113,7 +114,7 @@ void AppController::setup(){
 //    //appModel->setProperty("ShowDistanceLarge", true);
 //    appModel->setProperty("ShowDistanceSmall", true);
 //    //appModel->setProperty("ShowInfoLarge", true);
-//    appModel->setProperty("ShowInfoSmall", true);
+    appModel->setProperty("ShowInfoSmall", false);
 //    appModel->setProperty("ShowHeroVideos", true);
     
     ofxLogSetLogToFile(appModel->getProperty<bool>("LogToFile"), ofToDataPath("log_" + ofGetTimestampString() + ".log"));
@@ -401,28 +402,33 @@ void AppController::keyPressed(ofKeyEventArgs & e){
             }
         }
             break;
-//        case OF_KEY_LEFT:
-//        {
-//        }
-//            break;
-//            
-//        case OF_KEY_RIGHT:
-//        {
-//        }
-//            break;
-//        case OF_KEY_UP:
-//        {
-//        }
-//            break;
-//            
-//        case OF_KEY_DOWN:
-//        {
-//        }
-//            break;
-//        case '/':
-//        {
-//        }
-//            break;
+        case OF_KEY_LEFT:
+        {
+            playController->doAction("", 'l');
+        }
+            break;
+            
+        case OF_KEY_RIGHT:
+        {
+            
+        }
+            break;
+        case OF_KEY_UP:
+        {
+            
+        }
+            break;
+            
+        case OF_KEY_DOWN:
+        {
+            
+        }
+            break;
+        case '/':
+        {
+            
+        }
+            break;
             
 	}
     

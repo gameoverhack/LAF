@@ -83,6 +83,29 @@ void PlayController::update(){
             vector<MovieSequence*>& sequences = appModel->getSequences();
             for(int i = 0; i < sequences.size(); i++){
                 MovieSequence* sequence = sequences[i];
+                
+                
+                //------------- Omid: Collision Detection
+                int range = 10;
+                int startFrame = MAX(sequence->getCurrentSequenceFrame(), 0);
+                int endFrame = MIN(sequence->getCurrentSequenceFrame() + range, sequence->getTotalSequenceFrames());
+                
+                for(int j = startFrame; j < endFrame; j++){
+                    
+                    for (int w = 0; w < windowPositions.size(); w++) { // with windows except the target window
+                        ofRectangle bounding =sequence->getScaledBoundingAt(j);
+                        
+                        if (w!= sequence->getWindow() && bounding.intersects(windowPositions[w]))
+                            sequence->stop();  // TODO: Do recovery instead
+                    }
+                    
+                    for (int p = 0; p < sequences.size();p++) { // with other players
+                        if (sequences[p] != sequence && sequences[p]->getScaledBounding().intersects(sequence->getScaledBounding()))
+                            sequence->stop();  // TODO: Do recovery instead
+                    }
+                }
+                //------------- Omid
+                
                 sequence->update();
                 if(sequence->isSequequenceDone()) appModel->markPlayerForDeletion(sequence->getViewID());
                 ostringstream os;
@@ -127,6 +150,69 @@ void PlayController::update(){
             break;
     }
     
+}
+
+//--------------------------------------------------------------
+void PlayController::doAction(string name, char op) {
+    
+    
+    ofxLogNotice() << "Performing action " << op << " for " << name << endl;
+    
+    // get the players model
+    PlayerModel& model = appModel->getPlayerTemplate(name);
+    map<string, ofxXMP>& xmp = model.getXMP();
+    
+    // get the possible approach motions for this window
+    vector<string> transitions = appModel->getGraph("TargetGraph").getPossibleTransitions("STND_LEFT");
+    
+    // CARA's hack -> she doesn't have TRAV_LEFT or TRAV_RIGT
+    if(name == "CARAS" || name == "MEGANHG"){
+        eraseAll(transitions, (string)"TRAV_LEFT");
+        eraseAll(transitions, (string)"TRAV_RIGT");
+    }
+
+    
+    // randomly get a motion TODO: make this so that we don't have double approaches
+    string motion = transitions[1];
+    
+    // split motion into action and direction
+    string action = ofSplitString(motion, "_")[0];
+    string direction = ofSplitString(motion, "_")[1];
+    
+    float scale = appModel->getProperty<float>("DrawSize") / model.getWidth();
+    
+    // create a new MovieSequence
+    MovieSequence* movieSequence = new MovieSequence;
+       movieSequence->push(model.getFirstMovie());
+    movieSequence->setNormalPosition(ofPoint(0,0,0));
+    movieSequence->setNormalScale(scale); // TODO: store scale on the PlayerModel?
+    
+    // create a sequence of motions
+    vector<string> motionSequence;
+    
+    // start standing front and go to -> motion
+    motionSequence.push_back("STND_FRNT");
+    generateMotionsBetween("STND_FRNT", motion, name, motionSequence);
+    motionSequence.push_back(motion);
+    
+    generateMoviesFromMotions(motionSequence, movieSequence, name);
+    getPositionsForMovieSequence(movieSequence, name);
+    movieSequence->normalise();
+    
+    
+    switch (op) {
+        case 'l':
+            
+         
+
+            
+            break;
+        case 'r':
+            
+            break;
+        default:
+            break;
+    }
 }
 
 //--------------------------------------------------------------
@@ -281,6 +367,7 @@ void PlayController::makeSequence(string name, int window){
     
     appModel->addSequence(movieSequence);
     movieSequence->play();
+
 }
 
 //--------------------------------------------------------------

@@ -23,6 +23,8 @@ public:
     void update();
     
     void makeSequence(string name, int window);
+
+    void doAction(string name, char action);
     
 protected:
     
