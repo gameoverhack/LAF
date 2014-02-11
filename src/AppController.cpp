@@ -69,14 +69,14 @@ void AppController::setup(){
     appModel->setProperty("MediaPath", (string)"/Users/omid/Desktop/LAF/media");
     appModel->setProperty("NumberPlayers", 20);
     appModel->setProperty("RectTrail", 200);
-
+    
     appModel->setProperty("ForceFileListUpdate", true);
     appModel->setProperty("ForceFileListCheck", false);
     appModel->setProperty("CheckKeyFrames", false);
     appModel->setProperty("CheckXMP", false);
     appModel->setProperty("CheckRects", false);
     appModel->setProperty("ForceCheckRects", false);
-
+    
     appModel->setProperty("ContourMinArea", 10);
     appModel->setProperty("ContourMaxArea", 1200);
     appModel->setProperty("ContourThreshold", 11);
@@ -403,33 +403,33 @@ void AppController::keyPressed(ofKeyEventArgs & e){
             }
         }
             break;
-        case OF_KEY_LEFT:
-        {
-            playController->doAction("", 'l');
-        }
-            break;
-            
-        case OF_KEY_RIGHT:
-        {
-            
-        }
-            break;
-        case OF_KEY_UP:
-        {
-            
-        }
-            break;
-            
-        case OF_KEY_DOWN:
-        {
-            
-        }
-            break;
-        case '/':
-        {
-            
-        }
-            break;
+//        case OF_KEY_LEFT:
+//        {
+//            playController->doAction("", 'l');
+//        }
+//            break;
+//            
+//        case OF_KEY_RIGHT:
+//        {
+//            
+//        }
+//            break;
+//        case OF_KEY_UP:
+//        {
+//            
+//        }
+//            break;
+//            
+//        case OF_KEY_DOWN:
+//        {
+//            
+//        }
+//            break;
+//        case '/':
+//        {
+//            
+//        }
+//            break;
             
 	}
     

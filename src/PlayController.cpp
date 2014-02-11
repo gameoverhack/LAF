@@ -67,8 +67,8 @@ void PlayController::update(){
             if(appModel->getProperty<bool>("AutoGenerate")){
                 vector<int>& targetWindows = appModel->getWindowTargets();
                 int wTarget = appModel->getUniqueWindowTarget();
-               // if(wTarget != -1) makeSequence(appModel->getRandomPlayerName(), wTarget);
-                if(wTarget != -1) makeSequence("BLADIMIRSL", wTarget); // Omid: use bladimirsl so that we have all the motions
+                if(wTarget != -1) makeSequence(appModel->getRandomPlayerName(), wTarget);
+               // if(wTarget != -1) makeSequence("BLADIMIRSL", wTarget); // Omid: use bladimirsl so that we have all the motions
             }
             
             playControllerStates.setState(kPLAYCONTROLLER_PLAY);
@@ -85,7 +85,7 @@ void PlayController::update(){
             for(int i = 0; i < sequences.size(); i++){
                 MovieSequence* sequence = sequences[i];
                 
-                
+                /*
                 //------------- Omid: Collision Detection
 //                int range = sequence->getLastMovieInSequence().endframe;// ;10;
 //                int startFrame = MAX(sequence->getCurrentSequenceFrame(), 0);
@@ -98,7 +98,7 @@ void PlayController::update(){
                
                 sequence->setWillCollide(false);
                 
-                for(int j = startFrame; j < endFrame; j+=1){
+                for(int j = startFrame; j < endFrame; j+=2){
                     for (int w = 0; w < windowPositions.size(); w++) { // with windows except the target window
                         ofRectangle bounding =sequence->getScaledBoundingAt(j);
                         
@@ -115,7 +115,7 @@ void PlayController::update(){
                           //  sequence->stop();  // TODO: Do recovery instead
                             sequence->setWillCollide(true);
                     }
-                }
+                }*/
                 //------------- Omid
                 
                 sequence->update();
