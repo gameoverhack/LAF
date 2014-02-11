@@ -317,7 +317,7 @@ void AppView::update(){
             iFade = 127 * CLAMP((      pct2), 0.0f, 1.0f) * iY;
             tFade = 127 * CLAMP((      pct5), 0.0f, 1.0f) * iY;
             iSmal = 8   * CLAMP((      pct2), 0.0f, 1.0f) * iY;
-
+            
             
             windowFades[sequence->getWindow()].cFade += cFade;
             windowFades[sequence->getWindow()].numPlayers ++;
@@ -404,7 +404,10 @@ void AppView::update(){
             }
             
             if(appModel->getProperty<bool>("ShowCurrentBoundsSmall")){
-                ofSetColor(iFade * 2, 0, 0);
+                if (sequence->getWillCollide())
+                    ofSetColor(100,40,40);
+                else
+                    ofSetColor(0,40,iFade * 2);
                 ofRect(sequence->getScaledBounding());
             }
             
@@ -425,14 +428,17 @@ void AppView::update(){
                 ofDrawBitmapString(appModel->getProperty<string>("MovieInfo_" + ofToString(sequence->getViewID())), sequence->getScaledCentre());
             }
             
-            if(appModel->getProperty<bool>("ShowTrailBoundsSmall")){
+            if(appModel->getProperty<bool>("ShowTrailBoundsSmall")){ //Omid
                 
                 int range = appModel->getProperty<int>("RectTrail");
                 int startFrame = MAX(sequence->getCurrentSequenceFrame() - range, 0);
                 int endFrame = MIN(sequence->getCurrentSequenceFrame() + range, sequence->getTotalSequenceFrames());
                 
                 for(int j = startFrame; j < endFrame; j++){
-                    ofSetColor(0, iSmal, iSmal);
+                    if (sequence->getWillCollide())
+                        ofSetColor(100,10,10);
+                    else
+                        ofSetColor(0, iSmal, iSmal);
                     ofRect(sequence->getScaledBoundingAt(j));
                     //ofRect(sequence->getBoundingAt(j));
                 }

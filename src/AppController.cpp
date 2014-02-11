@@ -120,6 +120,7 @@ void AppController::setup(){
     ofxLogSetLogToFile(appModel->getProperty<bool>("LogToFile"), ofToDataPath("log_" + ofGetTimestampString() + ".log"));
     
     appModel->loadWindowPositions("WindowPositions.txt");
+   // appModel->loadWindowPositions("WindowPositions_Reduced.txt"); //Omid
     appModel->setGraph("ForwardMotionGraph.txt");
     appModel->setGraph("BackwardMotionGraph.txt");
     appModel->setGraph("DirectionGraph.txt");

@@ -67,7 +67,8 @@ void PlayController::update(){
             if(appModel->getProperty<bool>("AutoGenerate")){
                 vector<int>& targetWindows = appModel->getWindowTargets();
                 int wTarget = appModel->getUniqueWindowTarget();
-                if(wTarget != -1) makeSequence(appModel->getRandomPlayerName(), wTarget);
+               // if(wTarget != -1) makeSequence(appModel->getRandomPlayerName(), wTarget);
+                if(wTarget != -1) makeSequence("BLADIMIRSL", wTarget); // Omid: use bladimirsl so that we have all the motions
             }
             
             playControllerStates.setState(kPLAYCONTROLLER_PLAY);
@@ -86,22 +87,33 @@ void PlayController::update(){
                 
                 
                 //------------- Omid: Collision Detection
-                int range = 10;
+//                int range = sequence->getLastMovieInSequence().endframe;// ;10;
+//                int startFrame = MAX(sequence->getCurrentSequenceFrame(), 0);
+//                int endFrame = MIN(sequence->getCurrentSequenceFrame() + range, sequence->getTotalSequenceFrames());
+                MovieInfo lastMovieInSeq = sequence->getLastMovieInSequence();
+                int currentMovieLength =sequence->getCurrentMovie().endframe-sequence->getCurrentMovie().startframe;
+                int range = 5;
                 int startFrame = MAX(sequence->getCurrentSequenceFrame(), 0);
                 int endFrame = MIN(sequence->getCurrentSequenceFrame() + range, sequence->getTotalSequenceFrames());
+               
+                sequence->setWillCollide(false);
                 
-                for(int j = startFrame; j < endFrame; j++){
-                    
+                for(int j = startFrame; j < endFrame; j+=1){
                     for (int w = 0; w < windowPositions.size(); w++) { // with windows except the target window
                         ofRectangle bounding =sequence->getScaledBoundingAt(j);
                         
-                        if (w!= sequence->getWindow() && bounding.intersects(windowPositions[w]))
+                        if (w!= sequence->getWindow() && bounding.intersects(windowPositions[w])) {
                             sequence->stop();  // TODO: Do recovery instead
+                            //sequence->StopAt(endFrame);
+                            sequence->setWillCollide(true);
+                        }
+                        
                     }
                     
                     for (int p = 0; p < sequences.size();p++) { // with other players
                         if (sequences[p] != sequence && sequences[p]->getScaledBounding().intersects(sequence->getScaledBounding()))
-                            sequence->stop();  // TODO: Do recovery instead
+                          //  sequence->stop();  // TODO: Do recovery instead
+                            sequence->setWillCollide(true);
                     }
                 }
                 //------------- Omid

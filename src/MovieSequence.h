@@ -26,6 +26,14 @@ public:
         clear();
     }
     
+    void setWillCollide(bool w) {
+        willCollide=w;
+    }
+    
+    bool getWillCollide() {
+        return willCollide;
+    }
+    
     ofxThreadedVideo* getVideo(){
         return video;
     }
@@ -77,7 +85,13 @@ public:
         }
 
         // check if we're done TODO: reverse
-        if((video->getIsMovieDone()) || currentMovie.frame + currentMovie.startframe >= currentMovie.endframe) loadNextMovie();
+        if((video->getIsMovieDone()) || currentMovie.frame + currentMovie.startframe >= currentMovie.endframe) {
+            if (pauseFrame>1)  //Omid
+                stop();
+            else
+                loadNextMovie();
+        }
+        
         
     }
     
@@ -143,6 +157,12 @@ public:
         setPaused(true);
     }
     
+    
+    void StopAt(int frame) {
+         ofxLogVerbose() << "Stoping Sequence at frame " << frame << "" << endl;
+        pauseFrame = frame;
+    }
+    
     bool isSequequenceDone(){
         return bSequenceIsDone;
     }
@@ -205,6 +225,8 @@ public:
         currentMovie = NoMovie;
         currentSequenceIndex = lastnormalindex = -1;
         currentSequenceFrame = totalSequenceFrames = 0;
+        
+        willCollide = false;
     }
     
     void setNormalPosition(ofPoint p){
@@ -526,6 +548,9 @@ protected:
     
     ofRectangle totalBounding;
     ofRectangle stotalBounding;
+    
+    bool willCollide;
+    int pauseFrame;
     
 };
 
