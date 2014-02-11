@@ -120,7 +120,7 @@ void AppController::setup(){
     ofxLogSetLogToFile(appModel->getProperty<bool>("LogToFile"), ofToDataPath("log_" + ofGetTimestampString() + ".log"));
     
     appModel->loadWindowPositions("WindowPositions.txt");
-   // appModel->loadWindowPositions("WindowPositions_Reduced.txt"); //Omid
+    //appModel->loadWindowPositions("WindowPositions_Reduced.txt"); //Omid
     appModel->setGraph("ForwardMotionGraph.txt");
     appModel->setGraph("BackwardMotionGraph.txt");
     appModel->setGraph("DirectionGraph.txt");
@@ -414,17 +414,26 @@ void AppController::keyPressed(ofKeyEventArgs & e){
 //            
 //        }
 //            break;
-//        case OF_KEY_UP:
-//        {
-//            
-//        }
-//            break;
-//            
-//        case OF_KEY_DOWN:
-//        {
-//            
-//        }
-//            break;
+        case OF_KEY_UP:
+        {
+            vector<MovieSequence*>& sequences = appModel->getSequences();
+            for(int i = 0; i < sequences.size(); i++){
+                MovieSequence* sequence = sequences[i];
+                sequence->setSpeed(sequence->getSpeed()+0.2);
+            }
+        }
+            break;
+            
+        case OF_KEY_DOWN:
+        {
+            vector<MovieSequence*>& sequences = appModel->getSequences();
+            for(int i = 0; i < sequences.size(); i++){
+                MovieSequence* sequence = sequences[i];
+                sequence->setSpeed(sequence->getSpeed()-0.2);
+            }
+            
+        }
+            break;
 //        case '/':
 //        {
 //            

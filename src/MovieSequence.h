@@ -86,9 +86,9 @@ public:
 
         // check if we're done TODO: reverse
         if((video->getIsMovieDone()) || currentMovie.frame + currentMovie.startframe >= currentMovie.endframe) {
-            if (pauseFrame>1)  //Omid
-                stop();
-            else
+//            if (pauseFrame>1)  //Omid
+//                stop();
+//            else
                 loadNextMovie();
         }
         

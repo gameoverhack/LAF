@@ -85,37 +85,35 @@ void PlayController::update(){
             for(int i = 0; i < sequences.size(); i++){
                 MovieSequence* sequence = sequences[i];
                 
-                /*
+                
                 //------------- Omid: Collision Detection
-//                int range = sequence->getLastMovieInSequence().endframe;// ;10;
-//                int startFrame = MAX(sequence->getCurrentSequenceFrame(), 0);
-//                int endFrame = MIN(sequence->getCurrentSequenceFrame() + range, sequence->getTotalSequenceFrames());
-                MovieInfo lastMovieInSeq = sequence->getLastMovieInSequence();
-                int currentMovieLength =sequence->getCurrentMovie().endframe-sequence->getCurrentMovie().startframe;
                 int range = 5;
                 int startFrame = MAX(sequence->getCurrentSequenceFrame(), 0);
                 int endFrame = MIN(sequence->getCurrentSequenceFrame() + range, sequence->getTotalSequenceFrames());
                
                 sequence->setWillCollide(false);
                 
-                for(int j = startFrame; j < endFrame; j+=2){
+                for(int j = startFrame; j < endFrame; j+=1){
                     for (int w = 0; w < windowPositions.size(); w++) { // with windows except the target window
                         ofRectangle bounding =sequence->getScaledBoundingAt(j);
                         
                         if (w!= sequence->getWindow() && bounding.intersects(windowPositions[w])) {
-                            sequence->stop();  // TODO: Do recovery instead
+                            sequence->stop();
                             //sequence->StopAt(endFrame);
+                             //sequence->setSpeed(-1);
                             sequence->setWillCollide(true);
                         }
                         
                     }
                     
                     for (int p = 0; p < sequences.size();p++) { // with other players
-                        if (sequences[p] != sequence && sequences[p]->getScaledBounding().intersects(sequence->getScaledBounding()))
-                          //  sequence->stop();  // TODO: Do recovery instead
+                        if (sequences[p] != sequence && sequences[p]->getScaledBounding().intersects(sequence->getScaledBounding())) {
+                          //  sequence->stop();
                             sequence->setWillCollide(true);
+                           // sequence->setSpeed(-1);
+                        }
                     }
-                }*/
+                }
                 //------------- Omid
                 
                 sequence->update();
@@ -183,43 +181,20 @@ void PlayController::doAction(string name, char op) {
         eraseAll(transitions, (string)"TRAV_RIGT");
     }
 
-    
-    // randomly get a motion TODO: make this so that we don't have double approaches
-    string motion = transitions[1];
-    
-    // split motion into action and direction
-    string action = ofSplitString(motion, "_")[0];
-    string direction = ofSplitString(motion, "_")[1];
-    
-    float scale = appModel->getProperty<float>("DrawSize") / model.getWidth();
-    
-    // create a new MovieSequence
-    MovieSequence* movieSequence = new MovieSequence;
-       movieSequence->push(model.getFirstMovie());
-    movieSequence->setNormalPosition(ofPoint(0,0,0));
-    movieSequence->setNormalScale(scale); // TODO: store scale on the PlayerModel?
-    
-    // create a sequence of motions
-    vector<string> motionSequence;
-    
-    // start standing front and go to -> motion
-    motionSequence.push_back("STND_FRNT");
-    generateMotionsBetween("STND_FRNT", motion, name, motionSequence);
-    motionSequence.push_back(motion);
-    
-    generateMoviesFromMotions(motionSequence, movieSequence, name);
-    getPositionsForMovieSequence(movieSequence, name);
-    movieSequence->normalise();
+  
     
     
     switch (op) {
         case 'l':
             
-         
-
-            
             break;
         case 'r':
+            
+            break;
+        case 'u':
+            
+            break;
+        case 'd':
             
             break;
         default:
