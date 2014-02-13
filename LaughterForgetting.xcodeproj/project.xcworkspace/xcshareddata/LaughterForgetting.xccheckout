@@ -5,7 +5,7 @@
 	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
 	<false/>
 	<key>IDESourceControlProjectIdentifier</key>
-	<string>DBA0F109-8F90-41F1-8CA9-83C324228AAE</string>
+	<string>B552E970-9472-4FE1-B62B-E448EA38EC66</string>
 	<key>IDESourceControlProjectName</key>
 	<string>LaughterForgetting</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
@@ -14,6 +14,8 @@
 		<string>ssh://github.com/omimo/LAF.git</string>
 		<key>34B262B7-7622-4B84-B870-7875DE7EEA0A</key>
 		<string>ssh://github.com/omimo/ofxMVC.git</string>
+		<key>3F801EA8-F853-4CDC-B4CB-BD269D552822</key>
+		<string>https://github.com/kylemcdonald/ofxCv.git</string>
 		<key>4E521AE9-DEA1-48C8-9A01-BEEBF9DC51B4</key>
 		<string>ssh://github.com/omimo/ofxMSAPingPong.git</string>
 		<key>7C0055F5-7A97-4250-BCC8-59AC60CE90EC</key>
@@ -26,8 +28,6 @@
 		<string>ssh://github.com/omimo/ofxXMP.git</string>
 		<key>C34842C8-F095-4091-A0D6-EFFD96700BA3</key>
 		<string>ssh://github.com/omimo/ofxMSAOpenCL.git</string>
-		<key>C7DF4F31-A747-44F4-BFE0-2B7964B502CE</key>
-		<string>ssh://github.com/omimo/ofxCv.git</string>
 		<key>E63AADE1-6839-4028-A8DA-98118E3B6303</key>
 		<string>ssh://github.com/omimo/ofxLogger.git</string>
 		<key>ECA98880-78C6-4431-A5BE-50826A35079F</key>
@@ -43,6 +43,8 @@
 		<string>../..</string>
 		<key>34B262B7-7622-4B84-B870-7875DE7EEA0A</key>
 		<string>../../../../../addons/ofxMVC</string>
+		<key>3F801EA8-F853-4CDC-B4CB-BD269D552822</key>
+		<string>../../../../../addons/ofxCv</string>
 		<key>4E521AE9-DEA1-48C8-9A01-BEEBF9DC51B4</key>
 		<string>../../../../../addons/ofxMSAPingPong</string>
 		<key>7C0055F5-7A97-4250-BCC8-59AC60CE90EC</key>
@@ -55,8 +57,6 @@
 		<string>../../../../../addons/ofxXMP</string>
 		<key>C34842C8-F095-4091-A0D6-EFFD96700BA3</key>
 		<string>../../../../../addons/ofxMSAOpenCL</string>
-		<key>C7DF4F31-A747-44F4-BFE0-2B7964B502CE</key>
-		<string>../../../../../addons/ofxCv</string>
 		<key>E63AADE1-6839-4028-A8DA-98118E3B6303</key>
 		<string>../../../../../addons/ofxLogger</string>
 		<key>ECA98880-78C6-4431-A5BE-50826A35079F</key>
@@ -108,7 +108,7 @@
 			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
 			<string>public.vcs.git</string>
 			<key>IDESourceControlWCCIdentifierKey</key>
-			<string>C7DF4F31-A747-44F4-BFE0-2B7964B502CE</string>
+			<string>3F801EA8-F853-4CDC-B4CB-BD269D552822</string>
 			<key>IDESourceControlWCCName</key>
 			<string>ofxCv</string>
 		</dict>

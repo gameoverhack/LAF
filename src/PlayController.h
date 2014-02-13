@@ -25,6 +25,7 @@ public:
     void makeSequence(string name, int window);
 
     void doAction(string name, char action);
+    void makeManualAgent(string name);
     
 protected:
     

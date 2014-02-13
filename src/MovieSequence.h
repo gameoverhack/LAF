@@ -34,6 +34,30 @@ public:
         return willCollide;
     }
     
+    bool getManual() {
+        return isManual;
+    }
+    
+    void setManual(bool m) {
+        isManual = m;
+    }
+    
+    void setActionType(string axes, string action) {
+        if (axes == "LR")
+            LRAction = action;
+        else if (axes == "UD")
+            UDAction = action;
+    }
+    
+    string getActionType(string axes) {
+        if (axes == "LR")
+            return LRAction;
+        else if (axes == "UD")
+            return UDAction;
+        else return "";
+    }
+
+    
     ofxThreadedVideo* getVideo(){
         return video;
     }
@@ -227,6 +251,9 @@ public:
         currentSequenceFrame = totalSequenceFrames = 0;
         
         willCollide = false;
+        isManual = false;
+        LRAction = "WALK";
+        UDAction = "CLIM";
     }
     
     void setNormalPosition(ofPoint p){
@@ -551,6 +578,10 @@ protected:
     
     bool willCollide;
     int pauseFrame;
+    bool isManual;
+    
+    string LRAction;
+    string UDAction;
     
 };
 

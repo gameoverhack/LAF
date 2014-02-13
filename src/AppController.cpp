@@ -93,7 +93,11 @@ void AppController::setup(){
     appModel->setProperty("AnalysePlayers", 0);
     appModel->setProperty("AnalyseName", (string)"");
     
+    appModel->setProperty("ManualAgentControl", true);
     appModel->setProperty("AutoGenerate", true);
+    
+    appModel->setProperty("AvoidCollisions", true);
+    
     appModel->setProperty("DistanceThreshold", 200.0f);
     appModel->setProperty("FadeTime", 5);
     appModel->setProperty("SyncTime", 2);
@@ -403,18 +407,30 @@ void AppController::keyPressed(ofKeyEventArgs & e){
             }
         }
             break;
-//        case OF_KEY_LEFT:
-//        {
-//            playController->doAction("", 'l');
-//        }
-//            break;
-//            
-//        case OF_KEY_RIGHT:
-//        {
-//            
-//        }
-//            break;
+        case OF_KEY_LEFT:
+        {
+            playController->doAction("BLADIMIRSL", 'l');
+        }
+            break;
+            
+        case OF_KEY_RIGHT:
+        {
+            playController->doAction("BLADIMIRSL", 'r');
+        }
+            break;
         case OF_KEY_UP:
+        {
+            playController->doAction("BLADIMIRSL", 'u');
+        }
+            break;
+            
+        case OF_KEY_DOWN:
+        {
+            playController->doAction("BLADIMIRSL", 'd');
+        }
+            break;
+            
+        case ']':
         {
             vector<MovieSequence*>& sequences = appModel->getSequences();
             for(int i = 0; i < sequences.size(); i++){
@@ -424,7 +440,7 @@ void AppController::keyPressed(ofKeyEventArgs & e){
         }
             break;
             
-        case OF_KEY_DOWN:
+        case '[':
         {
             vector<MovieSequence*>& sequences = appModel->getSequences();
             for(int i = 0; i < sequences.size(); i++){
@@ -434,6 +450,7 @@ void AppController::keyPressed(ofKeyEventArgs & e){
             
         }
             break;
+
 //        case '/':
 //        {
 //            

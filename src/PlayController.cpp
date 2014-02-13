@@ -66,9 +66,15 @@ void PlayController::update(){
         {
             if(appModel->getProperty<bool>("AutoGenerate")){
                 vector<int>& targetWindows = appModel->getWindowTargets();
-                int wTarget = appModel->getUniqueWindowTarget();
+                int wTarget = appModel->getUniqueWindowTarget();// if it is not taken
+                //int wTarget = (int)ofRandom(targetWindows.size());
                 if(wTarget != -1) makeSequence(appModel->getRandomPlayerName(), wTarget);
                // if(wTarget != -1) makeSequence("BLADIMIRSL", wTarget); // Omid: use bladimirsl so that we have all the motions
+            }
+            
+            if(appModel->getProperty<bool>("ManualAgentControl")){
+                makeManualAgent("BLADIMIRSL");
+                appModel->setProperty("ManualAgentControl", false);
             }
             
             playControllerStates.setState(kPLAYCONTROLLER_PLAY);
@@ -86,35 +92,37 @@ void PlayController::update(){
                 MovieSequence* sequence = sequences[i];
                 
                 
-                //------------- Omid: Collision Detection
-                int range = 5;
-                int startFrame = MAX(sequence->getCurrentSequenceFrame(), 0);
-                int endFrame = MIN(sequence->getCurrentSequenceFrame() + range, sequence->getTotalSequenceFrames());
-               
-                sequence->setWillCollide(false);
-                
-                for(int j = startFrame; j < endFrame; j+=1){
-                    for (int w = 0; w < windowPositions.size(); w++) { // with windows except the target window
-                        ofRectangle bounding =sequence->getScaledBoundingAt(j);
-                        
-                        if (w!= sequence->getWindow() && bounding.intersects(windowPositions[w])) {
-                            sequence->stop();
-                            //sequence->StopAt(endFrame);
-                             //sequence->setSpeed(-1);
-                            sequence->setWillCollide(true);
-                        }
-                        
-                    }
+                if (appModel->getProperty<bool>("AvoidCollisions")) {
+                    //------------- Collision Detection
+                    int range = 5;
+                    int startFrame = MAX(sequence->getCurrentSequenceFrame(), 0);
+                    int endFrame = MIN(sequence->getCurrentSequenceFrame() + range, sequence->getTotalSequenceFrames());
                     
-                    for (int p = 0; p < sequences.size();p++) { // with other players
-                        if (sequences[p] != sequence && sequences[p]->getScaledBounding().intersects(sequence->getScaledBounding())) {
-                          //  sequence->stop();
-                            sequence->setWillCollide(true);
-                           // sequence->setSpeed(-1);
+                    sequence->setWillCollide(false);
+                    
+                    for(int j = startFrame; j < endFrame; j+=1){
+                        for (int w = 0; w < windowPositions.size(); w++) { // with windows except the target window
+                            ofRectangle bounding =sequence->getScaledBoundingAt(j);
+                            
+                            if (w!= sequence->getWindow() && bounding.intersects(windowPositions[w])) {
+                                sequence->stop();
+                                //sequence->StopAt(endFrame);
+                                //sequence->setSpeed(-1);
+                                sequence->setWillCollide(true);
+                            }
+                        }
+                        
+                        for (int p = 0; p < sequences.size();p++) { // with other players
+                            if (sequences[p] != sequence && sequences[p]->getScaledBounding().intersects(sequence->getScaledBounding())) {
+                                //  sequence->stop();
+                                sequence->setWillCollide(true);
+                                // sequence->setSpeed(-1);
+                            }
                         }
                     }
+                    //-------------
+
                 }
-                //------------- Omid
                 
                 sequence->update();
                 if(sequence->isSequequenceDone()) appModel->markPlayerForDeletion(sequence->getViewID());
@@ -165,42 +173,156 @@ void PlayController::update(){
 //--------------------------------------------------------------
 void PlayController::doAction(string name, char op) {
     
+  
     
     ofxLogNotice() << "Performing action " << op << " for " << name << endl;
     
-    // get the players model
-    PlayerModel& model = appModel->getPlayerTemplate(name);
-    map<string, ofxXMP>& xmp = model.getXMP();
+    vector<MovieSequence*>& sequences = appModel->getSequences();
+    MovieSequence* movieSequence = new MovieSequence;
     
-    // get the possible approach motions for this window
-    vector<string> transitions = appModel->getGraph("TargetGraph").getPossibleTransitions("STND_LEFT");
-    
-    // CARA's hack -> she doesn't have TRAV_LEFT or TRAV_RIGT
-    if(name == "CARAS" || name == "MEGANHG"){
-        eraseAll(transitions, (string)"TRAV_LEFT");
-        eraseAll(transitions, (string)"TRAV_RIGT");
+    for(int i = 0; i < sequences.size(); i++){
+       if (sequences[i]->getManual())
+           movieSequence = sequences[i];
     }
-
-  
     
+    MovieInfo lastMovie = movieSequence->getLastMovieInSequence();
+    
+    string lastMotion = ofSplitString(lastMovie.markername,"_")[0] + "_" + ofSplitString(lastMovie.markername,"_")[1];
+
+    MotionGraph nestedForwardDirectionGraph = appModel->getGraph("DirectionGraph");
+    nestedForwardDirectionGraph.nestGraph(appModel->getGraph("ForwardMotionGraph").getPossibilitie());
+
+    // create a sequence of motions
+    vector<string> motionSequence;
+
+    cout << name <<endl;
     
     switch (op) {
         case 'l':
+        {
+            // get the possible approach motions for going left
+            string act = movieSequence->getActionType("LR");
+            vector<string> transitions = nestedForwardDirectionGraph.getPossibleTransitions("LEFT");
             
+            // get the first possible transition to the next action to left
+            string motion ="";
+            for (int t=0;t<transitions.size();t++) {
+              if (ofSplitString(transitions[t],"_")[0]==act)
+                  motion = transitions[t];
+            }
+            if (motion!="") {
+                generateMotionsBetween(lastMotion, motion, name, motionSequence);
+                motionSequence.push_back(motion);
+            }
+        }
+    
             break;
         case 'r':
+        {
+            // get the possible approach motions for going right
+            string act = movieSequence->getActionType("LR");
+            vector<string> transitions = nestedForwardDirectionGraph.getPossibleTransitions("RIGHT");
             
+            // get the first possible transition to the next action to right
+            string motion ="";
+            for (int t=0;t<transitions.size();t++) {
+                if (ofSplitString(transitions[t],"_")[0]==act)
+                    motion = transitions[t];
+            }
+            if (motion!="") {
+                generateMotionsBetween(lastMotion, motion, name, motionSequence);
+                motionSequence.push_back(motion);
+            }
+        }
             break;
         case 'u':
+        {
+            // get the possible approach motions for going up
+            string act = movieSequence->getActionType("UD");
+            vector<string> transitions = nestedForwardDirectionGraph.getPossibleTransitions("UP");
             
+            // get the first possible transition to the next action to up
+            string motion ="";
+            for (int t=0;t<transitions.size();t++) {
+                if (ofSplitString(transitions[t],"_")[0]==act && ofSplitString(transitions[t],"_")[1]== "UPPP")
+                    motion = transitions[t];
+            }
+            cout<< motion;
+            
+            if (motion!="") {
+                generateMotionsBetween(lastMotion, motion, name, motionSequence);
+                motionSequence.push_back(motion);
+            }
+        }
             break;
         case 'd':
+        {
+            // get the possible approach motions for going down
+            string act = movieSequence->getActionType("UD");
+            vector<string> transitions = nestedForwardDirectionGraph.getPossibleTransitions("DOWN");
             
+            // get the first possible transition to the next action to down
+            string motion ="";
+            for (int t=0;t<transitions.size();t++) {
+                if (ofSplitString(transitions[t],"_")[0]==act && ofSplitString(transitions[t],"_")[1]== "DOWN")
+                    motion = transitions[t];
+            }
+            if (motion!="") {
+                generateMotionsBetween(lastMotion, motion, name, motionSequence);
+                motionSequence.push_back(motion);
+            }
+        }
             break;
         default:
             break;
     }
+    
+    
+    
+    generateMoviesFromMotions(motionSequence, movieSequence, name);
+    getPositionsForMovieSequence(movieSequence, name);
+    movieSequence->normalise();
+    
+    movieSequence->setSpeed(ofRandom(1.0, 3.0));
+    
+   // appModel->addSequence(movieSequence);
+    movieSequence->play();
+
 }
+
+//--------------------------------------------------------------
+void PlayController::makeManualAgent(string name) {
+    // get the players model
+    PlayerModel& model = appModel->getPlayerTemplate(name);
+    map<string, ofxXMP>& xmp = model.getXMP();
+
+    
+    float scale = appModel->getProperty<float>("DrawSize") / model.getWidth();
+    
+    // create a new MovieSequence
+    MovieSequence* movieSequence = new MovieSequence;
+    movieSequence->setManual(true);
+    movieSequence->setWindow(0);
+    movieSequence->push(model.getFirstMovie());
+    movieSequence->setNormalPosition(ofPoint(0,0,0));
+    movieSequence->setNormalScale(scale); // TODO: store scale on the PlayerModel?
+    
+    // create a sequence of motions
+    vector<string> motionSequence;
+    
+    // start standing front and go to -> motion
+    motionSequence.push_back("STND_FRNT");
+    
+    generateMoviesFromMotions(motionSequence, movieSequence, name);
+    getPositionsForMovieSequence(movieSequence, name);
+    movieSequence->normalise();
+    
+    movieSequence->setSpeed(ofRandom(1.0, 3.0));
+    
+    appModel->addSequence(movieSequence);
+    movieSequence->play();
+}
+
 
 //--------------------------------------------------------------
 void PlayController::makeSequence(string name, int window){
