@@ -105,18 +105,15 @@ void PlayController::update(){
                             ofRectangle bounding =sequence->getScaledBoundingAt(j);
                             
                             if (w!= sequence->getWindow() && bounding.intersects(windowPositions[w])) {
-                                sequence->stop();
-                                //sequence->StopAt(endFrame);
-                                //sequence->setSpeed(-1);
-                                sequence->setWillCollide(true);
+                              
+                                recoverFromCollisionWithWindow(sequence, w);
                             }
                         }
                         
                         for (int p = 0; p < sequences.size();p++) { // with other players
                             if (sequences[p] != sequence && sequences[p]->getScaledBounding().intersects(sequence->getScaledBounding())) {
-                                //  sequence->stop();
-                                sequence->setWillCollide(true);
-                                // sequence->setSpeed(-1);
+                                
+                                recoverFromCollisionWithPlayer(sequence, sequences[p]);
                             }
                         }
                     }
@@ -168,6 +165,21 @@ void PlayController::update(){
             break;
     }
     
+}
+
+//--------------------------------------------------------------
+void PlayController::recoverFromCollisionWithPlayer(MovieSequence* playerSequence, MovieSequence* collisionSequence) {
+    //  sequence->stop();
+    playerSequence->setWillCollide(true);
+    playerSequence->setSpeed(-1);
+}
+
+//--------------------------------------------------------------
+void PlayController::recoverFromCollisionWithWindow(MovieSequence* playerSequence, int window) {
+    //sequence->stop();
+    //sequence->StopAt(endFrame);
+    playerSequence->setSpeed(-1);
+    playerSequence->setWillCollide(true);
 }
 
 //--------------------------------------------------------------
@@ -295,7 +307,8 @@ void PlayController::makeManualAgent(string name) {
     // get the players model
     PlayerModel& model = appModel->getPlayerTemplate(name);
     map<string, ofxXMP>& xmp = model.getXMP();
-
+    
+    
     
     float scale = appModel->getProperty<float>("DrawSize") / model.getWidth();
     
@@ -333,6 +346,7 @@ void PlayController::makeSequence(string name, int window){
     PlayerModel& model = appModel->getPlayerTemplate(name);
     map<string, ofxXMP>& xmp = model.getXMP();
     
+
     // get the possible approach motions for this window
     vector<string> transitions = appModel->getGraph("TargetGraph").getPossibleTransitions(ofToString(window));
     

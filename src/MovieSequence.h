@@ -140,9 +140,13 @@ public:
         ofxLogVerbose() << "Loading next movie: " << currentSequenceIndex << " -> " << currentSequenceIndex + 1 << " of " << sequence.size() << endl;
         
         // increment sequenceIndex TODO: reverse
-        if(currentSequenceIndex + 1 < sequence.size()){
+        if(speed>0 && currentSequenceIndex + 1 < sequence.size()){
             bSequenceIsDone = false;
             currentSequenceIndex++;
+        }
+        else if (speed< 0 && currentSequenceIndex > 0) {
+            bSequenceIsDone = false;
+            currentSequenceIndex--;
         }
         else{
             // TODO: add loop?

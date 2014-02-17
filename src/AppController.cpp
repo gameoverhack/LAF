@@ -93,10 +93,10 @@ void AppController::setup(){
     appModel->setProperty("AnalysePlayers", 0);
     appModel->setProperty("AnalyseName", (string)"");
     
-    appModel->setProperty("ManualAgentControl", true);
+    appModel->setProperty("ManualAgentControl", false);
     appModel->setProperty("AutoGenerate", true);
     
-    appModel->setProperty("AvoidCollisions", true);
+    appModel->setProperty("AvoidCollisions", false);
     
     appModel->setProperty("DistanceThreshold", 200.0f);
     appModel->setProperty("FadeTime", 5);
