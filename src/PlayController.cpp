@@ -172,6 +172,8 @@ void PlayController::recoverFromCollisionWithPlayer(MovieSequence* playerSequenc
     //  sequence->stop();
     playerSequence->setWillCollide(true);
     playerSequence->setSpeed(-1);
+    
+
 }
 
 //--------------------------------------------------------------
@@ -428,6 +430,7 @@ void PlayController::makeSequence(string name, int window){
     getPositionsForMovieSequence(movieSequence, name);
     movieSequence->normalise();
     
+ 
     // calculate target and syncframes
     MovieInfo& lastMovieInSequence = movieSequence->getLastMovieInSequence();
     int goalFrame = movieSequence->getTotalSequenceFrames() - 1;
@@ -439,6 +442,7 @@ void PlayController::makeSequence(string name, int window){
     ofPoint floorOffset = movieSequence->getScaledFloorOffset();
     ofPoint targetPosition = ofPoint(windowPositions[window].x + windowPositions[window].width / 2.0, windowPositions[window].y, 0.0f);
     ofPoint finalSequencePosition = targetPosition - movieSequence->getScaledPositionAt(goalFrame) - floorOffset;
+   
     
     if(emotion != "FALL_BACK"){
         

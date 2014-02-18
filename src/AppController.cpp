@@ -96,7 +96,7 @@ void AppController::setup(){
     appModel->setProperty("ManualAgentControl", false);
     appModel->setProperty("AutoGenerate", true);
     
-    appModel->setProperty("AvoidCollisions", false);
+    appModel->setProperty("AvoidCollisions", true);
     
     appModel->setProperty("DistanceThreshold", 200.0f);
     appModel->setProperty("FadeTime", 5);

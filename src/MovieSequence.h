@@ -109,10 +109,9 @@ public:
         }
 
         // check if we're done TODO: reverse
-        if((video->getIsMovieDone()) || currentMovie.frame + currentMovie.startframe >= currentMovie.endframe) {
-//            if (pauseFrame>1)  //Omid
-//                stop();
-//            else
+        if((video->getIsMovieDone()) || currentMovie.frame + currentMovie.startframe >= currentMovie.endframe
+        || (speed < 0 && video->getCurrentFrame() - currentMovie.startframe < 0)
+           ) {
                 loadNextMovie();
         }
         
@@ -124,6 +123,7 @@ public:
         currentMovie.frame = video->getCurrentFrame() - currentMovie.startframe;
         currentSequenceFrame = sequenceFrames[currentSequenceIndex];
         currentSequenceFrame = currentSequenceFrame + currentMovie.frame;
+        
     }
     
     void updatePosition(){
@@ -158,6 +158,8 @@ public:
         
         MovieInfo& nextMovie = sequence[currentSequenceIndex];
         
+        nextMovie.speed = speed; //ASK: do we update the speed in each movie or for the sequence
+        
         if(nextMovie.path != currentMovie.path){
             ofxLogVerbose() << "Loading next movie: " << nextMovie.name << " " << nextMovie.startframe << endl;
             video->loadMovie(nextMovie.path);
@@ -166,9 +168,16 @@ public:
         }else{
             ofxLogVerbose() << "Loading same movie: " << nextMovie.name << " " << nextMovie.startframe << endl;
         }
+        
+        if (speed> 0) {
         video->setFrame(nextMovie.startframe + frameSeek);
         video->setSpeed(nextMovie.speed);
-        
+        }
+        else {
+            video->setFrame(nextMovie.endframe);
+            video->setSpeed(nextMovie.speed);
+        }
+            
         currentMovie = nextMovie;
         
     }
