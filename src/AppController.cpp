@@ -97,6 +97,7 @@ void AppController::setup(){
     appModel->setProperty("AutoGenerate", true);
     
     appModel->setProperty("AvoidCollisions", true);
+    appModel->setProperty("gridScale", 40.0f);
     
     appModel->setProperty("DistanceThreshold", 200.0f);
     appModel->setProperty("FadeTime", 5);
@@ -104,6 +105,7 @@ void AppController::setup(){
     appModel->setProperty("HeroTime", 80000);
     appModel->setProperty("HeroFade", 10000);
     
+    appModel->setProperty("ShowPathGrid", true);
 //    appModel->setProperty("ShowWindowTargets", true);
 //    appModel->setProperty("ShowWindowOutline", true);
 //    appModel->setProperty("ShowWindowInfo", true);
@@ -119,7 +121,7 @@ void AppController::setup(){
 //    appModel->setProperty("ShowDistanceSmall", true);
 //    //appModel->setProperty("ShowInfoLarge", true);
     appModel->setProperty("ShowInfoSmall", false);
-//    appModel->setProperty("ShowHeroVideos", true);
+    appModel->setProperty("ShowHeroVideos", false);
     
     ofxLogSetLogToFile(appModel->getProperty<bool>("LogToFile"), ofToDataPath("log_" + ofGetTimestampString() + ".log"));
     
@@ -364,6 +366,12 @@ void AppController::keyPressed(ofKeyEventArgs & e){
                 playControllerStates.setState(kPLAYCONTROLLER_MAKE);
             }
         }
+        case 'g':
+        {
+            bool bAuto = appModel->getProperty<bool>("ShowPathGrid");
+            appModel->setProperty("ShowPathGrid", !bAuto);
+        }
+            break;
             
             break;
         case 'n':

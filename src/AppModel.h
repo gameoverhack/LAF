@@ -94,10 +94,10 @@ public:
                 windows.push_back(ofRectangle(ofToFloat(windowPosition[0]), ofToFloat(windowPosition[1]), ofToFloat(windowPosition[2]), ofToFloat(windowPosition[3])));
 
                 file << "//Hole x-y coordinates listed clockwise" << endl;
-                file << ofToFloat(windowPosition[0]) << " " << 660 - ofToFloat(windowPosition[1]) << endl;
-                file << ofToFloat(windowPosition[0]) + ofToFloat(windowPosition[2]) << " " <<  660 - ofToFloat(windowPosition[1]) << endl;
-                file << ofToFloat(windowPosition[0]) + ofToFloat(windowPosition[2]) << " " <<  660 - (ofToFloat(windowPosition[1]) + ofToFloat(windowPosition[3])) << endl;
-                file << ofToFloat(windowPosition[0]) << " " <<  660 -  (ofToFloat(windowPosition[1]) + ofToFloat(windowPosition[3])) << endl;
+                file << ofToFloat(windowPosition[0]) << " " << ofToFloat(windowPosition[1]) << endl;
+                file << ofToFloat(windowPosition[0]) + ofToFloat(windowPosition[2]) << " " << ofToFloat(windowPosition[1]) << endl;
+                file << ofToFloat(windowPosition[0]) + ofToFloat(windowPosition[2]) << " " << (ofToFloat(windowPosition[1]) + ofToFloat(windowPosition[3])) << endl;
+                file << ofToFloat(windowPosition[0]) << " " << (ofToFloat(windowPosition[1]) + ofToFloat(windowPosition[3])) << endl;
 
                 
             }

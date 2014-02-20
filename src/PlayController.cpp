@@ -7,7 +7,8 @@
 //
 
 #include "PlayController.h"
-#include "visilibity.hpp"
+#include "AStarSearch.h"
+
 
 //--------------------------------------------------------------
 PlayController::PlayController(){
@@ -683,46 +684,22 @@ void PlayController::makeSequenceWithPath(string name, int window){
     
     appModel->addSequence(movieSequence);
     movieSequence->play();
-    
-    
+   
+
     
     ofPoint startPos = movieSequence->getScaledPositionAt(1);
     ofPoint endPos = windowPositions[window].getCenter();
     cout << startPos.x << " " << startPos.y << endl;
     cout << endPos.x << " " << endPos.y << endl;
     
-    // From visibility demo
     
-    //Set geometric robustness constant
-    //:WARNING:
-    //may need to modify epsilon for Environments with greatly varying
-    //scale of features
-    double epsilon = 0.000000001;
-    
-    VisiLibity::Environment my_environment("/Users/omid/Code/of007/apps/myApps/LAF/bin/data/environment.txt"); //TODO: read from the correct path 
-    
-    assert(!my_environment.is_valid( epsilon ));
-    
-    VisiLibity::Point start(startPos.x, startPos.y);
-    VisiLibity::Point finish(endPos.x, endPos.y);
-    
-    //Compute shortest path through environment from start to finish
-    VisiLibity::Polyline my_shortest_path;
-    my_shortest_path = my_environment.shortest_path(start, finish, epsilon);
-    
-    ofPolyline path;
+    // find the paths using A*
+    vector< vector< ofPoint > > paths = findPaths(startPos,endPos);
     
     
-    //Populate the output
-    for (int i=0; i<my_shortest_path.size(); i++){
-        path.addVertex(my_shortest_path[i].x(),my_shortest_path[i].y());
-        std::cout << "x: " << my_shortest_path[i].x();
-        std::cout << "y: " << my_shortest_path[i].y() << std::endl;
-    }
-
-    movieSequence->setCurrentPath(path);
+    movieSequence->setCurrentPath(paths[0]);
     
-    //
+ 
 }
 
 

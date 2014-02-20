@@ -7,6 +7,7 @@
 //
 
 #include "AppView.h"
+#include "AStarSearch.h"
 
 //--------------------------------------------------------------
 AppView::AppView(){
@@ -412,7 +413,7 @@ void AppView::update(){
             }
             
             if(appModel->getProperty<bool>("ShowDistanceSmall")){ // Omid
-                ofSetColor(0, iFade, 0);/*
+                ofSetColor(0, 100, 0);/*
                 ofCircle(sequence->getScaledCentre(), 4);
                 ofPoint playCenter = sequence->getScaledCentre();
                 ofPoint distanceTrailCenter;
@@ -422,7 +423,9 @@ void AppView::update(){
                     distanceTrailCenter.set(playCenter.x, wC.y);
                 ofLine(sequence->getScaledCentre(), distanceTrailCenter);
                 */
+                ofSetLineWidth(2.0f);
                 sequence->getCurrentPath().draw();
+                ofSetLineWidth(1.0f);
             }
             
             if(appModel->getProperty<bool>("ShowInfoSmall") && appModel->hasProperty<string>("MovieInfo_" + ofToString(sequence->getViewID()))){
@@ -464,6 +467,39 @@ void AppView::update(){
                 }
                 windowFades[i].cFade = windowFades[i].numPlayers = 0;
             }
+        }
+        
+        if(appModel->getProperty<bool>("ShowPathGrid")){
+            
+            myGraphDescription myGraphClassInstance;
+            // Now set that instance and its functions as our function container
+            
+            ofRectangle biggerEnv;
+
+            
+//            biggerEnv.x = 0;
+//            biggerEnv.y = 0;
+//            biggerEnv.width = appModel->getProperty<float>("OutputWidth");
+//            biggerEnv.height = appModel->getProperty<float>("OutputHeight");
+            
+            biggerEnv.x = -appModel->getProperty<float>("OutputWidth")/2;
+            biggerEnv.y = -appModel->getProperty<float>("OutputHeight");
+            biggerEnv.width = appModel->getProperty<float>("OutputWidth")*2;
+            biggerEnv.height = appModel->getProperty<float>("OutputHeight")*3;
+            
+            ofSetColor(200, 0, 100);
+            ofRect(biggerEnv);
+            
+             ofSetLineWidth(0.5f);
+            ofSetColor(100, 0, 200);
+            float gridScale = appModel->getProperty<float>("gridScale");
+            for (int i=0;i<biggerEnv.width/gridScale;i++) {
+                for (int j=0;j<biggerEnv.height/gridScale;j++) {
+                    ofLine(biggerEnv.x, biggerEnv.y+j*gridScale, biggerEnv.width + biggerEnv.x, biggerEnv.y+j*gridScale);
+                    ofLine(biggerEnv.x+i*gridScale, biggerEnv.y, biggerEnv.x+i*gridScale, biggerEnv.y+biggerEnv.height);
+                }
+            }
+            
         }
 
         ofDisableBlendMode();
