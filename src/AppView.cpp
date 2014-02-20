@@ -423,8 +423,9 @@ void AppView::update(){
                     distanceTrailCenter.set(playCenter.x, wC.y);
                 ofLine(sequence->getScaledCentre(), distanceTrailCenter);
                 */
-                ofSetLineWidth(2.0f);
-                sequence->getCurrentPath().draw();
+                ofSetLineWidth(4.0f);
+                if (sequence->getCurrentPath().size() >0)
+                    sequence->getCurrentPath().draw();
                 ofSetLineWidth(1.0f);
             }
             

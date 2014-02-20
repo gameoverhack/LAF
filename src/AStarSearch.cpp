@@ -55,18 +55,24 @@
         for (int a=-1; a<=1; a+=2) {
             tn.x = n.x+a;
             tn.y = n.y;
-            if (isInEnv(tn) && !isInWindow(tn)) {
+            if (!isInWindows(tn) && isInEnv(tn)) {
                 s->push_back(tn);
                 c->push_back(sqrt((double)(a*a)));
+            }
+            else {
+                cout << "fdasfsdfdsfsadfefewfewewgergergergergeargergergergerg "<< isInWindows(tn) << endl;
             }
         }
         
         for (int b=-1; b<=1; b+=2) {
             tn.x = n.x;
             tn.y = n.y+b;
-            if (isInEnv(tn) && !isInWindow(tn)) {
+            if (!isInWindows(tn) && isInEnv(tn)) {
                 s->push_back(tn);
                 c->push_back(sqrt((double)(b*b)));
+            }
+            else {
+                cout << "fdasfsdfdsfsadfefewfewewgergergergergeargergergergerg "<< isInWindows(tn) << endl;
             }
         }
         
@@ -105,23 +111,28 @@ bool myGraphDescription::isInEnv(myNode& n) {
     scaledNode.x = n.x * gridScale;
     scaledNode.y = n.y * gridScale;
     
-    if (biggerEnv.inside(scaledNode))
-        return true;
+    return biggerEnv.inside(scaledNode);
+
 }
 
-bool myGraphDescription::isInWindow(myNode& n) {
+bool myGraphDescription::isInWindows(myNode& n) {
     float gridScale = appModel->getProperty<float>("gridScale");
+    ofRectangle bounding;
     
     ofPoint scaledNode;
     scaledNode.x = n.x * gridScale;
     scaledNode.y = n.y * gridScale;
     
+    bounding.setFromCenter(scaledNode,appModel->getProperty<float>("pathBoundingSize"),appModel->getProperty<float>("pathBoundingSize"));
+    
     vector<ofRectangle> windows = appModel->getWindows();
     
     for (int w=0;w<windows.size();w++) {
-        if (windows[w].inside(scaledNode))
-            return false;
+        if (windows[w].intersects(bounding))
+            return true;
     }
+    
+    return false;
 }
 
 

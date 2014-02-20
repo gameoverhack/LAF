@@ -687,18 +687,18 @@ void PlayController::makeSequenceWithPath(string name, int window){
    
 
     
-    ofPoint startPos = movieSequence->getScaledPositionAt(1);
-    ofPoint endPos = windowPositions[window].getCenter();
+    ofPoint startPos = finalSequencePosition;
+    ofPoint endPos = targetPosition;
     cout << startPos.x << " " << startPos.y << endl;
     cout << endPos.x << " " << endPos.y << endl;
     
     
     // find the paths using A*
     vector< vector< ofPoint > > paths = findPaths(startPos,endPos);
-    
-    
-    movieSequence->setCurrentPath(paths[0]);
-    
+    if (paths.size()>0)
+        movieSequence->setCurrentPath(paths[0]);
+    else
+        ofxLogVerbose() << "No path found for sequence " << appModel->getSequences().size()-1 << endl;
  
 }
 

@@ -23,7 +23,7 @@ public:
     bool isAccessible(myNode& n);
     bool stopSearch_fp(myNode& n);
     bool isInEnv(myNode& n);
-    bool isInWindow(myNode& n);
+    bool isInWindows(myNode& n);
     myNode target;
 };
 

@@ -97,7 +97,9 @@ void AppController::setup(){
     appModel->setProperty("AutoGenerate", true);
     
     appModel->setProperty("AvoidCollisions", true);
-    appModel->setProperty("gridScale", 40.0f);
+    appModel->setProperty("gridScale", 10.0f);
+    appModel->setProperty("pathBoundingSize", 1.0f);
+
     
     appModel->setProperty("DistanceThreshold", 200.0f);
     appModel->setProperty("FadeTime", 5);
@@ -105,7 +107,7 @@ void AppController::setup(){
     appModel->setProperty("HeroTime", 80000);
     appModel->setProperty("HeroFade", 10000);
     
-    appModel->setProperty("ShowPathGrid", true);
+    appModel->setProperty("ShowPathGrid", false);
 //    appModel->setProperty("ShowWindowTargets", true);
 //    appModel->setProperty("ShowWindowOutline", true);
 //    appModel->setProperty("ShowWindowInfo", true);
@@ -417,24 +419,28 @@ void AppController::keyPressed(ofKeyEventArgs & e){
             break;
         case OF_KEY_LEFT:
         {
-            playController->doAction("BLADIMIRSL", 'l');
+            if (appModel->getProperty<bool>("ManualAgentControl"))
+                playController->doAction("BLADIMIRSL", 'l');
         }
             break;
             
         case OF_KEY_RIGHT:
         {
-            playController->doAction("BLADIMIRSL", 'r');
+            if (appModel->getProperty<bool>("ManualAgentControl"))
+                playController->doAction("BLADIMIRSL", 'r');
         }
             break;
         case OF_KEY_UP:
         {
-            playController->doAction("BLADIMIRSL", 'u');
+            if (appModel->getProperty<bool>("ManualAgentControl"))
+                playController->doAction("BLADIMIRSL", 'u');
         }
             break;
             
         case OF_KEY_DOWN:
         {
-            playController->doAction("BLADIMIRSL", 'd');
+            if (appModel->getProperty<bool>("ManualAgentControl"))
+                playController->doAction("BLADIMIRSL", 'd');
         }
             break;
             
