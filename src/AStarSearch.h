@@ -24,6 +24,7 @@ public:
     bool stopSearch_fp(myNode& n);
     bool isInEnv(myNode& n);
     bool isInWindows(myNode& n);
+    double calcDistToWindows(myNode& n);
     myNode target;
 };
 

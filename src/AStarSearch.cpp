@@ -57,10 +57,8 @@
             tn.y = n.y;
             if (!isInWindows(tn) && isInEnv(tn)) {
                 s->push_back(tn);
-                c->push_back(sqrt((double)(a*a)));
-            }
-            else {
-                cout << "fdasfsdfdsfsadfefewfewewgergergergergeargergergergerg "<< isInWindows(tn) << endl;
+                //c->push_back(sqrt((double)(a*a)));
+                c->push_back(calcDistToWindows(tn));
             }
         }
         
@@ -69,10 +67,8 @@
             tn.y = n.y+b;
             if (!isInWindows(tn) && isInEnv(tn)) {
                 s->push_back(tn);
-                c->push_back(sqrt((double)(b*b)));
-            }
-            else {
-                cout << "fdasfsdfdsfsadfefewfewewgergergergergeargergergergerg "<< isInWindows(tn) << endl;
+                //c->push_back(sqrt((double)(b*b)));
+                c->push_back(calcDistToWindows(tn));
             }
         }
         
@@ -83,6 +79,8 @@
 		int dx = abs(n1.x - n2.x);
 		int dy = abs(n1.y - n2.y);
 		return (sqrt((double)(dx*dx + dy*dy))); // Euclidean distance as heuristics
+        
+//        return 0;//calcDistToWindows(n2);
 	}
 
     bool myGraphDescription::stopSearch_fp(myNode& n) {
@@ -135,6 +133,79 @@ bool myGraphDescription::isInWindows(myNode& n) {
     return false;
 }
 
+double myGraphDescription::calcDistToWindows(myNode& n) {
+    double cost = 0;
+    
+    float gridScale = appModel->getProperty<float>("gridScale");
+    
+    ofPoint scaledNode;
+    scaledNode.x = n.x * gridScale;
+    scaledNode.y = n.y * gridScale;
+    
+    vector<ofRectangle> windows = appModel->getWindows();
+    
+    for (int w=0;w<windows.size();w++) {
+        if (windows[w].getPosition().squareDistance(scaledNode) < 100)
+            cost += windows[w].getPosition().squareDistance(scaledNode);
+    }
+    
+    return cost;
+}
+/*
+float DistancePointToRectangle(ofPoint point, ofRectangle rect) {
+    //  Calculate a distance between a point and a rectangle.
+    //  The area around/in the rectangle is defined in terms of
+    //  several regions:
+    //
+    //  O--x
+    //  |
+    //  y
+    //
+    //
+    //        I   |    II    |  III
+    //      ======+==========+======   --yMin
+    //       VIII |  IX (in) |  IV
+    //      ======+==========+======   --yMax
+    //       VII  |    VI    |   V
+    //
+    //
+    //  Note that the +y direction is down because of Unity's GUI coordinates.
+    
+    if (point.x < rect.getMinX()) { // Region I, VIII, or VII
+        if (point.y < rect.getMinY()) { // I
+            return point.distanceSquared(ofPoint(rect.getMinX(), rect.getMinY()));
+        }
+        else if (point.y > rect.getMaxY()) { // VII
+            return point.distanceSquared(ofPoint(rect.getMinX(), rect.getMaxY()));
+        }
+        else { // VIII
+            return rect.xMin - point.x;
+        }
+    }
+    else if (point.x > rect.xMax) { // Region III, IV, or V
+        if (point.y < rect.yMin) { // III
+            Vector2 diff = point - new Vector2(rect.xMax, rect.yMin);
+            return diff.magnitude;
+        }
+        else if (point.y > rect.yMax) { // V
+            Vector2 diff = point - new Vector2(rect.xMax, rect.yMax);
+            return diff.magnitude;
+        }
+        else { // IV
+            return point.x - rect.xMax;
+        }
+    }
+    else { // Region II, IX, or VI
+        if (point.y < rect.yMin) { // II
+            return rect.yMin - point.y;
+        }
+        else if (point.y > rect.yMax) { // VI
+            return point.y - rect.yMax;
+        }
+        else { // IX
+            return 0f;
+        }
+    }*/
 
 // =============================================================================
 
