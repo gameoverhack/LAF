@@ -57,6 +57,22 @@ public:
         else return "";
     }
 
+    void setPlayerName(string name) {
+        playerName = name;
+    }
+    
+    string getPlayerName() {
+        return playerName;
+    }
+    
+    ofPolyline getCurrentPath() {
+        return currentPath;
+    }
+    
+    void setCurrentPath(ofPolyline p) {
+        currentPath.clear();
+        currentPath = p;
+    }
     
     ofxThreadedVideo* getVideo(){
         return video;
@@ -106,6 +122,10 @@ public:
             // render
             //updateRender();
             
+        }
+        
+        if (pauseFrame > -1 && pauseFrame >= video->getCurrentFrame() - currentMovie.startframe) {
+            stop();
         }
 
         // check if we're done TODO: reverse
@@ -186,6 +206,7 @@ public:
         ofxLogVerbose() << "Play Sequence" << endl;
         setPaused(false);
         bSequenceIsDone = false;
+        pauseFrame = -1;
         loadNextMovie();
     }
     
@@ -264,9 +285,11 @@ public:
         currentSequenceFrame = totalSequenceFrames = 0;
         
         willCollide = false;
+        pauseFrame = -1;
         isManual = false;
         LRAction = "WALK";
         UDAction = "CLIM";
+        playerName = "";
     }
     
     void setNormalPosition(ofPoint p){
@@ -593,8 +616,12 @@ protected:
     int pauseFrame;
     bool isManual;
     
+    string playerName;
+    
     string LRAction;
     string UDAction;
+    
+    ofPolyline currentPath; //TODO: Use templates
     
 };
 

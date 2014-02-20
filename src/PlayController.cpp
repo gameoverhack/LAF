@@ -7,6 +7,7 @@
 //
 
 #include "PlayController.h"
+#include "visilibity.hpp"
 
 //--------------------------------------------------------------
 PlayController::PlayController(){
@@ -68,7 +69,7 @@ void PlayController::update(){
                 vector<int>& targetWindows = appModel->getWindowTargets();
                 int wTarget = appModel->getUniqueWindowTarget();// if it is not taken
                 //int wTarget = (int)ofRandom(targetWindows.size());
-                if(wTarget != -1) makeSequence(appModel->getRandomPlayerName(), wTarget);
+                if(wTarget != -1) makeSequenceWithPath(appModel->getRandomPlayerName(), wTarget);
                // if(wTarget != -1) makeSequence("BLADIMIRSL", wTarget); // Omid: use bladimirsl so that we have all the motions
             }
             
@@ -169,19 +170,44 @@ void PlayController::update(){
 
 //--------------------------------------------------------------
 void PlayController::recoverFromCollisionWithPlayer(MovieSequence* playerSequence, MovieSequence* collisionSequence) {
-    //  sequence->stop();
+    //  playerSequence->stop();
     playerSequence->setWillCollide(true);
     playerSequence->setSpeed(-1);
     
+
 
 }
 
 //--------------------------------------------------------------
 void PlayController::recoverFromCollisionWithWindow(MovieSequence* playerSequence, int window) {
-    //sequence->stop();
-    //sequence->StopAt(endFrame);
-    playerSequence->setSpeed(-1);
+    // get the players model
+    PlayerModel& model = appModel->getPlayerTemplate(playerSequence->getPlayerName());
+    map<string, ofxXMP>& xmp = model.getXMP();
+    
+    MovieInfo currentMovie = playerSequence->getCurrentMovie();
+    
+    ofxXMPMarker lastMarker = xmp[currentMovie.name].getLastMarker(currentMovie.frame);
+    ofxXMPMarker nextMarker = xmp[currentMovie.name].getNextMarker(currentMovie.frame);
+    
+    
+    cout << "lastmarker name = " << lastMarker.getName() << endl;
+    cout << "lastmarker st frame =  " << lastMarker.getStartFrame() << endl;
+    cout << "nextmarker st frame =  " << nextMarker.getStartFrame() << endl;
+    cout << "cframe = " << currentMovie.frame << endl;
+    
+    
+    //playerSequence->stop();
+   // playerSequence->StopAt(lastMarker.getStartFrame());
+    playerSequence->setSpeed(-1* abs(playerSequence->getSpeed()));
     playerSequence->setWillCollide(true);
+    
+    /*
+     change stopAt to changeSequenceAt (frame, new motion/movie sequence)
+     so, first we find an alternate path/sequence,
+     second, the player moves back to the previous marker,
+     third, the player replaces its old sequecnce with the new sequence and plays it!
+     
+     */
 }
 
 //--------------------------------------------------------------
@@ -322,6 +348,8 @@ void PlayController::makeManualAgent(string name) {
     movieSequence->setNormalPosition(ofPoint(0,0,0));
     movieSequence->setNormalScale(scale); // TODO: store scale on the PlayerModel?
     
+    movieSequence->setPlayerName(name);
+    
     // create a sequence of motions
     vector<string> motionSequence;
     
@@ -373,6 +401,8 @@ void PlayController::makeSequence(string name, int window){
     movieSequence->push(model.getFirstMovie());
     movieSequence->setNormalPosition(ofPoint(0,0,0));
     movieSequence->setNormalScale(scale); // TODO: store scale on the PlayerModel?
+    
+    movieSequence->setPlayerName(name);
     
     // create a sequence of motions
     vector<string> motionSequence;
@@ -494,8 +524,207 @@ void PlayController::makeSequence(string name, int window){
     
     appModel->addSequence(movieSequence);
     movieSequence->play();
-
 }
+
+//--------------------------------------------------------------
+void PlayController::makeSequenceWithPath(string name, int window){
+    
+    ofxLogNotice() << "Making sequence for " << name << " targeting window " << window << endl;
+    
+    // get the players model
+    PlayerModel& model = appModel->getPlayerTemplate(name);
+    map<string, ofxXMP>& xmp = model.getXMP();
+    
+    
+    // get the possible approach motions for this window
+    vector<string> transitions = appModel->getGraph("TargetGraph").getPossibleTransitions(ofToString(window));
+    
+    // CARA's hack -> she doesn't have TRAV_LEFT or TRAV_RIGT
+    if(name == "CARAS" || name == "MEGANHG"){
+        eraseAll(transitions, (string)"TRAV_LEFT");
+        eraseAll(transitions, (string)"TRAV_RIGT");
+    }
+    
+    // randomly get a motion TODO: make this so that we don't have double approaches
+    string motion = transitions[(int)ofRandom(transitions.size())];
+    
+    // split motion into action and direction
+    string action = ofSplitString(motion, "_")[0];
+    string direction = ofSplitString(motion, "_")[1];
+    
+    float scale = appModel->getProperty<float>("DrawSize") / model.getWidth();
+    
+    // create a new MovieSequence
+    MovieSequence* movieSequence = new MovieSequence;
+    movieSequence->setWindow(window);
+    movieSequence->push(model.getFirstMovie());
+    movieSequence->setNormalPosition(ofPoint(0,0,0));
+    movieSequence->setNormalScale(scale); // TODO: store scale on the PlayerModel?
+    
+    movieSequence->setPlayerName(name);
+    
+    // create a sequence of motions
+    vector<string> motionSequence;
+    
+    // start standing front and go to -> motion
+    motionSequence.push_back("STND_FRNT");
+    generateMotionsBetween("STND_FRNT", motion, name, motionSequence);
+    motionSequence.push_back(motion);
+    
+    generateMoviesFromMotions(motionSequence, movieSequence, name);
+    getPositionsForMovieSequence(movieSequence, name);
+    movieSequence->normalise();
+    
+    // calulate and insert loops of the action to travel far enough to get to the target window
+    vector<ofRectangle>& windowPositions = appModel->getWindows();
+    
+    int inserts = 0;
+    float target = appModel->getProperty<float>("DrawSize");
+    MovieInfo loopMovie = movieSequence->getLastMovieInSequence();
+    
+    if(direction == "LEFT" || direction == "RIGT"){
+        if(direction == "RIGT") target += windowPositions[window].x;
+        if(direction == "LEFT") target += ofGetWidth() - windowPositions[window].x;
+        while (movieSequence->getScaledTotalBounding().width < target) {
+            inserts++;
+            movieSequence->push(loopMovie);
+            movieSequence->normalise();
+            cout << direction << " " << movieSequence->getScaledTotalBounding().width << endl;
+        }
+    }else if(direction == "DOWN" || direction == "UPPP") {
+        if(direction == "DOWN") target += windowPositions[window].y;
+        if(direction == "UPPP") target = 2 * target + ofGetHeight() - windowPositions[window].y;
+        while (movieSequence->getScaledTotalBounding().height < target) {
+            inserts++;
+            movieSequence->push(loopMovie);
+            movieSequence->normalise();
+            cout << direction << " " << movieSequence->getScaledTotalBounding().height << endl;
+        }
+    }
+    
+    motionSequence.clear();
+    
+    // randomise SYNCMOTIONS or WAITMOTIONS TODO: make this selectable
+    vector<string> vEndMotionType(2);
+    vEndMotionType[0] = "SYNCMOTIONS";
+    vEndMotionType[1] = "WAITMOTIONS";
+    string endMotionType = random(vEndMotionType);
+    
+    vector<string>& endMotions = appModel->getGraph("EndGraph").getPossibleTransitions(endMotionType);
+    string emotion = random(endMotions);
+    
+    generateMotionsBetween(motion, emotion, name, motionSequence);
+    
+    generateMoviesFromMotions(motionSequence, movieSequence, name);
+    getPositionsForMovieSequence(movieSequence, name);
+    movieSequence->normalise();
+    
+    
+    // calculate target and syncframes
+    MovieInfo& lastMovieInSequence = movieSequence->getLastMovieInSequence();
+    int goalFrame = movieSequence->getTotalSequenceFrames() - 1;
+    int syncFrame = goalFrame - lastMovieInSequence.startframe + xmp[lastMovieInSequence.name].getMarker(motionSequence[motionSequence.size() - 1]).getStartFrame();
+    
+    movieSequence->setGoalFrame(goalFrame - lastMovieInSequence.endframe - lastMovieInSequence.startframe);
+    movieSequence->setSyncFrame(syncFrame);
+    
+    ofPoint floorOffset = movieSequence->getScaledFloorOffset();
+    ofPoint targetPosition = ofPoint(windowPositions[window].x + windowPositions[window].width / 2.0, windowPositions[window].y, 0.0f);
+    ofPoint finalSequencePosition = targetPosition - movieSequence->getScaledPositionAt(goalFrame) - floorOffset;
+    
+    
+    if(emotion != "FALL_BACK"){
+        
+        movieSequence->setHug(true);
+        
+        // reverse the motion to get back out
+        motionSequence.clear();
+        
+        if(emotion == "LWNG_FRNT"){
+            motionSequence.push_back("LWNG_FRNT");
+            motionSequence.push_back("LWNG_FRNT");
+        }
+        
+        if(emotion == "SITT_FRNT"){
+            motionSequence.push_back("SITT_FRNT");
+            motionSequence.push_back("SITT_FRNT");
+            motionSequence.push_back("CRCH_FRNT");
+        }
+        
+        motionSequence.push_back("STND_FRNT");
+        
+        string reversemotion;
+        if(direction == "LEFT") reversemotion = action + "_RIGT";
+        if(direction == "RIGT") reversemotion = action + "_LEFT";
+        if(direction == "DOWN") reversemotion = action + "_UPPP";
+        if(direction == "UPPP") reversemotion = action + "_DOWN";
+        
+        if(emotion == "SITT_FRNT"){
+            generateMotionsBetween("CRCH_FRNT", reversemotion, name, motionSequence);
+        }else{
+            generateMotionsBetween("STND_FRNT", reversemotion, name, motionSequence);
+        }
+        
+        for(int i = 0; i < inserts + 2; i++) motionSequence.push_back(reversemotion);
+        
+        generateMoviesFromMotions(motionSequence, movieSequence, name);
+        getPositionsForMovieSequence(movieSequence, name);
+    }else{
+        movieSequence->setHug(false);
+    }
+    
+    movieSequence->setNormalPosition(finalSequencePosition);
+    movieSequence->normalise();
+    
+    ofxLogVerbose() << "Adding MovieSequence" << movieSequence->getMovieSequenceAsString() << endl;
+    ofxLogVerbose() << "E(nd) Motion: " << endMotionType << " of " << emotion << endl;
+    
+    movieSequence->setSpeed(ofRandom(1.0, 3.0));
+    
+    appModel->addSequence(movieSequence);
+    movieSequence->play();
+    
+    
+    
+    ofPoint startPos = movieSequence->getScaledPositionAt(1);
+    ofPoint endPos = windowPositions[window].getCenter();
+    cout << startPos.x << " " << startPos.y << endl;
+    cout << endPos.x << " " << endPos.y << endl;
+    
+    // From visibility demo
+    
+    //Set geometric robustness constant
+    //:WARNING:
+    //may need to modify epsilon for Environments with greatly varying
+    //scale of features
+    double epsilon = 0.000000001;
+    
+    VisiLibity::Environment my_environment("/Users/omid/Code/of007/apps/myApps/LAF/bin/data/environment.txt"); //TODO: read from the correct path 
+    
+    assert(!my_environment.is_valid( epsilon ));
+    
+    VisiLibity::Point start(startPos.x, startPos.y);
+    VisiLibity::Point finish(endPos.x, endPos.y);
+    
+    //Compute shortest path through environment from start to finish
+    VisiLibity::Polyline my_shortest_path;
+    my_shortest_path = my_environment.shortest_path(start, finish, epsilon);
+    
+    ofPolyline path;
+    
+    
+    //Populate the output
+    for (int i=0; i<my_shortest_path.size(); i++){
+        path.addVertex(my_shortest_path[i].x(),my_shortest_path[i].y());
+        std::cout << "x: " << my_shortest_path[i].x();
+        std::cout << "y: " << my_shortest_path[i].y() << std::endl;
+    }
+
+    movieSequence->setCurrentPath(path);
+    
+    //
+}
+
 
 //--------------------------------------------------------------
 void PlayController::generateMoviesFromMotions(vector<string>& motionSequence, MovieSequence* movieSequence, string name){

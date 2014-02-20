@@ -412,7 +412,7 @@ void AppView::update(){
             }
             
             if(appModel->getProperty<bool>("ShowDistanceSmall")){ // Omid
-                ofSetColor(0, iFade, 0);
+                ofSetColor(0, iFade, 0);/*
                 ofCircle(sequence->getScaledCentre(), 4);
                 ofPoint playCenter = sequence->getScaledCentre();
                 ofPoint distanceTrailCenter;
@@ -421,6 +421,8 @@ void AppView::update(){
                 else
                     distanceTrailCenter.set(playCenter.x, wC.y);
                 ofLine(sequence->getScaledCentre(), distanceTrailCenter);
+                */
+                sequence->getCurrentPath().draw();
             }
             
             if(appModel->getProperty<bool>("ShowInfoSmall") && appModel->hasProperty<string>("MovieInfo_" + ofToString(sequence->getViewID()))){

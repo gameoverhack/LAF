@@ -16,6 +16,7 @@
 		2023ef517ed2d8b397511d4bf2052690 /* Helpers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = b9076967f8c54a04362c04aa9e3bb906 /* Helpers.cpp */; };
 		250a95ba26587be85db0a353e6e1dea2 /* ofxCvColorImage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ce9c7160245b19131dae61282ee6cb53 /* ofxCvColorImage.cpp */; };
 		28090deb5109115003e8f1c540f04092 /* UdpSocketWin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5928aa323f5c2690b06c837d8d036f55 /* UdpSocketWin.cpp */; };
+		2E97C17B18B584DD00CF1BA5 /* visilibity.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E97C17918B584DD00CF1BA5 /* visilibity.cpp */; };
 		33b32c35c83434bbea521bb68d8af36c /* MSAOpenCLImage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = d5fd533ac868acec76d7cbbc2b5f654c /* MSAOpenCLImage.cpp */; };
 		43a33bf0edf818e4fb3cab1836289157 /* ofxThreadedVideo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5e45d8c6fd325c1bb31af2ce68a43b0b /* ofxThreadedVideo.cpp */; };
 		45cc483a999bf1065a6b926c53724159 /* Distance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9dbd717072c35d324e1016697d7aa720 /* Distance.cpp */; };
@@ -183,6 +184,8 @@
 		23640f57df6c4bb6bfc5da4c2199c7dd /* PacketListener.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = PacketListener.h; path = ../../../addons/ofxOsc/libs/oscpack/src/ip/PacketListener.h; sourceTree = SOURCE_ROOT; };
 		26ef3e71a07c6948eaf6709ef2dcacc0 /* ofxTCPManager.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = ofxTCPManager.h; path = ../../../addons/ofxNetwork/src/ofxTCPManager.h; sourceTree = SOURCE_ROOT; };
 		2834d88a62cd23f3de2c47d1c39bd645 /* ofxButton.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = ofxButton.h; path = ../../../addons/ofxGui/src/ofxButton.h; sourceTree = SOURCE_ROOT; };
+		2E97C17918B584DD00CF1BA5 /* visilibity.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = visilibity.cpp; sourceTree = "<group>"; };
+		2E97C17A18B584DD00CF1BA5 /* visilibity.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = visilibity.hpp; sourceTree = "<group>"; };
 		2a5b1fad3f30c8065c396acbb72e5d95 /* NetworkingUtilsWin.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 30; name = NetworkingUtilsWin.cpp; path = ../../../addons/ofxOsc/libs/oscpack/src/ip/win32/NetworkingUtilsWin.cpp; sourceTree = SOURCE_ROOT; };
 		2b0a017124e9362d0bd153a135315311 /* WXMPIterator.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = WXMPIterator.hpp; path = "../../../addons/ofxXMP/libs/xmp/include/client-glue/WXMPIterator.hpp"; sourceTree = SOURCE_ROOT; };
 		2b40eda85beb63e46785bc299a638898 /* tinyxml.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 30; name = tinyxml.cpp; path = ../../../addons/ofxXmlSettings/libs/tinyxml.cpp; sourceTree = SOURCE_ROOT; };
@@ -1064,6 +1067,8 @@
 		77EF15D7187724EB00104A92 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				2E97C17918B584DD00CF1BA5 /* visilibity.cpp */,
+				2E97C17A18B584DD00CF1BA5 /* visilibity.hpp */,
 				DCAC66DC1890AEF600316A1F /* Kalman.cpp */,
 				DCAC66DD1890AEF600316A1F /* Kalman.h */,
 				77DCBB031871E30C00EB911C /* FileList.h */,
@@ -1536,6 +1541,8 @@
 /* Begin PBXProject section */
 		E4B69B4C0A3A1720003C02F2 /* Project object */ = {
 			isa = PBXProject;
+			attributes = {
+			};
 			buildConfigurationList = E4B69B4D0A3A1720003C02F2 /* Build configuration list for PBXProject "LaughterForgetting" */;
 			compatibilityVersion = "Xcode 2.4";
 			developmentRegion = English;
@@ -1666,6 +1673,7 @@
 				771C8CE918805D4300B7859B /* AnalyzeController.cpp in Sources */,
 				771C8CEC18805D4F00B7859B /* PlayController.cpp in Sources */,
 				7761E65318984442005EF134 /* KeyModifiers.mm in Sources */,
+				2E97C17B18B584DD00CF1BA5 /* visilibity.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
