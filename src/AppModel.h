@@ -77,12 +77,6 @@ public:
         
         ofBuffer b = ofBufferFromFile(ofToDataPath(path));
 
-        ofFile file("environment.txt",ofFile::WriteOnly); // Build the environment for path planning TODO: move this to a separate function
-        
-        file << "//Environment Model" << endl << "//Outer Boundary x-y coordinates listed counterclockwise" << endl;
-       // file << "0  0" << endl << "1920 0" << endl << "1920 660" << endl << "0  660" << endl;
-         file << "-1920  -660" << endl << "-1920 1300" << endl << "4000 1300" << endl << "1920  -660" << endl;
-
         int lineCount = 0;
         windows.clear();
         
@@ -92,18 +86,9 @@ public:
             if(windowPosition.size() == 4){
                 addWindowTarget(windows.size());
                 windows.push_back(ofRectangle(ofToFloat(windowPosition[0]), ofToFloat(windowPosition[1]), ofToFloat(windowPosition[2]), ofToFloat(windowPosition[3])));
-
-                file << "//Hole x-y coordinates listed clockwise" << endl;
-                file << ofToFloat(windowPosition[0]) << " " << ofToFloat(windowPosition[1]) << endl;
-                file << ofToFloat(windowPosition[0]) + ofToFloat(windowPosition[2]) << " " << ofToFloat(windowPosition[1]) << endl;
-                file << ofToFloat(windowPosition[0]) + ofToFloat(windowPosition[2]) << " " << (ofToFloat(windowPosition[1]) + ofToFloat(windowPosition[3])) << endl;
-                file << ofToFloat(windowPosition[0]) << " " << (ofToFloat(windowPosition[1]) + ofToFloat(windowPosition[3])) << endl;
-
-                
             }
             lineCount++;
         }
-        file.close();
         
     }
     
