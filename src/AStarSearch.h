@@ -24,7 +24,9 @@ public:
     bool stopSearch_fp(myNode& n);
     bool isInEnv(myNode& n);
     bool isInWindows(myNode& n);
-    double calcDistToWindows(myNode& n);
+    float calcDistToWindows(myNode& n);
+    float distancePointToRectangle(ofPoint point, ofRectangle rect);
+    
     myNode target;
 };
 

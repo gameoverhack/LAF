@@ -97,7 +97,7 @@ void AppController::setup(){
     appModel->setProperty("AutoGenerate", true);
     
     appModel->setProperty("AvoidCollisions", true);
-    appModel->setProperty("gridScale", 10.0f);
+    appModel->setProperty("gridScale", 20.0f);
     appModel->setProperty("pathBoundingSize", 1.0f);
 
     

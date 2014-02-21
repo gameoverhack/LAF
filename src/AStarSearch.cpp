@@ -133,8 +133,8 @@ bool myGraphDescription::isInWindows(myNode& n) {
     return false;
 }
 
-double myGraphDescription::calcDistToWindows(myNode& n) {
-    double cost = 0;
+float myGraphDescription::calcDistToWindows(myNode& n) {
+    float cost = 0;
     
     float gridScale = appModel->getProperty<float>("gridScale");
     
@@ -145,14 +145,16 @@ double myGraphDescription::calcDistToWindows(myNode& n) {
     vector<ofRectangle> windows = appModel->getWindows();
     
     for (int w=0;w<windows.size();w++) {
-        if (windows[w].getPosition().squareDistance(scaledNode) < 100)
-            cost += windows[w].getPosition().squareDistance(scaledNode);
+        if (distancePointToRectangle(scaledNode,windows[w]) < 50)  //TODO: use a dynamic parameter
+            cost += distancePointToRectangle(scaledNode,windows[w]);
     }
     
     return cost;
 }
-/*
-float DistancePointToRectangle(ofPoint point, ofRectangle rect) {
+
+float myGraphDescription::distancePointToRectangle(ofPoint point, ofRectangle rect) {
+   
+    //return point.distance(rect.getCenter());
     //  Calculate a distance between a point and a rectangle.
     //  The area around/in the rectangle is defined in terms of
     //  several regions:
@@ -173,39 +175,38 @@ float DistancePointToRectangle(ofPoint point, ofRectangle rect) {
     
     if (point.x < rect.getMinX()) { // Region I, VIII, or VII
         if (point.y < rect.getMinY()) { // I
-            return point.distanceSquared(ofPoint(rect.getMinX(), rect.getMinY()));
+            return point.distance(ofPoint(rect.getMinX(), rect.getMinY()));
         }
         else if (point.y > rect.getMaxY()) { // VII
-            return point.distanceSquared(ofPoint(rect.getMinX(), rect.getMaxY()));
+            return point.distance(ofPoint(rect.getMinX(), rect.getMaxY()));
         }
         else { // VIII
-            return rect.xMin - point.x;
+            return rect.getMinX() - point.x;
         }
     }
-    else if (point.x > rect.xMax) { // Region III, IV, or V
-        if (point.y < rect.yMin) { // III
-            Vector2 diff = point - new Vector2(rect.xMax, rect.yMin);
-            return diff.magnitude;
+    else if (point.x > rect.getMaxX()) { // Region III, IV, or V
+        if (point.y < rect.getMinY()) { // III
+            return point.distance(ofPoint(rect.getMaxX(), rect.getMinY()));
         }
-        else if (point.y > rect.yMax) { // V
-            Vector2 diff = point - new Vector2(rect.xMax, rect.yMax);
-            return diff.magnitude;
+        else if (point.y > rect.getMaxY()) { // V
+            return point.distanceSquared(ofPoint(rect.getMaxX(), rect.getMaxY()));
         }
         else { // IV
-            return point.x - rect.xMax;
+            return point.x - rect.getMaxX();
         }
     }
     else { // Region II, IX, or VI
-        if (point.y < rect.yMin) { // II
-            return rect.yMin - point.y;
+        if (point.y < rect.getMinY()) { // II
+            return rect.getMinY() - point.y;
         }
-        else if (point.y > rect.yMax) { // VI
-            return point.y - rect.yMax;
+        else if (point.y > rect.getMaxX()) { // VI
+            return point.y - rect.getMaxY();
         }
         else { // IX
-            return 0f;
+            return 0;
         }
-    }*/
+    }
+}
 
 // =============================================================================
 
