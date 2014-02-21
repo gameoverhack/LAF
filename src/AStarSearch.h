@@ -27,10 +27,11 @@ public:
     float calcDistToWindows(myNode& n);
     float distancePointToRectangle(ofPoint point, ofRectangle rect);
     
-    myNode target;
+    myNode targetNode;
+    int targetWindow;
 };
 
-vector< vector< ofPoint > > findPaths(ofPoint startPoint, ofPoint finishPoint);
+vector< vector< ofPoint > > findPaths(ofPoint startPoint, ofPoint finishPoint,int _targetWindow);
 
 
 

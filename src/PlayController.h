@@ -34,8 +34,8 @@ protected:
     void generateMoviesFromMotions(vector<string>& motionSequence, MovieSequence* movieSequence, string name);
     void generateMotionsBetween(string m1, string m2, string name, vector<string>& motionSequence, bool bForward = true);
     
-    void recoverFromCollisionWithPlayer(MovieSequence* playerSequence, MovieSequence* collisionSequence);
-    void recoverFromCollisionWithWindow(MovieSequence* playerSequence, int window);
+    void recoverFromCollisionWithPlayer(Agent* playerSequence, Agent* collisionSequence);
+    void recoverFromCollisionWithWindow(Agent* playerSequence, int window);
     
 private:
 	

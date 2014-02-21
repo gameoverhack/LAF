@@ -25,6 +25,7 @@
 #include "MouseObj.h"
 #include "KeyModifiers.h"
 #include "Pointer.h"
+#include "Agent.h"
 
 typedef struct{
     
@@ -295,7 +296,7 @@ public:
             for(int i = 0; i < sequences.size(); i++){
                 movieSequence = sequences[i];
                 if(movieSequence->getViewID() == viewID){
-                    targetunique.push_back(movieSequence->getWindow());
+                    targetunique.push_back(((Agent*)movieSequence)->getWindow());
                     delete movieSequence;
                     index = i;
                     break;

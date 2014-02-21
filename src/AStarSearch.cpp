@@ -126,6 +126,8 @@ bool myGraphDescription::isInWindows(myNode& n) {
     vector<ofRectangle> windows = appModel->getWindows();
     
     for (int w=0;w<windows.size();w++) {
+        if (w==targetWindow)
+            continue;
         if (windows[w].intersects(bounding))
             return true;
     }
@@ -145,7 +147,9 @@ float myGraphDescription::calcDistToWindows(myNode& n) {
     vector<ofRectangle> windows = appModel->getWindows();
     
     for (int w=0;w<windows.size();w++) {
-        if (distancePointToRectangle(scaledNode,windows[w]) < 50)  //TODO: use a dynamic parameter
+        if (w==targetWindow)
+            continue;
+        if (distancePointToRectangle(scaledNode,windows[w]) < 500)  //TODO: use a dynamic parameter
             cost += distancePointToRectangle(scaledNode,windows[w]);
     }
     
@@ -210,8 +214,7 @@ float myGraphDescription::distancePointToRectangle(ofPoint point, ofRectangle re
 
 // =============================================================================
 
-vector< vector< ofPoint > > findPaths(ofPoint _startPoint, ofPoint _finishPoint)
-{
+vector< vector< ofPoint > > findPaths(ofPoint _startPoint, ofPoint _finishPoint, int _targetWindow){
 	// Profiling observation: Using int instead of double cost provides marginal improvement (~10%)
 	GenericSearchGraphDescriptor<myNode,double> myGraph;
 	
@@ -220,6 +223,8 @@ vector< vector< ofPoint > > findPaths(ofPoint _startPoint, ofPoint _finishPoint)
 	// Create an instance of "myGraphDescription"
 
 	myGraphDescription myGraphClassInstance;
+    myGraphClassInstance.targetWindow = _targetWindow;
+    
 	// Now set that instance and its functions as our function container
 	SearchGraphDescriptorFunctionPointerContainer<myNode,double,myGraphDescription>* fun_pointer_container
     = new SearchGraphDescriptorFunctionPointerContainer<myNode,double,myGraphDescription>;

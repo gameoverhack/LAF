@@ -91,31 +91,31 @@ void PlayController::update(){
 
             vector<MovieSequence*>& sequences = appModel->getSequences();
             for(int i = 0; i < sequences.size(); i++){
-                MovieSequence* sequence = sequences[i];
+                Agent* agent = (Agent*)sequences[i];
                 
                 
                 if (appModel->getProperty<bool>("AvoidCollisions")) {
                     //------------- Collision Detection
                     int range = 5;
-                    int startFrame = MAX(sequence->getCurrentSequenceFrame(), 0);
-                    int endFrame = MIN(sequence->getCurrentSequenceFrame() + range, sequence->getTotalSequenceFrames());
+                    int startFrame = MAX(agent->getCurrentSequenceFrame(), 0);
+                    int endFrame = MIN(agent->getCurrentSequenceFrame() + range, agent->getTotalSequenceFrames());
                     
-                    sequence->setWillCollide(false);
+                    agent->setWillCollide(false);
                     
                     for(int j = startFrame; j < endFrame; j+=1){
                         for (int w = 0; w < windowPositions.size(); w++) { // with windows except the target window
-                            ofRectangle bounding =sequence->getScaledBoundingAt(j);
+                            ofRectangle bounding =agent->getScaledBoundingAt(j);
                             
-                            if (w!= sequence->getWindow() && bounding.intersects(windowPositions[w])) {
+                            if (w!= agent->getWindow() && bounding.intersects(windowPositions[w])) {
                               
-                                recoverFromCollisionWithWindow(sequence, w);
+                                recoverFromCollisionWithWindow(agent, w);
                             }
                         }
                         
                         for (int p = 0; p < sequences.size();p++) { // with other players
-                            if (sequences[p] != sequence && sequences[p]->getScaledBounding().intersects(sequence->getScaledBounding())) {
+                            if ((Agent*)sequences[p] != agent && (Agent*)sequences[p]->getScaledBounding().intersects(agent->getScaledBounding())) {
                                 
-                                recoverFromCollisionWithPlayer(sequence, sequences[p]);
+                                recoverFromCollisionWithPlayer(agent, (Agent*)sequences[p]);
                             }
                         }
                     }
@@ -123,11 +123,11 @@ void PlayController::update(){
 
                 }
                 
-                sequence->update();
-                if(sequence->isSequequenceDone()) appModel->markPlayerForDeletion(sequence->getViewID());
+                agent->update();
+                if(agent->isSequequenceDone()) appModel->markPlayerForDeletion(agent->getViewID());
                 ostringstream os;
-                os << sequence << endl;
-                appModel->setProperty("MovieInfo_" + ofToString(sequence->getViewID()), os.str());
+                os << agent << endl;
+                appModel->setProperty("MovieInfo_" + ofToString(agent->getViewID()), os.str());
             }
             
             appModel->deleteMarkedPlayers();
@@ -170,22 +170,20 @@ void PlayController::update(){
 }
 
 //--------------------------------------------------------------
-void PlayController::recoverFromCollisionWithPlayer(MovieSequence* playerSequence, MovieSequence* collisionSequence) {
+void PlayController::recoverFromCollisionWithPlayer(Agent* thisPlayer, Agent* otherPlayer) {
     //  playerSequence->stop();
-    playerSequence->setWillCollide(true);
-    playerSequence->setSpeed(-1);
-    
-
+    thisPlayer->setWillCollide(true);
+    thisPlayer->setSpeed(-1);
 
 }
 
 //--------------------------------------------------------------
-void PlayController::recoverFromCollisionWithWindow(MovieSequence* playerSequence, int window) {
+void PlayController::recoverFromCollisionWithWindow(Agent* playerAgent, int window) {
     // get the players model
-    PlayerModel& model = appModel->getPlayerTemplate(playerSequence->getPlayerName());
+    PlayerModel& model = appModel->getPlayerTemplate(playerAgent->getPlayerName());
     map<string, ofxXMP>& xmp = model.getXMP();
     
-    MovieInfo currentMovie = playerSequence->getCurrentMovie();
+    MovieInfo currentMovie = playerAgent->getCurrentMovie();
     
     ofxXMPMarker lastMarker = xmp[currentMovie.name].getLastMarker(currentMovie.frame);
     ofxXMPMarker nextMarker = xmp[currentMovie.name].getNextMarker(currentMovie.frame);
@@ -199,8 +197,8 @@ void PlayController::recoverFromCollisionWithWindow(MovieSequence* playerSequenc
     
     //playerSequence->stop();
    // playerSequence->StopAt(lastMarker.getStartFrame());
-    playerSequence->setSpeed(-1* abs(playerSequence->getSpeed()));
-    playerSequence->setWillCollide(true);
+    playerAgent->setSpeed(-1* abs(playerAgent->getSpeed()));
+    playerAgent->setWillCollide(true);
     
     /*
      change stopAt to changeSequenceAt (frame, new motion/movie sequence)
@@ -219,14 +217,14 @@ void PlayController::doAction(string name, char op) {
     ofxLogNotice() << "Performing action " << op << " for " << name << endl;
     
     vector<MovieSequence*>& sequences = appModel->getSequences();
-    MovieSequence* movieSequence = new MovieSequence;
+    Agent* agent = new Agent;
     
     for(int i = 0; i < sequences.size(); i++){
-       if (sequences[i]->getManual())
-           movieSequence = sequences[i];
+       if (((Agent*)sequences[i])->getManual())
+           agent = (Agent*)sequences[i];
     }
     
-    MovieInfo lastMovie = movieSequence->getLastMovieInSequence();
+    MovieInfo lastMovie = agent->getLastMovieInSequence();
     
     string lastMotion = ofSplitString(lastMovie.markername,"_")[0] + "_" + ofSplitString(lastMovie.markername,"_")[1];
 
@@ -242,7 +240,7 @@ void PlayController::doAction(string name, char op) {
         case 'l':
         {
             // get the possible approach motions for going left
-            string act = movieSequence->getActionType("LR");
+            string act = agent->getActionType("LR");
             vector<string> transitions = nestedForwardDirectionGraph.getPossibleTransitions("LEFT");
             
             // get the first possible transition to the next action to left
@@ -261,7 +259,7 @@ void PlayController::doAction(string name, char op) {
         case 'r':
         {
             // get the possible approach motions for going right
-            string act = movieSequence->getActionType("LR");
+            string act = agent->getActionType("LR");
             vector<string> transitions = nestedForwardDirectionGraph.getPossibleTransitions("RIGHT");
             
             // get the first possible transition to the next action to right
@@ -279,7 +277,7 @@ void PlayController::doAction(string name, char op) {
         case 'u':
         {
             // get the possible approach motions for going up
-            string act = movieSequence->getActionType("UD");
+            string act = agent->getActionType("UD");
             vector<string> transitions = nestedForwardDirectionGraph.getPossibleTransitions("UP");
             
             // get the first possible transition to the next action to up
@@ -299,7 +297,7 @@ void PlayController::doAction(string name, char op) {
         case 'd':
         {
             // get the possible approach motions for going down
-            string act = movieSequence->getActionType("UD");
+            string act = agent->getActionType("UD");
             vector<string> transitions = nestedForwardDirectionGraph.getPossibleTransitions("DOWN");
             
             // get the first possible transition to the next action to down
@@ -320,14 +318,14 @@ void PlayController::doAction(string name, char op) {
     
     
     
-    generateMoviesFromMotions(motionSequence, movieSequence, name);
-    getPositionsForMovieSequence(movieSequence, name);
-    movieSequence->normalise();
+    generateMoviesFromMotions(motionSequence, agent, name);
+    getPositionsForMovieSequence(agent, name);
+    agent->normalise();
     
-    movieSequence->setSpeed(ofRandom(1.0, 3.0));
+    agent->setSpeed(ofRandom(1.0, 3.0));
     
    // appModel->addSequence(movieSequence);
-    movieSequence->play();
+    agent->play();
 
 }
 
@@ -342,14 +340,14 @@ void PlayController::makeManualAgent(string name) {
     float scale = appModel->getProperty<float>("DrawSize") / model.getWidth();
     
     // create a new MovieSequence
-    MovieSequence* movieSequence = new MovieSequence;
-    movieSequence->setManual(true);
-    movieSequence->setWindow(0);
-    movieSequence->push(model.getFirstMovie());
-    movieSequence->setNormalPosition(ofPoint(0,0,0));
-    movieSequence->setNormalScale(scale); // TODO: store scale on the PlayerModel?
+    Agent* agent = new Agent;
+    agent->setManual(true);
+    agent->setWindow(0);
+    agent->push(model.getFirstMovie());
+    agent->setNormalPosition(ofPoint(0,0,0));
+    agent->setNormalScale(scale); // TODO: store scale on the PlayerModel?
     
-    movieSequence->setPlayerName(name);
+    agent->setPlayerName(name);
     
     // create a sequence of motions
     vector<string> motionSequence;
@@ -357,14 +355,14 @@ void PlayController::makeManualAgent(string name) {
     // start standing front and go to -> motion
     motionSequence.push_back("STND_FRNT");
     
-    generateMoviesFromMotions(motionSequence, movieSequence, name);
-    getPositionsForMovieSequence(movieSequence, name);
-    movieSequence->normalise();
+    generateMoviesFromMotions(motionSequence, agent, name);
+    getPositionsForMovieSequence(agent, name);
+    agent->normalise();
     
-    movieSequence->setSpeed(ofRandom(1.0, 3.0));
+    agent->setSpeed(ofRandom(1.0, 3.0));
     
-    appModel->addSequence(movieSequence);
-    movieSequence->play();
+    appModel->addSequence(agent);
+    agent->play();
 }
 
 
@@ -377,7 +375,7 @@ void PlayController::makeSequence(string name, int window){
     PlayerModel& model = appModel->getPlayerTemplate(name);
     map<string, ofxXMP>& xmp = model.getXMP();
     
-
+    
     // get the possible approach motions for this window
     vector<string> transitions = appModel->getGraph("TargetGraph").getPossibleTransitions(ofToString(window));
     
@@ -386,7 +384,7 @@ void PlayController::makeSequence(string name, int window){
         eraseAll(transitions, (string)"TRAV_LEFT");
         eraseAll(transitions, (string)"TRAV_RIGT");
     }
-
+    
     // randomly get a motion TODO: make this so that we don't have double approaches
     string motion = transitions[(int)ofRandom(transitions.size())];
     
@@ -396,14 +394,14 @@ void PlayController::makeSequence(string name, int window){
     
     float scale = appModel->getProperty<float>("DrawSize") / model.getWidth();
     
-    // create a new MovieSequence
-    MovieSequence* movieSequence = new MovieSequence;
-    movieSequence->setWindow(window);
-    movieSequence->push(model.getFirstMovie());
-    movieSequence->setNormalPosition(ofPoint(0,0,0));
-    movieSequence->setNormalScale(scale); // TODO: store scale on the PlayerModel?
+    // create a new Agent
+    Agent* agent = new Agent;
+    agent->setWindow(window);
+    agent->push(model.getFirstMovie());
+    agent->setNormalPosition(ofPoint(0,0,0));
+    agent->setNormalScale(scale); // TODO: store scale on the PlayerModel?
     
-    movieSequence->setPlayerName(name);
+    agent->setPlayerName(name);
     
     // create a sequence of motions
     vector<string> motionSequence;
@@ -413,34 +411,34 @@ void PlayController::makeSequence(string name, int window){
     generateMotionsBetween("STND_FRNT", motion, name, motionSequence);
     motionSequence.push_back(motion);
     
-    generateMoviesFromMotions(motionSequence, movieSequence, name);
-    getPositionsForMovieSequence(movieSequence, name);
-    movieSequence->normalise();
+    generateMoviesFromMotions(motionSequence, agent, name);
+    getPositionsForMovieSequence(agent, name);
+    agent->normalise();
     
     // calulate and insert loops of the action to travel far enough to get to the target window
     vector<ofRectangle>& windowPositions = appModel->getWindows();
     
     int inserts = 0;
     float target = appModel->getProperty<float>("DrawSize");
-    MovieInfo loopMovie = movieSequence->getLastMovieInSequence();
+    MovieInfo loopMovie = agent->getLastMovieInSequence();
     
     if(direction == "LEFT" || direction == "RIGT"){
         if(direction == "RIGT") target += windowPositions[window].x;
         if(direction == "LEFT") target += ofGetWidth() - windowPositions[window].x;
-        while (movieSequence->getScaledTotalBounding().width < target) {
+        while (agent->getScaledTotalBounding().width < target) {
             inserts++;
-            movieSequence->push(loopMovie);
-            movieSequence->normalise();
-            cout << direction << " " << movieSequence->getScaledTotalBounding().width << endl;
+            agent->push(loopMovie);
+            agent->normalise();
+            cout << direction << " " << agent->getScaledTotalBounding().width << endl;
         }
     }else if(direction == "DOWN" || direction == "UPPP") {
         if(direction == "DOWN") target += windowPositions[window].y;
         if(direction == "UPPP") target = 2 * target + ofGetHeight() - windowPositions[window].y;
-        while (movieSequence->getScaledTotalBounding().height < target) {
+        while (agent->getScaledTotalBounding().height < target) {
             inserts++;
-            movieSequence->push(loopMovie);
-            movieSequence->normalise();
-            cout << direction << " " << movieSequence->getScaledTotalBounding().height << endl;
+            agent->push(loopMovie);
+            agent->normalise();
+            cout << direction << " " << agent->getScaledTotalBounding().height << endl;
         }
     }
     
@@ -457,27 +455,27 @@ void PlayController::makeSequence(string name, int window){
     
     generateMotionsBetween(motion, emotion, name, motionSequence);
     
-    generateMoviesFromMotions(motionSequence, movieSequence, name);
-    getPositionsForMovieSequence(movieSequence, name);
-    movieSequence->normalise();
+    generateMoviesFromMotions(motionSequence, agent, name);
+    getPositionsForMovieSequence(agent, name);
+    agent->normalise();
     
- 
+    
     // calculate target and syncframes
-    MovieInfo& lastMovieInSequence = movieSequence->getLastMovieInSequence();
-    int goalFrame = movieSequence->getTotalSequenceFrames() - 1;
+    MovieInfo& lastMovieInSequence = agent->getLastMovieInSequence();
+    int goalFrame = agent->getTotalSequenceFrames() - 1;
     int syncFrame = goalFrame - lastMovieInSequence.startframe + xmp[lastMovieInSequence.name].getMarker(motionSequence[motionSequence.size() - 1]).getStartFrame();
     
-    movieSequence->setGoalFrame(goalFrame - lastMovieInSequence.endframe - lastMovieInSequence.startframe);
-    movieSequence->setSyncFrame(syncFrame);
+    agent->setGoalFrame(goalFrame - lastMovieInSequence.endframe - lastMovieInSequence.startframe);
+    agent->setSyncFrame(syncFrame);
     
-    ofPoint floorOffset = movieSequence->getScaledFloorOffset();
+    ofPoint floorOffset = agent->getScaledFloorOffset();
     ofPoint targetPosition = ofPoint(windowPositions[window].x + windowPositions[window].width / 2.0, windowPositions[window].y, 0.0f);
-    ofPoint finalSequencePosition = targetPosition - movieSequence->getScaledPositionAt(goalFrame) - floorOffset;
-   
+    ofPoint finalSequencePosition = targetPosition - agent->getScaledPositionAt(goalFrame) - floorOffset;
+    
     
     if(emotion != "FALL_BACK"){
         
-        movieSequence->setHug(true);
+        agent->setHug(true);
         
         // reverse the motion to get back out
         motionSequence.clear();
@@ -509,22 +507,22 @@ void PlayController::makeSequence(string name, int window){
         
         for(int i = 0; i < inserts + 2; i++) motionSequence.push_back(reversemotion);
         
-        generateMoviesFromMotions(motionSequence, movieSequence, name);
-        getPositionsForMovieSequence(movieSequence, name);
+        generateMoviesFromMotions(motionSequence, agent, name);
+        getPositionsForMovieSequence(agent, name);
     }else{
-        movieSequence->setHug(false);
+        agent->setHug(false);
     }
-
-    movieSequence->setNormalPosition(finalSequencePosition);
-    movieSequence->normalise();
     
-    ofxLogVerbose() << "Adding MovieSequence" << movieSequence->getMovieSequenceAsString() << endl;
+    agent->setNormalPosition(finalSequencePosition);
+    agent->normalise();
+    
+    ofxLogVerbose() << "Adding MovieSequence" << agent->getMovieSequenceAsString() << endl;
     ofxLogVerbose() << "E(nd) Motion: " << endMotionType << " of " << emotion << endl;
     
-    movieSequence->setSpeed(ofRandom(1.0, 3.0));
+    agent->setSpeed(ofRandom(1.0, 3.0));
     
-    appModel->addSequence(movieSequence);
-    movieSequence->play();
+    appModel->addSequence(agent);
+    agent->play();
 }
 
 //--------------------------------------------------------------
@@ -555,14 +553,14 @@ void PlayController::makeSequenceWithPath(string name, int window){
     
     float scale = appModel->getProperty<float>("DrawSize") / model.getWidth();
     
-    // create a new MovieSequence
-    MovieSequence* movieSequence = new MovieSequence;
-    movieSequence->setWindow(window);
-    movieSequence->push(model.getFirstMovie());
-    movieSequence->setNormalPosition(ofPoint(0,0,0));
-    movieSequence->setNormalScale(scale); // TODO: store scale on the PlayerModel?
+    // create a new Agent
+    Agent* agent = new Agent;
+    agent->setWindow(window);
+    agent->push(model.getFirstMovie());
+    agent->setNormalPosition(ofPoint(0,0,0));
+    agent->setNormalScale(scale); // TODO: store scale on the PlayerModel?
     
-    movieSequence->setPlayerName(name);
+    agent->setPlayerName(name);
     
     // create a sequence of motions
     vector<string> motionSequence;
@@ -572,34 +570,34 @@ void PlayController::makeSequenceWithPath(string name, int window){
     generateMotionsBetween("STND_FRNT", motion, name, motionSequence);
     motionSequence.push_back(motion);
     
-    generateMoviesFromMotions(motionSequence, movieSequence, name);
-    getPositionsForMovieSequence(movieSequence, name);
-    movieSequence->normalise();
+    generateMoviesFromMotions(motionSequence, agent, name);
+    getPositionsForMovieSequence(agent, name);
+    agent->normalise();
     
     // calulate and insert loops of the action to travel far enough to get to the target window
     vector<ofRectangle>& windowPositions = appModel->getWindows();
     
     int inserts = 0;
     float target = appModel->getProperty<float>("DrawSize");
-    MovieInfo loopMovie = movieSequence->getLastMovieInSequence();
+    MovieInfo loopMovie = agent->getLastMovieInSequence();
     
     if(direction == "LEFT" || direction == "RIGT"){
         if(direction == "RIGT") target += windowPositions[window].x;
         if(direction == "LEFT") target += ofGetWidth() - windowPositions[window].x;
-        while (movieSequence->getScaledTotalBounding().width < target) {
+        while (agent->getScaledTotalBounding().width < target) {
             inserts++;
-            movieSequence->push(loopMovie);
-            movieSequence->normalise();
-            cout << direction << " " << movieSequence->getScaledTotalBounding().width << endl;
+            agent->push(loopMovie);
+            agent->normalise();
+            cout << direction << " " << agent->getScaledTotalBounding().width << endl;
         }
     }else if(direction == "DOWN" || direction == "UPPP") {
         if(direction == "DOWN") target += windowPositions[window].y;
         if(direction == "UPPP") target = 2 * target + ofGetHeight() - windowPositions[window].y;
-        while (movieSequence->getScaledTotalBounding().height < target) {
+        while (agent->getScaledTotalBounding().height < target) {
             inserts++;
-            movieSequence->push(loopMovie);
-            movieSequence->normalise();
-            cout << direction << " " << movieSequence->getScaledTotalBounding().height << endl;
+            agent->push(loopMovie);
+            agent->normalise();
+            cout << direction << " " << agent->getScaledTotalBounding().height << endl;
         }
     }
     
@@ -616,27 +614,27 @@ void PlayController::makeSequenceWithPath(string name, int window){
     
     generateMotionsBetween(motion, emotion, name, motionSequence);
     
-    generateMoviesFromMotions(motionSequence, movieSequence, name);
-    getPositionsForMovieSequence(movieSequence, name);
-    movieSequence->normalise();
+    generateMoviesFromMotions(motionSequence, agent, name);
+    getPositionsForMovieSequence(agent, name);
+    agent->normalise();
     
     
     // calculate target and syncframes
-    MovieInfo& lastMovieInSequence = movieSequence->getLastMovieInSequence();
-    int goalFrame = movieSequence->getTotalSequenceFrames() - 1;
+    MovieInfo& lastMovieInSequence = agent->getLastMovieInSequence();
+    int goalFrame = agent->getTotalSequenceFrames() - 1;
     int syncFrame = goalFrame - lastMovieInSequence.startframe + xmp[lastMovieInSequence.name].getMarker(motionSequence[motionSequence.size() - 1]).getStartFrame();
     
-    movieSequence->setGoalFrame(goalFrame - lastMovieInSequence.endframe - lastMovieInSequence.startframe);
-    movieSequence->setSyncFrame(syncFrame);
+    agent->setGoalFrame(goalFrame - lastMovieInSequence.endframe - lastMovieInSequence.startframe);
+    agent->setSyncFrame(syncFrame);
     
-    ofPoint floorOffset = movieSequence->getScaledFloorOffset();
+    ofPoint floorOffset = agent->getScaledFloorOffset();
     ofPoint targetPosition = ofPoint(windowPositions[window].x + windowPositions[window].width / 2.0, windowPositions[window].y, 0.0f);
-    ofPoint finalSequencePosition = targetPosition - movieSequence->getScaledPositionAt(goalFrame) - floorOffset;
+    ofPoint finalSequencePosition = targetPosition - agent->getScaledPositionAt(goalFrame) - floorOffset;
     
     
     if(emotion != "FALL_BACK"){
         
-        movieSequence->setHug(true);
+        agent->setHug(true);
         
         // reverse the motion to get back out
         motionSequence.clear();
@@ -668,22 +666,22 @@ void PlayController::makeSequenceWithPath(string name, int window){
         
         for(int i = 0; i < inserts + 2; i++) motionSequence.push_back(reversemotion);
         
-        generateMoviesFromMotions(motionSequence, movieSequence, name);
-        getPositionsForMovieSequence(movieSequence, name);
+        generateMoviesFromMotions(motionSequence, agent, name);
+        getPositionsForMovieSequence(agent, name);
     }else{
-        movieSequence->setHug(false);
+        agent->setHug(false);
     }
     
-    movieSequence->setNormalPosition(finalSequencePosition);
-    movieSequence->normalise();
+    agent->setNormalPosition(finalSequencePosition);
+    agent->normalise();
     
-    ofxLogVerbose() << "Adding MovieSequence" << movieSequence->getMovieSequenceAsString() << endl;
+    ofxLogVerbose() << "Adding MovieSequence" << agent->getMovieSequenceAsString() << endl;
     ofxLogVerbose() << "E(nd) Motion: " << endMotionType << " of " << emotion << endl;
     
-    movieSequence->setSpeed(ofRandom(1.0, 3.0));
+    agent->setSpeed(ofRandom(1.0, 3.0));
     
-    appModel->addSequence(movieSequence);
-    movieSequence->play();
+    appModel->addSequence(agent);
+    agent->play();
    
 
     
@@ -693,10 +691,10 @@ void PlayController::makeSequenceWithPath(string name, int window){
     cout << endPos.x << " " << endPos.y << endl;
     
     
-    // find the paths using A*
-    vector< vector< ofPoint > > paths = findPaths(startPos,endPos);
+    // find the paths using A*.
+    vector< vector< ofPoint > > paths = findPaths(startPos,endPos,agent->getWindow());
     if (paths.size()>0)
-        movieSequence->setCurrentPath(paths[0]);
+        agent->setCurrentPath(paths[0]);
     else
         ofxLogVerbose() << "No path found for sequence " << appModel->getSequences().size()-1 << endl;
  
