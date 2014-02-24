@@ -12,6 +12,7 @@
 #include "BaseController.h"
 #include "AppModel.h"
 
+
 class PlayController : public BaseController {
     
 public:
@@ -24,9 +25,11 @@ public:
     
     void makeSequence(string name, int window);
 
-    void makeSequenceWithPath(string name, int window);
+    void makeAgent(string name, int window);
     void doAction(string name, char action);
     void makeManualAgent(string name);
+    void moveAgent(Agent* agent, char op);
+    void updatePosition(Agent* agent);
     
 protected:
     

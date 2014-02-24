@@ -32,7 +32,7 @@ public:
 };
 
 vector< vector< ofPoint > > findPaths(ofPoint startPoint, ofPoint finishPoint,int _targetWindow);
-
-
+char getDirection(ofPoint one, ofPoint two);
+vector<char> getDirectionsInPath(vector<ofPoint> path);
 
 #endif /* defined(__LaughterForgetting__AStarSearch__) */

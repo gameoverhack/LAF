@@ -149,7 +149,7 @@ float myGraphDescription::calcDistToWindows(myNode& n) {
     for (int w=0;w<windows.size();w++) {
         if (w==targetWindow)
             continue;
-        if (distancePointToRectangle(scaledNode,windows[w]) < 500)  //TODO: use a dynamic parameter
+        if (distancePointToRectangle(scaledNode,windows[w]) < 1000)  //TODO: use a dynamic parameter
             cost += distancePointToRectangle(scaledNode,windows[w]);
     }
     
@@ -159,54 +159,39 @@ float myGraphDescription::calcDistToWindows(myNode& n) {
 float myGraphDescription::distancePointToRectangle(ofPoint point, ofRectangle rect) {
    
     //return point.distance(rect.getCenter());
+
     //  Calculate a distance between a point and a rectangle.
-    //  The area around/in the rectangle is defined in terms of
-    //  several regions:
-    //
-    //  O--x
-    //  |
-    //  y
-    //
-    //
-    //        I   |    II    |  III
-    //      ======+==========+======   --yMin
-    //       VIII |  IX (in) |  IV
-    //      ======+==========+======   --yMax
-    //       VII  |    VI    |   V
-    //
-    //
-    //  Note that the +y direction is down because of Unity's GUI coordinates.
     
-    if (point.x < rect.getMinX()) { // Region I, VIII, or VII
-        if (point.y < rect.getMinY()) { // I
+    if (point.x < rect.getMinX()) {
+        if (point.y < rect.getMinY()) {
             return point.distance(ofPoint(rect.getMinX(), rect.getMinY()));
         }
-        else if (point.y > rect.getMaxY()) { // VII
+        else if (point.y > rect.getMaxY()) {
             return point.distance(ofPoint(rect.getMinX(), rect.getMaxY()));
         }
-        else { // VIII
+        else {
             return rect.getMinX() - point.x;
         }
     }
-    else if (point.x > rect.getMaxX()) { // Region III, IV, or V
-        if (point.y < rect.getMinY()) { // III
+    else if (point.x > rect.getMaxX()) {
+        if (point.y < rect.getMinY()) {
             return point.distance(ofPoint(rect.getMaxX(), rect.getMinY()));
         }
-        else if (point.y > rect.getMaxY()) { // V
+        else if (point.y > rect.getMaxY()) {
             return point.distanceSquared(ofPoint(rect.getMaxX(), rect.getMaxY()));
         }
-        else { // IV
+        else {
             return point.x - rect.getMaxX();
         }
     }
-    else { // Region II, IX, or VI
-        if (point.y < rect.getMinY()) { // II
+    else {
+        if (point.y < rect.getMinY()) {
             return rect.getMinY() - point.y;
         }
-        else if (point.y > rect.getMaxX()) { // VI
+        else if (point.y > rect.getMaxX()) {
             return point.y - rect.getMaxY();
         }
-        else { // IX
+        else {
             return 0;
         }
     }
@@ -279,4 +264,33 @@ vector< vector< ofPoint > > findPaths(ofPoint _startPoint, ofPoint _finishPoint,
 
 	return paths2;
 
+}
+
+vector<char> getDirectionsInPath(vector<ofPoint> path) { //TODO: calculate the distance between start and end of one direction
+    vector<char> result;
+    char last = getDirection(path[0], path[1]);
+    result.push_back(last);
+    for (int i=1;i<path.size()-1;i++) {
+        if (getDirection(path[i], path[i+1]) !=last) {
+            last = getDirection(path[i], path[i+1]);
+            result.push_back(last);
+        }
+    }
+    return result;
+}
+
+char getDirection(ofPoint one, ofPoint two) { //TODO: add diagonal directions if needed
+    if (one == two)
+        return 's'; //still
+    else if (one.x == two.x && one.y > two.y)
+        return 'u'; //up
+    else if (one.x == two.x && one.y < two.y)
+        return 'd'; //down
+    else if (one.x > two.x && one.y == two.y)
+        return 'l'; //left
+    else if (one.x < two.x && one.y == two.y)
+        return 'r'; //right
+    else
+        return 'x'; //unknown
+    
 }

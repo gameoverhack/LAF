@@ -9,8 +9,14 @@
 #ifndef LaughterForgetting_Agent_h
 #define LaughterForgetting_Agent_h
 
+#include "AppModel.h"
+
 class Agent : public MovieSequence{
 public:
+
+    vector<char> actions;
+    int actionIndex = 0;
+
     
     void setWillCollide(bool w) {
         willCollide=w;
@@ -36,6 +42,7 @@ public:
     }
     
     string getActionType(string axes) {
+        cout<<">"<<axes<< LRAction << endl;
         if (axes == "LR")
             return LRAction;
         else if (axes == "UD")
@@ -102,6 +109,7 @@ public:
         playerName = "";
 
     }
+    
 protected:
     
     bool bHug;
@@ -115,8 +123,8 @@ protected:
     
     string playerName;
     
-    string LRAction;
-    string UDAction;
+    string LRAction = "WALK";
+    string UDAction = "CLIM";
     
     ofPolyline currentPath;
 

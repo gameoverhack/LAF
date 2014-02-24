@@ -67,7 +67,7 @@ void AppController::setup(){
     //appModel->setProperty("MediaPath", (string)"/Users/gameover/Desktop/LOTE/media");
     //appModel->setProperty("MediaPath", (string)"/Volumes/LongingAndForgetting02/LOTE/TESTRENDERS/mediaANIME");
     appModel->setProperty("MediaPath", (string)"/Users/omid/Desktop/LAF/media");
-    appModel->setProperty("NumberPlayers", 20);
+    appModel->setProperty("NumberPlayers", 4);
     appModel->setProperty("RectTrail", 200);
     
     appModel->setProperty("ForceFileListUpdate", true);
@@ -97,8 +97,8 @@ void AppController::setup(){
     appModel->setProperty("AutoGenerate", true);
     
     appModel->setProperty("AvoidCollisions", true);
-    appModel->setProperty("gridScale", 20.0f);
-    appModel->setProperty("pathBoundingSize", 1.0f);
+    appModel->setProperty("gridScale", 40.0f);
+    appModel->setProperty("pathBoundingSize", 15.0f);
 
     
     appModel->setProperty("DistanceThreshold", 200.0f);
