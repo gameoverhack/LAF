@@ -31,7 +31,7 @@
         return true;
 	}
     
-	void myGraphDescription::getSuccessors(myNode& n, std::vector<myNode>* s, std::vector<double>* c)
+	void myGraphDescription::getSuccessors(myNode& n, std::vector<myNode>* s, std::vector<double>* c) //TODO: Change the cost function or heuristics to prefer straight lines
 	{
 		// This function needn't account for obstacles or size of environment. That's done by "isAccessible"
 		myNode tn;
@@ -75,9 +75,10 @@
     
 	double myGraphDescription::getHeuristics(myNode& n1, myNode& n2)
 	{
-		int dx = abs(n1.x - n2.x);
-		int dy = abs(n1.y - n2.y);
-		return (sqrt((double)(dx*dx + dy*dy))); // Euclidean distance as heuristics
+            int dx = abs(n1.x - n2.x);
+            int dy = abs(n1.y - n2.y);
+            return (sqrt((double)(dx*dx + dy*dy))); // Euclidean distance as heuristics
+       		
         
 //        return 0;//calcDistToWindows(n2);
 	}
@@ -93,15 +94,15 @@
 
 bool myGraphDescription::isInEnv(myNode& n) {
     ofRectangle biggerEnv;
-    biggerEnv.x = -appModel->getProperty<float>("OutputWidth")/2;
-    biggerEnv.y = -appModel->getProperty<float>("OutputHeight");
-    biggerEnv.width = appModel->getProperty<float>("OutputWidth")*2;
-    biggerEnv.height = appModel->getProperty<float>("OutputHeight")*3;
+//    biggerEnv.x = -appModel->getProperty<float>("OutputWidth")/2;
+//    biggerEnv.y = -appModel->getProperty<float>("OutputHeight");
+//    biggerEnv.width = appModel->getProperty<float>("OutputWidth")*2;
+//    biggerEnv.height = appModel->getProperty<float>("OutputHeight")*3;
     
-//    biggerEnv.x = 0;
-//    biggerEnv.y = 0;
-//    biggerEnv.width = appModel->getProperty<float>("OutputWidth");
-//    biggerEnv.height = appModel->getProperty<float>("OutputHeight");
+    biggerEnv.x = 0;
+    biggerEnv.y = 0;
+    biggerEnv.width = appModel->getProperty<float>("OutputWidth");
+    biggerEnv.height = appModel->getProperty<float>("OutputHeight");
     
     float gridScale = appModel->getProperty<float>("gridScale");
     ofPoint scaledNode;
@@ -120,7 +121,7 @@ bool myGraphDescription::isInWindows(myNode& n) {
     scaledNode.x = n.x * gridScale;
     scaledNode.y = n.y * gridScale;
     
-    bounding.setFromCenter(scaledNode,appModel->getProperty<float>("pathBoundingSize"),appModel->getProperty<float>("pathBoundingSize"));
+    bounding.setFromCenter(scaledNode,appModel->getProperty<float>("pathBoundingSizeW"),appModel->getProperty<float>("pathBoundingSizeH"));
     
     vector<ofRectangle> windows = appModel->getWindows();
     
@@ -265,15 +266,21 @@ vector< vector< ofPoint > > findPaths(ofPoint _startPoint, ofPoint _finishPoint,
 
 }
 
-vector<char> getDirectionsInPath(vector<ofPoint> path) { //TODO: calculate the distance between start and end of one direction
-    vector<char> result;
+vector< pair<char,float> > getDirectionsInPath(vector<ofPoint> path) { //TODO: calculate the distance between start and end of one direction
+    vector< pair<char,float> > result;
     char last = getDirection(path[0], path[1]);
-    result.push_back(last);
+    int lastIndex = 0;
     for (int i=1;i<path.size()-1;i++) {
         if (getDirection(path[i], path[i+1]) !=last) {
+            pair<char,float> segment(last,path[lastIndex].distance(path[i]));
+            result.push_back(segment);
             last = getDirection(path[i], path[i+1]);
-            result.push_back(last);
+            lastIndex = i;
         }
+    }
+    if (lastIndex!=path.size()-2) {
+        pair<char,float> segment(last,path[lastIndex].distance(path[path.size()-1]));
+        result.push_back(segment);
     }
     return result;
 }

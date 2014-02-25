@@ -30,11 +30,13 @@ public:
     void makeManualAgent(string name);
     void moveAgent(Agent* agent, char op);
     void updatePosition(Agent* agent);
+    void moveAgentByPixel(Agent* agent, pair<char,float> act);
     
 protected:
     
     void getPositionsForMovieSequence(MovieSequence* movieSequence, string name);
     void generateMoviesFromMotions(vector<string>& motionSequence, MovieSequence* movieSequence, string name);
+    void generateMoviesFromMotionsAndActions(vector<string>& motionSequence, Agent* agent, string name, ofPoint normalPos, int length);
     void generateMotionsBetween(string m1, string m2, string name, vector<string>& motionSequence, bool bForward = true);
     
     void recoverFromCollisionWithPlayer(Agent* playerSequence, Agent* collisionSequence);

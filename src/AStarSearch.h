@@ -33,6 +33,6 @@ public:
 
 vector< vector< ofPoint > > findPaths(ofPoint startPoint, ofPoint finishPoint,int _targetWindow);
 char getDirection(ofPoint one, ofPoint two);
-vector<char> getDirectionsInPath(vector<ofPoint> path);
+vector< pair<char,float> > getDirectionsInPath(vector<ofPoint> path);
 
 #endif /* defined(__LaughterForgetting__AStarSearch__) */

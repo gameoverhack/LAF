@@ -14,9 +14,13 @@
 class Agent : public MovieSequence{
 public:
 
-    vector<char> actions;
+    vector< pair<char,float> > actions;
     int actionIndex = 0;
-
+    int currentAction = 0;
+    
+    void setAction(pair<char,float> acts) {
+      
+    }
     
     void setWillCollide(bool w) {
         willCollide=w;
@@ -108,6 +112,11 @@ public:
         UDAction = "CLIM";
         playerName = "";
 
+    }
+    
+    void update(){
+        MovieSequence::update();
+        
     }
     
 protected:

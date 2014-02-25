@@ -69,10 +69,9 @@ void PlayController::update(){
             if(appModel->getProperty<bool>("AutoGenerate")){
                 vector<int>& targetWindows = appModel->getWindowTargets();
                 int wTarget = appModel->getUniqueWindowTarget();// if it is not taken
-                //int wTarget = (int)ofRandom(targetWindows.size());
-//                if(wTarget != -1) makeSequence(appModel->getRandomPlayerName(), wTarget);
-                if(wTarget != -1) makeAgent(appModel->getRandomPlayerName(), wTarget);
-               // if(wTarget != -1) makeSequence("BLADIMIRSL", wTarget); // Omid: use bladimirsl so that we have all the motions
+                //if(wTarget != -1) makeSequence(appModel->getRandomPlayerName(), wTarget);
+                //if(wTarget != -1) makeAgent(appModel->getRandomPlayerName(), wTarget);
+                if(wTarget != -1) makeAgent("BLADIMIRSL", wTarget);
             }
             
             if(appModel->getProperty<bool>("ManualAgentControl")){
@@ -440,10 +439,126 @@ void PlayController::moveAgent(Agent* agent, char op) {
     
 }
 
+
+//--------------------------------------------------------------
+void PlayController::moveAgentByPixel(Agent* agent, pair<char,float> act) {
+    char op = act.first;
+    float length = act.second;
+    string name = agent->getPlayerName();
+    ofxLogNotice() << "Performing action " << op << " for " << name << endl;
+    
+    
+    MovieInfo lastMovie = agent->getLastMovieInSequence();
+    
+    string lastMotion = ofSplitString(lastMovie.markername,"_")[0] + "_" + ofSplitString(lastMovie.markername,"_")[1];
+    
+    MotionGraph nestedForwardDirectionGraph = appModel->getGraph("DirectionGraph");
+    nestedForwardDirectionGraph.nestGraph(appModel->getGraph("ForwardMotionGraph").getPossibilitie());
+    
+    // create a sequence of motions
+    vector<string> motionSequence;
+    
+    cout << name <<endl;
+    
+    switch (op) {
+        case 'l':
+        {
+            // get the possible approach motions for going left
+            string act = agent->getActionType("LR");
+            vector<string> transitions = nestedForwardDirectionGraph.getPossibleTransitions("LEFT");
+            
+            // get the first possible transition to the next action to left
+            string motion ="";
+            for (int t=0;t<transitions.size();t++) {
+                if (ofSplitString(transitions[t],"_")[0]==act)
+                motion = transitions[t];
+            }
+            if (motion!="") {
+                generateMotionsBetween(lastMotion, motion, name, motionSequence);
+                motionSequence.push_back(motion);
+            }
+        }
+        
+        break;
+        case 'r':
+        {
+            // get the possible approach motions for going right
+            string act = agent->getActionType("LR"); cout<<act <<endl;
+            vector<string> transitions = nestedForwardDirectionGraph.getPossibleTransitions("RIGHT");
+            
+            // get the first possible transition to the next action to right
+            string motion ="";
+            for (int t=0;t<transitions.size();t++) {
+                if (ofSplitString(transitions[t],"_")[0]==act)
+                motion = transitions[t];
+            }
+            if (motion!="") {
+                generateMotionsBetween(lastMotion, motion, name, motionSequence);
+                motionSequence.push_back(motion);
+            }
+        }
+        break;
+        case 'u':
+        {
+            // get the possible approach motions for going up
+            string act = agent->getActionType("UD");
+            vector<string> transitions = nestedForwardDirectionGraph.getPossibleTransitions("UP");
+            
+            // get the first possible transition to the next action to up
+            string motion ="";
+            for (int t=0;t<transitions.size();t++) {
+                if (ofSplitString(transitions[t],"_")[0]==act && ofSplitString(transitions[t],"_")[1]== "UPPP")
+                motion = transitions[t];
+            }
+            cout<< motion;
+            
+            if (motion!="") {
+                generateMotionsBetween(lastMotion, motion, name, motionSequence);
+                motionSequence.push_back(motion);
+            }
+        }
+        break;
+        case 'd':
+        {
+            // get the possible approach motions for going down
+            string act = agent->getActionType("UD");
+            vector<string> transitions = nestedForwardDirectionGraph.getPossibleTransitions("DOWN");
+            
+            // get the first possible transition to the next action to down
+            string motion ="";
+            for (int t=0;t<transitions.size();t++) {
+                if (ofSplitString(transitions[t],"_")[0]==act && ofSplitString(transitions[t],"_")[1]== "DOWN")
+                motion = transitions[t];
+            }
+            if (motion!="") {
+                generateMotionsBetween(lastMotion, motion, name, motionSequence);
+                motionSequence.push_back(motion);
+            }
+        }
+        break;
+        default:
+        break;
+    }
+    
+    for (int u=0;u<motionSequence.size();u++)
+        cout << " >>>>>>>>>>>> " << motionSequence[u] << endl;
+    
+    generateMoviesFromMotionsAndActions(motionSequence, agent, name, agent->getNormalPosition(), length);
+    getPositionsForMovieSequence(agent, name);
+    //   agent->setNormalPosition(agent->getScaledPositionAt(0));
+    agent->normalise();
+    
+    //   agent->setSpeed(ofRandom(1.0, 3.0));
+    
+    // appModel->addSequence(movieSequence);
+    agent->play();
+    
+}
+
 //--------------------------------------------------------------
 void PlayController::updatePosition(Agent* agent) {
 if (agent->actionIndex<agent->actions.size())// && agent->getCurrentMovie().frame >=  agent->getCurrentMovie().endframe)
-    moveAgent(agent, agent->actions[agent->actionIndex++]);
+    moveAgentByPixel(agent, agent->actions[agent->actionIndex++]);
 }
 
 
@@ -683,15 +798,16 @@ void PlayController::makeAgent(string name, int window){
     vector<ofRectangle> windows = appModel->getWindows();
     float wStart = appModel->getProperty<float>("OutputWidth");
     float hStart = appModel->getProperty<float>("OutputHeight")+200;
-    float startMargin = 400;
+    int startMargin = 200/appModel->getProperty<float>("gridScale");
     
     int sx = ofRandom(startMargin);
     int sy = ofRandom(startMargin);
     int q = floor(ofRandom(4));
    
-    ofPoint startPosition = ofPoint(sx%2==1?sx:wStart-sx, sy%2==1?sy:hStart-sy);
+   // ofPoint startPosition = ofPoint(sx%2==1?sx/2:wStart-sx/2, sy%2==1?sy/2:hStart-sy/2);
+    ofPoint startPosition = ofPoint((int)ofRandom(startMargin)*appModel->getProperty<float>("gridScale"), (int)ofRandom(startMargin)*appModel->getProperty<float>("gridScale"));
     
-    ofPoint targetPosition = ofPoint(windows[window].x + windows[window].width / 2.0, windows[window].y, 0.0f);
+    ofPoint targetPosition = ofPoint(windows[window].x + windows[window].width / 2.0, windows[window].y - appModel->getProperty<float>("pathBoundingSizeH")/2, 0.0f);
     
     
     // get the possible approach motions for this window
@@ -715,7 +831,7 @@ void PlayController::makeAgent(string name, int window){
     generateMoviesFromMotions(motionSequence, agent, name);
     MovieInfo loopMovie = agent->getLastMovieInSequence();
     agent->push(loopMovie);
-   agent->push(loopMovie);
+    agent->push(loopMovie);
     agent->push(loopMovie);
     agent->push(loopMovie);
     agent->push(loopMovie);
@@ -746,12 +862,14 @@ void PlayController::makeAgent(string name, int window){
     // find the paths using A*.
     ofxLogVerbose() << "Finding a path from (" << agent->getScaledCentreAt(1).x << "," << agent->getScaledCentreAt(1).y  << ") to  (" << targetPosition.x << "," << targetPosition.y << ")"  << endl;
     vector< vector< ofPoint > > paths = findPaths(agent->getScaledCentreAt(1),targetPosition,agent->getWindow());
-    if (paths.size()>0)
+    if (paths.size()>0){
         agent->setCurrentPath(paths[0]);
+        agent->actions =  getDirectionsInPath(paths[0]);
+    }
     else
         ofxLogVerbose() << "No path found for sequence " << appModel->getSequences().size()-1 << endl;
    
-    agent->actions =  getDirectionsInPath(paths[0]);
+    
 
 
     cout << ">>>>>> (" << agent->getScaledCentreAt(1).x << "," << agent->getScaledCentreAt(1).y  << ")" << endl;
@@ -848,6 +966,146 @@ void PlayController::generateMoviesFromMotions(vector<string>& motionSequence, M
     }
     
 }
+
+//--------------------------------------------------------------
+void PlayController::generateMoviesFromMotionsAndActions(vector<string>& motionSequence, Agent* agent, string name, ofPoint normalPos, int length){
+   
+    PlayerModel& model = appModel->getPlayerTemplate(name);
+    map<string, vector<string> >& markDictionary = model.getMarkerDictionary();
+    map<string, ofxXMP>& xmp = model.getXMP();
+    
+    //
+    float scale = appModel->getProperty<float>("DrawSize") / model.getWidth();
+    
+    // convert the motionSequnce to marker names...
+    
+    vector<string> markerSequence;
+    for(int i = 1; i < motionSequence.size(); i++){
+        
+        // ...by chaining the motion sequences together
+        string markerName = motionSequence[i - 1] + "_" + motionSequence[i];
+        
+        // if we get to HUGG then let's insert a stand TODO: deal with other situations such as LWNG etc
+        if(markerName == "HUGG_FRNT_STND_FRNT") markerName = "STND_FRNT_STND_FRNT";
+        
+        markerSequence.push_back(markerName);
+    }
+    
+    ofxLogVerbose() << "Generating movies for marker sequence: " << markerSequence << endl;
+    
+    MovieInfo lastMovie = agent->getLastMovieInSequence();
+    
+    ofPoint startPos;
+    float totalDistance = 0;
+    
+    for(int i = 0; i < markerSequence.size(); i++){
+        
+        ofxLogVerbose() << "Find movies with: " << markerSequence[i] << endl;
+        
+        if(i == 0 && markerSequence[i] == lastMovie.markername){
+            ofxLogVerbose() << "...movie already in sequence, continuing" << endl;
+            continue;
+        }
+        
+        // get all the movies with this marker name
+        map<string, vector<string> >::iterator it = markDictionary.find(markerSequence[i]);
+        assert(it != markDictionary.end());
+        vector<string> uniqueMovies = it->second;
+        
+        // we prefer jumping to a marker in the same movie
+        // so see if it's in amongst the unique movies
+        int randomIndex = first(uniqueMovies, lastMovie.name);                  // returns -1 if not there
+        if(randomIndex == -1) randomIndex = (int)ofRandom(uniqueMovies.size()); // ...hence choose any movie
+        
+        // select the movie name
+        string rMovieName = uniqueMovies[randomIndex];
+        
+        // let's just check to see if the next marker is the one we want...
+        ofxXMPMarker pStartMarker = xmp[rMovieName].getNextMarker(lastMovie.startframe + 1);
+        ofxXMPMarker pEndMarker = xmp[rMovieName].getNextMarker(pStartMarker.getStartFrame() + 1);
+        
+        // if it's not the same movie or the next marker isn't the one we want, then randomly choose one
+        if(rMovieName != lastMovie.name || pStartMarker.getName() != markerSequence[i]){
+            
+            // get all the markers in the movie which match the sequence name - there can be many!!
+            vector<ofxXMPMarker> markers = xmp[rMovieName].getMarkers(markerSequence[i]);
+            pStartMarker = markers[(int)ofRandom(markers.size())];
+            pEndMarker = xmp[rMovieName].getNextMarker(pStartMarker.getStartFrame() + 1);
+            
+            ofxLogVerbose() << "Selecting RAND marker match: " << motionSequence[i] << " == " << pStartMarker.getName() << " of " << markers.size() << endl;
+            
+        }else{
+            ofxLogVerbose() << "Selecting NEXT marker match: " << motionSequence[i] << " == " << pStartMarker.getName() << endl;
+        }
+        
+        int startFrame = pStartMarker.getStartFrame();
+        int endFrame = pEndMarker.getStartFrame();
+        
+        MovieInfo nextMovie;
+        nextMovie.name = rMovieName;
+        nextMovie.path = model.getPlayerFolder() + nextMovie.name + ".mov";
+        nextMovie.startframe = startFrame;
+        nextMovie.endframe = endFrame;
+        nextMovie.speed = lastMovie.speed;
+        nextMovie.markername = markerSequence[i];
+        
+        ostringstream os; os << nextMovie;
+        ofxLogVerbose() << "Adding movie: " << os.str() << endl;
+        
+        
+        
+        //
+        
+        ofPoint movieSP = model.getKeyFrameAt(nextMovie.name, nextMovie.startframe);
+        ofPoint movieEP = model.getKeyFrameAt(nextMovie.name, nextMovie.endframe);
+        
+        
+        if (i!= markerSequence.size()-1)
+            totalDistance+=movieSP.distance(movieEP);
+        
+        
+        cout << " <><><><><><><><><><>  marker " << markerSequence[i] << " distance so far = " << totalDistance << " req length = " << length << endl;
+        if (i==markerSequence.size()-1) {
+            
+            if ((movieSP.distance(movieEP) + totalDistance)*scale < length) {  // if one movie is not enough to cover the distance repeat it
+                markerSequence.push_back(markerSequence[i]);
+                motionSequence.push_back(motionSequence[i]);
+                totalDistance+=movieSP.distance(movieEP);
+                cout << " <><><><><><><><><><> need to repeat "  << markerSequence[i] << endl;
+            }
+            else { // if one movie is enough to cover the distance, find the proper cut point
+                startPos = model.getKeyFrameAt(nextMovie.name, nextMovie.startframe);
+                for(int f = nextMovie.startframe+1; f < nextMovie.endframe; f++){
+                    ofPoint pos = model.getKeyFrameAt(nextMovie.name, f);
+                    if ((totalDistance+startPos.distance(pos))*scale >= length) {
+                        cout << " <><><><><><><><><><>  ending the last movie at " << f << " instead of " << nextMovie.endframe << endl;
+                        cout << " <><><><><><><><><><>  req length = " << length << " , movie length = " << startPos.distance(pos) << endl;
+                        nextMovie.endframe=f;
+                        break;
+                    }
+                }
+            }
+        }
+        
+        agent->push(nextMovie);
+        lastMovie = nextMovie;
+        
+    }
+    
+    
+//    lNormal + (mNormal - sequence[i].positions[j]);
+//
+//    sposition = sposition * scale + pNormal;
+   
+   
+    cout << "motion ========== " << motionSequence.size() << endl;
+    cout << "marker ========== " << markerSequence.size() << endl;
+    cout << "action ========== " << agent->actions.size() << endl;
+    cout << "sequence ========== " << agent->getSequenceSize() << endl;
+
+    
+}
+
 
 //--------------------------------------------------------------
 void PlayController::getPositionsForMovieSequence(MovieSequence* movieSequence, string name){

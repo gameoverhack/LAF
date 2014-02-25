@@ -478,15 +478,15 @@ void AppView::update(){
             ofRectangle biggerEnv;
 
             
-//            biggerEnv.x = 0;
-//            biggerEnv.y = 0;
-//            biggerEnv.width = appModel->getProperty<float>("OutputWidth");
-//            biggerEnv.height = appModel->getProperty<float>("OutputHeight");
+            biggerEnv.x = 0;
+            biggerEnv.y = 0;
+            biggerEnv.width = appModel->getProperty<float>("OutputWidth");
+            biggerEnv.height = appModel->getProperty<float>("OutputHeight");
             
-            biggerEnv.x = -appModel->getProperty<float>("OutputWidth")/2;
-            biggerEnv.y = -appModel->getProperty<float>("OutputHeight");
-            biggerEnv.width = appModel->getProperty<float>("OutputWidth")*2;
-            biggerEnv.height = appModel->getProperty<float>("OutputHeight")*3;
+//            biggerEnv.x = -appModel->getProperty<float>("OutputWidth")/2;
+//            biggerEnv.y = -appModel->getProperty<float>("OutputHeight");
+//            biggerEnv.width = appModel->getProperty<float>("OutputWidth")*2;
+//            biggerEnv.height = appModel->getProperty<float>("OutputHeight")*3;
             
             ofSetColor(200, 0, 100);
             ofRect(biggerEnv);
