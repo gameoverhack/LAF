@@ -199,7 +199,7 @@ float myGraphDescription::distancePointToRectangle(ofPoint point, ofRectangle re
 
 // =============================================================================
 
-vector< vector< ofPoint > > findPaths(ofPoint _startPoint, ofPoint _finishPoint, int _targetWindow){
+vector< vector< ofPoint > > PathPlanning::findPaths(ofPoint _startPoint, ofPoint _finishPoint, int _targetWindow){
 	// Profiling observation: Using int instead of double cost provides marginal improvement (~10%)
 	GenericSearchGraphDescriptor<myNode,double> myGraph;
 	
@@ -266,7 +266,7 @@ vector< vector< ofPoint > > findPaths(ofPoint _startPoint, ofPoint _finishPoint,
 
 }
 
-vector< pair<char,float> > getDirectionsInPath(vector<ofPoint> path) { //TODO: calculate the distance between start and end of one direction
+ vector< pair<char,float> > PathPlanning::getDirectionsInPath(vector<ofPoint> path) { //TODO: calculate the distance between start and end of one direction
     vector< pair<char,float> > result;
     char last = getDirection(path[0], path[1]);
     int lastIndex = 0;
@@ -285,7 +285,7 @@ vector< pair<char,float> > getDirectionsInPath(vector<ofPoint> path) { //TODO: c
     return result;
 }
 
-char getDirection(ofPoint one, ofPoint two) { //TODO: add diagonal directions if needed
+char PathPlanning::getDirection(ofPoint one, ofPoint two) { //TODO: add diagonal directions if needed
     if (one == two)
         return 's'; //still
     else if (one.x == two.x && one.y > two.y)
