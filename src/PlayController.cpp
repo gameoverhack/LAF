@@ -741,7 +741,10 @@ void PlayController::makeAgent(string name, int window){
     int q = floor(ofRandom(4));
    
    // ofPoint startPosition = ofPoint(sx%2==1?sx/2:wStart-sx/2, sy%2==1?sy/2:hStart-sy/2);
-    ofPoint startPosition = ofPoint((int)ofRandom(startMargin)*appModel->getProperty<float>("gridScale"), (int)ofRandom(startMargin)*appModel->getProperty<float>("gridScale"));
+  //  ofPoint startPosition = ofPoint((int)ofRandom(startMargin)*appModel->getProperty<float>("gridScale"), (int)ofRandom(startMargin)*appModel->getProperty<float>("gridScale"));
+    
+    ofPoint startPosition = ofPoint(ofRandom(wStart), 0);
+    
     
     ofPoint targetPosition = ofPoint(windows[window].x + windows[window].width / 2.0, windows[window].y - appModel->getProperty<float>("pathBoundingSizeH")/2, 0.0f);
     
@@ -795,15 +798,25 @@ void PlayController::makeAgent(string name, int window){
     
    // agent->plan(targetPosition); //TODO: fix this issue
     // find the paths using A*.
-    ofxLogVerbose() << "Finding a path from (" << agent->getScaledCentreAt(1).x << "," << agent->getScaledCentreAt(1).y  << ") to  (" << targetPosition.x << "," << targetPosition.y << ")"  << endl;
-    vector< vector< ofPoint > > paths = PathPlanning::findPaths(agent->getScaledCentreAt(1),targetPosition,agent->getWindow());
-    if (paths.size()>0){
-        agent->setCurrentPath(paths[0]);
-        agent->actions =  PathPlanning::getDirectionsInPath(paths[0]);
-    }
-    else
-        ofxLogVerbose() << "No path found for me "  << endl;
+//    ofxLogVerbose() << "Finding a path from (" << agent->getScaledCentreAt(1).x << "," << agent->getScaledCentreAt(1).y  << ") to  (" << targetPosition.x << "," << targetPosition.y << ")"  << endl;
+//    vector< vector< ofPoint > > paths = PathPlanning::findPaths(agent->getScaledCentreAt(1),targetPosition,agent->getWindow());
+//    if (paths.size()>0){
+//        agent->setCurrentPath(paths[0]);
+//        agent->actions =  PathPlanning::getDirectionsInPath(paths[0]);
+//    }
+//    else
+//        ofxLogVerbose() << "No path found for me "  << endl;
    
+    vector< ofPoint > pp;
+    ofPoint nextPoint = ofPoint(startPosition.x,startPosition.y);
+    pp.push_back(nextPoint);
+    ofPoint nextPoint2 = ofPoint(startPosition.x,startPosition.y+200);
+    pp.push_back(nextPoint2);
+    ofPoint nextPoint3 = ofPoint(startPosition.x+40,startPosition.y+200);
+    pp.push_back(nextPoint3);
+
+    agent->setCurrentPath(pp);
+    agent->actions = PathPlanning::getDirectionsInPath(pp);
 }
 
 
@@ -998,6 +1011,8 @@ void PlayController::generateMoviesFromMotionsAndActions(vector<string>& motionS
     int distx =0;
     int disty =0;
     
+    
+    //calculate the total distance ONLY for this motion sequence
     for (int i=lastMovieIndexBeforeAdd+1;i<movs.size();i++) {//
         movieSP = model.getKeyFrameAt(movs[i].name, movs[i].startframe);
 //        movieSP = agent->getScaledPositionAt(ind);// getScaledCentreAt(ind+1);
@@ -1018,13 +1033,14 @@ void PlayController::generateMoviesFromMotionsAndActions(vector<string>& motionS
             cout << " <><><><><><><><><><> miny "<< disty << "   -   " <<  length << endl;
             totalDistance+=disty;
         }
-        
     }
     
     cout << " <><><><><><><><><><> tot = " << totalDistance << endl;
     cout << " <><><><><><><><><><> tot*scal = " << totalDistance*scale << endl;
-        
-        while (totalDistance < length) {  // if one movie is not enough to cover the distance repeat it
+    
+    
+        // if the last movie is not enough to cover the distance repeat it
+        while (totalDistance < length) {
             MovieInfo nextMovie;
             nextMovie.name = lastMovie.name;
             nextMovie.path = model.getPlayerFolder() + nextMovie.name + ".mov";
@@ -1047,40 +1063,36 @@ void PlayController::generateMoviesFromMotionsAndActions(vector<string>& motionS
         }
     
     
-    
-        if (direction=="LEFT" || direction=="RIGT"){
+        // subtract the distance travelled in the last movie so that we check it frame-by-frame next
+        if (direction=="LEFT" || direction=="RIGT")
             totalDistance-=distx;
-        }
     
-        if (direction=="DOWN" || direction=="UPPP"){
+        if (direction=="DOWN" || direction=="UPPP")
             totalDistance-=disty;
-        }
 
     
+        // check the last movie and find the cut frame (if any)
         MovieInfo* lastMovieInSeq = &agent->getLastMovieInSequence();
         ind-=lastMovieInSeq->endframe-lastMovieInSeq->startframe;
     
         startPos = model.getKeyFrameAt(lastMovieInSeq->name, lastMovieInSeq->startframe);//agent->getScaledCentreAt(ind);
     
-        for(int f = lastMovieInSeq->startframe+1; f < lastMovieInSeq->endframe; f++){
+        for(int f = lastMovieInSeq->startframe+1; f <=lastMovieInSeq->endframe; f++){
             ofPoint pos = model.getKeyFrameAt(lastMovieInSeq->name, f); //agent->getScaledCentreAt(ind+f);
             
             int dist;
             distx =abs(startPos.x - pos.x)*scale;
             disty =abs(startPos.y - pos.y)*scale;
             
-            if (direction=="LEFT" || direction=="RIGT"){
+            if (direction=="LEFT" || direction=="RIGT")
                 dist=distx;
-            }
             
-            if (direction=="DOWN" || direction=="UPPP"){
+            if (direction=="DOWN" || direction=="UPPP")
                 dist=disty;
-            }
             
-           
             if ((totalDistance+dist) >= length) { // if one movie is enough to cover the distance, find the proper cut point
                 cout << " <><><><><><><><><><>  ending the last movie at " << f << " instead of " << lastMovieInSeq->endframe << endl;
-                lastMovieInSeq->endframe=f;//lastMovieInSeq->startframe+f;
+            //    lastMovieInSeq->endframe=f;//lastMovieInSeq->startframe+f;
             }
         }
     
@@ -1097,7 +1109,6 @@ void PlayController::generateMoviesFromMotionsAndActions(vector<string>& motionS
     cout << "action ========== " << agent->actions.size() << endl;
     cout << "sequence ========== " << agent->getSequenceSize() << endl;
 
-    
 }
 
 
