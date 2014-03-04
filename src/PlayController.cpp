@@ -492,7 +492,7 @@ void PlayController::moveAgentByPixel(Agent* agent, pair<char,float> act) {
 }
 
 //--------------------------------------------------------------
-void PlayController::updatePosition(Agent* agent) {
+void PlayController::updatePosition(Agent* agent) { //TODO: This is unnecessary now and has to be changed
 if (agent->actionIndex<agent->actions.size())// && agent->getCurrentMovie().frame >=  agent->getCurrentMovie().endframe)
     moveAgentByPixel(agent, agent->actions[agent->actionIndex++]);
 }
@@ -741,9 +741,9 @@ void PlayController::makeAgent(string name, int window){
     int q = floor(ofRandom(4));
    
    // ofPoint startPosition = ofPoint(sx%2==1?sx/2:wStart-sx/2, sy%2==1?sy/2:hStart-sy/2);
-  //  ofPoint startPosition = ofPoint((int)ofRandom(startMargin)*appModel->getProperty<float>("gridScale"), (int)ofRandom(startMargin)*appModel->getProperty<float>("gridScale"));
+    ofPoint startPosition = ofPoint((int)ofRandom(startMargin)*appModel->getProperty<float>("gridScale"), (int)ofRandom(startMargin)*appModel->getProperty<float>("gridScale"));
     
-    ofPoint startPosition = ofPoint(ofRandom(wStart), 0);
+  //  ofPoint startPosition = ofPoint(ofRandom(wStart), 0);
     
     
     ofPoint targetPosition = ofPoint(windows[window].x + windows[window].width / 2.0, windows[window].y - appModel->getProperty<float>("pathBoundingSizeH")/2, 0.0f);
@@ -796,27 +796,27 @@ void PlayController::makeAgent(string name, int window){
 //    actions->push_back('u');
 
     
-   // agent->plan(targetPosition); //TODO: fix this issue
+    agent->plan(targetPosition); //TODO: fix this issue
     // find the paths using A*.
-//    ofxLogVerbose() << "Finding a path from (" << agent->getScaledCentreAt(1).x << "," << agent->getScaledCentreAt(1).y  << ") to  (" << targetPosition.x << "," << targetPosition.y << ")"  << endl;
-//    vector< vector< ofPoint > > paths = PathPlanning::findPaths(agent->getScaledCentreAt(1),targetPosition,agent->getWindow());
-//    if (paths.size()>0){
-//        agent->setCurrentPath(paths[0]);
-//        agent->actions =  PathPlanning::getDirectionsInPath(paths[0]);
-//    }
-//    else
-//        ofxLogVerbose() << "No path found for me "  << endl;
+    ofxLogVerbose() << "Finding a path from (" << agent->getScaledCentreAt(1).x << "," << agent->getScaledCentreAt(1).y  << ") to  (" << targetPosition.x << "," << targetPosition.y << ")"  << endl;
+    vector< vector< ofPoint > > paths = PathPlanning::findPaths(agent->getScaledCentreAt(1),targetPosition,agent->getWindow());
+    if (paths.size()>0){
+        agent->setCurrentPath(paths[0]);
+        agent->actions =  PathPlanning::getDirectionsInPath(paths[0]);
+    }
+    else
+        ofxLogVerbose() << "No path found for me "  << endl;
    
-    vector< ofPoint > pp;
-    ofPoint nextPoint = ofPoint(startPosition.x,startPosition.y);
-    pp.push_back(nextPoint);
-    ofPoint nextPoint2 = ofPoint(startPosition.x,startPosition.y+200);
-    pp.push_back(nextPoint2);
-    ofPoint nextPoint3 = ofPoint(startPosition.x+40,startPosition.y+200);
-    pp.push_back(nextPoint3);
-
-    agent->setCurrentPath(pp);
-    agent->actions = PathPlanning::getDirectionsInPath(pp);
+//    vector< ofPoint > pp;
+//    ofPoint nextPoint = ofPoint(startPosition.x,startPosition.y);
+//    pp.push_back(nextPoint);
+//    ofPoint nextPoint2 = ofPoint(startPosition.x,startPosition.y+200);
+//    pp.push_back(nextPoint2);
+//    ofPoint nextPoint3 = ofPoint(startPosition.x+40,startPosition.y+200);
+//    pp.push_back(nextPoint3);
+//
+//    agent->setCurrentPath(pp);
+//    agent->actions = PathPlanning::getDirectionsInPath(pp);
 }
 
 
@@ -1020,7 +1020,7 @@ void PlayController::generateMoviesFromMotionsAndActions(vector<string>& motionS
 //        movieEP = agent->getScaledPositionAt(ind+(movs[i].endframe-movs[i].startframe));//
         
         distx =abs(movieEP.x - movieSP.x)*scale;
-        disty =abs(movieEP.y - movieSP.y)*scale;
+        disty =abs(movieEP.y - movieSP.y)*scale*2;
         
         ind+=movs[i].endframe-movs[i].startframe;
         cout << ind << " <><><><><><><><><><> s "<< movieSP.x << "   -   " <<  movieSP.y << endl;
@@ -1082,7 +1082,7 @@ void PlayController::generateMoviesFromMotionsAndActions(vector<string>& motionS
             
             int dist;
             distx =abs(startPos.x - pos.x)*scale;
-            disty =abs(startPos.y - pos.y)*scale;
+            disty =abs(startPos.y - pos.y)*scale*2;
             
             if (direction=="LEFT" || direction=="RIGT")
                 dist=distx;
@@ -1092,7 +1092,7 @@ void PlayController::generateMoviesFromMotionsAndActions(vector<string>& motionS
             
             if ((totalDistance+dist) >= length) { // if one movie is enough to cover the distance, find the proper cut point
                 cout << " <><><><><><><><><><>  ending the last movie at " << f << " instead of " << lastMovieInSeq->endframe << endl;
-            //    lastMovieInSeq->endframe=f;//lastMovieInSeq->startframe+f;
+                lastMovieInSeq->endframe=f;//lastMovieInSeq->startframe+f;
             }
         }
     
