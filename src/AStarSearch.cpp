@@ -278,7 +278,8 @@ vector< vector< ofPoint > > PathPlanning::findPaths(ofPoint _startPoint, ofPoint
             lastIndex = i;
         }
     }
-    if (lastIndex!=path.size()-2) {
+     
+    if (last != result[result.size()-1].first) {
         pair<char,float> segment(last,path[lastIndex].distance(path[path.size()-1]));
         result.push_back(segment);
     }

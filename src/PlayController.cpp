@@ -476,7 +476,9 @@ void PlayController::moveAgentByPixel(Agent* agent, pair<char,float> act) {
     
     for (int u=0;u<motionSequence.size();u++)
         cout << " >>>>>>>>>>>> " << motionSequence[u] << endl;
-    
+
+  //  agent->setNormalPosition(agent->getPositionAt(agent->getTotalSequenceFrames()));
+
     generateMoviesFromMotionsAndActions(motionSequence, agent, name, agent->getNormalPosition(), length);
     getPositionsForMovieSequence(agent, name);
     agent->normalise();
@@ -487,7 +489,7 @@ void PlayController::moveAgentByPixel(Agent* agent, pair<char,float> act) {
     //   agent->setSpeed(ofRandom(1.0, 3.0));
     
     // appModel->addSequence(movieSequence);
-    agent->play();
+//    agent->play();
     
 }
 
@@ -741,9 +743,9 @@ void PlayController::makeAgent(string name, int window){
     int q = floor(ofRandom(4));
    
    // ofPoint startPosition = ofPoint(sx%2==1?sx/2:wStart-sx/2, sy%2==1?sy/2:hStart-sy/2);
-    ofPoint startPosition = ofPoint((int)ofRandom(startMargin)*appModel->getProperty<float>("gridScale"), (int)ofRandom(startMargin)*appModel->getProperty<float>("gridScale"));
-    
-  //  ofPoint startPosition = ofPoint(ofRandom(wStart), 0);
+  //  ofPoint startPosition = ofPoint((int)ofRandom(startMargin)*appModel->getProperty<float>("gridScale"), (int)ofRandom(startMargin)*appModel->getProperty<float>("gridScale"));
+
+    ofPoint startPosition = ofPoint(3*appModel->getProperty<float>("gridScale"), 3*appModel->getProperty<float>("gridScale"));
     
     
     ofPoint targetPosition = ofPoint(windows[window].x + windows[window].width / 2.0, windows[window].y - appModel->getProperty<float>("pathBoundingSizeH")/2, 0.0f);
@@ -771,14 +773,14 @@ void PlayController::makeAgent(string name, int window){
     MovieInfo loopMovie = agent->getLastMovieInSequence();
     agent->push(loopMovie);
     agent->push(loopMovie);
-    agent->push(loopMovie);
-    agent->push(loopMovie);
-    agent->push(loopMovie);
+
 
     getPositionsForMovieSequence(agent, name);
     //    agent->push(loopMovie);
+    agent->normalise();
+    ofPoint startPositionAgent = startPosition - agent->getScaledCentreAt(1);
     
-    agent->setNormalPosition(startPosition);
+    agent->setNormalPosition(startPositionAgent);
     agent->normalise();
     
     agent->setSpeed(3);//ofRandom(1.0, 3.0));
@@ -796,27 +798,43 @@ void PlayController::makeAgent(string name, int window){
 //    actions->push_back('u');
 
     
-    agent->plan(targetPosition); //TODO: fix this issue
-    // find the paths using A*.
-    ofxLogVerbose() << "Finding a path from (" << agent->getScaledCentreAt(1).x << "," << agent->getScaledCentreAt(1).y  << ") to  (" << targetPosition.x << "," << targetPosition.y << ")"  << endl;
-    vector< vector< ofPoint > > paths = PathPlanning::findPaths(agent->getScaledCentreAt(1),targetPosition,agent->getWindow());
-    if (paths.size()>0){
-        agent->setCurrentPath(paths[0]);
-        agent->actions =  PathPlanning::getDirectionsInPath(paths[0]);
-    }
-    else
-        ofxLogVerbose() << "No path found for me "  << endl;
+//    agent->plan(targetPosition); //TODO: fix this issue
+//    // find the paths using A*.
+//    ofxLogVerbose() << "Finding a path from (" << agent->getScaledCentreAt(1).x << "," << agent->getScaledCentreAt(1).y  << ") to  (" << targetPosition.x << "," << targetPosition.y << ")"  << endl;
+//    vector< vector< ofPoint > > paths = PathPlanning::findPaths(agent->getScaledCentreAt(1),targetPosition,agent->getWindow());
+//    if (paths.size()>0){
+//        agent->setCurrentPath(paths[0]);
+//        agent->actions =  PathPlanning::getDirectionsInPath(paths[0]);
+//    }
+//    else
+//        ofxLogVerbose() << "No path found for me "  << endl;
    
 //    vector< ofPoint > pp;
 //    ofPoint nextPoint = ofPoint(startPosition.x,startPosition.y);
 //    pp.push_back(nextPoint);
-//    ofPoint nextPoint2 = ofPoint(startPosition.x,startPosition.y+200);
+//    ofPoint nextPoint2 = ofPoint(startPosition.x+300,startPosition.y);
 //    pp.push_back(nextPoint2);
-//    ofPoint nextPoint3 = ofPoint(startPosition.x+40,startPosition.y+200);
+//    ofPoint nextPoint3 = ofPoint(startPosition.x+300,startPosition.y+300);
 //    pp.push_back(nextPoint3);
-//
-//    agent->setCurrentPath(pp);
-//    agent->actions = PathPlanning::getDirectionsInPath(pp);
+    
+    vector< ofPoint > pp;
+    ofPoint nextPoint = ofPoint(agent->getScaledCentreAt(1).x,agent->getScaledCentreAt(1).y);
+    pp.push_back(nextPoint);
+    ofPoint nextPoint2 = ofPoint(agent->getScaledCentreAt(1).x+320,agent->getScaledCentreAt(1).y);
+    pp.push_back(nextPoint2);
+    ofPoint nextPoint3 = ofPoint(agent->getScaledCentreAt(1).x+320,agent->getScaledCentreAt(1).y+320);
+    pp.push_back(nextPoint3);
+    ofPoint nextPoint4 = ofPoint(agent->getScaledCentreAt(1).x+640,agent->getScaledCentreAt(1).y+320);
+    pp.push_back(nextPoint4);
+    ofPoint nextPoint5 = ofPoint(agent->getScaledCentreAt(1).x+680,agent->getScaledCentreAt(1).y+320);
+    pp.push_back(nextPoint5);
+    
+    agent->setCurrentPath(pp);
+    agent->actions = PathPlanning::getDirectionsInPath(pp);
+    
+    for (int a=0;a<agent->actions.size();a++) {
+        cout << "########## action " << agent->actions[a].first << endl;
+     }
 }
 
 
@@ -1014,13 +1032,22 @@ void PlayController::generateMoviesFromMotionsAndActions(vector<string>& motionS
     
     //calculate the total distance ONLY for this motion sequence
     for (int i=lastMovieIndexBeforeAdd+1;i<movs.size();i++) {//
-        movieSP = model.getKeyFrameAt(movs[i].name, movs[i].startframe);
+        ofRectangle startBounding = model.getBoundingAt(movs[i].name, movs[i].startframe);
+        startBounding.position = (startBounding.getPosition() + model.getKeyFrameAt(movs[i].name, movs[i].startframe))*scale;
+        startBounding.scale(scale);
+        ofRectangle endBounding = model.getBoundingAt(movs[i].name, movs[i].endframe);
+        endBounding.position = (endBounding.getPosition() + model.getKeyFrameAt(movs[i].name, movs[i].endframe))*scale;
+        endBounding.scale(scale);
+        
+         movieSP = startBounding.getCenter();
+//        movieSP = model.getKeyFrameAt(movs[i].name, movs[i].startframe);
 //        movieSP = agent->getScaledPositionAt(ind);// getScaledCentreAt(ind+1);
-        movieEP = model.getKeyFrameAt(movs[i].name, movs[i].endframe);
+         movieEP = endBounding.getCenter();
+//        movieEP = model.getKeyFrameAt(movs[i].name, movs[i].endframe);
 //        movieEP = agent->getScaledPositionAt(ind+(movs[i].endframe-movs[i].startframe));//
         
-        distx =abs(movieEP.x - movieSP.x)*scale;
-        disty =abs(movieEP.y - movieSP.y)*scale*2;
+        distx =abs(movieEP.x - movieSP.x);
+        disty =abs(movieEP.y - movieSP.y);
         
         ind+=movs[i].endframe-movs[i].startframe;
         cout << ind << " <><><><><><><><><><> s "<< movieSP.x << "   -   " <<  movieSP.y << endl;
@@ -1075,14 +1102,22 @@ void PlayController::generateMoviesFromMotionsAndActions(vector<string>& motionS
         MovieInfo* lastMovieInSeq = &agent->getLastMovieInSequence();
         ind-=lastMovieInSeq->endframe-lastMovieInSeq->startframe;
     
-        startPos = model.getKeyFrameAt(lastMovieInSeq->name, lastMovieInSeq->startframe);//agent->getScaledCentreAt(ind);
+        ofRectangle startBounding2 =model.getBoundingAt(lastMovieInSeq->name, lastMovieInSeq->startframe);
+        startBounding2.position = (startBounding2.getPosition() + model.getKeyFrameAt(lastMovieInSeq->name, lastMovieInSeq->startframe))*scale;
+        startBounding2.scale(scale);
+        //startPos = model.getKeyFrameAt(lastMovieInSeq->name, lastMovieInSeq->startframe);//agent->getScaledCentreAt(ind);
+        startPos = startBounding2.getCenter();
     
         for(int f = lastMovieInSeq->startframe+1; f <=lastMovieInSeq->endframe; f++){
-            ofPoint pos = model.getKeyFrameAt(lastMovieInSeq->name, f); //agent->getScaledCentreAt(ind+f);
+            ofRectangle currentPositionBounding = model.getBoundingAt(lastMovieInSeq->name, f);
+            currentPositionBounding.position = (currentPositionBounding.getPosition() + model.getKeyFrameAt(lastMovieInSeq->name, f))*scale;
+            currentPositionBounding.scale(scale);
+            //ofPoint pos = model.getKeyFrameAt(lastMovieInSeq->name, f); //agent->getScaledCentreAt(ind+f);
+            ofPoint pos = currentPositionBounding.getCenter();
             
             int dist;
-            distx =abs(startPos.x - pos.x)*scale;
-            disty =abs(startPos.y - pos.y)*scale*2;
+            distx =abs(startPos.x - pos.x);
+            disty =abs(startPos.y - pos.y);
             
             if (direction=="LEFT" || direction=="RIGT")
                 dist=distx;
@@ -1099,16 +1134,6 @@ void PlayController::generateMoviesFromMotionsAndActions(vector<string>& motionS
 //    getPositionsForMovieSequence(agent, name);
 //    agent->normalise();
   
-    
-//    lNormal + (mNormal - sequence[i].positions[j]);
-//    sposition = sposition * scale + pNormal;
-   
-   
-    cout << "motion ========== " << motionSequence.size() << endl;
-    cout << "marker ========== " << markerSequence.size() << endl;
-    cout << "action ========== " << agent->actions.size() << endl;
-    cout << "sequence ========== " << agent->getSequenceSize() << endl;
-
 }
 
 
