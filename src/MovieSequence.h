@@ -41,7 +41,7 @@ public:
     }
     
     void update(){
-        
+         cout << "%%%%%%%%%%%%%%%%>>>  "<< currentMovie.frame << endl;
         // don't try this on a NULL
         if(video == NULL) return;
         
@@ -76,10 +76,31 @@ public:
             
         }
         
+        
         if (pauseFrame > -1 && pauseFrame >= video->getCurrentFrame() - currentMovie.startframe) {
             stop();
         }
 
+        cout << "%%%%%%%%%%%%%%%%>>>  "<< currentMovie.frame << endl;
+        
+        if (currentMovie.isCut) {
+            cout << "%%%%%%%%%%%%%%%%  b " << boundings[currentSequenceFrame].x << endl;
+            cout << "%%%%%%%%%%%%%%%% sb " << sboundings[currentSequenceFrame].x << endl;
+            cout << "%%%%%%%%%%%%%%%%  p " << positions[currentSequenceFrame].x << endl;
+            cout << "%%%%%%%%%%%%%%%% sp " << spositions[currentSequenceFrame].x << endl;
+        }
+        
+        if (video->getIsMovieDone()) {
+            cout<<"@#%#$@%#$%#@$%@#$%#@$%#$@ 1" << endl;
+            cout <<"dd";
+        }
+        
+        if (currentMovie.frame + currentMovie.startframe >= currentMovie.endframe) {
+            cout<<"@#%#$@%#$%#@$%@#$%#@$%#$@ 2" << endl;
+            cout <<"dd";
+        }
+        
+        
         // check if we're done TODO: reverse
         if((video->getIsMovieDone()) || currentMovie.frame + currentMovie.startframe >= currentMovie.endframe
         || (speed < 0 && video->getCurrentFrame() - currentMovie.startframe < 0)
@@ -149,7 +170,7 @@ public:
             video->setFrame(nextMovie.endframe);
             video->setSpeed(nextMovie.speed);
         }
-            
+        
         currentMovie = nextMovie;
         
     }
@@ -364,7 +385,7 @@ public:
                 
             }
             
-            lNormal = position;
+            lNormal = position + ofPoint(0,0);
             
         }
         

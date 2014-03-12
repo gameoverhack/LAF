@@ -771,8 +771,8 @@ void PlayController::makeAgent(string name, int window){
     
     generateMoviesFromMotions(motionSequence, agent, name);
     MovieInfo loopMovie = agent->getLastMovieInSequence();
-    agent->push(loopMovie);
-    agent->push(loopMovie);
+//    agent->push(loopMovie);
+//    agent->push(loopMovie);
 
 
     getPositionsForMovieSequence(agent, name);
@@ -1128,6 +1128,7 @@ void PlayController::generateMoviesFromMotionsAndActions(vector<string>& motionS
             if ((totalDistance+dist) >= length) { // if one movie is enough to cover the distance, find the proper cut point
                 cout << " <><><><><><><><><><>  ending the last movie at " << f << " instead of " << lastMovieInSeq->endframe << endl;
                 lastMovieInSeq->endframe=f;//lastMovieInSeq->startframe+f;
+                lastMovieInSeq->isCut = true;
             }
         }
     
@@ -1148,7 +1149,7 @@ void PlayController::getPositionsForMovieSequence(MovieSequence* movieSequence, 
         MovieInfo& m = sequence[i];
         int totalframes = m.endframe - m.startframe;
         ostringstream os; os << m;
-        
+        cout<< "####### totoal frames = " << totalframes << endl;
         if(m.positions.size() == totalframes && m.boundings.size() == totalframes){
             ofxLogWarning() << "Assuming positions are the same for " << os.str() << endl;
             continue;

@@ -41,8 +41,8 @@ public:
     vector<ofPoint> centres;
     ofRectangle totalbounding;
     
+    bool isCut = false;
     string currentDirection; //Omid
-    
     string getCurrentDirection() { //Omid
         // markername
         
