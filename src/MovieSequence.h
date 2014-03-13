@@ -41,7 +41,6 @@ public:
     }
     
     void update(){
-         cout << "%%%%%%%%%%%%%%%%>>>  "<< currentMovie.frame << endl;
         // don't try this on a NULL
         if(video == NULL) return;
         
@@ -232,11 +231,9 @@ public:
     }
     
     void fixLastSequenceFrame(int oldLength, int newLength) {
-        cout << " b:::  " << totalSequenceFrames << endl;
         totalSequenceFrames -= oldLength;
         sequenceFrames[sequenceFrames.size()-1] = totalSequenceFrames+newLength;
         totalSequenceFrames += newLength;
-        cout << " a:::  " << totalSequenceFrames << endl;
     }
     
     void clear(){
