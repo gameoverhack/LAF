@@ -81,25 +81,6 @@ public:
             stop();
         }
 
-        cout << "%%%%%%%%%%%%%%%%>>>  "<< currentMovie.frame << endl;
-        
-        if (currentMovie.isCut) {
-            cout << "%%%%%%%%%%%%%%%%  b " << boundings[currentSequenceFrame].x << endl;
-            cout << "%%%%%%%%%%%%%%%% sb " << sboundings[currentSequenceFrame].x << endl;
-            cout << "%%%%%%%%%%%%%%%%  p " << positions[currentSequenceFrame].x << endl;
-            cout << "%%%%%%%%%%%%%%%% sp " << spositions[currentSequenceFrame].x << endl;
-        }
-        
-        if (video->getIsMovieDone()) {
-            cout<<"@#%#$@%#$%#@$%@#$%#@$%#$@ 1" << endl;
-            cout <<"dd";
-        }
-        
-        if (currentMovie.frame + currentMovie.startframe >= currentMovie.endframe) {
-            cout<<"@#%#$@%#$%#@$%@#$%#@$%#$@ 2" << endl;
-            cout <<"dd";
-        }
-        
         
         // check if we're done TODO: reverse
         if((video->getIsMovieDone()) || currentMovie.frame + currentMovie.startframe >= currentMovie.endframe
@@ -151,6 +132,12 @@ public:
         
         MovieInfo& nextMovie = sequence[currentSequenceIndex];
         
+        if (nextMovie.agentActionIndex!=currentMovie.agentActionIndex) {
+            ofxLogVerbose() << "Starting to perform the next action old = " << currentMovie.agentActionIndex << "  new = " << nextMovie.agentActionIndex << endl;
+            cout << endl;
+           // if (currentMovie.agentActionIndex!=-1) stop();
+        }
+        
         nextMovie.speed = speed; //ASK: do we update the speed in each movie or for the sequence
         
         if(nextMovie.path != currentMovie.path){
@@ -170,6 +157,7 @@ public:
             video->setFrame(nextMovie.endframe);
             video->setSpeed(nextMovie.speed);
         }
+        
         
         currentMovie = nextMovie;
         
@@ -241,6 +229,14 @@ public:
         sequenceFrames.push_back(totalSequenceFrames + m.endframe - m.startframe);
         totalSequenceFrames += m.endframe - m.startframe;
         //normalise();
+    }
+    
+    void fixLastSequenceFrame(int oldLength, int newLength) {
+        cout << " b:::  " << totalSequenceFrames << endl;
+        totalSequenceFrames -= oldLength;
+        sequenceFrames[sequenceFrames.size()-1] = totalSequenceFrames+newLength;
+        totalSequenceFrames += newLength;
+        cout << " a:::  " << totalSequenceFrames << endl;
     }
     
     void clear(){

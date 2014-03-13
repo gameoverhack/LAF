@@ -41,6 +41,7 @@ public:
     vector<ofPoint> centres;
     ofRectangle totalbounding;
     
+    int agentActionIndex=-1;
     bool isCut = false;
     string currentDirection; //Omid
     string getCurrentDirection() { //Omid
