@@ -83,21 +83,21 @@ void AppController::setup(){
     
     appModel->setProperty("VideoWidth", 550.0f);
     appModel->setProperty("VideoHeight", 550.0f);
-    appModel->setProperty("DrawSize", 200.0f);
+    appModel->setProperty("DrawSize", 100.0f);
     
     appModel->setProperty("TransitionLength", 12);
     
-    appModel->setProperty("OutputWidth", 1920.0f);
+    appModel->setProperty("OutputWidth",    1920.0f);
     appModel->setProperty("OutputHeight", 666.0f);
     
     appModel->setProperty("AnalysePlayers", 0);
     appModel->setProperty("AnalyseName", (string)"");
     
-    appModel->setProperty("ManualAgentControl", false);
-    appModel->setProperty("AutoGenerate", true);
+    appModel->setProperty("ManualAgentControl", true);
+    appModel->setProperty("AutoGenerate", false);
     
     appModel->setProperty("AvoidCollisions", true);
-    appModel->setProperty("gridScale", 40.0f);  // 40
+    appModel->setProperty("gridScale", 60.0f);  // 40
     appModel->setProperty("pathBoundingSizeW", 70.0f); // 15
     appModel->setProperty("pathBoundingSizeH", 110.0f); // 15
     
@@ -152,6 +152,7 @@ void AppController::setup(){
                      ofGetHeight(),
                      ViewOption(),
                      (string)"debug");
+
     
     /******************************************************
      *******               Controllers              *******
@@ -420,27 +421,27 @@ void AppController::keyPressed(ofKeyEventArgs & e){
         case OF_KEY_LEFT:
         {
             if (appModel->getProperty<bool>("ManualAgentControl"))
-                playController->doAction("BLADIMIRSL", 'l');
+                playController->moveAgent((Agent*)appModel->getSequences()[0], 'l');
         }
             break;
             
         case OF_KEY_RIGHT:
         {
             if (appModel->getProperty<bool>("ManualAgentControl"))
-                playController->doAction("BLADIMIRSL", 'r');
+                playController->moveAgent((Agent*)appModel->getSequences()[0], 'r');
         }
             break;
         case OF_KEY_UP:
         {
             if (appModel->getProperty<bool>("ManualAgentControl"))
-                playController->doAction("BLADIMIRSL", 'u');
+                playController->moveAgent((Agent*)appModel->getSequences()[0], 'u');
         }
             break;
             
         case OF_KEY_DOWN:
         {
             if (appModel->getProperty<bool>("ManualAgentControl"))
-                playController->doAction("BLADIMIRSL", 'd');
+                playController->moveAgent((Agent*)appModel->getSequences()[0], 'd');
         }
             break;
             

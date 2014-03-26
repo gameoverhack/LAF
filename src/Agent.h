@@ -118,6 +118,7 @@ public:
         LRAction = "WALK";
         UDAction = "CLIM";
         playerName = "";
+        drawSize = 100;//appModel->getProperty<float>("DrawSize");
 
     }
     
@@ -210,6 +211,14 @@ public:
 //            ofxLogVerbose() << "No path found for me "  << endl;
     }
     
+    float getDrawSize(){
+        return drawSize;
+    }
+    
+    void setDrawSize(float d){
+        drawSize = d;
+    }
+    
 protected:
     
     bool bHug;
@@ -227,6 +236,8 @@ protected:
     string UDAction = "CLIM";
     
     ofPolyline currentPath;
+    
+    float drawSize;
 
 };
 

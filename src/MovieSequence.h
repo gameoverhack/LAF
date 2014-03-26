@@ -299,7 +299,21 @@ public:
         
     }
     
-    void normalise(){
+    void shiftPosition(char direction, float length) {
+        ofPoint t;
+        if (direction == 'l')
+            t = ofPoint (-length,0,0);
+        else if (direction == 'r')
+            t = ofPoint (length,0,0);
+        else if (direction == 'u')
+            t = ofPoint (0,-length,0);
+        else if (direction == 'd')
+            t = ofPoint (0,-length,0);
+        
+        normalise(0,t);
+    }
+    
+    void normalise(int startNormalIndex = 0, ofPoint lNormal = ofPoint(0,0,0)){
 
         // set up temp store vars
         ofPoint     position;
@@ -311,9 +325,9 @@ public:
         ofPoint scentre;
         
         ofPoint mNormal;
-        ofPoint lNormal = ofPoint(0,0,0);
+//        ofPoint lNormal = ofPoint(0,0,0);
         
-        int startNormalIndex = 0;
+//        int startNormalIndex = 0;
 //        if(lastnormalindex == -1){
         
             ofxLogVerbose() << "Normalize Whole Sequence" << endl;
@@ -499,7 +513,8 @@ public:
     
     friend ostream& operator<< (ostream &os, MovieSequence &mS);
     
-      
+    ofPoint shiftPoint;
+    
 protected:
     float speed;
     bool bPaused;

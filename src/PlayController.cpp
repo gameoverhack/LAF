@@ -69,13 +69,13 @@ void PlayController::update(){
                 vector<int>& targetWindows = appModel->getWindowTargets();
                 int wTarget = appModel->getUniqueWindowTarget();// if it is not taken
                 //if(wTarget != -1) makeSequence(appModel->getRandomPlayerName(), wTarget);
-                //if(wTarget != -1) makeAgent(appModel->getRandomPlayerName(), wTarget);
-                if(wTarget != -1) makeAgent("BLADIMIRSL", wTarget);
+                if(wTarget != -1) makeAgent(appModel->getRandomPlayerName(), wTarget);
+                //if(wTarget != -1) makeAgent("BLADIMIRSL", wTarget);
             }
             
             if(appModel->getProperty<bool>("ManualAgentControl")){
                 makeManualAgent("BLADIMIRSL");
-                appModel->setProperty("ManualAgentControl", false);
+                appModel->setProperty("ManualAgentControl", true);
             }
             
             playControllerStates.setState(kPLAYCONTROLLER_PLAY);
@@ -143,126 +143,10 @@ void PlayController::update(){
 }
 
 
-//--------------------------------------------------------------
-void PlayController::doAction(string name, char op) {
- 
-    ofxLogNotice() << "Performing action " << op << " for " << name << endl;
-    
-    vector<MovieSequence*>& sequences = appModel->getSequences();
-    Agent* agent = new Agent;
-    
-    for(int i = 0; i < sequences.size(); i++){
-       if (((Agent*)sequences[i])->getManual())
-           agent = (Agent*)sequences[i];
-    }
-    
-    MovieInfo lastMovie = agent->getLastMovieInSequence();
-    
-    string lastMotion = ofSplitString(lastMovie.markername,"_")[0] + "_" + ofSplitString(lastMovie.markername,"_")[1];
-
-    MotionGraph nestedForwardDirectionGraph = appModel->getGraph("DirectionGraph");
-    nestedForwardDirectionGraph.nestGraph(appModel->getGraph("ForwardMotionGraph").getPossibilitie());
-
-    // create a sequence of motions
-    vector<string> motionSequence;
-
-    cout << name <<endl;
-    
-    switch (op) {
-        case 'l':
-        {
-            // get the possible approach motions for going left
-            string act = agent->getActionType("LR");
-            vector<string> transitions = nestedForwardDirectionGraph.getPossibleTransitions("LEFT");
-            
-            // get the first possible transition to the next action to left
-            string motion ="";
-            for (int t=0;t<transitions.size();t++) {
-              if (ofSplitString(transitions[t],"_")[0]==act)
-                  motion = transitions[t];
-            }
-            if (motion!="") {
-                generateMotionsBetween(lastMotion, motion, name, motionSequence);
-                motionSequence.push_back(motion);
-            }
-        }
-    
-            break;
-        case 'r':
-        {
-            // get the possible approach motions for going right
-            string act = agent->getActionType("LR");
-            vector<string> transitions = nestedForwardDirectionGraph.getPossibleTransitions("RIGHT");
-            
-            // get the first possible transition to the next action to right
-            string motion ="";
-            for (int t=0;t<transitions.size();t++) {
-                if (ofSplitString(transitions[t],"_")[0]==act)
-                    motion = transitions[t];
-            }
-            if (motion!="") {
-                generateMotionsBetween(lastMotion, motion, name, motionSequence);
-                motionSequence.push_back(motion);
-            }
-        }
-            break;
-        case 'u':
-        {
-            // get the possible approach motions for going up
-            string act = agent->getActionType("UD");
-            vector<string> transitions = nestedForwardDirectionGraph.getPossibleTransitions("UP");
-            
-            // get the first possible transition to the next action to up
-            string motion ="";
-            for (int t=0;t<transitions.size();t++) {
-                if (ofSplitString(transitions[t],"_")[0]==act && ofSplitString(transitions[t],"_")[1]== "UPPP")
-                    motion = transitions[t];
-            }
-            cout<< motion;
-            
-            if (motion!="") {
-                generateMotionsBetween(lastMotion, motion, name, motionSequence);
-                motionSequence.push_back(motion);
-            }
-        }
-            break;
-        case 'd':
-        {
-            // get the possible approach motions for going down
-            string act = agent->getActionType("UD");
-            vector<string> transitions = nestedForwardDirectionGraph.getPossibleTransitions("DOWN");
-            
-            // get the first possible transition to the next action to down
-            string motion ="";
-            for (int t=0;t<transitions.size();t++) {
-                if (ofSplitString(transitions[t],"_")[0]==act && ofSplitString(transitions[t],"_")[1]== "DOWN")
-                    motion = transitions[t];
-            }
-            if (motion!="") {
-                generateMotionsBetween(lastMotion, motion, name, motionSequence);
-                motionSequence.push_back(motion);
-            }
-        }
-            break;
-        default:
-            break;
-    }
-    
-    
-    
-    generateMoviesFromMotions(motionSequence, agent, name);
-    getPositionsForMovieSequence(agent, name);
-    agent->normalise();
-    
-    agent->setSpeed(ofRandom(1.0, 3.0));
-    
-   // appModel->addSequence(movieSequence);
-    agent->play();
-
-}
 
 //--------------------------------------------------------------
 void PlayController::moveAgent(Agent* agent, char op) {
+
     string name = agent->getPlayerName();
     ofxLogNotice() << "Performing action " << op << " for " << name << endl;
     
@@ -279,6 +163,8 @@ void PlayController::moveAgent(Agent* agent, char op) {
     
     cout << name <<endl;
     
+    agent->shiftPoint = ofPoint(0,0,0);
+    
     switch (op) {
         case 'l':
         {
@@ -290,7 +176,7 @@ void PlayController::moveAgent(Agent* agent, char op) {
             string motion ="";
             for (int t=0;t<transitions.size();t++) {
                 if (ofSplitString(transitions[t],"_")[0]==act)
-                    motion = transitions[t];
+                motion = transitions[t];
             }
             if (motion!="") {
                 generateMotionsBetween(lastMotion, motion, name, motionSequence);
@@ -309,7 +195,7 @@ void PlayController::moveAgent(Agent* agent, char op) {
             string motion ="";
             for (int t=0;t<transitions.size();t++) {
                 if (ofSplitString(transitions[t],"_")[0]==act)
-                    motion = transitions[t];
+                motion = transitions[t];
             }
             if (motion!="") {
                 generateMotionsBetween(lastMotion, motion, name, motionSequence);
@@ -327,7 +213,7 @@ void PlayController::moveAgent(Agent* agent, char op) {
             string motion ="";
             for (int t=0;t<transitions.size();t++) {
                 if (ofSplitString(transitions[t],"_")[0]==act && ofSplitString(transitions[t],"_")[1]== "UPPP")
-                    motion = transitions[t];
+                motion = transitions[t];
             }
             cout<< motion;
             
@@ -347,8 +233,10 @@ void PlayController::moveAgent(Agent* agent, char op) {
             string motion ="";
             for (int t=0;t<transitions.size();t++) {
                 if (ofSplitString(transitions[t],"_")[0]==act && ofSplitString(transitions[t],"_")[1]== "DOWN")
-                    motion = transitions[t];
+                motion = transitions[t];
             }
+            cout<< motion;
+            
             if (motion!="") {
                 generateMotionsBetween(lastMotion, motion, name, motionSequence);
                 motionSequence.push_back(motion);
@@ -359,17 +247,12 @@ void PlayController::moveAgent(Agent* agent, char op) {
             break;
     }
     
-    
+    for (int u=0;u<motionSequence.size();u++)
+    cout << " >>>>>>>>>>>> " << motionSequence[u] << endl;
     
     generateMoviesFromMotions(motionSequence, agent, name);
-    getPositionsForMovieSequence(agent, name);
- //   agent->setNormalPosition(agent->getScaledPositionAt(0));
+    getPositionsForMovieSequence(agent, agent->getPlayerName());
     agent->normalise();
-    
- //   agent->setSpeed(ofRandom(1.0, 3.0));
-    
-    // appModel->addSequence(movieSequence);
-    agent->play();
     
 }
 
@@ -393,6 +276,26 @@ void PlayController::moveAgentByPixel(Agent* agent, pair<char,float> act) {
     vector<string> motionSequence;
     
     cout << name <<endl;
+    
+    agent->shiftPoint = ofPoint(0,0,0);
+    
+    if (length <= 200) {
+      //  agent->shiftPosition(op, length);
+        
+        ofPoint t;
+        if (op == 'l')
+            t = ofPoint (-length,0,0);
+        else if (op == 'r')
+            t = ofPoint (length,0,0);
+        else if (op == 'u')
+            t = ofPoint (0,-length,0);
+        else if (op == 'd')
+            t = ofPoint (0,-length,0);
+        
+        agent->shiftPoint = t;
+//        agent->normalise(agent->getCurrentMovieIndex(),t);
+//       return;
+    }
     
     switch (op) {
         case 'l':
@@ -481,6 +384,7 @@ void PlayController::moveAgentByPixel(Agent* agent, pair<char,float> act) {
 
     generateMoviesFromMotionsAndActions(motionSequence, agent, name, agent->actionIndex,length);
     getPositionsForMovieSequence(agent, agent->getPlayerName());
+//    agent->normalise(agent->getCurrentMovieIndex()+1,agent->shiftPoint);
     agent->normalise();
 }
 
@@ -503,38 +407,54 @@ if (agent->actionIndex<agent->actions.size())// && agent->getCurrentMovie().fram
 
 //--------------------------------------------------------------
 void PlayController::makeManualAgent(string name) {
+    ofxLogNotice() << "Making an agent for " << name << endl;
+    
     // get the players model
     PlayerModel& model = appModel->getPlayerTemplate(name);
     map<string, ofxXMP>& xmp = model.getXMP();
     
-    
-    
     float scale = appModel->getProperty<float>("DrawSize") / model.getWidth();
+    ofSeedRandom();
     
-    // create a new MovieSequence
+    // create a new Agent
     Agent* agent = new Agent;
     agent->setManual(true);
-    agent->setWindow(0);
     agent->push(model.getFirstMovie());
-    agent->setNormalPosition(ofPoint(0,0,0));
     agent->setNormalScale(scale); // TODO: store scale on the PlayerModel?
-    
     agent->setPlayerName(name);
     
-    // create a sequence of motions
-    vector<string> motionSequence;
+    // choose a random starting position
+    vector<ofRectangle> windows = appModel->getWindows();
+    float wStart = appModel->getProperty<float>("OutputWidth");
+    float hStart = appModel->getProperty<float>("OutputHeight")+200;
+    int startMargin = 400/appModel->getProperty<float>("gridScale");
     
-    // start standing front and go to -> motion
-    motionSequence.push_back("STND_FRNT");
+    int sx = ofRandom(startMargin);
+    int sy = ofRandom(startMargin);
+    int q = floor(ofRandom(4));
     
-    generateMoviesFromMotions(motionSequence, agent, name);
+    // ofPoint startPosition = ofPoint(sx%2==1?sx/2:wStart-sx/2, sy%2==1?sy/2:hStart-sy/2);
+    ofPoint startPosition = ofPoint((int)ofRandom(startMargin)*appModel->getProperty<float>("gridScale"), (int)ofRandom(startMargin)*appModel->getProperty<float>("gridScale"));
+    
+    
+    MovieInfo loopMovie = agent->getLastMovieInSequence();
+    agent->push(loopMovie);
+    agent->push(loopMovie);
+    agent->push(loopMovie);
+    agent->push(loopMovie);
+    
     getPositionsForMovieSequence(agent, name);
     agent->normalise();
     
-    agent->setSpeed(ofRandom(1.0, 3.0));
+    ofPoint startPositionAgent = startPosition - agent->getScaledCentreAt(1);
     
+    agent->setNormalPosition(startPositionAgent);
+    agent->normalise();
+    
+    agent->setSpeed(3);//ofRandom(1.0, 3.0));
     appModel->addSequence(agent);
     agent->play();
+  
 }
 
 
@@ -737,16 +657,16 @@ void PlayController::makeAgent(string name, int window){
     vector<ofRectangle> windows = appModel->getWindows();
     float wStart = appModel->getProperty<float>("OutputWidth");
     float hStart = appModel->getProperty<float>("OutputHeight")+200;
-    int startMargin = 200/appModel->getProperty<float>("gridScale");
+    int startMargin = 400/appModel->getProperty<float>("gridScale");
     
     int sx = ofRandom(startMargin);
     int sy = ofRandom(startMargin);
     int q = floor(ofRandom(4));
    
    // ofPoint startPosition = ofPoint(sx%2==1?sx/2:wStart-sx/2, sy%2==1?sy/2:hStart-sy/2);
-  //  ofPoint startPosition = ofPoint((int)ofRandom(startMargin)*appModel->getProperty<float>("gridScale"), (int)ofRandom(startMargin)*appModel->getProperty<float>("gridScale"));
+    ofPoint startPosition = ofPoint((int)ofRandom(startMargin)*appModel->getProperty<float>("gridScale"), (int)ofRandom(startMargin)*appModel->getProperty<float>("gridScale"));
 
-    ofPoint startPosition = ofPoint(3*appModel->getProperty<float>("gridScale"), 3*appModel->getProperty<float>("gridScale"));
+  //  ofPoint startPosition = ofPoint(3*appModel->getProperty<float>("gridScale"), 3*appModel->getProperty<float>("gridScale"));
     
     
     ofPoint targetPosition = ofPoint(windows[window].x + windows[window].width / 2.0, windows[window].y - appModel->getProperty<float>("pathBoundingSizeH")/2, 0.0f);
@@ -776,32 +696,32 @@ void PlayController::makeAgent(string name, int window){
     agent->play();
     
     
-//    agent->plan(targetPosition); //TODO: fix this issue
-//    // find the paths using A*.
-//    ofxLogVerbose() << "Finding a path from (" << agent->getScaledCentreAt(1).x << "," << agent->getScaledCentreAt(1).y  << ") to  (" << targetPosition.x << "," << targetPosition.y << ")"  << endl;
-//    vector< vector< ofPoint > > paths = PathPlanning::findPaths(agent->getScaledCentreAt(1),targetPosition,agent->getWindow());
-//    if (paths.size()>0){
-//        agent->setCurrentPath(paths[0]);
-//        agent->actions =  PathPlanning::getDirectionsInPath(paths[0]);
-//    }
-//    else
-//        ofxLogVerbose() << "No path found for me "  << endl;
+    agent->plan(targetPosition); //TODO: fix this issue
+    // find the paths using A*.
+    ofxLogVerbose() << "Finding a path from (" << agent->getScaledCentreAt(1).x << "," << agent->getScaledCentreAt(1).y  << ") to  (" << targetPosition.x << "," << targetPosition.y << ")"  << endl;
+    vector< vector< ofPoint > > paths = PathPlanning::findPaths(agent->getScaledCentreAt(1),targetPosition,agent->getWindow());
+    if (paths.size()>0){
+        agent->setCurrentPath(paths[0]);
+        agent->actions =  PathPlanning::getDirectionsInPath(paths[0]);
+    }
+    else
+        ofxLogVerbose() << "No path found for me "  << endl;
    
 
-    vector< ofPoint > pp;
-    ofPoint nextPoint = ofPoint(agent->getScaledCentreAt(1).x,agent->getScaledCentreAt(1).y);
-    pp.push_back(nextPoint);
-    ofPoint nextPoint2 = ofPoint(agent->getScaledCentreAt(1).x+420,agent->getScaledCentreAt(1).y);
-    pp.push_back(nextPoint2);
-    ofPoint nextPoint3 = ofPoint(agent->getScaledCentreAt(1).x+420,agent->getScaledCentreAt(1).y+320);
-    pp.push_back(nextPoint3);
-    ofPoint nextPoint4 = ofPoint(agent->getScaledCentreAt(1).x+640,agent->getScaledCentreAt(1).y+320);
-    pp.push_back(nextPoint4);
-    ofPoint nextPoint5 = ofPoint(agent->getScaledCentreAt(1).x+680,agent->getScaledCentreAt(1).y+320);
-    pp.push_back(nextPoint5);
-    
-    agent->setCurrentPath(pp);
-    agent->actions = PathPlanning::getDirectionsInPath(pp);
+//    vector< ofPoint > pp;
+//    ofPoint nextPoint = ofPoint(agent->getScaledCentreAt(1).x,agent->getScaledCentreAt(1).y);
+//    pp.push_back(nextPoint);
+//    ofPoint nextPoint2 = ofPoint(agent->getScaledCentreAt(1).x,agent->getScaledCentreAt(1).y+270);
+//    pp.push_back(nextPoint2);
+//    ofPoint nextPoint3 = ofPoint(agent->getScaledCentreAt(1).x+320,agent->getScaledCentreAt(1).y+270);
+//    pp.push_back(nextPoint3);
+//    ofPoint nextPoint4 = ofPoint(agent->getScaledCentreAt(1).x+320,agent->getScaledCentreAt(1).y+640);
+//    pp.push_back(nextPoint4);
+//    ofPoint nextPoint5 = ofPoint(agent->getScaledCentreAt(1).x+320,agent->getScaledCentreAt(1).y+680);
+//    pp.push_back(nextPoint5);
+//    
+//    agent->setCurrentPath(pp);
+//    agent->actions = PathPlanning::getDirectionsInPath(pp);
     
     for (int a=0;a<agent->actions.size();a++) {
         cout << "########## action " << agent->actions[a].first << endl;
@@ -950,7 +870,7 @@ void PlayController::generateMoviesFromMotionsAndActions(vector<string>& motionS
         string rMovieName = uniqueMovies[randomIndex];
         
         // let's just check to see if the next marker is the one we want...
-        ofxXMPMarker pStartMarker = xmp[rMovieName].getNextMarker(lastMovie.endframe+1);
+        ofxXMPMarker pStartMarker = xmp[rMovieName].getNextMarker(lastMovie.startframe + 1);
         ofxXMPMarker pEndMarker = xmp[rMovieName].getNextMarker(pStartMarker.getStartFrame() + 1);
         
         // if it's not the same movie or the next marker isn't the one we want, then randomly choose one
