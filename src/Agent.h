@@ -10,7 +10,7 @@
 #define LaughterForgetting_Agent_h
 
 #include "AppModel.h"
-//#include "AStarSearch.h"
+#include "AStarSearch.h"
 
 class Agent : public MovieSequence{
 public:
@@ -107,13 +107,14 @@ public:
         MovieSequence::clear();
         
         willCollide = false;
-        isManual = false;
         LRAction = "WALK";
         UDAction = "CLIM";
         playerName = "";
         
         drawSize = 100;//appModel->getProperty<float>("DrawSize");
-
+        actions.clear();
+        currentAction = 0;
+        actionIndex = 0;
     }
     
     void update(){
@@ -193,16 +194,47 @@ public:
     }
     //-----------------------------------------------------------
     
-    void plan(ofPoint targetPosition) {  //TODO: Fix the dependency issues
-//        // find the paths using A*.
-//        ofxLogVerbose() << "Finding a path from (" << this->getScaledCentreAt(1).x << "," << this->getScaledCentreAt(1).y  << ") to  (" << targetPosition.x << "," << targetPosition.y << ")"  << endl;
-//        vector< vector< ofPoint > > paths = PathPlanning::findPaths(this->getScaledCentreAt(1),targetPosition,this->getWindow());
-//        if (paths.size()>0){
-//            this->setCurrentPath(paths[0]);
-//            this->actions =  PathPlanning::getDirectionsInPath(paths[0]);
-//        }
-//        else
-//            ofxLogVerbose() << "No path found for me "  << endl;
+    void plan(ofPoint targetPosition, ofRectangle worldRect, vector<ofRectangle> windows) {  //TODO: Fix the dependency issues
+    
+        PathPlanner pp;
+        
+        pp.gridScaleX = this->gridSizeX;
+        pp.gridScaleY = this->gridSizeY;
+        
+        pp.worldRect = worldRect;
+        pp.windows = windows;
+        
+        pp.targetWindow = this->window;
+        
+        pp.obstAvoidBoundingW = 2 * this->drawSize /3;
+        pp.obstAvoidBoundingH = this->drawSize + this->drawSize /4;
+        
+        // find the paths using A*.
+        ofxLogVerbose() << "Finding a path from (" << this->getScaledCentreAt(1).x << "," << this->getScaledCentreAt(1).y  << ") to  (" << targetPosition.x << "," << targetPosition.y << ")"  << endl;
+        
+        vector< vector< ofPoint > > paths = pp.findPaths(this->getScaledCentreAt(1),targetPosition,this->getWindow());
+        
+        if (paths.size()>0){
+            this->setCurrentPath(paths[0]);
+            this->actions =  pp.getDirectionsInPath(paths[0]);
+        }
+        else
+            ofxLogVerbose() << "No path found for me "  << endl;
+        
+        //    vector< ofPoint > pp;
+        //    ofPoint nextPoint = ofPoint(agent->getScaledCentreAt(1).x,agent->getScaledCentreAt(1).y);
+        //    pp.push_back(nextPoint);
+        //    ofPoint nextPoint2 = ofPoint(agent->getScaledCentreAt(1).x,agent->getScaledCentreAt(1).y+270);
+        //    pp.push_back(nextPoint2);
+        //    ofPoint nextPoint3 = ofPoint(agent->getScaledCentreAt(1).x+320,agent->getScaledCentreAt(1).y+270);
+        //    pp.push_back(nextPoint3);
+        //    ofPoint nextPoint4 = ofPoint(agent->getScaledCentreAt(1).x+320,agent->getScaledCentreAt(1).y+640);
+        //    pp.push_back(nextPoint4);
+        //    ofPoint nextPoint5 = ofPoint(agent->getScaledCentreAt(1).x+320,agent->getScaledCentreAt(1).y+680);
+        //    pp.push_back(nextPoint5);
+        //
+        //    agent->setCurrentPath(pp);
+        //    agent->actions = PathPlanning::getDirectionsInPath(pp);
     }
     
     float getDrawSize(){
@@ -229,13 +261,6 @@ public:
         gridSizeY = d;
     }
     
-    int getBehaviourMode() {
-        return behaviourMode;
-    }
-    
-    void setBehaviourMode(int b) {
-        behaviourMode = b;
-    }
     
     
 protected:
@@ -255,16 +280,11 @@ protected:
     ofPolyline currentPath;
     
     float drawSize;
-    float gridSizeX;
-    float gridSizeY;
+    float gridSizeX; //girdSizeX should be proportionate to the agent's min left and right movement length (in the movies); changes by changing the drawsize.
+    float gridSizeY; //girdSizeY should be proportionate to the agent's min up and down movement length (in the movies); changes by changing the drawsize.
     
-    int behaviourMode;
-
+    
 };
 
-enum {
-    bREALISTIC = 0,
-    bFLYING
-};
 
 #endif

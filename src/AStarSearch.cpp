@@ -119,36 +119,37 @@ bool myGraphDescription::isInEnv(myNode& n) {
 //    biggerEnv.width = appModel->getProperty<float>("OutputWidth")*2;
 //    biggerEnv.height = appModel->getProperty<float>("OutputHeight")*3;
     
-    biggerEnv.x = 0;
-    biggerEnv.y = 0;
-    biggerEnv.width = appModel->getProperty<float>("OutputWidth");
-    biggerEnv.height = appModel->getProperty<float>("OutputHeight");
+//    biggerEnv.x = 0;
+//    biggerEnv.y = 0;
+//    biggerEnv.width = appModel->getProperty<float>("OutputWidth");
+//    biggerEnv.height = appModel->getProperty<float>("OutputHeight");
     
-    float gridScale = appModel->getProperty<float>("gridScale");
+    
     ofPoint scaledNode;
-    scaledNode.x = n.x * gridScale;
-    scaledNode.y = n.y * gridScale;
+    scaledNode.x = n.x * pathPlanner->gridScaleX + pathPlanner->offsetX;
+    scaledNode.y = n.y * pathPlanner->gridScaleY + pathPlanner->offsetY;
     
-    return biggerEnv.inside(scaledNode);
+    return this->pathPlanner->worldRect.inside(scaledNode);
 
 }
 
 bool myGraphDescription::isInWindows(myNode& n) {
-    float gridScale = appModel->getProperty<float>("gridScale");
     ofRectangle bounding;
     
     ofPoint scaledNode;
-    scaledNode.x = n.x * gridScale;
-    scaledNode.y = n.y * gridScale;
+    scaledNode.x = n.x * pathPlanner->gridScaleX + pathPlanner->offsetX;
+    scaledNode.y = n.y * pathPlanner->gridScaleY + pathPlanner->offsetY;
     
-    bounding.setFromCenter(scaledNode,appModel->getProperty<float>("pathBoundingSizeW"),appModel->getProperty<float>("pathBoundingSizeH"));
+
+    bounding.setFromCenter(scaledNode,this->pathPlanner->obstAvoidBoundingW, this->pathPlanner->obstAvoidBoundingH);
+
     
-    vector<ofRectangle> windows = appModel->getWindows();
+   
     
-    for (int w=0;w<windows.size();w++) {
-        if (w==targetWindow)
+    for (int w=0;w<pathPlanner->windows.size();w++) {
+        if (w==pathPlanner->targetWindow)
             continue;
-        if (windows[w].intersects(bounding))
+        if (pathPlanner->windows[w].intersects(bounding))
             return true;
     }
     
@@ -158,19 +159,16 @@ bool myGraphDescription::isInWindows(myNode& n) {
 float myGraphDescription::calcDistToWindows(myNode& n) {
     float cost = 0;
     
-    float gridScale = appModel->getProperty<float>("gridScale");
-    
     ofPoint scaledNode;
-    scaledNode.x = n.x * gridScale;
-    scaledNode.y = n.y * gridScale;
+    scaledNode.x = n.x * pathPlanner->gridScaleX + pathPlanner->offsetX;
+    scaledNode.y = n.y * pathPlanner->gridScaleY + pathPlanner->offsetY;
     
-    vector<ofRectangle> windows = appModel->getWindows();
     
-    for (int w=0;w<windows.size();w++) {
-        if (w==targetWindow)
+    for (int w=0;w<pathPlanner->windows.size();w++) {
+        if (w==pathPlanner->targetWindow)
             continue;
-        if (distancePointToRectangle(scaledNode,windows[w]) < 1000)  //TODO: use a dynamic parameter
-            cost += distancePointToRectangle(scaledNode,windows[w]);
+        if (distancePointToRectangle(scaledNode,pathPlanner->windows[w]) < 1000)  //TODO: use a dynamic parameter
+            cost += distancePointToRectangle(scaledNode,pathPlanner->windows[w]);
     }
     
     return cost;
@@ -219,7 +217,11 @@ float myGraphDescription::distancePointToRectangle(ofPoint point, ofRectangle re
 
 // =============================================================================
 
-vector< vector< ofPoint > > PathPlanning::findPaths(ofPoint _startPoint, ofPoint _finishPoint, int _targetWindow){
+vector< vector< ofPoint > > PathPlanner::findPaths(ofPoint _startPoint, ofPoint _finishPoint, int _targetWindow){
+    
+    this->targetWindow = _targetWindow;
+    
+    
 	// Profiling observation: Using int instead of double cost provides marginal improvement (~10%)
 	GenericSearchGraphDescriptor<myNode,double> myGraph;
 	
@@ -228,7 +230,7 @@ vector< vector< ofPoint > > PathPlanning::findPaths(ofPoint _startPoint, ofPoint
 	// Create an instance of "myGraphDescription"
 
 	myGraphDescription myGraphClassInstance;
-    myGraphClassInstance.targetWindow = _targetWindow;
+    myGraphClassInstance.pathPlanner = this;
     
 	// Now set that instance and its functions as our function container
 	SearchGraphDescriptorFunctionPointerContainer<myNode,double,myGraphDescription>* fun_pointer_container
@@ -249,15 +251,17 @@ vector< vector< ofPoint > > PathPlanning::findPaths(ofPoint _startPoint, ofPoint
 	myGraph.hashBinSizeIncreaseStep = 512; // By default it's 128. For this problem, we choose a higher value.
 	
     // snap the input nodes to the grid
-    float gridScale = appModel->getProperty<float>("gridScale");
 
     myNode startPoint;
     myNode finishPoint;
-    startPoint.x = round(_startPoint.x/gridScale);
-    startPoint.y = round(_startPoint.y/gridScale);
+    startPoint.x = round(_startPoint.x/this->gridScaleX);
+    startPoint.y = round(_startPoint.y/this->gridScaleY);
     
-    finishPoint.x = round(_finishPoint.x/gridScale);
-    finishPoint.y = round(_finishPoint.y/gridScale);
+    finishPoint.x = round(_finishPoint.x/this->gridScaleX);
+    finishPoint.y = round(_finishPoint.y/this->gridScaleY);
+    
+    offsetX = _finishPoint.x - finishPoint.x*gridScaleX;
+    offsetY = _finishPoint.y - finishPoint.y*gridScaleY;
     
 	myGraph.SeedNode = startPoint;
 	myGraph.TargetNode = finishPoint;
@@ -276,17 +280,15 @@ vector< vector< ofPoint > > PathPlanning::findPaths(ofPoint _startPoint, ofPoint
     for (int i=0; i < paths.size(); i++) {
         vector<ofPoint> path;
         for (int j=paths[i].size()-1;j>=0;j--) {  // the points are reverse
-            path.push_back(ofPoint(paths[i][j].x*gridScale,paths[i][j].y*gridScale));
+            path.push_back(ofPoint(paths[i][j].x*this->gridScaleX+offsetX,paths[i][j].y*this->gridScaleY+offsetY));
         }
         paths2.push_back(path);
     }
     
-
 	return paths2;
-
 }
 
- vector< pair<char,float> > PathPlanning::getDirectionsInPath(vector<ofPoint> path) { //TODO: calculate the distance between start and end of one direction
+ vector< pair<char,float> > PathPlanner::getDirectionsInPath(vector<ofPoint> path) { //TODO: calculate the distance between start and end of one direction
     vector< pair<char,float> > result;
     char last = getDirection(path[0], path[1]);
     int lastIndex = 0;
@@ -311,7 +313,7 @@ vector< vector< ofPoint > > PathPlanning::findPaths(ofPoint _startPoint, ofPoint
     return result;
 }
 
-char PathPlanning::getDirection(ofPoint one, ofPoint two) { //TODO: add diagonal directions if needed
+char PathPlanner::getDirection(ofPoint one, ofPoint two) { //TODO: add diagonal directions if needed
     if (one == two)
         return 's'; //still
     else if (one.x == two.x && one.y > two.y)

@@ -67,7 +67,7 @@ void AppController::setup(){
     //appModel->setProperty("MediaPath", (string)"/Users/gameover/Desktop/LOTE/media");
     //appModel->setProperty("MediaPath", (string)"/Volumes/LongingAndForgetting02/LOTE/TESTRENDERS/mediaANIME");
     appModel->setProperty("MediaPath", (string)"/Users/omid/Desktop/LAF/media");
-    appModel->setProperty("NumberPlayers", 10);
+    appModel->setProperty("NumberPlayers", 1);
     appModel->setProperty("RectTrail", 200);
     
     appModel->setProperty("ForceFileListUpdate", true);
@@ -83,7 +83,7 @@ void AppController::setup(){
     
     appModel->setProperty("VideoWidth", 550.0f);
     appModel->setProperty("VideoHeight", 550.0f);
-    appModel->setProperty("DrawSize", 100.0f);
+    appModel->setProperty("DefaultDrawSize", 100.0f);
     
     appModel->setProperty("TransitionLength", 12);
     
@@ -97,9 +97,9 @@ void AppController::setup(){
     appModel->setProperty("AutoGenerate", true);
     
     appModel->setProperty("AvoidCollisions", true);
-    appModel->setProperty("gridScale", 60.0f);  // 40
-    appModel->setProperty("pathBoundingSizeW", 70.0f); // 15
-    appModel->setProperty("pathBoundingSizeH", 110.0f); // 15
+    appModel->setProperty("DefaultGridScale", 60.0f);  // 40
+//    appModel->setProperty("pathBoundingSizeW", 70.0f); // 15
+//    appModel->setProperty("pathBoundingSizeH", 110.0f); // 15
     
     appModel->setProperty("DistanceThreshold", 200.0f);
     appModel->setProperty("FadeTime", 5);

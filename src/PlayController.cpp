@@ -7,7 +7,7 @@
 //
 
 #include "PlayController.h"
-#include "AStarSearch.h"
+#include "AgentBehaviours.h"
 
 //--------------------------------------------------------------
 PlayController::PlayController(){
@@ -69,7 +69,7 @@ void PlayController::update(){
                 vector<int>& targetWindows = appModel->getWindowTargets();
                 int wTarget = appModel->getUniqueWindowTarget();// if it is not taken
                 //if(wTarget != -1) makeSequence(appModel->getRandomPlayerName(), wTarget);
-                if(wTarget != -1) makeAgent(appModel->getRandomPlayerName(), wTarget);
+                if(wTarget != -1) makeAgent2(appModel->getRandomPlayerName(), wTarget);
                 //if(wTarget != -1) makeAgent("BLADIMIRSL", wTarget);
             }
             
@@ -95,7 +95,7 @@ void PlayController::update(){
             
                 agent->update(appModel->getProperty<bool>("AvoidCollisions"), windowPositions, sequences);
                 
-                updatePosition(agent);
+               // updatePosition(agent);
 
                 if(agent->isSequequenceDone()) appModel->markPlayerForDeletion(agent->getViewID());
                 ostringstream os;
@@ -264,7 +264,7 @@ void PlayController::moveAgent(Agent* agent, char op) {
 
 
 //--------------------------------------------------------------
-void PlayController::moveAgentByPixel(Agent* agent, pair<char,float> act) {
+void PlayController::insertMoviesByPixel(Agent* agent, pair<char,float> act) {
     char op = act.first;
     float length = act.second;
     string name = agent->getPlayerName();
@@ -397,7 +397,7 @@ void PlayController::moveAgentByPixel(Agent* agent, pair<char,float> act) {
 //--------------------------------------------------------------
 void PlayController::updatePosition(Agent* agent) { //TODO: This is unnecessary now and has to be changed
 if (agent->actionIndex<agent->actions.size())// && agent->getCurrentMovie().frame >=  agent->getCurrentMovie().endframe)
-     moveAgentByPixel(agent, agent->actions[agent->actionIndex++]);
+     insertMoviesByPixel(agent, agent->actions[agent->actionIndex++]);
     
 //    if (agent->actionIndex!= agent->getCurrentMovie().agentActionIndex) {
 //        
@@ -424,8 +424,8 @@ void PlayController::makeManualAgent(string name) {
     
     // create a new Agent
     Agent* agent = new Agent;
-    agent->setManual(true);
     agent->setWindow(0);
+    agent->setBehaviourMode(bMANUAL);
     agent->push(model.getFirstMovie());
     agent->setNormalScale(scale); // TODO: store scale on the PlayerModel?
     agent->setPlayerName(name);
@@ -489,7 +489,7 @@ void PlayController::makeSequence(string name, int window){
     string action = ofSplitString(motion, "_")[0];
     string direction = ofSplitString(motion, "_")[1];
     
-    float scale = appModel->getProperty<float>("DrawSize") / model.getWidth();
+    float scale = appModel->getProperty<float>("DefaultDrawSize") / model.getWidth();
     
     // create a new Agent
     Agent* agent = new Agent;
@@ -516,7 +516,7 @@ void PlayController::makeSequence(string name, int window){
     vector<ofRectangle>& windowPositions = appModel->getWindows();
     
     int inserts = 0;
-    float target = appModel->getProperty<float>("DrawSize");
+    float target = appModel->getProperty<float>("DefaultDrawSize");
     MovieInfo loopMovie = agent->getLastMovieInSequence();
     
     if(direction == "LEFT" || direction == "RIGT"){
@@ -620,22 +620,6 @@ void PlayController::makeSequence(string name, int window){
     
     appModel->addSequence(agent);
     agent->play();
-    
-    
-    // Find a sample path
-    ofPoint startPos = finalSequencePosition;
-    ofPoint endPos = targetPosition;
-    cout << startPos.x << " " << startPos.y << endl;
-    cout << endPos.x << " " << endPos.y << endl;
-    
-    
-    // find the paths using A*.
-    vector< vector< ofPoint > > paths = PathPlanning::findPaths(startPos,endPos,agent->getWindow());
-    if (paths.size()>0)
-        agent->setCurrentPath(paths[0]);
-    else
-        ofxLogVerbose() << "No path found for sequence " << appModel->getSequences().size()-1 << endl;
-    
 }
 
 //--------------------------------------------------------------
@@ -647,34 +631,46 @@ void PlayController::makeAgent(string name, int window){
     PlayerModel& model = appModel->getPlayerTemplate(name);
     map<string, ofxXMP>& xmp = model.getXMP();
     
-    float scale = appModel->getProperty<float>("DrawSize") / model.getWidth();
+   // float scale = appModel->getProperty<float>("DefaultDrawSize") / model.getWidth();
     ofSeedRandom();
+    
+    float drawSizes[] = {100,150,200};
     
     // create a new Agent
     Agent* agent = new Agent;
-    agent->setManual(false);
+    agent->setBehaviourMode(bAUTO_REALISTIC);
+    agent->setDrawSize(appModel->getProperty<float>("DefaultDrawSize"));
+    //agent->setGridSizeX(appModel->getProperty<float>("DefaultGridScale"));
+    //agent->setGridSizeY(appModel->getProperty<float>("DefaultGridScale"));
+    
+    //agent->setDrawSize(drawSizes[(int)ofRandom(3)]);
+    agent->setGridSizeX(agent->getDrawSize());
+    agent->setGridSizeY(agent->getDrawSize());
+    
     agent->setWindow(window);
+    
+    float scale = agent->getDrawSize() / model.getWidth();
+    
     agent->push(model.getFirstMovie());
     agent->setNormalScale(scale); // TODO: store scale on the PlayerModel?
     agent->setPlayerName(name);
     
     // choose a random starting position
     vector<ofRectangle> windows = appModel->getWindows();
-    float wStart = appModel->getProperty<float>("OutputWidth");
-    float hStart = appModel->getProperty<float>("OutputHeight")+200;
-    int startMargin = 400/appModel->getProperty<float>("gridScale");
     
-    int sx = ofRandom(startMargin);
-    int sy = ofRandom(startMargin);
-    int q = floor(ofRandom(4));
-   
-   // ofPoint startPosition = ofPoint(sx%2==1?sx/2:wStart-sx/2, sy%2==1?sy/2:hStart-sy/2);
-    ofPoint startPosition = ofPoint((int)ofRandom(startMargin)*appModel->getProperty<float>("gridScale"), (int)ofRandom(startMargin)*appModel->getProperty<float>("gridScale"));
+//    float wStart = appModel->getProperty<float>("OutputWidth");
+//    float hStart = appModel->getProperty<float>("OutputHeight")+200;
+//    int sx = ofRandom(400/agent->getGridSizeX());
+//    int sy = ofRandom(400/agent->getGridSizeY());
+//    int q = floor(ofRandom(4));
+//    ofPoint startPosition = ofPoint(sx%2==1?sx/2:wStart-sx/2, sy%2==1?sy/2:hStart-sy/2);
+    
+    ofPoint startPosition = ofPoint((int)ofRandom(400/agent->getGridSizeX())*agent->getGridSizeX(), (int)ofRandom(400/agent->getGridSizeY())*agent->getGridSizeY());
 
   //  ofPoint startPosition = ofPoint(3*appModel->getProperty<float>("gridScale"), 3*appModel->getProperty<float>("gridScale"));
     
     
-    ofPoint targetPosition = ofPoint(windows[window].x + windows[window].width / 2.0, windows[window].y - appModel->getProperty<float>("pathBoundingSizeH")/2, 0.0f);
+    ofPoint targetPosition = ofPoint(windows[window].x + windows[window].width / 2.0, windows[window].y - agent->getDrawSize()/2, 0.0f);
     
     
     // get the possible approach motions for this window
@@ -685,8 +681,6 @@ void PlayController::makeAgent(string name, int window){
         eraseAll(targetTransitions, (string)"TRAV_LEFT");
         eraseAll(targetTransitions, (string)"TRAV_RIGT");
     }
-    
-    
    
     getPositionsForMovieSequence(agent, name);
     agent->normalise();
@@ -700,39 +694,141 @@ void PlayController::makeAgent(string name, int window){
     appModel->addSequence(agent);
     agent->play();
     
+    ofRectangle worldRect;
+    worldRect.x = 0;
+    worldRect.y = 0;
+    worldRect.width = appModel->getProperty<float>("OutputWidth");
+    worldRect.height = appModel->getProperty<float>("OutputHeight");
     
-    agent->plan(targetPosition); //TODO: fix this issue
-    // find the paths using A*.
-    ofxLogVerbose() << "Finding a path from (" << agent->getScaledCentreAt(1).x << "," << agent->getScaledCentreAt(1).y  << ") to  (" << targetPosition.x << "," << targetPosition.y << ")"  << endl;
-    vector< vector< ofPoint > > paths = PathPlanning::findPaths(agent->getScaledCentreAt(1),targetPosition,agent->getWindow());
-    if (paths.size()>0){
-        agent->setCurrentPath(paths[0]);
-        agent->actions =  PathPlanning::getDirectionsInPath(paths[0]);
-    }
-    else
-        ofxLogVerbose() << "No path found for me "  << endl;
-   
+    agent->plan(targetPosition, worldRect, appModel->getWindows()); 
 
-//    vector< ofPoint > pp;
-//    ofPoint nextPoint = ofPoint(agent->getScaledCentreAt(1).x,agent->getScaledCentreAt(1).y);
-//    pp.push_back(nextPoint);
-//    ofPoint nextPoint2 = ofPoint(agent->getScaledCentreAt(1).x,agent->getScaledCentreAt(1).y+270);
-//    pp.push_back(nextPoint2);
-//    ofPoint nextPoint3 = ofPoint(agent->getScaledCentreAt(1).x+320,agent->getScaledCentreAt(1).y+270);
-//    pp.push_back(nextPoint3);
-//    ofPoint nextPoint4 = ofPoint(agent->getScaledCentreAt(1).x+320,agent->getScaledCentreAt(1).y+640);
-//    pp.push_back(nextPoint4);
-//    ofPoint nextPoint5 = ofPoint(agent->getScaledCentreAt(1).x+320,agent->getScaledCentreAt(1).y+680);
-//    pp.push_back(nextPoint5);
-//    
-//    agent->setCurrentPath(pp);
-//    agent->actions = PathPlanning::getDirectionsInPath(pp);
     
     for (int a=0;a<agent->actions.size();a++) {
         cout << "########## action " << agent->actions[a].first << endl;
+        insertMoviesByPixel(agent, agent->actions[agent->actionIndex++]);
      }
+    
+    
+    
 }
 
+
+//--------------------------------------------------------------
+void PlayController::makeAgent2(string name, int window){
+    window = 3;
+    name = "BLADIMIRSL";
+    
+    ofxLogNotice() << "Making an agent for " << name << " targeting window " << window << endl;
+    
+    // get the players model
+    PlayerModel& model = appModel->getPlayerTemplate(name);
+    map<string, ofxXMP>& xmp = model.getXMP();
+    
+    // float scale = appModel->getProperty<float>("DefaultDrawSize") / model.getWidth();
+    ofSeedRandom();
+    
+    float drawSizes[] = {100,150,200};
+    
+    // create a new Agent
+    Agent* agent = new Agent;
+    agent->setBehaviourMode(bAUTO_REALISTIC);
+    agent->setDrawSize(appModel->getProperty<float>("DefaultDrawSize"));
+    //agent->setGridSizeX(appModel->getProperty<float>("DefaultGridScale"));
+    //agent->setGridSizeY(appModel->getProperty<float>("DefaultGridScale"));
+    //agent->setDrawSize(drawSizes[(int)ofRandom(3)]);
+    agent->setGridSizeX(agent->getDrawSize()/2);
+    agent->setGridSizeY(agent->getDrawSize()/2);
+    
+    agent->setWindow(window);
+    
+    float scale = agent->getDrawSize() / model.getWidth();
+    
+    agent->push(model.getFirstMovie());
+    agent->setNormalScale(scale); // TODO: store scale on the PlayerModel?
+    agent->setPlayerName(name);
+    
+    vector<ofRectangle> windows = appModel->getWindows();
+    
+    // choose a random starting position
+    //    float wStart = appModel->getProperty<float>("OutputWidth");
+    //    float hStart = appModel->getProperty<float>("OutputHeight")+200;
+    //    int sx = ofRandom(400/agent->getGridSizeX());
+    //    int sy = ofRandom(400/agent->getGridSizeY());
+    //    int q = floor(ofRandom(4));
+    //    ofPoint startPosition = ofPoint(sx%2==1?sx/2:wStart-sx/2, sy%2==1?sy/2:hStart-sy/2);
+    
+    //ofPoint startPosition = ofPoint((int)ofRandom(400/agent->getGridSizeX())*agent->getGridSizeX(), (int)ofRandom(400/agent->getGridSizeY())*agent->getGridSizeY());
+    
+    
+    
+    
+
+  
+    
+    ofPoint pathStartPosition = ofPoint(1*agent->getGridSizeX(), 1* agent->getGridSizeY());
+    ofPoint targetPosition = ofPoint(windows[window].x + windows[window].width / 2.0, windows[window].y, 0.0f);
+    ofPoint agentStartPosition = pathStartPosition - agent->getScaledCentreAt(1);
+    
+    getPositionsForMovieSequence(agent, name);
+    agent->normalise();
+    
+    
+    ofPoint floorOffset = agent->getScaledFloorOffset();
+    ofPoint pathTargetPosition = targetPosition;// - floorOffset;
+    
+    ofRectangle worldRect;
+    worldRect.x = 0;
+    worldRect.y = 0;
+    worldRect.width = appModel->getProperty<float>("OutputWidth");
+    worldRect.height = appModel->getProperty<float>("OutputHeight");
+    
+    agent->plan(pathTargetPosition, worldRect, appModel->getWindows());
+    
+    
+    for (int a=0;a<agent->actions.size();a++) {
+        cout << "########## action " << agent->actions[a].first << endl;
+        insertMoviesByPixel(agent, agent->actions[agent->actionIndex++]);
+    }
+    
+    // ******
+    vector<string> motionSequence;
+    motionSequence.clear();
+    string motion = ofSplitString(agent->getLastMovieInSequence().markername,"_")[0]+"_"+ofSplitString(agent->getLastMovieInSequence().markername,"_")[1];
+    
+    // randomise SYNCMOTIONS or WAITMOTIONS TODO: make this selectable
+    vector<string> vEndMotionType(2);
+    vEndMotionType[0] = "SYNCMOTIONS";
+    vEndMotionType[1] = "WAITMOTIONS";
+    string endMotionType = random(vEndMotionType);
+    
+    vector<string>& endMotions = appModel->getGraph("EndGraph").getPossibleTransitions(endMotionType);
+    string emotion = random(endMotions);
+    
+    generateMotionsBetween(motion, emotion, name, motionSequence);
+    
+    generateMoviesFromMotions(motionSequence, agent, name);
+    getPositionsForMovieSequence(agent, name);
+    agent->normalise();
+
+    
+    // calculate target and syncframes
+    MovieInfo& lastMovieInSequence = agent->getLastMovieInSequence();
+    int goalFrame = agent->getTotalSequenceFrames() - 1;
+    int syncFrame = goalFrame;//
+    
+    agent->setGoalFrame(goalFrame - lastMovieInSequence.endframe - lastMovieInSequence.startframe);
+    agent->setSyncFrame(syncFrame);
+    
+    ofPoint finalSequencePosition = targetPosition - agent->getScaledPositionAt(goalFrame) - floorOffset;
+    
+    agent->setNormalPosition(finalSequencePosition);
+    agent->normalise();
+    // ******
+    
+    agent->setSpeed(3);//ofRandom(1.0, 3.0));
+    appModel->addSequence(agent);
+    agent->play();
+}
 
 
 //--------------------------------------------------------------
@@ -829,7 +925,7 @@ void PlayController::generateMoviesFromMotionsAndActions(vector<string>& motionS
     map<string, ofxXMP>& xmp = model.getXMP();
     
     //
-   float scale = appModel->getProperty<float>("DrawSize") / model.getWidth();
+   float scale = agent->getDrawSize() / model.getWidth();
   //  float scale = 1;
     // convert the motionSequnce to marker names...
     

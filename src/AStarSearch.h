@@ -9,10 +9,29 @@
 #ifndef __LaughterForgetting__AStarSearch__
 #define __LaughterForgetting__AStarSearch__
 
-//#include <iostream>
-#include "AppModel.h"
+#include <vector>
+#include <ofRectangle.h>
 #include "myNode.h"
 
+
+class PathPlanner {
+public:
+    float gridScaleX,gridScaleY;
+    float obstAvoidBoundingW, obstAvoidBoundingH;
+    
+    int targetWindow;
+    
+    float offsetX, offsetY;
+    
+    ofRectangle worldRect;
+    vector<ofRectangle> windows;
+    
+    
+    vector< vector< ofPoint > > findPaths(ofPoint startPoint, ofPoint finishPoint,int _targetWindow);
+    char getDirection(ofPoint one, ofPoint two);
+    vector< pair<char,float> > getDirectionsInPath(vector<ofPoint> path);
+    
+};
 
 class myGraphDescription {
 public:
@@ -28,16 +47,8 @@ public:
     float distancePointToRectangle(ofPoint point, ofRectangle rect);
     
     myNode targetNode;
-    int targetWindow;
-};
-
-class PathPlanning {
-    public:
-        static vector< vector< ofPoint > > findPaths(ofPoint startPoint, ofPoint finishPoint,int _targetWindow);
-        static char getDirection(ofPoint one, ofPoint two);
-        static vector< pair<char,float> > getDirectionsInPath(vector<ofPoint> path);
     
+    PathPlanner* pathPlanner;
 };
-
 
 #endif /* defined(__LaughterForgetting__AStarSearch__) */

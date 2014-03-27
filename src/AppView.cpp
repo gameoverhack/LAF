@@ -44,7 +44,7 @@ AppView::~AppView(){
 void AppView::resetCamera(){
     
     videoFBOBig.allocate(appModel->getProperty<float>("VideoWidth"), appModel->getProperty<float>("VideoHeight"));
-    videoFBOSmall.allocate(appModel->getProperty<float>("DrawSize"), appModel->getProperty<float>("DrawSize"));
+    videoFBOSmall.allocate(appModel->getProperty<float>("DefaultDrawSize"), appModel->getProperty<float>("DefaultDrawSize"));
     
 #ifdef USE_PRORES
     videoFBOHero.allocate(ofGetWidth(), ofGetHeight());
@@ -493,7 +493,7 @@ void AppView::update(){
             
              ofSetLineWidth(0.5f);
             ofSetColor(100, 0, 200);
-            float gridScale = appModel->getProperty<float>("gridScale");
+            float gridScale = appModel->getProperty<float>("DefaultGridScale");
             for (int i=0;i<biggerEnv.width/gridScale;i++) {
                 for (int j=0;j<biggerEnv.height/gridScale;j++) {
                     ofLine(biggerEnv.x, biggerEnv.y+j*gridScale, biggerEnv.width + biggerEnv.x, biggerEnv.y+j*gridScale);

@@ -12,6 +12,8 @@
 #include "MovieInfo.h"
 #include "ofxLogger.h"
 #include "ofxThreadedVideo.h"
+#include "AgentBehaviours.h"
+
 
 class MovieSequence{
     
@@ -127,7 +129,7 @@ public:
         else{
             // TODO: add loop?
             //currentSequenceIndex = 0;
-            if (!isManual)
+            if (behaviourMode!=bMANUAL)
                 bSequenceIsDone = true;
             stop();
             return;
@@ -255,6 +257,7 @@ public:
         currentSequenceFrame = totalSequenceFrames = 0;
         
         pauseFrame = -1;
+        behaviourMode = bAUTO_REALISTIC;
     }
     
     void setNormalPosition(ofPoint p){
@@ -519,12 +522,12 @@ public:
     
     ofPoint shiftPoint;
     
-    bool getManual() {
-        return isManual;
+    int getBehaviourMode() {
+        return behaviourMode;
     }
     
-    void setManual(bool m) {
-        isManual = m;
+    void setBehaviourMode(int b) {
+        behaviourMode = b;
     }
     
 protected:
@@ -560,8 +563,10 @@ protected:
     ofRectangle stotalBounding;
     
     int pauseFrame;
-    bool isManual;
+    int behaviourMode;
 };
+
+
 
 inline ostream& operator<<(ostream& os, MovieSequence *mS){
     os << mS->getCurrentMovie() << " || " << mS->getCurrentMovieIndex() << " / " << mS->getSequenceSize() << " " << mS->getCurrentSequenceFrame() << " / " << mS->getTotalSequenceFrames();
