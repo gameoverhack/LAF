@@ -37,13 +37,6 @@ public:
         return willCollide;
     }
     
-    bool getManual() {
-        return isManual;
-    }
-    
-    void setManual(bool m) {
-        isManual = m;
-    }
     
     void setActionType(string axes, string action) {
         if (axes == "LR")
@@ -118,6 +111,7 @@ public:
         LRAction = "WALK";
         UDAction = "CLIM";
         playerName = "";
+        
         drawSize = 100;//appModel->getProperty<float>("DrawSize");
 
     }
@@ -219,6 +213,31 @@ public:
         drawSize = d;
     }
     
+    float getGridSizeX(){
+        return gridSizeX;
+    }
+    
+    void setGridSizeX(float d){
+        gridSizeX = d;
+    }
+    
+    float getGridSizeY(){
+        return gridSizeY;
+    }
+    
+    void setGridSizeY(float d){
+        gridSizeY = d;
+    }
+    
+    int getBehaviourMode() {
+        return behaviourMode;
+    }
+    
+    void setBehaviourMode(int b) {
+        behaviourMode = b;
+    }
+    
+    
 protected:
     
     bool bHug;
@@ -228,8 +247,6 @@ protected:
     
     bool willCollide;
     
-    bool isManual;
-    
     string playerName;
     
     string LRAction = "WALK";
@@ -238,9 +255,16 @@ protected:
     ofPolyline currentPath;
     
     float drawSize;
+    float gridSizeX;
+    float gridSizeY;
+    
+    int behaviourMode;
 
 };
 
-
+enum {
+    bREALISTIC = 0,
+    bFLYING
+};
 
 #endif

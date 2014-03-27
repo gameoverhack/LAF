@@ -221,6 +221,8 @@ void PlayController::moveAgent(Agent* agent, char op) {
                 generateMotionsBetween(lastMotion, motion, name, motionSequence);
                 motionSequence.push_back(motion);
             }
+            
+            agent->setActionType("LR", "TRAV");
         }
             break;
         case 'd':
@@ -241,6 +243,8 @@ void PlayController::moveAgent(Agent* agent, char op) {
                 generateMotionsBetween(lastMotion, motion, name, motionSequence);
                 motionSequence.push_back(motion);
             }
+            
+            agent->setActionType("LR", "TRAV");
         }
             break;
         default:
@@ -254,6 +258,8 @@ void PlayController::moveAgent(Agent* agent, char op) {
     getPositionsForMovieSequence(agent, agent->getPlayerName());
     agent->normalise();
     
+  //  if (!agent->isPlaying())
+        agent->play();
 }
 
 
@@ -419,6 +425,7 @@ void PlayController::makeManualAgent(string name) {
     // create a new Agent
     Agent* agent = new Agent;
     agent->setManual(true);
+    agent->setWindow(0);
     agent->push(model.getFirstMovie());
     agent->setNormalScale(scale); // TODO: store scale on the PlayerModel?
     agent->setPlayerName(name);
@@ -437,11 +444,9 @@ void PlayController::makeManualAgent(string name) {
     ofPoint startPosition = ofPoint((int)ofRandom(startMargin)*appModel->getProperty<float>("gridScale"), (int)ofRandom(startMargin)*appModel->getProperty<float>("gridScale"));
     
     
-    MovieInfo loopMovie = agent->getLastMovieInSequence();
-    agent->push(loopMovie);
-    agent->push(loopMovie);
-    agent->push(loopMovie);
-    agent->push(loopMovie);
+    MovieInfo& loopMovie = agent->getLastMovieInSequence();
+    loopMovie.isLooped = true;
+    
     
     getPositionsForMovieSequence(agent, name);
     agent->normalise();
@@ -647,7 +652,7 @@ void PlayController::makeAgent(string name, int window){
     
     // create a new Agent
     Agent* agent = new Agent;
-    agent->setManual(true);
+    agent->setManual(false);
     agent->setWindow(window);
     agent->push(model.getFirstMovie());
     agent->setNormalScale(scale); // TODO: store scale on the PlayerModel?

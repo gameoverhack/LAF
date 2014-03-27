@@ -121,10 +121,14 @@ public:
             bSequenceIsDone = false;
             currentSequenceIndex--;
         }
+        else if (currentMovie.isLooped) {
+            bSequenceIsDone = false;
+        }
         else{
             // TODO: add loop?
             //currentSequenceIndex = 0;
-            bSequenceIsDone = true;
+            if (!isManual)
+                bSequenceIsDone = true;
             stop();
             return;
         }
@@ -515,6 +519,14 @@ public:
     
     ofPoint shiftPoint;
     
+    bool getManual() {
+        return isManual;
+    }
+    
+    void setManual(bool m) {
+        isManual = m;
+    }
+    
 protected:
     float speed;
     bool bPaused;
@@ -548,6 +560,7 @@ protected:
     ofRectangle stotalBounding;
     
     int pauseFrame;
+    bool isManual;
 };
 
 inline ostream& operator<<(ostream& os, MovieSequence *mS){

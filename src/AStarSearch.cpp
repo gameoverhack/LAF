@@ -33,8 +33,12 @@
     
 	void myGraphDescription::getSuccessors(myNode& n, std::vector<myNode>* s, std::vector<double>* c) //TODO: Change the cost function or heuristics to prefer straight lines
 	{
-		// This function needn't account for obstacles or size of environment. That's done by "isAccessible"
 		myNode tn;
+        
+        tn.prevX = n.x;
+        tn.prevY = n.y;
+        tn.prevNode = &n;
+        
 		s->clear(); c->clear(); // Planner is supposed to clear these. Still, for safety we clear it again.
 
         // Define a 8-connected graph
@@ -49,6 +53,16 @@
 			}
          */
         
+        int xCost = 0;
+        int yCost = 0;
+        
+        int penalty = 100000; //TODO: This is now just experimental. Calculate it!
+        
+        if (n.prevX == n.x)
+            xCost = penalty;
+        else if (n.prevY == n.y)
+            yCost = penalty;
+        
         
         // Define a 4-connected graph
         for (int a=-1; a<=1; a+=2) {
@@ -57,7 +71,8 @@
             if (!isInWindows(tn) && isInEnv(tn)) {
                 s->push_back(tn);
                 //c->push_back(sqrt((double)(a*a)));
-                c->push_back(calcDistToWindows(tn));
+                c->push_back(calcDistToWindows(tn)+xCost);
+                
             }
         }
         
@@ -67,7 +82,7 @@
             if (!isInWindows(tn) && isInEnv(tn)) {
                 s->push_back(tn);
                 //c->push_back(sqrt((double)(b*b)));
-                c->push_back(calcDistToWindows(tn));
+                c->push_back(calcDistToWindows(tn)+yCost);cout << calcDistToWindows(tn) <<endl;
             }
         }
         
@@ -75,12 +90,17 @@
     
 	double myGraphDescription::getHeuristics(myNode& n1, myNode& n2)
 	{
-            int dx = abs(n1.x - n2.x);
-            int dy = abs(n1.y - n2.y);
-            return (sqrt((double)(dx*dx + dy*dy))); // Euclidean distance as heuristics
-       		
+        int directH = 0;
         
-//        return 0;//calcDistToWindows(n2);
+        if (n1.prevNode && n1.prevNode->prevNode) {
+            if ((n1.x == n1.prevNode->x  && n1.x == n1.prevNode->prevNode->x)
+                || (n1.y == n1.prevNode->y  && n1.y == n1.prevNode->prevNode->y))
+                directH = 10000;
+        }
+        
+        int dx = abs(n1.x - n2.x);
+        int dy = abs(n1.y - n2.y);
+        return (directH + sqrt((double)(dx*dx + dy*dy))); // Euclidean distance as heuristics
 	}
 
     bool myGraphDescription::stopSearch_fp(myNode& n) {
