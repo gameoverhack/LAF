@@ -31,7 +31,7 @@ public:
     void makeManualAgent(string name);
     void moveAgent(Agent* agent, char op);
     void updatePosition(Agent* agent);
-    void insertMoviesByPixel(Agent* agent, pair<char,float> act);
+    void insertMoviesFromAction(Agent* agent, pair<char,float> act);
     
 protected:
     

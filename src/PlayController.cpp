@@ -264,7 +264,7 @@ void PlayController::moveAgent(Agent* agent, char op) {
 
 
 //--------------------------------------------------------------
-void PlayController::insertMoviesByPixel(Agent* agent, pair<char,float> act) {
+void PlayController::insertMoviesFromAction(Agent* agent, pair<char,float> act) {
     char op = act.first;
     float length = act.second;
     string name = agent->getPlayerName();
@@ -308,6 +308,12 @@ void PlayController::insertMoviesByPixel(Agent* agent, pair<char,float> act) {
         {
             // get the possible approach motions for going left
             string act = agent->getActionType("LR");
+           
+            if (act == "TRAV" && length > agent->getDrawSize() * 5) {
+                agent->setActionType("LR", "WALK");
+                act = agent->getActionType("LR");
+            }
+            
             vector<string> transitions = nestedForwardDirectionGraph.getPossibleTransitions("LEFT");
             
             // get the first possible transition to the next action to left
@@ -316,6 +322,7 @@ void PlayController::insertMoviesByPixel(Agent* agent, pair<char,float> act) {
                 if (ofSplitString(transitions[t],"_")[0]==act)
                 motion = transitions[t];
             }
+            //motion = transitions[ofRandom(transitions.size())];
             if (motion!="") {
                 generateMotionsBetween(lastMotion, motion, name, motionSequence);
                 motionSequence.push_back(motion);
@@ -327,6 +334,13 @@ void PlayController::insertMoviesByPixel(Agent* agent, pair<char,float> act) {
         {
             // get the possible approach motions for going right
             string act = agent->getActionType("LR"); cout<<act <<endl;
+            
+            if (act == "TRAV" && length > agent->getDrawSize() * 5) {
+                agent->setActionType("LR", "WALK");
+                act = agent->getActionType("LR");
+            }
+            
+            
             vector<string> transitions = nestedForwardDirectionGraph.getPossibleTransitions("RIGHT");
             
             // get the first possible transition to the next action to right
@@ -335,6 +349,8 @@ void PlayController::insertMoviesByPixel(Agent* agent, pair<char,float> act) {
                 if (ofSplitString(transitions[t],"_")[0]==act)
                 motion = transitions[t];
             }
+            //motion = transitions[ofRandom(transitions.size())];
+            
             if (motion!="") {
                 generateMotionsBetween(lastMotion, motion, name, motionSequence);
                 motionSequence.push_back(motion);
@@ -358,6 +374,8 @@ void PlayController::insertMoviesByPixel(Agent* agent, pair<char,float> act) {
             if (motion!="") {
                 generateMotionsBetween(lastMotion, motion, name, motionSequence);
                 motionSequence.push_back(motion);
+                
+                agent->setActionType("LR", "TRAV");
             }
         }
         break;
@@ -378,7 +396,10 @@ void PlayController::insertMoviesByPixel(Agent* agent, pair<char,float> act) {
             if (motion!="") {
                 generateMotionsBetween(lastMotion, motion, name, motionSequence);
                 motionSequence.push_back(motion);
+                
+                agent->setActionType("LR", "TRAV");
             }
+            
         }
         break;
         default:
@@ -397,7 +418,7 @@ void PlayController::insertMoviesByPixel(Agent* agent, pair<char,float> act) {
 //--------------------------------------------------------------
 void PlayController::updatePosition(Agent* agent) { //TODO: This is unnecessary now and has to be changed
 if (agent->actionIndex<agent->actions.size())// && agent->getCurrentMovie().frame >=  agent->getCurrentMovie().endframe)
-     insertMoviesByPixel(agent, agent->actions[agent->actionIndex++]);
+     insertMoviesFromAction(agent, agent->actions[agent->actionIndex++]);
     
 //    if (agent->actionIndex!= agent->getCurrentMovie().agentActionIndex) {
 //        
@@ -634,16 +655,16 @@ void PlayController::makeAgent(string name, int window){
    // float scale = appModel->getProperty<float>("DefaultDrawSize") / model.getWidth();
     ofSeedRandom();
     
-    float drawSizes[] = {100,150,200};
+    float drawSizes[] = {100,200,200};
     
     // create a new Agent
     Agent* agent = new Agent;
     agent->setBehaviourMode(bAUTO_REALISTIC);
-    agent->setDrawSize(appModel->getProperty<float>("DefaultDrawSize"));
+    //agent->setDrawSize(appModel->getProperty<float>("DefaultDrawSize"));
     //agent->setGridSizeX(appModel->getProperty<float>("DefaultGridScale"));
     //agent->setGridSizeY(appModel->getProperty<float>("DefaultGridScale"));
     
-    //agent->setDrawSize(drawSizes[(int)ofRandom(3)]);
+    agent->setDrawSize(drawSizes[(int)ofRandom(3)]);
     agent->setGridSizeX(agent->getDrawSize());
     agent->setGridSizeY(agent->getDrawSize());
     
@@ -690,7 +711,7 @@ void PlayController::makeAgent(string name, int window){
     agent->setNormalPosition(startPositionAgent);
     agent->normalise();
     
-    agent->setSpeed(3);//ofRandom(1.0, 3.0));
+    agent->setSpeed(6);//ofRandom(1.0, 3.0));
     appModel->addSequence(agent);
     agent->play();
     
@@ -700,12 +721,12 @@ void PlayController::makeAgent(string name, int window){
     worldRect.width = appModel->getProperty<float>("OutputWidth");
     worldRect.height = appModel->getProperty<float>("OutputHeight");
     
-    agent->plan(targetPosition, worldRect, appModel->getWindows()); 
+    agent->plan(startPosition, targetPosition, worldRect, appModel->getWindows());
 
     
     for (int a=0;a<agent->actions.size();a++) {
         cout << "########## action " << agent->actions[a].first << endl;
-        insertMoviesByPixel(agent, agent->actions[agent->actionIndex++]);
+        insertMoviesFromAction(agent, agent->actions[agent->actionIndex++]);
      }
     
     
@@ -715,8 +736,9 @@ void PlayController::makeAgent(string name, int window){
 
 //--------------------------------------------------------------
 void PlayController::makeAgent2(string name, int window){
-    window = 3;
+    window = 10;
     name = "BLADIMIRSL";
+    name = "PRIYAR";
     
     ofxLogNotice() << "Making an agent for " << name << " targeting window " << window << endl;
     
@@ -759,35 +781,36 @@ void PlayController::makeAgent2(string name, int window){
     
     //ofPoint startPosition = ofPoint((int)ofRandom(400/agent->getGridSizeX())*agent->getGridSizeX(), (int)ofRandom(400/agent->getGridSizeY())*agent->getGridSizeY());
     
+    float startXRegion = (int)ofRandom(1920/5);
+    float startYRegion = 0;//(int)ofRandom(2)*500;
+    int startX = (int)ofRandom(1920/agent->getGridSizeX())+1;
+    int startY = (int)ofRandom(2)+2;
     
+    cout << "sX = " << startX*agent->getGridSizeX() << " sY = " << startY * agent->getGridSizeY() + startYRegion << " - startYReg = " << startYRegion << endl;
     
-    
-
-  
-    
-    ofPoint pathStartPosition = ofPoint(1*agent->getGridSizeX(), 1* agent->getGridSizeY());
+    ofPoint pathStartPosition = ofPoint(startX*agent->getGridSizeX(), startY * agent->getGridSizeY() + startYRegion);
+    //ofPoint pathStartPosition = ofPoint(3*agent->getGridSizeX(), 6 * agent->getGridSizeY());
     ofPoint targetPosition = ofPoint(windows[window].x + windows[window].width / 2.0, windows[window].y, 0.0f);
-    ofPoint agentStartPosition = pathStartPosition - agent->getScaledCentreAt(1);
-    
+    //agent->setNormalPosition(agentStartPosition);
     getPositionsForMovieSequence(agent, name);
     agent->normalise();
     
-    
+    ofPoint agentStartPosition = pathStartPosition - agent->getScaledCentreAt(1);
     ofPoint floorOffset = agent->getScaledFloorOffset();
     ofPoint pathTargetPosition = targetPosition;// - floorOffset;
     
     ofRectangle worldRect;
-    worldRect.x = 0;
-    worldRect.y = 0;
-    worldRect.width = appModel->getProperty<float>("OutputWidth");
-    worldRect.height = appModel->getProperty<float>("OutputHeight");
+    worldRect.x = - 3* agent->getDrawSize();
+    worldRect.y = - 3* agent->getDrawSize();
+    worldRect.width = appModel->getProperty<float>("OutputWidth") + 3* agent->getDrawSize();
+    worldRect.height = appModel->getProperty<float>("OutputHeight") + 3* agent->getDrawSize();
     
-    agent->plan(pathTargetPosition, worldRect, appModel->getWindows());
+    agent->plan(agentStartPosition, pathTargetPosition, worldRect, appModel->getWindows());
     
     
     for (int a=0;a<agent->actions.size();a++) {
         cout << "########## action " << agent->actions[a].first << endl;
-        insertMoviesByPixel(agent, agent->actions[agent->actionIndex++]);
+        insertMoviesFromAction(agent, agent->actions[agent->actionIndex++]);
     }
     
     // ******
@@ -825,7 +848,7 @@ void PlayController::makeAgent2(string name, int window){
     agent->normalise();
     // ******
     
-    agent->setSpeed(3);//ofRandom(1.0, 3.0));
+    agent->setSpeed(6);//ofRandom(1.0, 3.0));
     appModel->addSequence(agent);
     agent->play();
 }

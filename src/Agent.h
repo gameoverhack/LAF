@@ -194,7 +194,7 @@ public:
     }
     //-----------------------------------------------------------
     
-    void plan(ofPoint targetPosition, ofRectangle worldRect, vector<ofRectangle> windows) {  //TODO: Fix the dependency issues
+    void plan(ofPoint startPosition, ofPoint targetPosition, ofRectangle worldRect, vector<ofRectangle> windows) {  //TODO: Fix the dependency issues
     
         PathPlanner pp;
         
@@ -212,7 +212,8 @@ public:
         // find the paths using A*.
         ofxLogVerbose() << "Finding a path from (" << this->getScaledCentreAt(1).x << "," << this->getScaledCentreAt(1).y  << ") to  (" << targetPosition.x << "," << targetPosition.y << ")"  << endl;
         
-        vector< vector< ofPoint > > paths = pp.findPaths(this->getScaledCentreAt(1),targetPosition,this->getWindow());
+        //vector< vector< ofPoint > > paths = pp.findPaths(this->getScaledCentreAt(1),targetPosition,this->getWindow());
+        vector< vector< ofPoint > > paths = pp.findPaths(startPosition,targetPosition,this->getWindow());
         
         if (paths.size()>0){
             this->setCurrentPath(paths[0]);
