@@ -151,6 +151,27 @@ void PlayController::moveAgent(Agent* agent, char op) {
     ofxLogNotice() << "Performing action " << op << " for " << name << endl;
     
     
+    if (agent->getCurrentMovieIndex() < agent->getSequenceSize()-1)
+        agent->removeMoviesFromIndex(agent->getCurrentMovieIndex()+1)   ;
+    
+    getPositionsForMovieSequence(agent, agent->getPlayerName());
+    agent->normalise();
+    
+    // Cut the current movie and start the new movie at the current position
+    MovieInfo* currentMovie = &agent->getCurrentMovie();
+    int oldLength = currentMovie->endframe - currentMovie->startframe;
+    
+    currentMovie->endframe = currentMovie->startframe + currentMovie->frame;
+    agent->getMovieSequence()[agent->getCurrentMovieIndex()].endframe = currentMovie->startframe + currentMovie->frame;
+    
+    // we have pushed this movie before, so we need to fix the sequence frame
+    agent->fixLastSequenceFrame(oldLength, currentMovie->endframe - currentMovie->startframe);
+    // getPositionsForMovieSequence(agent, agent->getPlayerName());
+    
+    
+    
+    
+    
     MovieInfo lastMovie = agent->getLastMovieInSequence();
     
     string lastMotion = ofSplitString(lastMovie.markername,"_")[0] + "_" + ofSplitString(lastMovie.markername,"_")[1];
@@ -163,7 +184,6 @@ void PlayController::moveAgent(Agent* agent, char op) {
     
     cout << name <<endl;
     
-    agent->shiftPoint = ofPoint(0,0,0);
     
     switch (op) {
         case 'l':
@@ -254,12 +274,16 @@ void PlayController::moveAgent(Agent* agent, char op) {
     for (int u=0;u<motionSequence.size();u++)
     cout << " >>>>>>>>>>>> " << motionSequence[u] << endl;
     
+    
+
+
+    
     generateMoviesFromMotions(motionSequence, agent, name);
     getPositionsForMovieSequence(agent, agent->getPlayerName());
     agent->normalise();
     
   //  if (!agent->isPlaying())
-        agent->play();
+       agent->play();
 }
 
 
@@ -319,10 +343,10 @@ void PlayController::insertMoviesFromAction(Agent* agent, pair<char,float> act) 
             // get the first possible transition to the next action to left
             string motion ="";
             for (int t=0;t<transitions.size();t++) {
-                if (ofSplitString(transitions[t],"_")[0]==act)
+                if (ofSplitString(transitions[t],"_")[0]==act && ofSplitString(transitions[t],"_")[1]== "LEFT")
                 motion = transitions[t];
             }
-            //motion = transitions[ofRandom(transitions.size())];
+            motion = transitions[ofRandom(transitions.size())];
             if (motion!="") {
                 generateMotionsBetween(lastMotion, motion, name, motionSequence);
                 motionSequence.push_back(motion);
@@ -346,10 +370,10 @@ void PlayController::insertMoviesFromAction(Agent* agent, pair<char,float> act) 
             // get the first possible transition to the next action to right
             string motion ="";
             for (int t=0;t<transitions.size();t++) {
-                if (ofSplitString(transitions[t],"_")[0]==act)
+                if (ofSplitString(transitions[t],"_")[0]==act && ofSplitString(transitions[t],"_")[1]== "RIGT")
                 motion = transitions[t];
             }
-            //motion = transitions[ofRandom(transitions.size())];
+            motion = transitions[ofRandom(transitions.size())];
             
             if (motion!="") {
                 generateMotionsBetween(lastMotion, motion, name, motionSequence);
@@ -440,19 +464,31 @@ void PlayController::makeManualAgent(string name) {
     PlayerModel& model = appModel->getPlayerTemplate(name);
     map<string, ofxXMP>& xmp = model.getXMP();
     
-    float scale = appModel->getProperty<float>("DrawSize") / model.getWidth();
+    // float scale = appModel->getProperty<float>("DefaultDrawSize") / model.getWidth();
     ofSeedRandom();
+    
+    float drawSizes[] = {100,150,200};
     
     // create a new Agent
     Agent* agent = new Agent;
-    agent->setWindow(0);
     agent->setBehaviourMode(bMANUAL);
+    agent->setDrawSize(appModel->getProperty<float>("DefaultDrawSize"));
+    //agent->setGridSizeX(appModel->getProperty<float>("DefaultGridScale"));
+    //agent->setGridSizeY(appModel->getProperty<float>("DefaultGridScale"));
+    //agent->setDrawSize(drawSizes[(int)ofRandom(3)]);
+    agent->setGridSizeX(agent->getDrawSize()/2);
+    agent->setGridSizeY(agent->getDrawSize()/2);
+    
+    agent->setWindow(0); //TODO: set it to -1
+    
+    float scale = agent->getDrawSize() / model.getWidth();
+    
     agent->push(model.getFirstMovie());
     agent->setNormalScale(scale); // TODO: store scale on the PlayerModel?
     agent->setPlayerName(name);
+
     
     // choose a random starting position
-    vector<ofRectangle> windows = appModel->getWindows();
     float wStart = appModel->getProperty<float>("OutputWidth");
     float hStart = appModel->getProperty<float>("OutputHeight")+200;
     int startMargin = 400/appModel->getProperty<float>("gridScale");
@@ -477,7 +513,7 @@ void PlayController::makeManualAgent(string name) {
     agent->setNormalPosition(startPositionAgent);
     agent->normalise();
     
-    agent->setSpeed(3);//ofRandom(1.0, 3.0));
+    agent->setSpeed(8);//ofRandom(1.0, 3.0));
     appModel->addSequence(agent);
     agent->play();
   
@@ -738,7 +774,7 @@ void PlayController::makeAgent(string name, int window){
 void PlayController::makeAgent2(string name, int window){
     window = 10;
     name = "BLADIMIRSL";
-    name = "PRIYAR";
+    //name = "PRIYAR";
     
     ofxLogNotice() << "Making an agent for " << name << " targeting window " << window << endl;
     

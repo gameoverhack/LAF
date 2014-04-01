@@ -93,8 +93,8 @@ void AppController::setup(){
     appModel->setProperty("AnalysePlayers", 0);
     appModel->setProperty("AnalyseName", (string)"");
     
-    appModel->setProperty("ManualAgentControl", false);
-    appModel->setProperty("AutoGenerate", true);
+    appModel->setProperty("ManualAgentControl", true);
+    appModel->setProperty("AutoGenerate", false);
     
     appModel->setProperty("AvoidCollisions", true);
     appModel->setProperty("DefaultGridScale", 60.0f);  // 40
@@ -102,7 +102,7 @@ void AppController::setup(){
 //    appModel->setProperty("pathBoundingSizeH", 110.0f); // 15
     
     appModel->setProperty("DistanceThreshold", 200.0f);
-    appModel->setProperty("FadeTime", 5);
+    appModel->setProperty("FadeTime", 0);
     appModel->setProperty("SyncTime", 2);
     appModel->setProperty("HeroTime", 80000);
     appModel->setProperty("HeroFade", 10000);

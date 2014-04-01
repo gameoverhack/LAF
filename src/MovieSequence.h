@@ -530,6 +530,23 @@ public:
         behaviourMode = b;
     }
     
+    void removeMoviesFromIndex (int ind) {
+        
+        ind++;
+        sequence.erase(sequence.begin()+ind,sequence.end());
+        sequence.erase(sequence.end());
+        
+         for (int i=sequenceFrames.size()-1; i>=ind;i--) {
+             totalSequenceFrames -= sequenceFrames[i] - sequenceFrames[i-1];
+         }
+        
+        currentSequenceFrame = totalSequenceFrames + currentMovie.frame;
+        
+        sequenceFrames.erase(sequenceFrames.begin()+ind,sequenceFrames.end());
+        //sequenceFrames.erase(sequenceFrames.end());
+        //Remember to normalise after
+    }
+    
 protected:
     float speed;
     bool bPaused;
