@@ -57,6 +57,8 @@ void PlayController::update(){
             appModel->resetUniqueTargets();
             appModel->resetHeroTimer();
             
+            appModel->initStartingPositions();
+
             // make the player views
             appModel->createPlayerViews(appModel->getProperty<int>("NumberPlayers"));
             
@@ -67,9 +69,12 @@ void PlayController::update(){
         {
             if(appModel->getProperty<bool>("AutoGenerate")){
                 vector<int>& targetWindows = appModel->getWindowTargets();
-                int wTarget = appModel->getUniqueWindowTarget();// if it is not taken
+                //int wTarget = appModel->getUniqueWindowTarget();// if it is not taken
                 //if(wTarget != -1) makeSequence(appModel->getRandomPlayerName(), wTarget);
-                if(wTarget != -1) makeAgent2(appModel->getRandomPlayerName(), wTarget);
+                
+                int start = appModel->getUniqueStartPosition();
+                
+                makeAgent2(appModel->getRandomPlayerName(), start, -1);
                 //if(wTarget != -1) makeAgent("BLADIMIRSL", wTarget);
             }
             
@@ -151,18 +156,39 @@ void PlayController::moveAgent(Agent* agent, char op) {
     ofxLogNotice() << "Performing action " << op << " for " << name << endl;
     
     
+    
+    // Remove the rest of the movies in the sequence as we are overwriting them
     if (agent->getCurrentMovieIndex() < agent->getSequenceSize()-1)
         agent->removeMoviesFromIndex(agent->getCurrentMovieIndex()+1)   ;
-    
     getPositionsForMovieSequence(agent, agent->getPlayerName());
     agent->normalise();
     
     // Cut the current movie and start the new movie at the current position
     MovieInfo* currentMovie = &agent->getCurrentMovie();
+    string lastMotion = ofSplitString(currentMovie->markername,"_")[0] + "_" + ofSplitString(currentMovie->markername,"_")[1];
     int oldLength = currentMovie->endframe - currentMovie->startframe;
     
-    currentMovie->endframe = currentMovie->startframe + currentMovie->frame;
-    agent->getMovieSequence()[agent->getCurrentMovieIndex()].endframe = currentMovie->startframe + currentMovie->frame;
+    // find the next or last marker and cut at that point
+    
+    // get the players model
+    PlayerModel& model = appModel->getPlayerTemplate(agent->getPlayerName());
+    map<string, ofxXMP>& xmp = model.getXMP();
+
+    ofxXMPMarker lastMarker = xmp[currentMovie->name].getLastMarker(currentMovie->frame);
+    ofxXMPMarker nextMarker = xmp[currentMovie->name].getNextMarker(currentMovie->frame);
+    
+    
+    cout << "lastmarker name = " << lastMarker.getName() << endl;
+    cout << "lastmarker st frame =  " << lastMarker.getStartFrame() << endl;
+    cout << "nextmarker st frame =  " << nextMarker.getStartFrame() << endl;
+    cout << "cframe = " << currentMovie->frame << endl;
+    
+    
+    
+    int newEndFrame = currentMovie->startframe + currentMovie->frame;
+    //int newEndFrame = currentMovie->startframe + nextMarker.getStartFrame();
+    currentMovie->endframe = newEndFrame;
+    agent->getMovieSequence()[agent->getCurrentMovieIndex()].endframe = newEndFrame;
     
     // we have pushed this movie before, so we need to fix the sequence frame
     agent->fixLastSequenceFrame(oldLength, currentMovie->endframe - currentMovie->startframe);
@@ -172,9 +198,8 @@ void PlayController::moveAgent(Agent* agent, char op) {
     
     
     
-    MovieInfo lastMovie = agent->getLastMovieInSequence();
+    //MovieInfo lastMovie = agent->getLastMovieInSequence();
     
-    string lastMotion = ofSplitString(lastMovie.markername,"_")[0] + "_" + ofSplitString(lastMovie.markername,"_")[1];
     
     MotionGraph nestedForwardDirectionGraph = appModel->getGraph("DirectionGraph");
     nestedForwardDirectionGraph.nestGraph(appModel->getGraph("ForwardMotionGraph").getPossibilitie());
@@ -192,12 +217,20 @@ void PlayController::moveAgent(Agent* agent, char op) {
             string act = agent->getActionType("LR");
             vector<string> transitions = nestedForwardDirectionGraph.getPossibleTransitions("LEFT");
             
+            // removes the movies that do not exist
+            eraseAll(transitions, (string)"CLIM_UPLF");
+            eraseAll(transitions, (string)"CLIM_DNLF");
+            eraseAll(transitions, (string)"CLIM_LEFT");
+            eraseAll(transitions, (string)"CRCH_LEFT");
+            eraseAll(transitions, (string)"STND_LEFT");
+            
             // get the first possible transition to the next action to left
             string motion ="";
             for (int t=0;t<transitions.size();t++) {
                 if (ofSplitString(transitions[t],"_")[0]==act)
-                motion = transitions[t];
+                    motion = transitions[t];
             }
+            motion = transitions[(int)ofRandom(transitions.size())];
             if (motion!="") {
                 generateMotionsBetween(lastMotion, motion, name, motionSequence);
                 motionSequence.push_back(motion);
@@ -211,12 +244,20 @@ void PlayController::moveAgent(Agent* agent, char op) {
             string act = agent->getActionType("LR"); cout<<act <<endl;
             vector<string> transitions = nestedForwardDirectionGraph.getPossibleTransitions("RIGHT");
             
+            // removes the movies that do not exist
+            eraseAll(transitions, (string)"CLIM_UPRT");
+            eraseAll(transitions, (string)"CLIM_DNRT");
+            eraseAll(transitions, (string)"CLIM_RIGT");
+            eraseAll(transitions, (string)"CRCH_RIGT");
+            eraseAll(transitions, (string)"STND_RIGT");
+            
             // get the first possible transition to the next action to right
             string motion ="";
             for (int t=0;t<transitions.size();t++) {
                 if (ofSplitString(transitions[t],"_")[0]==act)
                 motion = transitions[t];
             }
+            motion = transitions[(int)ofRandom(transitions.size())];
             if (motion!="") {
                 generateMotionsBetween(lastMotion, motion, name, motionSequence);
                 motionSequence.push_back(motion);
@@ -229,14 +270,18 @@ void PlayController::moveAgent(Agent* agent, char op) {
             string act = agent->getActionType("UD");
             vector<string> transitions = nestedForwardDirectionGraph.getPossibleTransitions("UP");
             
+            // removes the movies that do not exist
+            eraseAll(transitions, (string)"CLIM_UPRT");
+            eraseAll(transitions, (string)"CLIM_UPLF");
+            eraseAll(transitions, (string)"STND_BACK");
+            
             // get the first possible transition to the next action to up
             string motion ="";
             for (int t=0;t<transitions.size();t++) {
                 if (ofSplitString(transitions[t],"_")[0]==act && ofSplitString(transitions[t],"_")[1]== "UPPP")
                 motion = transitions[t];
             }
-            cout<< motion;
-            
+            //motion = transitions[(int)ofRandom(transitions.size())];
             if (motion!="") {
                 generateMotionsBetween(lastMotion, motion, name, motionSequence);
                 motionSequence.push_back(motion);
@@ -251,14 +296,18 @@ void PlayController::moveAgent(Agent* agent, char op) {
             string act = agent->getActionType("UD");
             vector<string> transitions = nestedForwardDirectionGraph.getPossibleTransitions("DOWN");
             
+            // removes the movies that do not exist
+            eraseAll(transitions, (string)"CLIM_DNRT");
+            eraseAll(transitions, (string)"CLIM_DNLF");
+            eraseAll(transitions, (string)"CRCH_FRNT");
+            
             // get the first possible transition to the next action to down
             string motion ="";
             for (int t=0;t<transitions.size();t++) {
                 if (ofSplitString(transitions[t],"_")[0]==act && ofSplitString(transitions[t],"_")[1]== "DOWN")
                 motion = transitions[t];
             }
-            cout<< motion;
-            
+           // motion = transitions[(int)ofRandom(transitions.size())];
             if (motion!="") {
                 generateMotionsBetween(lastMotion, motion, name, motionSequence);
                 motionSequence.push_back(motion);
@@ -282,8 +331,8 @@ void PlayController::moveAgent(Agent* agent, char op) {
     getPositionsForMovieSequence(agent, agent->getPlayerName());
     agent->normalise();
     
-  //  if (!agent->isPlaying())
-       agent->play();
+   // if (!agent->isPlaying())
+   //    agent->play();
 }
 
 
@@ -340,13 +389,20 @@ void PlayController::insertMoviesFromAction(Agent* agent, pair<char,float> act) 
             
             vector<string> transitions = nestedForwardDirectionGraph.getPossibleTransitions("LEFT");
             
+            // removes the movies that do not exist
+            eraseAll(transitions, (string)"CLIM_UPLF");
+            eraseAll(transitions, (string)"CLIM_DNLF");
+            eraseAll(transitions, (string)"CLIM_LEFT");
+            eraseAll(transitions, (string)"CRCH_LEFT");
+            eraseAll(transitions, (string)"STND_LEFT");
+            
             // get the first possible transition to the next action to left
             string motion ="";
             for (int t=0;t<transitions.size();t++) {
                 if (ofSplitString(transitions[t],"_")[0]==act && ofSplitString(transitions[t],"_")[1]== "LEFT")
                 motion = transitions[t];
             }
-            motion = transitions[ofRandom(transitions.size())];
+            motion = transitions[(int)ofRandom(transitions.size())];
             if (motion!="") {
                 generateMotionsBetween(lastMotion, motion, name, motionSequence);
                 motionSequence.push_back(motion);
@@ -367,13 +423,21 @@ void PlayController::insertMoviesFromAction(Agent* agent, pair<char,float> act) 
             
             vector<string> transitions = nestedForwardDirectionGraph.getPossibleTransitions("RIGHT");
             
+            // removes the movies that do not exist
+            eraseAll(transitions, (string)"CLIM_UPRT");
+            eraseAll(transitions, (string)"CLIM_DNRT");
+            eraseAll(transitions, (string)"CLIM_RIGT");
+            eraseAll(transitions, (string)"CRCH_RIGT");
+            eraseAll(transitions, (string)"STND_RIGT");
+
+            
             // get the first possible transition to the next action to right
             string motion ="";
             for (int t=0;t<transitions.size();t++) {
                 if (ofSplitString(transitions[t],"_")[0]==act && ofSplitString(transitions[t],"_")[1]== "RIGT")
                 motion = transitions[t];
             }
-            motion = transitions[ofRandom(transitions.size())];
+            motion = transitions[(int)ofRandom(transitions.size())];
             
             if (motion!="") {
                 generateMotionsBetween(lastMotion, motion, name, motionSequence);
@@ -387,14 +451,18 @@ void PlayController::insertMoviesFromAction(Agent* agent, pair<char,float> act) 
             string act = agent->getActionType("UD");
             vector<string> transitions = nestedForwardDirectionGraph.getPossibleTransitions("UP");
             
+            // removes the movies that do not exist
+            eraseAll(transitions, (string)"CLIM_UPRT");
+            eraseAll(transitions, (string)"CLIM_UPLF");
+            eraseAll(transitions, (string)"STND_BACK");
+            
             // get the first possible transition to the next action to up
             string motion ="";
             for (int t=0;t<transitions.size();t++) {
                 if (ofSplitString(transitions[t],"_")[0]==act && ofSplitString(transitions[t],"_")[1]== "UPPP")
                 motion = transitions[t];
             }
-            cout<< motion;
-            
+            motion = transitions[(int)ofRandom(transitions.size())];
             if (motion!="") {
                 generateMotionsBetween(lastMotion, motion, name, motionSequence);
                 motionSequence.push_back(motion);
@@ -409,14 +477,18 @@ void PlayController::insertMoviesFromAction(Agent* agent, pair<char,float> act) 
             string act = agent->getActionType("UD");
             vector<string> transitions = nestedForwardDirectionGraph.getPossibleTransitions("DOWN");
             
+            // removes the movies that do not exist
+            eraseAll(transitions, (string)"CLIM_DNRT");
+            eraseAll(transitions, (string)"CLIM_DNLF");
+            eraseAll(transitions, (string)"CRCH_FRNT");
+            
             // get the first possible transition to the next action to down
             string motion ="";
             for (int t=0;t<transitions.size();t++) {
                 if (ofSplitString(transitions[t],"_")[0]==act && ofSplitString(transitions[t],"_")[1]== "DOWN")
                 motion = transitions[t];
             }
-            cout<< motion;
-
+            motion = transitions[(int)ofRandom(transitions.size())];
             if (motion!="") {
                 generateMotionsBetween(lastMotion, motion, name, motionSequence);
                 motionSequence.push_back(motion);
@@ -771,7 +843,7 @@ void PlayController::makeAgent(string name, int window){
 
 
 //--------------------------------------------------------------
-void PlayController::makeAgent2(string name, int window){
+void PlayController::makeAgent2(string name, int startX, int window){
     window = 10;
     name = "BLADIMIRSL";
     //name = "PRIYAR";
@@ -819,12 +891,14 @@ void PlayController::makeAgent2(string name, int window){
     
     float startXRegion = (int)ofRandom(1920/5);
     float startYRegion = 0;//(int)ofRandom(2)*500;
-    int startX = (int)ofRandom(1920/agent->getGridSizeX())+1;
-    int startY = (int)ofRandom(2)+2;
+    //int startX = (int)ofRandom(1920/agent->getGridSizeX())+1;
+    int startY = -(int)ofRandom(3)+1;
     
-    cout << "sX = " << startX*agent->getGridSizeX() << " sY = " << startY * agent->getGridSizeY() + startYRegion << " - startYReg = " << startYRegion << endl;
+    float xSpace = appModel->getProperty<float>("OutputWidth")/appModel->getProperty<int>("NumberPlayers");
     
-    ofPoint pathStartPosition = ofPoint(startX*agent->getGridSizeX(), startY * agent->getGridSizeY() + startYRegion);
+    ofPoint pathStartPosition = ofPoint(startX*xSpace, startY * agent->getGridSizeY() + startYRegion);
+    
+    //ofPoint pathStartPosition = ofPoint(startX*agent->getGridSizeX(), startY * agent->getGridSizeY() + startYRegion);
     //ofPoint pathStartPosition = ofPoint(3*agent->getGridSizeX(), 6 * agent->getGridSizeY());
     ofPoint targetPosition = ofPoint(windows[window].x + windows[window].width / 2.0, windows[window].y, 0.0f);
     //agent->setNormalPosition(agentStartPosition);

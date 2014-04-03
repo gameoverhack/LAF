@@ -62,7 +62,12 @@ public:
             video->setSpeed(speed);
         }
         
-        if(bPaused) return;
+        if(bPaused) {
+            if (behaviourMode == bMANUAL && currentSequenceIndex<sequence.size())
+                bPaused=false;
+            else
+                return;
+        }
         
         if(video->isFrameNew()){
             

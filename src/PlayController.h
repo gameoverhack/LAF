@@ -26,7 +26,7 @@ public:
     void makeSequence(string name, int window);
 
     void makeAgent(string name, int window);
-    void makeAgent2(string name, int window);
+    void makeAgent2(string name, int start, int window);
     void doAction(string name, char action);
     void makeManualAgent(string name);
     void moveAgent(Agent* agent, char op);

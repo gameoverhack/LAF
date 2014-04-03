@@ -429,6 +429,22 @@ public:
         return keyModifiers;
     }
     
+    void initStartingPositions() {
+        // set the possible starting positions for agents
+        for (int i=0;i<getProperty<int>("NumberPlayers");i++) {
+            uniqueStartingPositions.push_back(i);
+        }
+    }
+    
+    int getUniqueStartPosition() {
+        int s;
+        if(uniqueStartingPositions.size() > 0){
+            s = random(uniqueStartingPositions);
+            eraseAll(uniqueStartingPositions, s);
+        }
+        return s;
+    }
+    
 protected:
     
     KeyModifiers                keyModifiers;
@@ -460,6 +476,8 @@ protected:
     vector<ofRectangle> targets;
     vector<int>         targetunique;
     vector<int>         targetwindows;
+    
+    vector<int> uniqueStartingPositions;
     
     map<string, MotionGraph> motionGraphs;
     
