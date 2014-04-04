@@ -97,7 +97,7 @@ void AppController::setup(){
     appModel->setProperty("AutoGenerate", true);
     
     appModel->setProperty("AvoidCollisions", true);
-    appModel->setProperty("DefaultGridScale", 60.0f);  // 40
+    appModel->setProperty("DefaultGridScale", 50.0f);  // 40
 //    appModel->setProperty("pathBoundingSizeW", 70.0f); // 15
 //    appModel->setProperty("pathBoundingSizeH", 110.0f); // 15
     
@@ -444,7 +444,13 @@ void AppController::keyPressed(ofKeyEventArgs & e){
                 playController->moveAgent((Agent*)appModel->getSequences()[0], 'd');
         }
             break;
-            
+        
+        case 'z':
+        {
+            playController->triggerReplan();
+        }
+            break;
+        
         case ']':
         {
             vector<MovieSequence*>& sequences = appModel->getSequences();
@@ -504,7 +510,7 @@ void AppController::mouseDragged(ofMouseEventArgs & e){
 
 //--------------------------------------------------------------
 void AppController::mousePressed(ofMouseEventArgs & e){
-    
+
     StateGroup & appControllerStates = appModel->getStateGroup("AppControllerStates");
     if(!appControllerStates.getState(kAPPCONTROLLER_MAKEWINDOWS)) return;
     

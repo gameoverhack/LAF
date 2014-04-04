@@ -32,6 +32,8 @@ public:
     void moveAgent(Agent* agent, char op);
     void updatePosition(Agent* agent);
     void insertMoviesFromAction(Agent* agent, pair<char,float> act);
+    void triggerReplan();
+    void cutMoviesFromCurrentFrame(Agent* agent);
     
 protected:
     

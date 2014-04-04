@@ -423,9 +423,16 @@ void AppView::update(){
                     distanceTrailCenter.set(playCenter.x, wC.y);
                 ofLine(sequence->getScaledCentre(), distanceTrailCenter);
                 */
+                ofPolyline pathFromHere = ofPolyline(agent->getCurrentPath().getVertices());
+                
+                //TODO: delelet the traveled path points
+//                if (agent->getCurrentMovie().agentActionIndex > 0) {
+//                        pathFromHere.getVertices().erase(pathFromHere.getVertices().begin(), pathFromHere.getVertices().begin()+agent->getCurrentMovie().agentActionIndex);
+//                }
+                
                 ofSetLineWidth(4.0f);
-                if (agent->getCurrentPath().size() >0)
-                    agent->getCurrentPath().draw();
+                if (pathFromHere.size() >0)
+                    pathFromHere.draw();
                 ofSetLineWidth(1.0f);
             }
             
@@ -475,14 +482,16 @@ void AppView::update(){
             myGraphDescription myGraphClassInstance;
             // Now set that instance and its functions as our function container
             
+            float gridScale = appModel->getProperty<float>("DefaultGridScale");
+
             ofRectangle biggerEnv;
 
+            biggerEnv.x = -6*gridScale;
+            biggerEnv.y = -6*gridScale;
+            biggerEnv.width = appModel->getProperty<float>("OutputWidth") + 12*gridScale;
+            biggerEnv.height = appModel->getProperty<float>("OutputHeight") + 12*gridScale;
             
-            biggerEnv.x = 0;
-            biggerEnv.y = 0;
-            biggerEnv.width = appModel->getProperty<float>("OutputWidth");
-            biggerEnv.height = appModel->getProperty<float>("OutputHeight");
-            
+
 //            biggerEnv.x = -appModel->getProperty<float>("OutputWidth")/2;
 //            biggerEnv.y = -appModel->getProperty<float>("OutputHeight");
 //            biggerEnv.width = appModel->getProperty<float>("OutputWidth")*2;
@@ -493,7 +502,7 @@ void AppView::update(){
             
              ofSetLineWidth(0.5f);
             ofSetColor(100, 0, 200);
-            float gridScale = appModel->getProperty<float>("DefaultGridScale");
+            
             for (int i=0;i<biggerEnv.width/gridScale;i++) {
                 for (int j=0;j<biggerEnv.height/gridScale;j++) {
                     ofLine(biggerEnv.x, biggerEnv.y+j*gridScale, biggerEnv.width + biggerEnv.x, biggerEnv.y+j*gridScale);

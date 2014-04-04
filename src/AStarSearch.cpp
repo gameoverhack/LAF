@@ -68,10 +68,10 @@
         for (int a=-1; a<=1; a+=2) {
             tn.x = n.x+a;
             tn.y = n.y;
-            if (!isInWindows(tn) && isInEnv(tn)) {
+            if (!isInObstacle(tn) && isInEnv(tn)) {
                 s->push_back(tn);
                 //c->push_back(sqrt((double)(a*a)));
-                c->push_back(calcDistToWindows(tn)+xCost);
+                c->push_back(calcDistToObstacles(tn)+xCost);
                 
             }
         }
@@ -79,13 +79,12 @@
         for (int b=-1; b<=1; b+=2) {
             tn.x = n.x;
             tn.y = n.y+b;
-            if (!isInWindows(tn) && isInEnv(tn)) {
+            if (!isInObstacle(tn) && isInEnv(tn)) {
                 s->push_back(tn);
                 //c->push_back(sqrt((double)(b*b)));
-                c->push_back(calcDistToWindows(tn)+yCost);cout << calcDistToWindows(tn) <<endl;
+                c->push_back(calcDistToObstacles(tn)+yCost);
             }
         }
-        
 	}
     
 	double myGraphDescription::getHeuristics(myNode& n1, myNode& n2)
@@ -94,23 +93,34 @@
         
         if (n1.prevNode && n1.prevNode->prevNode) {
             if ((n1.x == n1.prevNode->x  && n1.x == n1.prevNode->prevNode->x)
-                || (n1.y == n1.prevNode->y  && n1.y == n1.prevNode->prevNode->y))
-                directH = 10000;
+                || (n1.y == n1.prevNode->y  && n1.y == n1.prevNode->prevNode->y)) {
+              
+                    if ((n1.prevNode->prevNode->prevNode) &&
+                           ( (n1.x == n1.prevNode->prevNode->prevNode->x)
+                        || (n1.y == n1.prevNode->prevNode->prevNode->y)))
+                        directH = 20000;
+                    else
+                        directH = 10000;
+            }
+            
         }
         
         int dx = abs(n1.x - n2.x);
         int dy = abs(n1.y - n2.y);
-        return (directH + sqrt((double)(dx*dx + dy*dy))); // Euclidean distance as heuristics
+        int distToTarget = 0;//sqrt((double)(dx*dx + dy*dy));
+        int rnd = ofRandom(2000); // make some variety in paths
+        return (directH + distToTarget + rnd); // Euclidean distance as heuristics
 	}
 
     bool myGraphDescription::stopSearch_fp(myNode& n) {
-        
+
     }
     
 	// -------------------------------
 	// constructors
-	myGraphDescription::myGraphDescription ()
-    { }
+	myGraphDescription::myGraphDescription (){
+    
+    }
 
 bool myGraphDescription::isInEnv(myNode& n) {
     ofRectangle biggerEnv;
@@ -133,7 +143,7 @@ bool myGraphDescription::isInEnv(myNode& n) {
 
 }
 
-bool myGraphDescription::isInWindows(myNode& n) {
+bool myGraphDescription::isInObstacle(myNode& n) {
     ofRectangle bounding;
     
     ofPoint scaledNode;
@@ -146,17 +156,17 @@ bool myGraphDescription::isInWindows(myNode& n) {
     
    
     
-    for (int w=0;w<pathPlanner->windows.size();w++) {
+    for (int w=0;w<pathPlanner->obstacles.size();w++) {
         if (w==pathPlanner->targetWindow)
             continue;
-        if (pathPlanner->windows[w].intersects(bounding))
+        if (pathPlanner->obstacles[w].intersects(bounding))
             return true;
     }
     
     return false;
 }
 
-float myGraphDescription::calcDistToWindows(myNode& n) {
+float myGraphDescription::calcDistToObstacles(myNode& n) {
     float cost = 0;
     
     ofPoint scaledNode;
@@ -164,11 +174,11 @@ float myGraphDescription::calcDistToWindows(myNode& n) {
     scaledNode.y = n.y * pathPlanner->gridScaleY + pathPlanner->offsetY;
     
     
-    for (int w=0;w<pathPlanner->windows.size();w++) {
+    for (int w=0;w<pathPlanner->obstacles.size();w++) {
         if (w==pathPlanner->targetWindow)
             continue;
-        if (distancePointToRectangle(scaledNode,pathPlanner->windows[w]) < 1000)  //TODO: use a dynamic parameter
-            cost += distancePointToRectangle(scaledNode,pathPlanner->windows[w]);
+        if (distancePointToRectangle(scaledNode,pathPlanner->obstacles[w]) < 1000)  //TODO: use a dynamic parameter
+            cost += distancePointToRectangle(scaledNode,pathPlanner->obstacles[w]);
     }
     
     return cost;

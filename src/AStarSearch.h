@@ -24,7 +24,7 @@ public:
     float offsetX, offsetY;
     
     ofRectangle worldRect;
-    vector<ofRectangle> windows;
+    vector<ofRectangle> obstacles;
     
     
     vector< vector< ofPoint > > findPaths(ofPoint startPoint, ofPoint finishPoint,int _targetWindow);
@@ -42,8 +42,8 @@ public:
     bool isAccessible(myNode& n);
     bool stopSearch_fp(myNode& n);
     bool isInEnv(myNode& n);
-    bool isInWindows(myNode& n);
-    float calcDistToWindows(myNode& n);
+    bool isInObstacle(myNode& n);
+    float calcDistToObstacles(myNode& n);
     float distancePointToRectangle(ofPoint point, ofRectangle rect);
     
     myNode targetNode;

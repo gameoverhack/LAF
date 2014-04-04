@@ -63,7 +63,7 @@ public:
         }
         
         if(bPaused) {
-            if (behaviourMode == bMANUAL && currentSequenceIndex<sequence.size())
+            if (!willCollide && behaviourMode == bMANUAL && currentSequenceIndex<sequence.size()-1)
                 bPaused=false;
             else
                 return;
@@ -83,7 +83,7 @@ public:
         }
         
         
-        if (pauseFrame > -1 && pauseFrame >= video->getCurrentFrame() - currentMovie.startframe) {
+        if (pauseFrame > -1 && pauseFrame >= currentMovie.frame) {
             stop();
         }
 
@@ -205,7 +205,6 @@ public:
                 loadNextMovie(frameSeek);
             }
         }
-        
     }
     
     void setSpeed(float s){
@@ -586,6 +585,7 @@ protected:
     
     int pauseFrame;
     int behaviourMode;
+    bool willCollide;
 };
 
 

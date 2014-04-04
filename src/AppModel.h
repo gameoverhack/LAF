@@ -297,6 +297,7 @@ public:
                 movieSequence = sequences[i];
                 if(movieSequence->getViewID() == viewID){
                     targetunique.push_back(((Agent*)movieSequence)->getWindow());
+                    uniqueStartingPositions.push_back(((Agent*)movieSequence)->getStartPosSegment());
                     delete movieSequence;
                     index = i;
                     break;
@@ -432,7 +433,7 @@ public:
     void initStartingPositions() {
         // set the possible starting positions for agents
         for (int i=0;i<getProperty<int>("NumberPlayers");i++) {
-            uniqueStartingPositions.push_back(i);
+            uniqueStartingPositions.push_back(i+1);
         }
     }
     

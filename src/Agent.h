@@ -111,58 +111,100 @@ public:
         UDAction = "CLIM";
         playerName = "";
         
-        drawSize = 100;//appModel->getProperty<float>("DrawSize");
+        //drawSize = 100;//appModel->getProperty<float>("DrawSize");
         actions.clear();
         currentAction = 0;
         actionIndex = 0;
+        collisionSkipCounter = COLLISIONSKIP;
     }
     
     void update(){
         MovieSequence::update();
     }
     
-    void update(bool avoidCollisions, vector<ofRectangle> obstacles, vector<MovieSequence*> agents){
+    void update(bool avoidCollisions, vector<ofRectangle> windows, vector<MovieSequence*> agents){
         //------------- Collision Detection
-        if (avoidCollisions) {
-            int range = 5;
+        if ((collisionSkipCounter == 0) && avoidCollisions) {
+            collisionSkipCounter = COLLISIONSKIP;
+            
+            int range = 100;
             int startFrame = MAX(this->getCurrentSequenceFrame(), 0);
             int endFrame = MIN(this->getCurrentSequenceFrame() + range, this->getTotalSequenceFrames());
             
             this->setWillCollide(false);
             
-            for(int j = startFrame; j < endFrame; j+=1){
-                for (int w = 0; w < obstacles.size(); w++) { // with windows except the target window
+            for(int j = startFrame; j < endFrame; j+=10){
+                for (int w = 0; w < windows.size(); w++) { // with windows except the target window
                     ofRectangle bounding =this->getScaledBoundingAt(j);
                     
-                    if (w!= this->getWindow() && bounding.intersects(obstacles[w])) {
+                    if (w!= this->getWindow() && bounding.intersects(windows[w])) {
                         
-                        recoverFromCollisionWithObstacle(w);
+                        recoverFromCollisionWithObstacle(windows, w);
                     }
                 }
                 
                 for (int p = 0; p < agents.size();p++) { // with other players
                     if ((Agent*)agents[p] != this && (Agent*)agents[p]->getScaledBounding().intersects(this->getScaledBounding())) {
                         
-                        recoverFromCollisionWithAgent((Agent*)agents[p]);
+                        recoverFromCollisionWithAgent(windows, (Agent*)agents[p]);
                     }
                 }
             }
         }
         //-------------
-        
+        collisionSkipCounter--;
         MovieSequence::update();
     }
     
     //--------------------------------------------------------------
-    void recoverFromCollisionWithAgent(Agent* otherPlayer) {
-        //  playerSequence->stop();
+    void recoverFromCollisionWithAgent(vector<ofRectangle> windows, Agent* otherPlayer) {
+       
         this->setWillCollide(true);
-        //  thisPlayer->setSpeed(-1);
+       
+        return; //!
+        
+        // get the players model
+        map<string, ofxXMP>& xmp = playerModel->getXMP();
+
+        MovieInfo currentMovie = getCurrentMovie();
+
+        ofxXMPMarker lastMarker = xmp[currentMovie.name].getLastMarker(currentMovie.frame);
+        ofxXMPMarker nextMarker = xmp[currentMovie.name].getNextMarker(currentMovie.frame);
+
+
+        cout << "lastmarker name = " << lastMarker.getName() << endl;
+        cout << "lastmarker st frame =  " << lastMarker.getStartFrame() << endl;
+        cout << "nextmarker st frame =  " << nextMarker.getStartFrame() << endl;
+        cout << "cframe = " << currentMovie.frame << endl;
+        
+        
+        //playerSequence->stop();
+        setSpeed(-1* abs(speed));
+
+        StopAt(lastMarker.getStartFrame());
+
         
     }
     
     //--------------------------------------------------------------
-    void recoverFromCollisionWithObstacle(int window) {
+    void recoverFromCollisionWithObstacle(vector<ofRectangle> obstacles, int obstacle) {
+        this->setWillCollide(true);
+        
+        switch (behaviourMode) {
+            case bAUTO_REALISTIC:
+                recoverFromCollisionWithObstacleAUTO(obstacles,obstacle);
+                break;
+                
+            case bMANUAL:
+                recoverFromCollisionWithObstacleMANUAL(obstacles,obstacle);
+                break;
+            default:
+                break;
+        }
+        
+        
+        
+        
         // get the players model
 //        PlayerModel& model = appModel->getPlayerTemplate(playerAgent->getPlayerName());
 //        map<string, ofxXMP>& xmp = model.getXMP();
@@ -182,7 +224,7 @@ public:
         //playerSequence->stop();
         // playerSequence->StopAt(lastMarker.getStartFrame());
         //    playerAgent->setSpeed(-1* abs(playerAgent->getSpeed()));
-        this->setWillCollide(true);
+
         
         /*
          change stopAt to changeSequenceAt (frame, new motion/movie sequence)
@@ -192,22 +234,34 @@ public:
          
          */
     }
+    
+    
+    //--------------------------------------------------------------
+    void recoverFromCollisionWithObstacleAUTO(vector<ofRectangle> obstacles, int obstacle) {
+
+    }
+    
+    //--------------------------------------------------------------
+    void recoverFromCollisionWithObstacleMANUAL(vector<ofRectangle> obstacles, int obstacle) {
+        stop();
+    }
+    
     //-----------------------------------------------------------
-    
-    void plan(ofPoint startPosition, ofPoint targetPosition, ofRectangle worldRect, vector<ofRectangle> windows) {  //TODO: Fix the dependency issues
-    
+    void plan(ofPoint startPosition, ofPoint targetPosition, ofRectangle worldRect, vector<ofRectangle> obstacles) {
         PathPlanner pp;
         
         pp.gridScaleX = this->gridSizeX;
         pp.gridScaleY = this->gridSizeY;
         
         pp.worldRect = worldRect;
-        pp.windows = windows;
+        pp.obstacles = obstacles;
         
+        // the agent can collide with its target window
         pp.targetWindow = this->window;
         
-        pp.obstAvoidBoundingW = 2 * this->drawSize /3;
-        pp.obstAvoidBoundingH = this->drawSize + this->drawSize /4;
+        // set the size of the area that the agent's bounding box can grow used in path finding to avoid possible collisions
+        pp.obstAvoidBoundingW = 2.5 * this->drawSize /3.0;
+        pp.obstAvoidBoundingH = this->drawSize;
         
         // find the paths using A*.
         ofxLogVerbose() << "Finding a path from (" << this->getScaledCentreAt(1).x << "," << this->getScaledCentreAt(1).y  << ") to  (" << targetPosition.x << "," << targetPosition.y << ")"  << endl;
@@ -238,6 +292,54 @@ public:
         //    agent->actions = PathPlanning::getDirectionsInPath(pp);
     }
     
+    //-----------------------------------------------------------
+    void rePlan(ofPoint newTargetPosition, ofRectangle worldRect, vector<ofRectangle> obstacles) {
+        // TODO: make a smoother transition
+        ofPoint currentPos = getScaledPositionAt(sequenceFrames[currentSequenceIndex] + currentMovie.endframe - currentMovie.startframe);
+        cutMoviesFromCurrentFrame();
+        plan(currentPos, newTargetPosition, worldRect, obstacles);
+    }
+
+    //--------------------------------------------------------------
+    void cutMoviesFromCurrentFrame() {
+        // Remove the rest of the movies in the sequence as we are overwriting them
+        if (this->getCurrentMovieIndex() < this->getSequenceSize()-1)
+            this->removeMoviesFromIndex(this->getCurrentMovieIndex()+1)   ;
+//        this->normalise();
+       
+        return;
+        // Cut the current movie and start the new movie at the current position
+       
+        int oldLength = currentMovie.endframe - currentMovie.startframe;
+        
+        // find the next or last marker and cut at that point
+        
+        // get the players model
+        PlayerModel* model = this->getPlayerModel();
+        map<string, ofxXMP>& xmp = model->getXMP();
+        
+        ofxXMPMarker lastMarker = xmp[currentMovie.name].getLastMarker(currentMovie.frame);
+        ofxXMPMarker nextMarker = xmp[currentMovie.name].getNextMarker(currentMovie.frame);
+        
+        
+        cout << "lastmarker name = " << lastMarker.getName() << endl;
+        cout << "lastmarker st frame =  " << lastMarker.getStartFrame() << endl;
+        cout << "nextmarker st frame =  " << nextMarker.getStartFrame() << endl;
+        cout << "cframe = " << currentMovie.frame << endl;
+        
+        
+        
+        int newEndFrame = currentMovie.startframe + currentMovie.frame;
+        //int newEndFrame = currentMovie->startframe + nextMarker.getStartFrame();
+        currentMovie.endframe = newEndFrame;
+        this->getMovieSequence()[this->getCurrentMovieIndex()].endframe = newEndFrame;
+        
+        // we have pushed this movie before, so we need to fix the sequence frame
+        this->fixLastSequenceFrame(oldLength, currentMovie.endframe - currentMovie.startframe);
+        // getPositionsForMovieSequence(agent, agent->getPlayerName());
+    }
+
+    
     float getDrawSize(){
         return drawSize;
     }
@@ -262,18 +364,32 @@ public:
         gridSizeY = d;
     }
     
+    void setPlayerModel(PlayerModel& m) {
+        playerModel = &m;
+    }
     
+    PlayerModel* getPlayerModel() {
+        return playerModel;
+    }
+    
+    int getStartPosSegment() {
+        return startPosSegment;
+    }
+    
+    void setStartPosSegment(int p) {
+        startPosSegment = p;
+    }
     
 protected:
+    const int COLLISIONSKIP = 6;
     
     bool bHug;
     int window;
     int sframe;
     int gframe;
-    
-    bool willCollide;
-    
+        
     string playerName;
+    PlayerModel* playerModel;
     
     string LRAction = "WALK";
     string UDAction = "CLIM";
@@ -284,6 +400,8 @@ protected:
     float gridSizeX; //girdSizeX should be proportionate to the agent's min left and right movement length (in the movies); changes by changing the drawsize.
     float gridSizeY; //girdSizeY should be proportionate to the agent's min up and down movement length (in the movies); changes by changing the drawsize.
     
+    int startPosSegment;
+    int collisionSkipCounter;
     
 };
 

@@ -147,16 +147,8 @@ void PlayController::update(){
     
 }
 
-
-
 //--------------------------------------------------------------
-void PlayController::moveAgent(Agent* agent, char op) {
-
-    string name = agent->getPlayerName();
-    ofxLogNotice() << "Performing action " << op << " for " << name << endl;
-    
-    
-    
+void PlayController::cutMoviesFromCurrentFrame(Agent* agent) {
     // Remove the rest of the movies in the sequence as we are overwriting them
     if (agent->getCurrentMovieIndex() < agent->getSequenceSize()-1)
         agent->removeMoviesFromIndex(agent->getCurrentMovieIndex()+1)   ;
@@ -173,7 +165,7 @@ void PlayController::moveAgent(Agent* agent, char op) {
     // get the players model
     PlayerModel& model = appModel->getPlayerTemplate(agent->getPlayerName());
     map<string, ofxXMP>& xmp = model.getXMP();
-
+    
     ofxXMPMarker lastMarker = xmp[currentMovie->name].getLastMarker(currentMovie->frame);
     ofxXMPMarker nextMarker = xmp[currentMovie->name].getNextMarker(currentMovie->frame);
     
@@ -193,13 +185,25 @@ void PlayController::moveAgent(Agent* agent, char op) {
     // we have pushed this movie before, so we need to fix the sequence frame
     agent->fixLastSequenceFrame(oldLength, currentMovie->endframe - currentMovie->startframe);
     // getPositionsForMovieSequence(agent, agent->getPlayerName());
+}
+
+//--------------------------------------------------------------
+void PlayController::moveAgent(Agent* agent, char op) {
+
+    string name = agent->getPlayerName();
+    ofxLogNotice() << "Performing action " << op << " for " << name << endl;
     
+    // Cut the current movie and start the new movie at the current position
+    MovieInfo* currentMovie = &agent->getCurrentMovie();
+    string lastMotion = ofSplitString(currentMovie->markername,"_")[0] + "_" + ofSplitString(currentMovie->markername,"_")[1];
     
-    
+    cutMoviesFromCurrentFrame(agent);
     
     
     //MovieInfo lastMovie = agent->getLastMovieInSequence();
     
+    int prevSequenceSize = agent->getSequenceSize();
+    int prevTotalSeqFrames = agent->getTotalSequenceFrames();
     
     MotionGraph nestedForwardDirectionGraph = appModel->getGraph("DirectionGraph");
     nestedForwardDirectionGraph.nestGraph(appModel->getGraph("ForwardMotionGraph").getPossibilitie());
@@ -322,14 +326,55 @@ void PlayController::moveAgent(Agent* agent, char op) {
     
     for (int u=0;u<motionSequence.size();u++)
     cout << " >>>>>>>>>>>> " << motionSequence[u] << endl;
-    
-    
-
 
     
     generateMoviesFromMotions(motionSequence, agent, name);
     getPositionsForMovieSequence(agent, agent->getPlayerName());
     agent->normalise();
+    
+    
+    
+    // Predict the possible collision
+    bool willColl = false;
+    ofRectangle ee = agent->getScaledTotalBounding();
+    for (int w=0;w<appModel->getWindows().size();w++) {
+        if (w!=agent->getWindow() && agent->getScaledTotalBounding().intersects(appModel->getWindows()[w])) {
+            willColl = true;
+            cout << "Will cOllide" << endl;
+            break;
+        }
+        
+    }
+    
+    /*
+    cout<<"checking 0 ..."<<endl;
+    for (int m = prevSequenceSize;m<agent->getSequenceSize();m++) {
+        cout<<"checking 1 ..."<<endl;
+
+        MovieInfo movie = agent->getMovieSequence()[m];
+        for (int w=0;w<appModel->getWindows().size();w++) {
+            for (int f =0; f<movie.endframe - movie.startframe;f+50) {
+                if (w!=agent->getWindow() && agent->getScaledBoundingAt(prevTotalSeqFrames+f).intersects(appModel->getWindows()[w]))
+                { willColl = true;
+                    break;
+                }
+            }
+            if (willColl)
+                break;
+        }
+        if (willColl)
+            break;
+    }
+    */
+        cout<<"done checking ..."<<endl;
+    // Avoid the movement if agent will collide
+   
+    if (willColl) {
+   //     cutMoviesFromCurrentFrame(agent);
+    }
+    
+    
+    
     
    // if (!agent->isPlaying())
    //    agent->play();
@@ -531,7 +576,7 @@ if (agent->actionIndex<agent->actions.size())// && agent->getCurrentMovie().fram
 //--------------------------------------------------------------
 void PlayController::makeManualAgent(string name) {
     ofxLogNotice() << "Making an agent for " << name << endl;
-    
+    name = "PRIYAR";
     // get the players model
     PlayerModel& model = appModel->getPlayerTemplate(name);
     map<string, ofxXMP>& xmp = model.getXMP();
@@ -561,17 +606,11 @@ void PlayController::makeManualAgent(string name) {
 
     
     // choose a random starting position
-    float wStart = appModel->getProperty<float>("OutputWidth");
-    float hStart = appModel->getProperty<float>("OutputHeight")+200;
     int startMargin = 400/appModel->getProperty<float>("gridScale");
-    
-    int sx = ofRandom(startMargin);
-    int sy = ofRandom(startMargin);
-    int q = floor(ofRandom(4));
-    
-    // ofPoint startPosition = ofPoint(sx%2==1?sx/2:wStart-sx/2, sy%2==1?sy/2:hStart-sy/2);
-    ofPoint startPosition = ofPoint((int)ofRandom(startMargin)*appModel->getProperty<float>("gridScale"), (int)ofRandom(startMargin)*appModel->getProperty<float>("gridScale"));
-    
+
+    // ofPoint startPosition = ofPoint((int)ofRandom(startMargin)*appModel->getProperty<float>("gridScale"), (int)ofRandom(startMargin)*appModel->getProperty<float>("gridScale"));
+    ofPoint startPosition = ofPoint(2*appModel->getProperty<float>("gridScale"), 10*appModel->getProperty<float>("gridScale"));
+
     
     MovieInfo& loopMovie = agent->getLastMovieInSequence();
     loopMovie.isLooped = true;
@@ -585,7 +624,7 @@ void PlayController::makeManualAgent(string name) {
     agent->setNormalPosition(startPositionAgent);
     agent->normalise();
     
-    agent->setSpeed(8);//ofRandom(1.0, 3.0));
+    agent->setSpeed(15);//ofRandom(1.0, 3.0));
     appModel->addSequence(agent);
     agent->play();
   
@@ -844,7 +883,7 @@ void PlayController::makeAgent(string name, int window){
 
 //--------------------------------------------------------------
 void PlayController::makeAgent2(string name, int startX, int window){
-    window = 10;
+    window = 3;
     name = "BLADIMIRSL";
     //name = "PRIYAR";
     
@@ -861,6 +900,8 @@ void PlayController::makeAgent2(string name, int startX, int window){
     
     // create a new Agent
     Agent* agent = new Agent;
+    agent->setPlayerName(name);
+    agent->setPlayerModel(model);
     agent->setBehaviourMode(bAUTO_REALISTIC);
     agent->setDrawSize(appModel->getProperty<float>("DefaultDrawSize"));
     //agent->setGridSizeX(appModel->getProperty<float>("DefaultGridScale"));
@@ -868,7 +909,7 @@ void PlayController::makeAgent2(string name, int startX, int window){
     //agent->setDrawSize(drawSizes[(int)ofRandom(3)]);
     agent->setGridSizeX(agent->getDrawSize()/2);
     agent->setGridSizeY(agent->getDrawSize()/2);
-    
+    agent->setStartPosSegment(startX);
     agent->setWindow(window);
     
     float scale = agent->getDrawSize() / model.getWidth();
@@ -879,28 +920,21 @@ void PlayController::makeAgent2(string name, int startX, int window){
     
     vector<ofRectangle> windows = appModel->getWindows();
     
-    // choose a random starting position
-    //    float wStart = appModel->getProperty<float>("OutputWidth");
-    //    float hStart = appModel->getProperty<float>("OutputHeight")+200;
-    //    int sx = ofRandom(400/agent->getGridSizeX());
-    //    int sy = ofRandom(400/agent->getGridSizeY());
-    //    int q = floor(ofRandom(4));
-    //    ofPoint startPosition = ofPoint(sx%2==1?sx/2:wStart-sx/2, sy%2==1?sy/2:hStart-sy/2);
-    
-    //ofPoint startPosition = ofPoint((int)ofRandom(400/agent->getGridSizeX())*agent->getGridSizeX(), (int)ofRandom(400/agent->getGridSizeY())*agent->getGridSizeY());
+    // choose a [random] starting position
     
     float startXRegion = (int)ofRandom(1920/5);
-    float startYRegion = 0;//(int)ofRandom(2)*500;
+    float startYRegion = 800;//(int)ofRandom(2)*500;
     //int startX = (int)ofRandom(1920/agent->getGridSizeX())+1;
     int startY = -(int)ofRandom(3)+1;
     
     float xSpace = appModel->getProperty<float>("OutputWidth")/appModel->getProperty<int>("NumberPlayers");
     
     ofPoint pathStartPosition = ofPoint(startX*xSpace, startY * agent->getGridSizeY() + startYRegion);
-    
     //ofPoint pathStartPosition = ofPoint(startX*agent->getGridSizeX(), startY * agent->getGridSizeY() + startYRegion);
     //ofPoint pathStartPosition = ofPoint(3*agent->getGridSizeX(), 6 * agent->getGridSizeY());
+    
     ofPoint targetPosition = ofPoint(windows[window].x + windows[window].width / 2.0, windows[window].y, 0.0f);
+    
     //agent->setNormalPosition(agentStartPosition);
     getPositionsForMovieSequence(agent, name);
     agent->normalise();
@@ -912,8 +946,8 @@ void PlayController::makeAgent2(string name, int startX, int window){
     ofRectangle worldRect;
     worldRect.x = - 3* agent->getDrawSize();
     worldRect.y = - 3* agent->getDrawSize();
-    worldRect.width = appModel->getProperty<float>("OutputWidth") + 3* agent->getDrawSize();
-    worldRect.height = appModel->getProperty<float>("OutputHeight") + 3* agent->getDrawSize();
+    worldRect.width = appModel->getProperty<float>("OutputWidth") + 6* agent->getDrawSize();
+    worldRect.height = appModel->getProperty<float>("OutputHeight") + 6* agent->getDrawSize();
     
     agent->plan(agentStartPosition, pathTargetPosition, worldRect, appModel->getWindows());
     
@@ -958,7 +992,7 @@ void PlayController::makeAgent2(string name, int startX, int window){
     agent->normalise();
     // ******
     
-    agent->setSpeed(6);//ofRandom(1.0, 3.0));
+    agent->setSpeed(ofRandom(5,8));
     appModel->addSequence(agent);
     agent->play();
 }
@@ -966,11 +1000,10 @@ void PlayController::makeAgent2(string name, int startX, int window){
 
 //--------------------------------------------------------------
 void PlayController::generateMoviesFromMotions(vector<string>& motionSequence, MovieSequence* movieSequence, string name){
-    cout << "----------------" << motionSequence.size() << endl;
     PlayerModel& model = appModel->getPlayerTemplate(name);
     map<string, vector<string> >& markDictionary = model.getMarkerDictionary();
     map<string, ofxXMP>& xmp = model.getXMP();
-
+    
     // convert the motionSequnce to marker names...
     
     vector<string> markerSequence;
@@ -986,7 +1019,7 @@ void PlayController::generateMoviesFromMotions(vector<string>& motionSequence, M
     }
     
     ofxLogVerbose() << "Generating movies for marker sequence: " << markerSequence << endl;
-
+    
     MovieInfo lastMovie = movieSequence->getLastMovieInSequence();
     
     for(int i = 0; i < markerSequence.size(); i++){
@@ -997,7 +1030,7 @@ void PlayController::generateMoviesFromMotions(vector<string>& motionSequence, M
             ofxLogVerbose() << "...movie already in sequence, continuing" << endl;
             continue;
         }
-
+        
         // get all the movies with this marker name
         map<string, vector<string> >::iterator it = markDictionary.find(markerSequence[i]);
         assert(it != markDictionary.end());
@@ -1017,7 +1050,7 @@ void PlayController::generateMoviesFromMotions(vector<string>& motionSequence, M
         
         // if it's not the same movie or the next marker isn't the one we want, then randomly choose one
         if(rMovieName != lastMovie.name || pStartMarker.getName() != markerSequence[i]){
-
+            
             // get all the markers in the movie which match the sequence name - there can be many!!
             vector<ofxXMPMarker> markers = xmp[rMovieName].getMarkers(markerSequence[i]);
             pStartMarker = markers[(int)ofRandom(markers.size())];
@@ -1031,7 +1064,7 @@ void PlayController::generateMoviesFromMotions(vector<string>& motionSequence, M
         
         int startFrame = pStartMarker.getStartFrame();
         int endFrame = pEndMarker.getStartFrame();
-
+        
         MovieInfo nextMovie;
         nextMovie.name = rMovieName;
         nextMovie.path = model.getPlayerFolder() + nextMovie.name + ".mov";
@@ -1039,7 +1072,7 @@ void PlayController::generateMoviesFromMotions(vector<string>& motionSequence, M
         nextMovie.endframe = endFrame;
         nextMovie.speed = lastMovie.speed;
         nextMovie.markername = markerSequence[i];
-
+        
         ostringstream os; os << nextMovie;
         ofxLogVerbose() << "Adding movie: " << os.str() << endl;
         
@@ -1291,6 +1324,74 @@ void PlayController::getPositionsForMovieSequence(MovieSequence* movieSequence, 
             m.totalbounding.growToInclude(m.boundings[f]);
             
         }
+    }
+}
+
+
+//--------------------------------------------------------------
+void PlayController::triggerReplan() {
+    int newWindow = 11;
+    
+    vector<ofRectangle> windows = appModel->getWindows();
+    
+    ofPoint targetPosition = ofPoint(windows[newWindow].x + windows[newWindow].width / 2.0, windows[newWindow].y, 0.0f);
+
+    
+    vector<MovieSequence*>& sequences = appModel->getSequences();
+    for(int i = 0; i < sequences.size(); i++){
+        Agent* agent = (Agent*)sequences[i];
+        
+        // store the last action index in the old plan
+        int lastActionIndex = agent->actions.size()-1;
+        
+        agent->actionIndex=0;
+        
+        ofRectangle worldRect;
+        worldRect.x = - 3* agent->getDrawSize();
+        worldRect.y = - 3* agent->getDrawSize();
+        worldRect.width = appModel->getProperty<float>("OutputWidth") + 6* agent->getDrawSize();
+        worldRect.height = appModel->getProperty<float>("OutputHeight") + 6* agent->getDrawSize();
+        
+        agent->setWindow(newWindow); //TODO: change the target window later to allow collision with the old window 
+        agent->rePlan(targetPosition, worldRect, windows);
+        
+        for (int a=0;a<agent->actions.size();a++) {
+            cout << "########## action " << agent->actions[a].first << endl;
+            insertMoviesFromAction(agent, agent->actions[agent->actionIndex++]);
+        }
+        
+        // ******
+        vector<string> motionSequence;
+        motionSequence.clear();
+        string motion = ofSplitString(agent->getLastMovieInSequence().markername,"_")[0]+"_"+ofSplitString(agent->getLastMovieInSequence().markername,"_")[1];
+        
+        // randomise SYNCMOTIONS or WAITMOTIONS TODO: make this selectable
+        vector<string> vEndMotionType(2);
+        vEndMotionType[0] = "SYNCMOTIONS";
+        vEndMotionType[1] = "WAITMOTIONS";
+        string endMotionType = random(vEndMotionType);
+        
+        vector<string>& endMotions = appModel->getGraph("EndGraph").getPossibleTransitions(endMotionType);
+        string emotion = random(endMotions);
+        
+        generateMotionsBetween(motion, emotion, agent->getPlayerName(), motionSequence);
+        
+        generateMoviesFromMotions(motionSequence, agent, agent->getPlayerName());
+        getPositionsForMovieSequence(agent, agent->getPlayerName());
+        agent->normalise();
+        
+        
+        // calculate target and syncframes
+        MovieInfo& lastMovieInSequence = agent->getLastMovieInSequence();
+        int goalFrame = agent->getTotalSequenceFrames() - 1;
+        int syncFrame = goalFrame;//
+        
+        agent->setGoalFrame(goalFrame - lastMovieInSequence.endframe - lastMovieInSequence.startframe);
+        agent->setSyncFrame(syncFrame);
+        
+        
+        agent->normalise();
+        // ******
     }
 }
 
