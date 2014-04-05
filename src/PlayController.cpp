@@ -155,6 +155,7 @@ void PlayController::cutMoviesFromCurrentFrame(Agent* agent) {
     getPositionsForMovieSequence(agent, agent->getPlayerName());
     agent->normalise();
     
+    //return;
     // Cut the current movie and start the new movie at the current position
     MovieInfo* currentMovie = &agent->getCurrentMovie();
     string lastMotion = ofSplitString(currentMovie->markername,"_")[0] + "_" + ofSplitString(currentMovie->markername,"_")[1];
@@ -230,14 +231,21 @@ void PlayController::moveAgent(Agent* agent, char op) {
             
             // get the first possible transition to the next action to left
             string motion ="";
-            for (int t=0;t<transitions.size();t++) {
-                if (ofSplitString(transitions[t],"_")[0]==act)
-                    motion = transitions[t];
+//            for (int t=0;t<transitions.size();t++) {
+//                if (ofSplitString(transitions[t],"_")[0]==act)
+//                    motion = transitions[t];
+//            }
+            if (act == "") {
+                motion = transitions[(int)ofRandom(transitions.size())];
+                agent->setActionType("LR", ofSplitString(motion,"_")[0]);
             }
-            motion = transitions[(int)ofRandom(transitions.size())];
+            else
+                motion = act+"_LEFT";
+            
             if (motion!="") {
                 generateMotionsBetween(lastMotion, motion, name, motionSequence);
                 motionSequence.push_back(motion);
+                agent->setActionType("UD", "");
             }
         }
             
@@ -257,14 +265,22 @@ void PlayController::moveAgent(Agent* agent, char op) {
             
             // get the first possible transition to the next action to right
             string motion ="";
-            for (int t=0;t<transitions.size();t++) {
-                if (ofSplitString(transitions[t],"_")[0]==act)
-                motion = transitions[t];
+//            for (int t=0;t<transitions.size();t++) {
+//                if (ofSplitString(transitions[t],"_")[0]==act)
+//                motion = transitions[t];
+//            }
+            
+            if (act == "") {
+                motion = transitions[(int)ofRandom(transitions.size())];
+                agent->setActionType("LR", ofSplitString(motion,"_")[0]);
             }
-            motion = transitions[(int)ofRandom(transitions.size())];
+            else
+                motion = act+"_RIGT";
+            
             if (motion!="") {
                 generateMotionsBetween(lastMotion, motion, name, motionSequence);
                 motionSequence.push_back(motion);
+                agent->setActionType("UD", "");
             }
         }
             break;
@@ -281,17 +297,24 @@ void PlayController::moveAgent(Agent* agent, char op) {
             
             // get the first possible transition to the next action to up
             string motion ="";
-            for (int t=0;t<transitions.size();t++) {
-                if (ofSplitString(transitions[t],"_")[0]==act && ofSplitString(transitions[t],"_")[1]== "UPPP")
-                motion = transitions[t];
+//            for (int t=0;t<transitions.size();t++) {
+//                if (ofSplitString(transitions[t],"_")[0]==act && ofSplitString(transitions[t],"_")[1]== "UPPP")
+//                motion = transitions[t];
+//            }
+            
+            if (act == "") {
+                motion = transitions[(int)ofRandom(transitions.size())];
+                agent->setActionType("UD", ofSplitString(motion,"_")[0]);
             }
-            //motion = transitions[(int)ofRandom(transitions.size())];
+            else
+                motion = act+"_UPPP";
+            
             if (motion!="") {
                 generateMotionsBetween(lastMotion, motion, name, motionSequence);
                 motionSequence.push_back(motion);
+                agent->setActionType("LR", "");
             }
             
-            agent->setActionType("LR", "TRAV");
         }
             break;
         case 'd':
@@ -311,13 +334,19 @@ void PlayController::moveAgent(Agent* agent, char op) {
                 if (ofSplitString(transitions[t],"_")[0]==act && ofSplitString(transitions[t],"_")[1]== "DOWN")
                 motion = transitions[t];
             }
-           // motion = transitions[(int)ofRandom(transitions.size())];
+           
+            if (act == "") {
+                motion = transitions[(int)ofRandom(transitions.size())];
+                agent->setActionType("UD", ofSplitString(motion,"_")[0]);
+            }
+            else
+                motion = act+"_DOWN";
+            
             if (motion!="") {
                 generateMotionsBetween(lastMotion, motion, name, motionSequence);
                 motionSequence.push_back(motion);
+                agent->setActionType("LR", "");
             }
-            
-            agent->setActionType("LR", "TRAV");
         }
             break;
         default:
@@ -333,7 +362,7 @@ void PlayController::moveAgent(Agent* agent, char op) {
     agent->normalise();
     
     
-    
+    /*
     // Predict the possible collision
     bool willColl = false;
     ofRectangle ee = agent->getScaledTotalBounding();
@@ -346,7 +375,7 @@ void PlayController::moveAgent(Agent* agent, char op) {
         
     }
     
-    /*
+    
     cout<<"checking 0 ..."<<endl;
     for (int m = prevSequenceSize;m<agent->getSequenceSize();m++) {
         cout<<"checking 1 ..."<<endl;
@@ -365,19 +394,23 @@ void PlayController::moveAgent(Agent* agent, char op) {
         if (willColl)
             break;
     }
-    */
+    
         cout<<"done checking ..."<<endl;
     // Avoid the movement if agent will collide
    
     if (willColl) {
    //     cutMoviesFromCurrentFrame(agent);
     }
+     */
     
     
     
     
-   // if (!agent->isPlaying())
-   //    agent->play();
+    if (!agent->isPlaying()) {
+        cout << "is not playing " << endl;
+        agent->play();
+    }
+
 }
 
 
@@ -595,7 +628,8 @@ void PlayController::makeManualAgent(string name) {
     //agent->setDrawSize(drawSizes[(int)ofRandom(3)]);
     agent->setGridSizeX(agent->getDrawSize()/2);
     agent->setGridSizeY(agent->getDrawSize()/2);
-    
+    agent->setActionType("LR", "");
+    agent->setActionType("UD", "");
     agent->setWindow(0); //TODO: set it to -1
     
     float scale = agent->getDrawSize() / model.getWidth();
@@ -624,7 +658,7 @@ void PlayController::makeManualAgent(string name) {
     agent->setNormalPosition(startPositionAgent);
     agent->normalise();
     
-    agent->setSpeed(15);//ofRandom(1.0, 3.0));
+    agent->setSpeed(3);//ofRandom(1.0, 3.0));
     appModel->addSequence(agent);
     agent->play();
   

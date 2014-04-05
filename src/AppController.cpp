@@ -83,7 +83,7 @@ void AppController::setup(){
     
     appModel->setProperty("VideoWidth", 550.0f);
     appModel->setProperty("VideoHeight", 550.0f);
-    appModel->setProperty("DefaultDrawSize", 100.0f);
+    appModel->setProperty("DefaultDrawSize", 200.0f);
     
     appModel->setProperty("TransitionLength", 12);
     
@@ -93,10 +93,10 @@ void AppController::setup(){
     appModel->setProperty("AnalysePlayers", 0);
     appModel->setProperty("AnalyseName", (string)"");
     
-    appModel->setProperty("ManualAgentControl", false);
-    appModel->setProperty("AutoGenerate", true);
+    appModel->setProperty("ManualAgentControl", true);
+    appModel->setProperty("AutoGenerate", false);
     
-    appModel->setProperty("AvoidCollisions", true);
+    appModel->setProperty("AvoidCollisions", false);
     appModel->setProperty("DefaultGridScale", 50.0f);  // 40
 //    appModel->setProperty("pathBoundingSizeW", 70.0f); // 15
 //    appModel->setProperty("pathBoundingSizeH", 110.0f); // 15

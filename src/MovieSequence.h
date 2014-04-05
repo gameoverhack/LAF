@@ -53,10 +53,10 @@ public:
         if(video->getQueueSize() > 0) return;
         
         // make sure the video paused state is the same as the sequence
-//        if(video->isPaused() != bPaused){
-//            video->setPaused(bPaused);
-//            return;
-//        }
+        if(video->isPaused() != bPaused){
+            video->setPaused(bPaused);
+            return;
+        }
         
         if(video->getSpeed() != speed){
             video->setSpeed(speed);
@@ -222,7 +222,7 @@ public:
     }
     
     bool isPlaying(){
-        return bPaused;
+        return !bPaused; // Changed to ! by omid; TODO: Ask matt
     }
     
     void rewind(){
@@ -537,8 +537,8 @@ public:
     void removeMoviesFromIndex (int ind) {
         
         ind++;
-        sequence.erase(sequence.begin()+ind,sequence.end());
-        sequence.erase(sequence.end());
+        sequence.erase(sequence.begin()+ind,sequence.end()+1);
+//        sequence.erase(sequence.end());
         
          for (int i=sequenceFrames.size()-1; i>=ind;i--) {
              totalSequenceFrames -= sequenceFrames[i] - sequenceFrames[i-1];
