@@ -144,18 +144,18 @@ void PlayController::update(){
         }
             break;
     }
-    
 }
 
 //--------------------------------------------------------------
-void PlayController::cutMoviesFromCurrentFrame(Agent* agent) {
+void PlayController::cutSequenceFromCurrentMovie(Agent* agent, bool cutFromCurrentFrame) {
     // Remove the rest of the movies in the sequence as we are overwriting them
     if (agent->getCurrentMovieIndex() < agent->getSequenceSize()-1)
         agent->removeMoviesFromIndex(agent->getCurrentMovieIndex()+1)   ;
     getPositionsForMovieSequence(agent, agent->getPlayerName());
     agent->normalise();
     
-    //return;
+    if (!cutFromCurrentFrame)
+        return;
     // Cut the current movie and start the new movie at the current position
     MovieInfo* currentMovie = &agent->getCurrentMovie();
     string lastMotion = ofSplitString(currentMovie->markername,"_")[0] + "_" + ofSplitString(currentMovie->markername,"_")[1];
@@ -196,10 +196,76 @@ void PlayController::moveAgent(Agent* agent, char op) {
     
     // Cut the current movie and start the new movie at the current position
     MovieInfo* currentMovie = &agent->getCurrentMovie();
-    string lastMotion = ofSplitString(currentMovie->markername,"_")[0] + "_" + ofSplitString(currentMovie->markername,"_")[1];
+    string lastMotion = ofSplitString(currentMovie->markername,"_")[2] + "_" + ofSplitString(currentMovie->markername,"_")[3];
+    string lastDirection = ofSplitString(currentMovie->markername,"_")[3];
+    char lastOp = tolower(lastDirection[0]);
     
-    cutMoviesFromCurrentFrame(agent);
+    cout << lastOp << endl;
+    cout << op << endl;
     
+    if (lastOp == 'l') {
+        if (op == 'l' && agent->getWillCollide())
+            return;
+        if (op == 'r' && agent->getSpeed() > 0) {
+            cutSequenceFromCurrentMovie(agent,false);
+            agent->setSpeed(-1);
+            agent->setPaused(false);
+            agent->stopAtAction(currentMovie->agentActionIndex-1);
+            cout<<"reversing " <<endl;
+            return;
+            //currentMovie->speed =  -1 * abs(currentMovie->speed);
+        }
+    }
+
+    if (lastOp == 'r') {
+        if (op == 'r' && agent->getWillCollide()) {
+            return;
+        }
+        if (op == 'l' && agent->getSpeed() > 0) {
+            cutSequenceFromCurrentMovie(agent,false);
+            agent->setSpeed(-1);
+            if (!agent->isPlaying()) {
+                currentMovie->frame = currentMovie->frame - 10;
+                agent->getVideo()->setFrame(agent->getVideo()->getCurrentFrame() - 10);
+            }
+            
+            agent->setPaused(false);
+            agent->stopAtAction(currentMovie->agentActionIndex-1);
+            cout<<"reversing " <<endl;
+            return;
+            //currentMovie->speed =  -1 * abs(currentMovie->speed);
+        }
+    }
+    
+    if (lastOp == 'u') {
+        if (op == 'u' && agent->getWillCollide())
+            return;
+        if (op == 'd' && agent->getSpeed() > 0) {
+            cutSequenceFromCurrentMovie(agent, false);
+            agent->setSpeed(-1);
+            agent->setPaused(false);
+            agent->stopAtAction(currentMovie->agentActionIndex-1);
+            cout<<"reversing " <<endl;
+            return;
+            //currentMovie->speed =  -1 * abs(currentMovie->speed);
+        }
+    }
+    
+    if (lastOp == 'd') {
+        if (op == 'd' && agent->getWillCollide())
+            return;
+        if (op == 'u' && agent->getSpeed() > 0) {
+            cutSequenceFromCurrentMovie(agent, false);
+            agent->setSpeed(-1);
+            agent->setPaused(false);
+            agent->stopAtAction(currentMovie->agentActionIndex-1);
+            cout<<"reversing " <<endl;
+            return;
+            //currentMovie->speed =  -1 * abs(currentMovie->speed);
+        }
+    }
+    
+    cutSequenceFromCurrentMovie(agent,true);
     
     //MovieInfo lastMovie = agent->getLastMovieInSequence();
     
@@ -355,56 +421,44 @@ void PlayController::moveAgent(Agent* agent, char op) {
     
     for (int u=0;u<motionSequence.size();u++)
     cout << " >>>>>>>>>>>> " << motionSequence[u] << endl;
-
     
-    generateMoviesFromMotions(motionSequence, agent, name);
+    
+    // Create a vector to store the movies generated for this specific action befor pushing them to the agent
+    vector<MovieInfo> newMovies;
+    generateMoviesFromMotionsNoPush(motionSequence, agent, name, newMovies);
+    
+    
+    // Calcuate the total bounding for this action
+    ofRectangle totalBoundingForAction;
+    
+    for (int i=0;i<newMovies.size();i++) {
+        MovieInfo& m = newMovies[i];
+        for(int f = 0; f < m.endframe - m.startframe; f++){
+            int frame = m.startframe + f;
+            if(f == 0) totalBoundingForAction = agent->getPlayerModel()->getBoundingAt(m.name, frame);
+            totalBoundingForAction.growToInclude(agent->getPlayerModel()->getBoundingAt(m.name, frame));
+        }
+    }
+    
+    // get the scaled bounding
+    totalBoundingForAction.position = agent->getScaledPosition(); //TODO: at the next frame (next movie, currentmovie?)
+    totalBoundingForAction.scale(agent->getNormalScale());
+    
+    // if the bounding intersects with windows, then do not push the sequence in; return from the function
+    // TODO: this limits the movements
+    for (int w = 0; w<appModel->getWindows().size(); w++)
+        if (totalBoundingForAction.intersects(appModel->getWindows()[w]))
+            return;
+    
+    // if it does not intersect, then push the new movie sequence for this action to the agent
+    for (int i=0;i<newMovies.size();i++)
+        agent->push(newMovies[i]);
+    
     getPositionsForMovieSequence(agent, agent->getPlayerName());
     agent->normalise();
     
     
-    /*
-    // Predict the possible collision
-    bool willColl = false;
-    ofRectangle ee = agent->getScaledTotalBounding();
-    for (int w=0;w<appModel->getWindows().size();w++) {
-        if (w!=agent->getWindow() && agent->getScaledTotalBounding().intersects(appModel->getWindows()[w])) {
-            willColl = true;
-            cout << "Will cOllide" << endl;
-            break;
-        }
-        
-    }
-    
-    
-    cout<<"checking 0 ..."<<endl;
-    for (int m = prevSequenceSize;m<agent->getSequenceSize();m++) {
-        cout<<"checking 1 ..."<<endl;
-
-        MovieInfo movie = agent->getMovieSequence()[m];
-        for (int w=0;w<appModel->getWindows().size();w++) {
-            for (int f =0; f<movie.endframe - movie.startframe;f+50) {
-                if (w!=agent->getWindow() && agent->getScaledBoundingAt(prevTotalSeqFrames+f).intersects(appModel->getWindows()[w]))
-                { willColl = true;
-                    break;
-                }
-            }
-            if (willColl)
-                break;
-        }
-        if (willColl)
-            break;
-    }
-    
-        cout<<"done checking ..."<<endl;
-    // Avoid the movement if agent will collide
-   
-    if (willColl) {
-   //     cutMoviesFromCurrentFrame(agent);
-    }
-     */
-    
-    
-    
+    agent->setSpeed(3);
     
     if (!agent->isPlaying()) {
         cout << "is not playing " << endl;
@@ -621,6 +675,8 @@ void PlayController::makeManualAgent(string name) {
     
     // create a new Agent
     Agent* agent = new Agent;
+    agent->setPlayerName(name);
+    agent->setPlayerModel(model);
     agent->setBehaviourMode(bMANUAL);
     agent->setDrawSize(appModel->getProperty<float>("DefaultDrawSize"));
     //agent->setGridSizeX(appModel->getProperty<float>("DefaultGridScale"));
@@ -643,12 +699,12 @@ void PlayController::makeManualAgent(string name) {
     int startMargin = 400/appModel->getProperty<float>("gridScale");
 
     // ofPoint startPosition = ofPoint((int)ofRandom(startMargin)*appModel->getProperty<float>("gridScale"), (int)ofRandom(startMargin)*appModel->getProperty<float>("gridScale"));
-    ofPoint startPosition = ofPoint(2*appModel->getProperty<float>("gridScale"), 10*appModel->getProperty<float>("gridScale"));
+    ofPoint startPosition = ofPoint(2*appModel->getProperty<float>("gridScale"), 4*appModel->getProperty<float>("gridScale"));
 
     
     MovieInfo& loopMovie = agent->getLastMovieInSequence();
     loopMovie.isLooped = true;
-    
+    loopMovie.agentActionIndex = 0;
     
     getPositionsForMovieSequence(agent, name);
     agent->normalise();
@@ -1056,6 +1112,8 @@ void PlayController::generateMoviesFromMotions(vector<string>& motionSequence, M
     
     MovieInfo lastMovie = movieSequence->getLastMovieInSequence();
     
+    int nextActionIndex = lastMovie.agentActionIndex+1;
+    
     for(int i = 0; i < markerSequence.size(); i++){
         
         ofxLogVerbose() << "Find movies with: " << markerSequence[i] << endl;
@@ -1106,6 +1164,7 @@ void PlayController::generateMoviesFromMotions(vector<string>& motionSequence, M
         nextMovie.endframe = endFrame;
         nextMovie.speed = lastMovie.speed;
         nextMovie.markername = markerSequence[i];
+        nextMovie.agentActionIndex = nextActionIndex;
         
         ostringstream os; os << nextMovie;
         ofxLogVerbose() << "Adding movie: " << os.str() << endl;
@@ -1116,6 +1175,95 @@ void PlayController::generateMoviesFromMotions(vector<string>& motionSequence, M
     }
     
 }
+
+//--------------------------------------------------------------
+void PlayController::generateMoviesFromMotionsNoPush(vector<string>& motionSequence, MovieSequence* movieSequence, string name, vector<MovieInfo>& resultMovies) {
+    
+    PlayerModel& model = appModel->getPlayerTemplate(name);
+    map<string, vector<string> >& markDictionary = model.getMarkerDictionary();
+    map<string, ofxXMP>& xmp = model.getXMP();
+    
+    // convert the motionSequnce to marker names...
+    
+    vector<string> markerSequence;
+    for(int i = 1; i < motionSequence.size(); i++){
+        
+        // ...by chaining the motion sequences together
+        string markerName = motionSequence[i - 1] + "_" + motionSequence[i];
+        
+        // if we get to HUGG then let's insert a stand TODO: deal with other situations such as LWNG etc
+        if(markerName == "HUGG_FRNT_STND_FRNT") markerName = "STND_FRNT_STND_FRNT";
+        
+        markerSequence.push_back(markerName);
+    }
+    
+    ofxLogVerbose() << "Generating movies for marker sequence: " << markerSequence << endl;
+    
+    MovieInfo lastMovie = movieSequence->getLastMovieInSequence();
+    
+    int nextActionIndex = lastMovie.agentActionIndex+1;
+    
+    for(int i = 0; i < markerSequence.size(); i++){
+        
+        ofxLogVerbose() << "Find movies with: " << markerSequence[i] << endl;
+        
+        if(i == 0 && markerSequence[i] == lastMovie.markername){
+            ofxLogVerbose() << "...movie already in sequence, continuing" << endl;
+            continue;
+        }
+        
+        // get all the movies with this marker name
+        map<string, vector<string> >::iterator it = markDictionary.find(markerSequence[i]);
+        assert(it != markDictionary.end());
+        vector<string> uniqueMovies = it->second;
+        
+        // we prefer jumping to a marker in the same movie
+        // so see if it's in amongst the unique movies
+        int randomIndex = first(uniqueMovies, lastMovie.name);                  // returns -1 if not there
+        if(randomIndex == -1) randomIndex = (int)ofRandom(uniqueMovies.size()); // ...hence choose any movie
+        
+        // select the movie name
+        string rMovieName = uniqueMovies[randomIndex];
+        
+        // let's just check to see if the next marker is the one we want...
+        ofxXMPMarker pStartMarker = xmp[rMovieName].getNextMarker(lastMovie.startframe + 1);
+        ofxXMPMarker pEndMarker = xmp[rMovieName].getNextMarker(pStartMarker.getStartFrame() + 1);
+        
+        // if it's not the same movie or the next marker isn't the one we want, then randomly choose one
+        if(rMovieName != lastMovie.name || pStartMarker.getName() != markerSequence[i]){
+            
+            // get all the markers in the movie which match the sequence name - there can be many!!
+            vector<ofxXMPMarker> markers = xmp[rMovieName].getMarkers(markerSequence[i]);
+            pStartMarker = markers[(int)ofRandom(markers.size())];
+            pEndMarker = xmp[rMovieName].getNextMarker(pStartMarker.getStartFrame() + 1);
+            
+            ofxLogVerbose() << "Selecting RAND marker match: " << motionSequence[i] << " == " << pStartMarker.getName() << " of " << markers.size() << endl;
+            
+        }else{
+            ofxLogVerbose() << "Selecting NEXT marker match: " << motionSequence[i] << " == " << pStartMarker.getName() << endl;
+        }
+        
+        int startFrame = pStartMarker.getStartFrame();
+        int endFrame = pEndMarker.getStartFrame();
+        
+        MovieInfo nextMovie;
+        nextMovie.name = rMovieName;
+        nextMovie.path = model.getPlayerFolder() + nextMovie.name + ".mov";
+        nextMovie.startframe = startFrame;
+        nextMovie.endframe = endFrame;
+        nextMovie.speed = lastMovie.speed;
+        nextMovie.markername = markerSequence[i];
+        nextMovie.agentActionIndex = nextActionIndex;
+        
+        ostringstream os; os << nextMovie;
+        ofxLogVerbose() << "Adding movie: " << os.str() << endl;
+        
+        resultMovies.push_back(nextMovie);
+        lastMovie = nextMovie;
+        
+    }
+}
+
 
 //--------------------------------------------------------------
 void PlayController::generateMoviesFromMotionsAndActions(vector<string>& motionSequence, Agent* agent, string name, int actionIndex, int length){

@@ -127,7 +127,7 @@ public:
         if ((collisionSkipCounter == 0) && avoidCollisions) {
             collisionSkipCounter = COLLISIONSKIP;
             
-            int range = 100;
+            int range = 50;
             int startFrame = MAX(this->getCurrentSequenceFrame(), 0);
             int endFrame = MIN(this->getCurrentSequenceFrame() + range, this->getTotalSequenceFrames());
             
@@ -244,6 +244,26 @@ public:
     //--------------------------------------------------------------
     void recoverFromCollisionWithObstacleMANUAL(vector<ofRectangle> obstacles, int obstacle) {
         stop();
+        
+        return; //!
+        
+        // get the players model
+        map<string, ofxXMP>& xmp = playerModel->getXMP();
+        
+        MovieInfo currentMovie = getCurrentMovie();
+        
+        ofxXMPMarker lastMarker = xmp[currentMovie.name].getLastMarker(currentMovie.frame);
+        ofxXMPMarker nextMarker = xmp[currentMovie.name].getNextMarker(currentMovie.frame);
+        
+        
+        cout << "lastmarker name = " << lastMarker.getName() << endl;
+        cout << "lastmarker st frame =  " << lastMarker.getStartFrame() << endl;
+        cout << "nextmarker st frame =  " << nextMarker.getStartFrame() << endl;
+        cout << "cframe = " << currentMovie.frame << endl;
+        
+        
+        setSpeed(-1* abs(speed));
+        StopAt(lastMarker.getStartFrame());
     }
     
     //-----------------------------------------------------------
@@ -401,7 +421,7 @@ protected:
     float gridSizeY; //girdSizeY should be proportionate to the agent's min up and down movement length (in the movies); changes by changing the drawsize.
     
     int startPosSegment;
-    int collisionSkipCounter;
+    int collisionSkipCounter = 1;
     
 };
 

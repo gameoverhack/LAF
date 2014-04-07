@@ -55,7 +55,7 @@ public:
         // make sure the video paused state is the same as the sequence
         if(video->isPaused() != bPaused){
             video->setPaused(bPaused);
-            return;
+//            return;
         }
         
         if(video->getSpeed() != speed){
@@ -63,9 +63,9 @@ public:
         }
         
         if(bPaused) {
-            if (!willCollide && behaviourMode == bMANUAL && currentSequenceIndex<sequence.size()-1)
-                bPaused=false;
-            else
+//            if (!willCollide && behaviourMode == bMANUAL && currentSequenceIndex<sequence.size()-1)
+//                bPaused=false;
+//            else
                 return;
         }
         
@@ -85,16 +85,26 @@ public:
         
         if (pauseFrame > -1 && pauseFrame >= currentMovie.frame) {
             stop();
+            pauseFrame = -1;
         }
 
         
         // check if we're done TODO: reverse
         if((video->getIsMovieDone()) || currentMovie.frame + currentMovie.startframe >= currentMovie.endframe
-        || (speed < 0 && video->getCurrentFrame() - currentMovie.startframe < 0)
+        || (speed < 0 && currentMovie.frame  < 0)
            ) {
+            
+            // check if the next movie belongs to another action and if we want to stop now
+            if ((speed > 0 && sequence[CLAMP(currentSequenceIndex+1,0,sequence.size()-1)].agentActionIndex == pauseActionIndex) ||
+                (speed < 0 && sequence[CLAMP(currentSequenceIndex-1,0,sequence.size()-1)].agentActionIndex == pauseActionIndex)) {
+                
+                stop();
+                setSpeed(abs(getSpeed()));
+                pauseActionIndex = -1;
+            }
+            else
                 loadNextMovie();
         }
-        
         
     }
     
@@ -188,8 +198,12 @@ public:
     
     
     void StopAt(int frame) {
-         ofxLogVerbose() << "Stoping Sequence at frame " << frame << "" << endl;
+         ofxLogVerbose() << "Stoping current movie at frame " << frame << "" << endl;
         pauseFrame = frame;
+    }
+    
+    void stopAtAction(int actionIndex) {
+        pauseActionIndex = actionIndex;
     }
     
     bool isSequequenceDone(){
@@ -260,6 +274,7 @@ public:
         currentSequenceIndex = lastnormalindex = -1;
         currentSequenceFrame = totalSequenceFrames = 0;
         
+        pauseActionIndex = -1;
         pauseFrame = -1;
         behaviourMode = bAUTO_REALISTIC;
     }
@@ -584,6 +599,7 @@ protected:
     ofRectangle stotalBounding;
     
     int pauseFrame;
+    int pauseActionIndex;
     int behaviourMode;
     bool willCollide;
 };

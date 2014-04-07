@@ -33,13 +33,14 @@ public:
     void updatePosition(Agent* agent);
     void insertMoviesFromAction(Agent* agent, pair<char,float> act);
     void triggerReplan();
-    void cutMoviesFromCurrentFrame(Agent* agent);
+    void cutSequenceFromCurrentMovie(Agent* agent, bool cutFromCurrentFrame);
     
 protected:
     
     void getPositionsForMovieSequence(MovieSequence* movieSequence, string name);
     void generateMoviesFromMotions(vector<string>& motionSequence, MovieSequence* movieSequence, string name);
     void generateMoviesFromMotionsAndActions(vector<string>& motionSequence, Agent* agent, string name, int actionIndex, int length);
+    void generateMoviesFromMotionsNoPush(vector<string>& motionSequence, MovieSequence* movieSequence, string name, vector<MovieInfo>& resultMovies);
     void generateMotionsBetween(string m1, string m2, string name, vector<string>& motionSequence, bool bForward = true);
     
     void recoverFromCollisionWithPlayer(Agent* playerSequence, Agent* collisionSequence);
