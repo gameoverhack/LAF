@@ -486,10 +486,10 @@ void AppView::update(){
 
             ofRectangle biggerEnv;
 
-            biggerEnv.x = -6*gridScale;
-            biggerEnv.y = -6*gridScale;
-            biggerEnv.width = appModel->getProperty<float>("OutputWidth") + 12*gridScale;
-            biggerEnv.height = appModel->getProperty<float>("OutputHeight") + 12*gridScale;
+            biggerEnv.x = -1*gridScale;
+            biggerEnv.y = -1*gridScale;
+            biggerEnv.width = appModel->getProperty<float>("OutputWidth") + 2*gridScale;
+            biggerEnv.height = appModel->getProperty<float>("OutputHeight") + 2*gridScale;
             
 
 //            biggerEnv.x = -appModel->getProperty<float>("OutputWidth")/2;

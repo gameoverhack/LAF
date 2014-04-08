@@ -260,6 +260,18 @@ public:
         totalSequenceFrames += newLength;
     }
     
+    void rebuildSequenceFrames() {
+        totalSequenceFrames = 0;
+        sequenceFrames.clear();
+        
+        sequenceFrames.push_back(0);
+        
+        for (int i=0;i<sequence.size();i++) {
+            sequenceFrames.push_back(totalSequenceFrames + sequence[i].endframe - sequence[i].startframe);
+            totalSequenceFrames += sequence[i].endframe - sequence[i].startframe;
+        }
+    }
+    
     void clear(){
         ofxLogVerbose() << "Clear Sequence" << endl;
         bPaused = false;
@@ -564,6 +576,10 @@ public:
         sequenceFrames.erase(sequenceFrames.begin()+ind,sequenceFrames.end());
         //sequenceFrames.erase(sequenceFrames.end());
         //Remember to normalise after
+    }
+    
+    vector<int> getSequenceFrames() {
+        return sequenceFrames;
     }
     
 protected:

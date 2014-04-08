@@ -67,7 +67,7 @@ void AppController::setup(){
     //appModel->setProperty("MediaPath", (string)"/Users/gameover/Desktop/LOTE/media");
     //appModel->setProperty("MediaPath", (string)"/Volumes/LongingAndForgetting02/LOTE/TESTRENDERS/mediaANIME");
     appModel->setProperty("MediaPath", (string)"/Users/omid/Desktop/LAF/media");
-    appModel->setProperty("NumberPlayers", 6);
+    appModel->setProperty("NumberPlayers", 1);
     appModel->setProperty("RectTrail", 200);
     
     appModel->setProperty("ForceFileListUpdate", true);
@@ -83,7 +83,7 @@ void AppController::setup(){
     
     appModel->setProperty("VideoWidth", 550.0f);
     appModel->setProperty("VideoHeight", 550.0f);
-    appModel->setProperty("DefaultDrawSize", 200.0f);
+    appModel->setProperty("DefaultDrawSize", 100.0f);
     
     appModel->setProperty("TransitionLength", 12);
     
@@ -93,8 +93,8 @@ void AppController::setup(){
     appModel->setProperty("AnalysePlayers", 0);
     appModel->setProperty("AnalyseName", (string)"");
     
-    appModel->setProperty("ManualAgentControl", true);
-    appModel->setProperty("AutoGenerate", false);
+    appModel->setProperty("ManualAgentControl", false);
+    appModel->setProperty("AutoGenerate", true);
     
     appModel->setProperty("AvoidCollisions", true);
     appModel->setProperty("DefaultGridScale", 50.0f);  // 40
@@ -472,6 +472,61 @@ void AppController::keyPressed(ofKeyEventArgs & e){
         }
             break;
 
+        case 'h':
+        {
+            vector<MovieSequence*>& sequences = appModel->getSequences();
+            for(int i = 0; i < sequences.size(); i++){
+                MovieSequence* sequence = sequences[i];
+                sequence->setSpeed(-1);
+            }
+        }
+            break;
+        case 'j':
+        {
+            vector<MovieSequence*>& sequences = appModel->getSequences();
+            for(int i = 0; i < sequences.size(); i++){
+                MovieSequence* sequence = sequences[i];
+                sequence->setSpeed(-0.5);
+            }
+        }
+            break;
+        case 'k':
+        {
+            vector<MovieSequence*>& sequences = appModel->getSequences();
+            for(int i = 0; i < sequences.size(); i++){
+                MovieSequence* sequence = sequences[i];
+                sequence->setSpeed(0);
+            }
+        }
+            break;
+        case 'l':
+        {
+            vector<MovieSequence*>& sequences = appModel->getSequences();
+            for(int i = 0; i < sequences.size(); i++){
+                MovieSequence* sequence = sequences[i];
+                sequence->setSpeed(1);
+            }
+        }
+            break;
+        case ';':
+        {
+            vector<MovieSequence*>& sequences = appModel->getSequences();
+            for(int i = 0; i < sequences.size(); i++){
+                MovieSequence* sequence = sequences[i];
+                sequence->setSpeed(3);
+            }
+        }
+            break;
+        case '\'':
+        {
+            vector<MovieSequence*>& sequences = appModel->getSequences();
+            for(int i = 0; i < sequences.size(); i++){
+                MovieSequence* sequence = sequences[i];
+                sequence->setSpeed(6);
+            }
+        }
+            break;
+            
 //        case '/':
 //        {
 //            
