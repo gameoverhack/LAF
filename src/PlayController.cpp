@@ -920,11 +920,12 @@ void PlayController::makeAgent3(string name, int startX, int window){
     float startXRegion = (int)ofRandom(1920/5);
     float startYRegion = (int)ofRandom(2)*700;
     //int startX = (int)ofRandom(1920/agent->getGridSizeX())+1;
-    int startY = -(int)ofRandom(3)+1;
+    int startY = (int)ofRandom(2);
     
-    float xSpace = appModel->getProperty<float>("OutputWidth")/appModel->getProperty<int>("NumberPlayers");
-    
-    ofPoint pathStartCenterPosition = ofPoint(startX*xSpace, startY * agent->getGridSizeY() + startYRegion);
+    float xSpace = (appModel->getProperty<float>("OutputWidth")-100)/appModel->getProperty<int>("NumberPlayers");
+    xSpace = (xSpace/agent->getGridSizeX())*agent->getGridSizeX();
+    startX--;
+    ofPoint pathStartCenterPosition = ofPoint(startX*xSpace+50 , startY * agent->getGridSizeY() + startYRegion);
 //    ofPoint pathStartCenterPosition = ofPoint(startX*100, startY * agent->getGridSizeY() + startYRegion);
   
     
@@ -940,10 +941,10 @@ void PlayController::makeAgent3(string name, int startX, int window){
     pathTargetPosition.y = pathTargetPosition.y - agent->getScaledBoundingAt(1).height/2;
     
     ofRectangle worldRect;
-    worldRect.x = - 1* agent->getDrawSize();
-    worldRect.y = - 1* agent->getDrawSize();
-    worldRect.width = appModel->getProperty<float>("OutputWidth") + 2* agent->getDrawSize();
-    worldRect.height = appModel->getProperty<float>("OutputHeight") + 2* agent->getDrawSize();
+    worldRect.x = 0;//- 1* agent->getDrawSize();
+    worldRect.y = 0;//- 1* agent->getDrawSize();
+    worldRect.width = appModel->getProperty<float>("OutputWidth") + 1* agent->getDrawSize();
+    worldRect.height = appModel->getProperty<float>("OutputHeight") + 1* agent->getDrawSize();
     
     agent->plan(pathStartCenterPosition, pathTargetPosition, worldRect, appModel->getWindows());
     
