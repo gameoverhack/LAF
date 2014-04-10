@@ -879,9 +879,9 @@ void PlayController::makeSequence(string name, int window){
 
 //--------------------------------------------------------------
 void PlayController::makeAgent3(string name, int startX, int window){
-    //window = 3;
-    //name = "MARTINW";
-    name = "PRIYAR";
+    window = 3;
+    name = "MARTINW";
+    //name = "PRIYAR";
     
     ofxLogNotice() << "Making an agent for " << name << " targeting window " << window << endl;
     
@@ -925,8 +925,8 @@ void PlayController::makeAgent3(string name, int startX, int window){
     float xSpace = (appModel->getProperty<float>("OutputWidth")-100)/appModel->getProperty<int>("NumberPlayers");
     xSpace = (xSpace/agent->getGridSizeX())*agent->getGridSizeX();
     startX--;
-    ofPoint pathStartCenterPosition = ofPoint(startX*xSpace+50 , startY * agent->getGridSizeY() + startYRegion);
-    //ofPoint pathStartCenterPosition = ofPoint(400 , startY * agent->getGridSizeY() + startYRegion);
+    //ofPoint pathStartCenterPosition = ofPoint(startX*xSpace+50 , startY * agent->getGridSizeY() + startYRegion);
+    ofPoint pathStartCenterPosition = ofPoint(400 , 50);
     
     
     // Normalise for the first movie to get the scaled center
@@ -1671,7 +1671,7 @@ void PlayController::cutMoviesForActionsNormalised(Agent* agent) {
                 cout << "total distance so far = " << totalDistance << endl;
             }
         }
-            
+        
  
         // Now that we have inserted movies to go over the required distance, we need to cut the last movie to get the exact distance
         
