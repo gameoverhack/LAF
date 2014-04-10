@@ -879,7 +879,7 @@ void PlayController::makeSequence(string name, int window){
 
 //--------------------------------------------------------------
 void PlayController::makeAgent3(string name, int startX, int window){
-    window = 3;
+    //window = 3;
     //name = "MARTINW";
     name = "PRIYAR";
     
@@ -917,21 +917,16 @@ void PlayController::makeAgent3(string name, int startX, int window){
     agent->push(model.getFirstMovie());
     
     
-    
-    
     // Find the start and end position of the the agent
-    float startXRegion = (int)ofRandom(1920/5);
-    float startYRegion = 300;//(int)ofRandom(2)*600;
+    float startYRegion = (int)ofRandom(2)*700;
     //int startX = (int)ofRandom(1920/agent->getGridSizeX())+1;
-    int startY = 0;(int)ofRandom(2);
+    int startY = (int)ofRandom(2);
     
-    // Distribute the agents starting positions on the screen width based..
-    // ...on their assigned position segment from the appModel
     float xSpace = (appModel->getProperty<float>("OutputWidth")-100)/appModel->getProperty<int>("NumberPlayers");
     xSpace = (xSpace/agent->getGridSizeX())*agent->getGridSizeX();
     startX--;
     ofPoint pathStartCenterPosition = ofPoint(startX*xSpace+50 , startY * agent->getGridSizeY() + startYRegion);
-    
+    //ofPoint pathStartCenterPosition = ofPoint(400 , startY * agent->getGridSizeY() + startYRegion);
     
     
     // Normalise for the first movie to get the scaled center
@@ -980,11 +975,12 @@ void PlayController::makeAgent3(string name, int startX, int window){
     cout << "xOffset = " << xOffset << endl;
     cout << "yOffset = " << yOffset << endl;
     
+    cout << " Actions before fixing the start position" << endl;
     for (int a=0;a<agent->actions.size();a++) {
         cout << "########## action " << agent->actions[a].first << " , " <<  agent->actions[a].second << endl;
     }
     
-    if (agent->actions.size() > 1) {
+    if (agent->actions.size() > 0) {
         if (agent->actions[0].first == 'l')
             agent->actions[0].second -=xOffset;
 
@@ -996,7 +992,10 @@ void PlayController::makeAgent3(string name, int startX, int window){
         
         if (agent->actions[0].first == 'd')
             agent->actions[0].second +=yOffset;
-        
+    }
+    
+    if (agent->actions.size() > 1) {
+    
         if (agent->actions[1].first == 'l')
             agent->actions[1].second -=xOffset;
         
@@ -1010,15 +1009,11 @@ void PlayController::makeAgent3(string name, int startX, int window){
             agent->actions[1].second +=yOffset;
     }
     
-    xOffset =  pathStartCenterPosition.x - agent->getCurrentPath()[0].x;
-    yOffset =  pathStartCenterPosition.y - agent->getCurrentPath()[0].y;
-    
+    cout << " Actions after fixing the start position" << endl;
     for (int a=0;a<agent->actions.size();a++) {
         cout << "########## action " << agent->actions[a].first << " , " <<  agent->actions[a].second << endl;
     }
-    
-    cout << "xOffset = " << xOffset << endl;
-    cout << "yOffset = " << yOffset << endl;
+ 
     
     cout << endl;
     // Now that the agent has a set of actions, let's insert movies for them
@@ -1030,7 +1025,6 @@ void PlayController::makeAgent3(string name, int startX, int window){
     
     // Make sure the moveis for each action travel the exact lenth
     cutMoviesForActionsNormalised(agent);
-
     
     
     // Insert the end motions
@@ -1806,14 +1800,23 @@ float PlayController::calcMovieDistanceToFrame(Agent* agent, MovieInfo* movie, c
     movieEP = endBounding.getCenter();
     
     
+//    if (dir == 'l')
+//        return abs(movieEP.x - movieSP.x);
+//    else if (dir == 'r')
+//        return abs(movieSP.x - movieEP.x);
+//    else if (dir == 'u')
+//        return abs(movieEP.y - movieSP.y);
+//    else if (dir == 'd')
+//        return abs(movieEP.y - movieSP.y);
+    
     if (dir == 'l')
-        return abs(movieEP.x - movieSP.x);
+        return (movieSP.x - movieEP.x);
     else if (dir == 'r')
-        return abs(movieSP.x - movieEP.x);
+        return (movieEP.x - movieSP.x);
     else if (dir == 'u')
-        return abs(movieEP.y - movieSP.y);
+        return (movieSP.y - movieEP.y);
     else if (dir == 'd')
-        return abs(movieEP.y - movieSP.y);
+        return (movieEP.y - movieSP.y);
 }
 
 //--------------------------------------------------------------

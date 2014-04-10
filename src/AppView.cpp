@@ -478,8 +478,8 @@ void AppView::update(){
                 
                 ofSetColor(100, 10, 0);
                 ofSetLineWidth(3.0f);
-                if (agent->getCurrentPath().size() >0)
-                    agent->getCurrentPath().draw();
+               // if (agent->getCurrentPath().size() >0)
+               //     agent->getCurrentPath().draw();
                 
                 ofSetLineWidth(1.0f);
             }
