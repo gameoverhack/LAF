@@ -315,7 +315,7 @@ public:
     //-----------------------------------------------------------
     void rePlan(ofPoint newTargetPosition, ofRectangle worldRect, vector<ofRectangle> obstacles) {
         // TODO: make a smoother transition
-        ofPoint currentPos = getScaledPositionAt(sequenceFrames[currentSequenceIndex] + currentMovie.endframe - currentMovie.startframe);
+        ofPoint currentPos = getScaledPositionAt(sequenceFrames[currentSequenceIndex] + currentMovie.frame - currentMovie.startframe);
         cutMoviesFromCurrentFrame();
         plan(currentPos, newTargetPosition, worldRect, obstacles);
     }
@@ -327,7 +327,7 @@ public:
             this->removeMoviesFromIndex(this->getCurrentMovieIndex()+1)   ;
 //        this->normalise();
        
-        return;
+        //return;
         // Cut the current movie and start the new movie at the current position
        
         int oldLength = currentMovie.endframe - currentMovie.startframe;

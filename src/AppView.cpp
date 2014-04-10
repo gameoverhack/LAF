@@ -423,16 +423,64 @@ void AppView::update(){
                     distanceTrailCenter.set(playCenter.x, wC.y);
                 ofLine(sequence->getScaledCentre(), distanceTrailCenter);
                 */
-                ofPolyline pathFromHere = ofPolyline(agent->getCurrentPath().getVertices());
+                ofPolyline pathFromHere; //= ofPolyline(agent->getCurrentPath().getVertices());
+                vector<MovieInfo>& movies = agent->getMovieSequence();
                 
+                int currentAct = agent->getCurrentMovie().agentActionIndex;
+                ofPoint point;
+                
+//                if (currentAct == -1) {
+//                    point = agent->getScaledCentreAt(1);
+//                    pathFromHere.addVertex(point);
+//                }
+//                else {
+//                    point = agent->getScaledCentre();
+//                    
+//                    for (int i=0;i<movies.size();i++)
+//                        
+//                    if (agent->actions[a].first == 'l')
+//                        point.x-=agent->actions[currentAct].second;
+//                    else if (agent->actions[a].first == 'r')
+//                        point.x+=agent->actions[currentAct].second;
+//                    else if (agent->actions[a].first == 'u')
+//                        point.y-=agent->actions[currentAct].second;
+//                    else if (agent->actions[a].first == 'd')
+//                        point.y+=agent->actions[currentAct].second;
+//                    
+//                    pathFromHere.addVertex(point);
+//                }
+               
+                point = agent->getScaledCentreAt(1);
+                pathFromHere.addVertex(point);
+                
+                
+                for (int a=0;a<agent->actions.size();a++) {
+                    if (agent->actions[a].first == 'l')
+                        point.x-=agent->actions[a].second;
+                    else if (agent->actions[a].first == 'r')
+                        point.x+=agent->actions[a].second;
+                    else if (agent->actions[a].first == 'u')
+                        point.y-=agent->actions[a].second;
+                    else if (agent->actions[a].first == 'd')
+                        point.y+=agent->actions[a].second;
+                    
+                    pathFromHere.addVertex(point);
+                }
+
                 //TODO: delelet the traveled path points
 //                if (agent->getCurrentMovie().agentActionIndex > 0) {
 //                        pathFromHere.getVertices().erase(pathFromHere.getVertices().begin(), pathFromHere.getVertices().begin()+agent->getCurrentMovie().agentActionIndex);
 //                }
                 
-                ofSetLineWidth(4.0f);
+                ofSetLineWidth(3.0f);
                 if (pathFromHere.size() >0)
                     pathFromHere.draw();
+                
+                ofSetColor(100, 10, 0);
+                ofSetLineWidth(3.0f);
+                if (agent->getCurrentPath().size() >0)
+                    agent->getCurrentPath().draw();
+                
                 ofSetLineWidth(1.0f);
             }
             
