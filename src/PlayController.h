@@ -39,7 +39,7 @@ public:
 protected:
     
     void getPositionsForMovieSequence(MovieSequence* movieSequence, string name);
-    void generateMoviesFromMotions(vector<string>& motionSequence, MovieSequence* movieSequence, string name);
+    void generateMoviesFromMotions(vector<string>& motionSequence, MovieSequence* movieSequence, string name, bool isEnd=false);
     void generateMoviesFromMotionsAndActions(vector<string>& motionSequence, Agent* agent, string name, int actionIndex, int length);
     void generateMoviesFromMotionsAndActionsNoCut(vector<string>& motionSequence, Agent* agent, string name, int length);
     void generateMoviesFromMotionsNoPush(vector<string>& motionSequence, MovieSequence* movieSequence, string name, vector<MovieInfo>& resultMovies);
@@ -52,6 +52,7 @@ protected:
     float calcMovieDistanceToFrame(Agent* agent, MovieInfo* movie, char dir, int frame);
     float calcMovieDistanceNormalised(Agent* agent, int index,  MovieInfo* movie, char dir);
     float calcMovieDistanceToFrameNormalised(Agent* agent, int index, MovieInfo* movie, char dir, int frame);
+    float calcMoviesDistanceNormalised(Agent* agent, int indexS, int indexE, char dir);
     
     //void recoverFromCollisionWithPlayer(Agent* playerSequence, Agent* collisionSequence);
     //void recoverFromCollisionWithWindow(Agent* playerSequence, int window);

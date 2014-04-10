@@ -254,6 +254,13 @@ public:
         //normalise();
     }
     
+    void pushAt(MovieInfo m, int index){
+        ostringstream os; os << m;
+        ofxLogVerbose() << "Push Sequence: " << os.str() << endl;
+        sequence.insert(sequence.begin()+index, m);
+        rebuildSequenceFrames();
+    }
+    
     void fixLastSequenceFrame(int oldLength, int newLength) {
         totalSequenceFrames -= oldLength;
         sequenceFrames[sequenceFrames.size()-1] = totalSequenceFrames+newLength;
@@ -477,6 +484,15 @@ public:
         return sboundings[sequenceFrame];
     }
     
+    ofRectangle& getOrgScaledBoundingAt(int sequenceFrame){
+        sequenceFrame = CLAMP(sequenceFrame, 0, positions.size() - 1);
+        return orgsboundings[sequenceFrame];
+    }
+    
+    vector<ofRectangle>& getOrgScaledBoundings(){
+        return orgsboundings;
+    }
+    
     ofPoint& getScaledCentreAt(int sequenceFrame){
         sequenceFrame = CLAMP(sequenceFrame, 0, positions.size() - 1);
         return scentres[sequenceFrame];
@@ -582,6 +598,10 @@ public:
         return sequenceFrames;
     }
     
+    void storeSBoundings() {
+        orgsboundings = vector<ofRectangle>(sboundings);
+    }
+    
 protected:
     float speed;
     bool bPaused;
@@ -610,6 +630,9 @@ protected:
     vector<ofPoint>     spositions;
     vector<ofRectangle> sboundings;
     vector<ofPoint>     scentres;
+    
+    vector<ofRectangle> orgsboundings;
+
     
     ofRectangle totalBounding;
     ofRectangle stotalBounding;

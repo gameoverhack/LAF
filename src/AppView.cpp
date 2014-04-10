@@ -499,8 +499,15 @@ void AppView::update(){
                     if (agent->getWillCollide())
                         ofSetColor(100,10,10);
                     else
-                        ofSetColor(0, iSmal, iSmal);
+                        ofSetColor(0, 60, 60);
+                        //ofSetColor(0, iSmal, iSmal);
+                    
                     ofRect(agent->getScaledBoundingAt(j));
+                    
+                    ofSetColor(60, 10, 60);
+                    
+                    if (agent->getOrgScaledBoundings().size() > 0)
+                        ofRect(agent->getOrgScaledBoundingAt(j));
                     //ofRect(sequence->getBoundingAt(j));
                 }
                 

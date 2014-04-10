@@ -44,8 +44,10 @@ public:
     bool isLooped = false;
     int agentActionIndex=-1;
     bool isCut = false;
-    string currentDirection; //Omid
-    string getCurrentDirection() { //Omid
+    bool isEnd = false; // if the movie is part of the end motion (including the transitions leading to it)
+    
+    string currentDirection;
+    string getCurrentDirection() {
         // markername
         
         return ofSplitString(markername, "_")[1];

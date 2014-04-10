@@ -559,7 +559,7 @@ void PlayController::insertMoviesFromAction(Agent* agent, pair<char,float> act) 
                 agent->setActionType("LR", "WALK");
                 act = agent->getActionType("LR");
             }
-            
+            act = "CREP";
             
             vector<string> transitions = nestedForwardDirectionGraph.getPossibleTransitions("RIGHT");
             
@@ -577,7 +577,7 @@ void PlayController::insertMoviesFromAction(Agent* agent, pair<char,float> act) 
                 if (ofSplitString(transitions[t],"_")[0]==act && ofSplitString(transitions[t],"_")[1]== "RIGT")
                 motion = transitions[t];
             }
-            motion = transitions[(int)ofRandom(transitions.size())];
+            //motion = transitions[(int)ofRandom(transitions.size())];
             
             if (motion!="") {
                 generateMotionsBetween(lastMotion, motion, name, motionSequence);
@@ -645,8 +645,8 @@ void PlayController::insertMoviesFromAction(Agent* agent, pair<char,float> act) 
     for (int u=0;u<motionSequence.size();u++)
         cout << " >>>>>>>>>>>> " << motionSequence[u] << endl;
 
-    generateMoviesFromMotionsAndActionsNoCut(motionSequence, agent, name,length);
-    //generateMoviesFromMotions(motionSequence, agent, name);
+    //generateMoviesFromMotionsAndActionsNoCut(motionSequence, agent, name,length);
+    generateMoviesFromMotions(motionSequence, agent, name);
     
     getPositionsForMovieSequence(agent, agent->getPlayerName());
 //    agent->normalise(agent->getCurrentMovieIndex()+1,agent->shiftPoint);
@@ -926,7 +926,7 @@ void PlayController::makeAgent3(string name, int startX, int window){
     xSpace = (xSpace/agent->getGridSizeX())*agent->getGridSizeX();
     startX--;
     //ofPoint pathStartCenterPosition = ofPoint(startX*xSpace+50 , startY * agent->getGridSizeY() + startYRegion);
-    ofPoint pathStartCenterPosition = ofPoint(400 , 50);
+    ofPoint pathStartCenterPosition = ofPoint(400 , 550);
     
     
     // Normalise for the first movie to get the scaled center
@@ -1023,9 +1023,6 @@ void PlayController::makeAgent3(string name, int startX, int window){
         insertMoviesFromAction(agent, agent->actions[a]);
     }
     
-    // Make sure the moveis for each action travel the exact lenth
-    cutMoviesForActionsNormalised(agent);
-    
     
     // Insert the end motions
     vector<string> motionSequence;
@@ -1043,10 +1040,18 @@ void PlayController::makeAgent3(string name, int startX, int window){
     
     generateMotionsBetween(motion, emotion, name, motionSequence);
     
-    generateMoviesFromMotions(motionSequence, agent, name);
+    generateMoviesFromMotions(motionSequence, agent, name, true);
     getPositionsForMovieSequence(agent, name);
     agent->normalise();
+    
 
+    
+    //agent->storeSBoundings();
+    
+    // Make sure the moveis for each action travel the exact lenth
+    cutMoviesForActionsNormalised2(agent);
+    
+    
     
     
     // TODO: may not need the following anymore:
@@ -1074,7 +1079,7 @@ void PlayController::makeAgent3(string name, int startX, int window){
 
 
 //--------------------------------------------------------------
-void PlayController::generateMoviesFromMotions(vector<string>& motionSequence, MovieSequence* movieSequence, string name){
+void PlayController::generateMoviesFromMotions(vector<string>& motionSequence, MovieSequence* movieSequence, string name, bool isEnd){
     PlayerModel& model = appModel->getPlayerTemplate(name);
     map<string, vector<string> >& markDictionary = model.getMarkerDictionary();
     map<string, ofxXMP>& xmp = model.getXMP();
@@ -1150,6 +1155,7 @@ void PlayController::generateMoviesFromMotions(vector<string>& motionSequence, M
         nextMovie.speed = lastMovie.speed;
         nextMovie.markername = markerSequence[i];
         nextMovie.agentActionIndex = nextActionIndex;
+        nextMovie.isEnd = isEnd;
         
         ostringstream os; os << nextMovie;
         ofxLogVerbose() << "Adding movie: " << os.str() << endl;
@@ -1662,13 +1668,14 @@ void PlayController::cutMoviesForActionsNormalised(Agent* agent) {
         for (int i=lastMovIndex+1;i<movieSequence.size() && movieSequence[i].agentActionIndex == a+1; i++) {
             string markername = movieSequence[i].markername;
             
-            //if (!(ofSplitString(markername, "_")[0] == ofSplitString(markername, "_")[2] &&
-            //      ofSplitString(markername, "_")[1] == ofSplitString(markername, "_")[3]))
+            if ((ofSplitString(markername, "_")[0] == ofSplitString(markername, "_")[2] &&
+                  ofSplitString(markername, "_")[1] == ofSplitString(markername, "_")[3]))
             {
                 int d = calcMovieDistanceNormalised(agent, i, &movieSequence[i],currentActionDirection);
                 totalDistance += d;
                 cout<< "adding distance of next transition movie " << i <<  " = " << d << endl;
                 cout << "total distance so far = " << totalDistance << endl;
+                break;
             }
         }
         
@@ -1725,6 +1732,170 @@ void PlayController::cutMoviesForActionsNormalised(Agent* agent) {
 }
 
 
+//--------------------------------------------------------------
+void PlayController::cutMoviesForActionsNormalised2(Agent* agent) {
+    vector<MovieInfo>& movieSequence = agent->getMovieSequence();
+    PlayerModel* model = agent->getPlayerModel();
+    float scale = agent->getNormalScale();
+    
+    // for each action, i.e., each segment in path, cut the last movie to match the length
+    
+    int lastMovIndex = 0;
+    int firstMovIndex = 0;
+    
+    cout<< "------- start ------" << endl;
+    
+    for (int a=0; a<agent->actions.size();a++) {
+        cout << " ------ action " << a << endl;
+        float totalDistance = 0;
+        
+        int firstNextMovIndex = 0;
+
+        
+        char currentActionDirection = agent->actions[a].first;
+        float currentActionLength = agent->actions[a].second;
+        
+        MovieInfo* lastActionMovie;
+        
+        firstMovIndex = lastMovIndex+1;
+        
+        for (int i=firstMovIndex;i<movieSequence.size() && movieSequence[i].agentActionIndex == a; i++) {
+            lastMovIndex = i;
+        }
+        
+        lastActionMovie = &movieSequence[lastMovIndex];
+        cout << "last action movie is " << lastMovIndex << endl;
+        
+        
+        for (int i=lastMovIndex+1;i<movieSequence.size() && movieSequence[i].agentActionIndex == a+1; i++) {
+            string markername = movieSequence[i].markername;
+            string motion = ofSplitString(markername, "_")[2] + "_" + ofSplitString(markername, "_")[3];
+            
+            if ((ofSplitString(markername, "_")[0] == ofSplitString(markername, "_")[2] &&
+                 ofSplitString(markername, "_")[1] == ofSplitString(markername, "_")[3]))
+            {
+                firstNextMovIndex = i;
+                break;
+            }
+            
+//            if ((movieSequence[i].isEnd) &&
+//                (motion == "FALL_BACK" ||
+//                 motion == "HUGG_FRNT" ||
+//                 motion == "LWNG_FRNT" ||
+//                 motion == "SITT_FRNT" ||
+//                 motion == "STND_FRNT"))
+//            if (i == movieSequence.size()-1)
+//            {
+//                firstNextMovIndex = i;
+//                break;
+//            }
+        }
+        cout << "first none-transition movie of the next action is " << firstNextMovIndex << endl;
+        
+        
+        if (firstNextMovIndex < lastMovIndex) // there is no other movie after this action
+            firstNextMovIndex = movieSequence.size()-1;
+            
+        
+        cout << "firstMovIndex = " << firstMovIndex << endl;
+        cout << "firstNextMovIndex = " << firstNextMovIndex << endl;
+        cout << "lastMovIndex = " << lastMovIndex << endl;
+        
+        int d = calcMoviesDistanceNormalised(agent,firstMovIndex, firstNextMovIndex, currentActionDirection);
+        totalDistance =d;
+        cout << "total distance from first movie to next movie before isertion = " << totalDistance << " / required length = " << currentActionLength << endl;
+    
+        
+        
+        /// insert enough movies to cover the distance
+        
+        
+        
+        while (totalDistance < currentActionLength) {
+            MovieInfo nextMovie;
+            nextMovie.name = lastActionMovie->name;
+            nextMovie.path = lastActionMovie->path;
+            nextMovie.startframe = lastActionMovie->startframe;
+            nextMovie.endframe = lastActionMovie->endframe;
+            nextMovie.speed = lastActionMovie->speed;
+            nextMovie.markername = lastActionMovie->markername;
+            nextMovie.agentActionIndex = lastActionMovie->agentActionIndex;
+            
+            agent->pushAt(nextMovie, lastMovIndex);
+            
+            getPositionsForMovieSequence(agent, agent->getPlayerName());
+            agent->normalise();
+            
+            totalDistance += calcMovieDistanceNormalised(agent, lastMovIndex, lastActionMovie,currentActionDirection);
+            
+            ofxLogVerbose() << "Repeating the last movie: total distance = " << totalDistance << endl;
+        }
+
+        
+        // find the last movie for this action after insertion
+        for (int i=firstMovIndex;i<movieSequence.size() && movieSequence[i].agentActionIndex == a; i++) {
+            lastMovIndex = i;
+        }
+        for (int i=lastMovIndex+1;i<movieSequence.size() && movieSequence[i].agentActionIndex == a+1; i++) {
+            string markername = movieSequence[i].markername;
+            
+            if ((ofSplitString(markername, "_")[0] == ofSplitString(markername, "_")[2] &&
+                 ofSplitString(markername, "_")[1] == ofSplitString(markername, "_")[3]))
+            {
+                firstNextMovIndex = i;
+                break;
+            }
+        }
+        
+        
+        lastActionMovie = &movieSequence[lastMovIndex];
+        cout << "last action movie is " << lastMovIndex << endl;
+        
+        
+        d = calcMoviesDistanceNormalised(agent,firstMovIndex, firstNextMovIndex, currentActionDirection);
+        totalDistance =d;
+        cout << "updated total distance after all insertions = " << totalDistance << endl;
+        
+        // Now that we have inserted movies to go over the required distance, we need to cut the last movie to get the exact distance
+        
+        // subtract the distance travelled in the last movie so that we check it frame-by-frame next
+        d = calcMovieDistanceNormalised(agent, lastMovIndex, lastActionMovie,currentActionDirection);
+        totalDistance-= d;
+        cout << "last action movie distance = " << d << endl;
+        cout << "total distance after subtracting the last action movie = " << totalDistance << endl;
+        
+        for(int f = lastActionMovie->startframe+1; f <=lastActionMovie->endframe; f++){
+            float dist = calcMovieDistanceToFrameNormalised(agent, lastMovIndex, lastActionMovie, currentActionDirection, f);
+            if ((totalDistance+dist) >= currentActionLength) { // if one movie is enough to cover the distance, this is the right cut frame
+                cout << "dist at frame " << f << " = " << dist << endl;
+                ofxLogVerbose() << "Ending the last movie at " << f << " instead of " << lastActionMovie->endframe << endl;
+                int oldLength = lastActionMovie->endframe - lastActionMovie->startframe;
+                lastActionMovie->endframe=f;
+                lastActionMovie->isCut = true;
+                // we have pushed this movie before, so we need to fix the sequence frames
+                break;
+            }
+        }
+        
+        
+        d = calcMoviesDistanceNormalised(agent,firstMovIndex, firstNextMovIndex, currentActionDirection);
+        totalDistance =d;
+        cout << "total distance from first movie to next movie after cut = " << totalDistance << " / required length = " << currentActionLength << endl;
+        
+        
+        agent->rebuildSequenceFrames();
+        getPositionsForMovieSequence(agent, agent->getPlayerName());
+        agent->normalise();
+        
+        d = calcMoviesDistanceNormalised(agent,firstMovIndex, firstNextMovIndex, currentActionDirection);
+        totalDistance =d;
+        cout << "final total distance from first movie to next movie = " << totalDistance << " / required length = " << currentActionLength << endl;
+        
+        }
+    
+}
+
+
 
 //--------------------------------------------------------------
 float PlayController::calcMovieDistance(Agent* agent, MovieInfo* movie, char dir) {
@@ -1768,13 +1939,32 @@ float PlayController::calcMovieDistanceNormalised(Agent* agent, int index, Movie
     movieEP = agent->getScaledCentreAt(agent->getSequenceFrames()[index+1]);
     
     if (dir == 'l')
-        return (movieSP.x - movieEP.x);
+        return abs(movieSP.x - movieEP.x);
     else if (dir == 'r')
-        return (movieEP.x - movieSP.x);
+        return abs(movieEP.x - movieSP.x);
     else if (dir == 'u')
-        return (movieSP.y - movieEP.y);
+        return abs(movieSP.y - movieEP.y);
     else if (dir == 'd')
-        return (movieEP.y - movieSP.y);
+        return abs(movieEP.y - movieSP.y);
+}
+
+//--------------------------------------------------------------
+float PlayController::calcMoviesDistanceNormalised(Agent* agent, int indexS, int indexE, char dir) {
+    ofPoint movieSP;
+    ofPoint movieEP;
+    
+    // get the centers of those bounding boxes to calculate their distances
+    movieSP = agent->getScaledCentreAt(agent->getSequenceFrames()[indexS]);
+    movieEP = agent->getScaledCentreAt(agent->getSequenceFrames()[indexE]);
+    
+    if (dir == 'l')
+        return abs(movieSP.x - movieEP.x);
+    else if (dir == 'r')
+        return abs(movieEP.x - movieSP.x);
+    else if (dir == 'u')
+        return abs(movieSP.y - movieEP.y);
+    else if (dir == 'd')
+        return abs(movieEP.y - movieSP.y);
 }
 
 //--------------------------------------------------------------
@@ -1832,13 +2022,13 @@ float PlayController::calcMovieDistanceToFrameNormalised(Agent* agent, int index
     movieEP = agent->getScaledCentreAt(agent->getSequenceFrames()[index]+ frame - movie->startframe);
     
     if (dir == 'l')
-        return (movieSP.x - movieEP.x);
+        return abs(movieSP.x - movieEP.x);
     else if (dir == 'r')
-        return (movieEP.x - movieSP.x);
+        return abs(movieEP.x - movieSP.x);
     else if (dir == 'u')
-        return (movieSP.y - movieEP.y);
+        return abs(movieSP.y - movieEP.y);
     else if (dir == 'd')
-        return (movieEP.y - movieSP.y);
+        return abs(movieEP.y - movieSP.y);
 }
 
 //--------------------------------------------------------------
