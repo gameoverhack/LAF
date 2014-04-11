@@ -110,6 +110,7 @@ public:
         LRAction = "WALK";
         UDAction = "CLIM";
         playerName = "";
+        faultFlag = false;
         
         //drawSize = 100;//appModel->getProperty<float>("DrawSize");
         actions.clear();
@@ -400,6 +401,14 @@ public:
         startPosSegment = p;
     }
     
+    void setFaultyFlag(bool b) {
+        faultFlag = b;
+    }
+    
+    bool getFaultyFlag() {
+        return faultFlag;
+    }
+    
 protected:
     const int COLLISIONSKIP = 6;
     
@@ -423,6 +432,7 @@ protected:
     int startPosSegment;
     int collisionSkipCounter = 1;
     
+    bool faultFlag = false;
 };
 
 

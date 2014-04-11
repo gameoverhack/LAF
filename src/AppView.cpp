@@ -496,7 +496,10 @@ void AppView::update(){
                 int endFrame = MIN(agent->getCurrentSequenceFrame() + range, agent->getTotalSequenceFrames());
                 
                 for(int j = startFrame; j < endFrame; j++){
-                    if (agent->getWillCollide())
+                    
+                    if (agent->getFaultyFlag())
+                        ofSetColor(250,250,10);
+                    else if (agent->getWillCollide())
                         ofSetColor(100,10,10);
                     else
                         ofSetColor(0, 60, 60);

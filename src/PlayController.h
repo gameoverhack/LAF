@@ -46,7 +46,7 @@ protected:
     void generateMotionsBetween(string m1, string m2, string name, vector<string>& motionSequence, bool bForward = true);
     void cutMoviesForActions(Agent* agent);
     void cutMoviesForActionsNormalised(Agent* agent);
-    void cutMoviesForActionsNormalised2(Agent* agent);
+    bool cutMoviesForActionsNormalised2(Agent* agent);
 
     float calcMovieDistance(Agent* agent, MovieInfo* movie, char dir);
     float calcMovieDistanceToFrame(Agent* agent, MovieInfo* movie, char dir, int frame);
