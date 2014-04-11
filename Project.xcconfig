@@ -10,5 +10,5 @@ HEADER_SEARCH_PATHS = $(OF_CORE_HEADERS)
 
 
 //MODIFY these with your yarp and ace directories!!
-ACE_ROOT = ../../../../../lib/ace/ACE_wrappers
-YARP_DIR = ../../../../../lib/yarp
+ACE_ROOT = ../../../addons/ofxYarp/libs/ace/ACE_wrappers
+YARP_DIR = ../../../addons/ofxYarp/libs/yarp

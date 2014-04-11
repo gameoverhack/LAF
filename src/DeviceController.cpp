@@ -21,6 +21,8 @@ void DeviceController::setup() {
     //oscSender.setup("192.168.42.101", 8000);
     ofSetLogLevel(OF_LOG_VERBOSE);
     
+    initColors();
+    
     //setup read thread
     readThread.setup(&devices, &recorders, &xoptical_vals, &yoptical_vals, &port);
     readThread.startThread(true, false);
@@ -437,9 +439,9 @@ void DeviceController::draw() {
         
         glPushMatrix();
         
-        float xPos = ofMap(-client.lastAttitudeKalman.z, ofDegToRad(-35), ofDegToRad(35), 0.0f, ofGetWidth());
-        float yPos = ofMap(-client.lastAttitudeKalman.x, ofDegToRad(-35), ofDegToRad(15), 0.0f, ofGetHeight());
-        float zPos = ofMap(-client.lastAttitudeKalman.y, ofDegToRad(-15), ofDegToRad(35), 0.0f, ofGetHeight());
+        float xPos = ofMap(-client.lastAttitudeKalman.z, ofDegToRad(-90), ofDegToRad(90), 0.0f, ofGetWidth());
+        float yPos = ofMap(-client.lastAttitudeKalman.x, ofDegToRad(-90), ofDegToRad(35), 0.0f, ofGetHeight());
+        float zPos = ofMap(-client.lastAttitudeKalman.y, ofDegToRad(-35), ofDegToRad(90), 0.0f, ofGetHeight());
 
         //local x,y,z OpticalVals
         vector<float>& xOpticalVals = xoptical_vals[client.clientID];
@@ -469,7 +471,7 @@ void DeviceController::draw() {
         }
         
         if(client.lastUserAccelerationRaw.length() < 0.5f){
-            ofSetColor(0, 255, 255);
+            ofSetColor(client.deviceColorUp);
         }else{
             ofSetColor(255, 0, 127);
         }
@@ -531,15 +533,16 @@ void DeviceController::draw() {
         //    using a weighted average of each value in the vector would be smoother.
         //ofEllipse(xPos, yPos, 4+(((xOpticalVals.back() - xOpticalVals.front())/10)*3), 4+(((yOpticalVals.back() - yOpticalVals.front())/10)*3));
         
-        ofEllipse(xPos, yPos, 30+(((xOpticalVals.back() - xOpticalVals.front())/10)*5), 30+(((yOpticalVals.back() - yOpticalVals.front())/10)*5));
+        ofEllipse(xPos, yPos, 10+(((xOpticalVals.back() - xOpticalVals.front())/10)*5), 10+(((yOpticalVals.back() - yOpticalVals.front())/10)*5));
         
+        ofSetLineWidth(3);
         // TODO need to define an interator to display vector representation for all the devices side by side
-        ofLine(800,100, 800+(((xOpticalVals.back() - xOpticalVals.front())/10)*5), 100+(((yOpticalVals.back() - yOpticalVals.front())/10)*5));
+        ofLine(xPos, yPos, xPos+(((xOpticalVals.back() - xOpticalVals.front())/10)*10), yPos+(((yOpticalVals.back() - yOpticalVals.front())/10)*10));
         
-        float y2 = 100+(((yOpticalVals.back() - yOpticalVals.front())/10)*5);
-        float y1 = 100;
-        float x2 = 800+(((xOpticalVals.back() - xOpticalVals.front())/10)*5);
-        float x1 = 800;
+        float y2 = yPos+(((yOpticalVals.back() - yOpticalVals.front())/10)*5);
+        float y1 = yPos;
+        float x2 = xPos+(((xOpticalVals.back() - xOpticalVals.front())/10)*5);
+        float x1 = xPos;
         
         float slope = ((y2-y1)/(x2-x1));
         float theta = atan(slope);
@@ -956,5 +959,6 @@ void DeviceControllerThread::createClient(int clientID, DeviceType deviceType, S
         client.serverType = serverType;
         client.deviceType = deviceType;
         client.clientID = clientID;
+        client.deviceColorUp = generateRandomColor();
     }
 }

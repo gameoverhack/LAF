@@ -85,6 +85,31 @@ enum ServerType{
 //    };
 //};
 
+static vector<ofColor> colors;
+
+//--------------------------------------------------------------
+static void initColors(){
+    colors.clear();
+    colors.push_back(ofColor::white);
+    colors.push_back(ofColor::gray);
+    colors.push_back(ofColor::blue);
+    colors.push_back(ofColor::cyan);
+    colors.push_back(ofColor::olive);
+    colors.push_back(ofColor::gold);
+    colors.push_back(ofColor::magenta);
+    colors.push_back(ofColor::violet);
+}
+
+//--------------------------------------------------------------
+static ofColor generateRandomColor(){
+    ofColor c;
+    if(colors.size() == 0) initColors();
+    int index = ofRandom(0, colors.size() - 1);
+    c = colors[index];
+    colors.erase(colors.begin() + index);
+    return c;
+}
+
 class DeviceMessage {
     
 public:
@@ -422,6 +447,9 @@ public:
     DeviceType deviceType;
     ServerType serverType;
     int clientID;
+    
+    ofColor deviceColorUp;
+    ofColor deviceColorDown;
     
     Kalman kalmanFilter;
     
