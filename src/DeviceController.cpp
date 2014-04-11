@@ -23,23 +23,24 @@ void DeviceController::setup() {
     
     initColors();
     
-    //setup read thread
-    readThread.setup(&devices, &recorders, &xoptical_vals, &yoptical_vals, &port);
-    readThread.startThread(true, false);
-    
     yarp::os::impl::NameConfig nc;
-    yarp::os::impl::Address addr("10.0.1.104", 10000);
+    yarp::os::impl::Address addr("207.23.212.30", 10000);
     //yarp::os::impl::Address addr("206.12.30.240", 10000);
     nc.setAddress(addr);
     nc.toFile();
     nc.fromFile();
     
-    port.open("/motionReceiver");
-    
-    outPort.open("/mouseEmulator");
+    if(port.open("/motionReceiver")){
+        
+        outPort.open("/mouseEmulator");
+        
+        //setup read thread
+        readThread.setup(&devices, &recorders, &xoptical_vals, &yoptical_vals, &port);
+        readThread.startThread(true, false);
+    }
     
     bNormConnected = false;
-    
+
     ofBackground(0, 0, 0);
     
 }
@@ -751,8 +752,11 @@ void DeviceControllerThread::setup(map<int, DeviceClient> *d, map<int, OSCRecord
 }
 
 void DeviceControllerThread::threadedFunction() {
+    
     printf("starting read thread...\n");
+    
     while (isThreadRunning()) {
+        
         //parse input port
         if (port->getPendingReads()) {
             
