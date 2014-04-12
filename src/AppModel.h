@@ -25,6 +25,7 @@
 #include "MouseObj.h"
 #include "KeyModifiers.h"
 #include "Pointer.h"
+#include "Agent.h"
 
 typedef struct{
     
@@ -76,7 +77,7 @@ public:
         targetwindows.clear();
         
         ofBuffer b = ofBufferFromFile(ofToDataPath(path));
-        
+
         int lineCount = 0;
         windows.clear();
         
@@ -295,7 +296,8 @@ public:
             for(int i = 0; i < sequences.size(); i++){
                 movieSequence = sequences[i];
                 if(movieSequence->getViewID() == viewID){
-                    targetunique.push_back(movieSequence->getWindow());
+                    targetunique.push_back(((Agent*)movieSequence)->getWindow());
+                    uniqueStartingPositions.push_back(((Agent*)movieSequence)->getStartPosSegment());
                     delete movieSequence;
                     index = i;
                     break;
@@ -428,6 +430,22 @@ public:
         return keyModifiers;
     }
     
+    void initStartingPositions() {
+        // set the possible starting positions for agents
+        for (int i=0;i<getProperty<int>("NumberPlayers");i++) {
+            uniqueStartingPositions.push_back(i+1);
+        }
+    }
+    
+    int getUniqueStartPosition() {
+        int s;
+        if(uniqueStartingPositions.size() > 0){
+            s = random(uniqueStartingPositions);
+            eraseAll(uniqueStartingPositions, s);
+        }
+        return s;
+    }
+    
 protected:
     
     KeyModifiers                keyModifiers;
@@ -459,6 +477,8 @@ protected:
     vector<ofRectangle> targets;
     vector<int>         targetunique;
     vector<int>         targetwindows;
+    
+    vector<int> uniqueStartingPositions;
     
     map<string, MotionGraph> motionGraphs;
     

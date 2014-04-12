@@ -12,6 +12,8 @@
 #include "MovieInfo.h"
 #include "ofxLogger.h"
 #include "ofxThreadedVideo.h"
+#include "AgentBehaviours.h"
+
 
 class MovieSequence{
     
@@ -41,7 +43,6 @@ public:
     }
     
     void update(){
-        
         // don't try this on a NULL
         if(video == NULL) return;
         
@@ -52,16 +53,21 @@ public:
         if(video->getQueueSize() > 0) return;
         
         // make sure the video paused state is the same as the sequence
-//        if(video->isPaused() != bPaused){
-//            video->setPaused(bPaused);
+        if(video->isPaused() != bPaused){
+            video->setPaused(bPaused);
 //            return;
-//        }
+        }
         
         if(video->getSpeed() != speed){
             video->setSpeed(speed);
         }
         
-        if(bPaused) return;
+        if(bPaused) {
+//            if (!willCollide && behaviourMode == bMANUAL && currentSequenceIndex<sequence.size()-1)
+//                bPaused=false;
+//            else
+                return;
+        }
         
         if(video->isFrameNew()){
             
@@ -75,9 +81,30 @@ public:
             //updateRender();
             
         }
+        
+        
+        if (pauseFrame > -1 && pauseFrame >= currentMovie.frame) {
+            stop();
+            pauseFrame = -1;
+        }
 
+        
         // check if we're done TODO: reverse
-        if((video->getIsMovieDone()) || currentMovie.frame + currentMovie.startframe >= currentMovie.endframe) loadNextMovie();
+        if((video->getIsMovieDone()) || currentMovie.frame + currentMovie.startframe >= currentMovie.endframe
+        || (speed < 0 && currentMovie.frame  < 0)
+           ) {
+            
+            // check if the next movie belongs to another action and if we want to stop now
+            if ((speed > 0 && sequence[CLAMP(currentSequenceIndex+1,0,sequence.size()-1)].agentActionIndex == pauseActionIndex) ||
+                (speed < 0 && sequence[CLAMP(currentSequenceIndex-1,0,sequence.size()-1)].agentActionIndex == pauseActionIndex)) {
+                
+                stop();
+                setSpeed(abs(getSpeed()));
+                pauseActionIndex = -1;
+            }
+            else
+                loadNextMovie();
+        }
         
     }
     
@@ -86,6 +113,7 @@ public:
         currentMovie.frame = video->getCurrentFrame() - currentMovie.startframe;
         currentSequenceFrame = sequenceFrames[currentSequenceIndex];
         currentSequenceFrame = currentSequenceFrame + currentMovie.frame;
+        
     }
     
     void updatePosition(){
@@ -102,19 +130,35 @@ public:
         ofxLogVerbose() << "Loading next movie: " << currentSequenceIndex << " -> " << currentSequenceIndex + 1 << " of " << sequence.size() << endl;
         
         // increment sequenceIndex TODO: reverse
-        if(currentSequenceIndex + 1 < sequence.size()){
+        if(speed>0 && currentSequenceIndex + 1 < sequence.size()){
             bSequenceIsDone = false;
             currentSequenceIndex++;
+        }
+        else if (speed< 0 && currentSequenceIndex > 0) {
+            bSequenceIsDone = false;
+            currentSequenceIndex--;
+        }
+        else if (currentMovie.isLooped) {
+            bSequenceIsDone = false;
         }
         else{
             // TODO: add loop?
             //currentSequenceIndex = 0;
-            bSequenceIsDone = true;
+            if (behaviourMode!=bMANUAL)
+                bSequenceIsDone = true;
             stop();
             return;
         }
         
         MovieInfo& nextMovie = sequence[currentSequenceIndex];
+        
+        if (nextMovie.agentActionIndex!=currentMovie.agentActionIndex) {
+            ofxLogVerbose() << "Starting to perform the next action old = " << currentMovie.agentActionIndex << "  new = " << nextMovie.agentActionIndex << endl;
+            cout << endl;
+           // if (currentMovie.agentActionIndex!=-1) stop();
+        }
+        
+        nextMovie.speed = speed; //ASK: do we update the speed in each movie or for the sequence
         
         if(nextMovie.path != currentMovie.path){
             ofxLogVerbose() << "Loading next movie: " << nextMovie.name << " " << nextMovie.startframe << endl;
@@ -124,8 +168,16 @@ public:
         }else{
             ofxLogVerbose() << "Loading same movie: " << nextMovie.name << " " << nextMovie.startframe << endl;
         }
+        
+        if (speed> 0) {
         video->setFrame(nextMovie.startframe + frameSeek);
         video->setSpeed(nextMovie.speed);
+        }
+        else {
+            video->setFrame(nextMovie.endframe);
+            video->setSpeed(nextMovie.speed);
+        }
+        
         
         currentMovie = nextMovie;
         
@@ -135,12 +187,23 @@ public:
         ofxLogVerbose() << "Play Sequence" << endl;
         setPaused(false);
         bSequenceIsDone = false;
+        pauseFrame = -1;
         loadNextMovie();
     }
     
     void stop(){
         ofxLogVerbose() << "Stop Sequence" << endl;
         setPaused(true);
+    }
+    
+    
+    void StopAt(int frame) {
+         ofxLogVerbose() << "Stoping current movie at frame " << frame << "" << endl;
+        pauseFrame = frame;
+    }
+    
+    void stopAtAction(int actionIndex) {
+        pauseActionIndex = actionIndex;
     }
     
     bool isSequequenceDone(){
@@ -156,7 +219,6 @@ public:
                 loadNextMovie(frameSeek);
             }
         }
-        
     }
     
     void setSpeed(float s){
@@ -174,7 +236,7 @@ public:
     }
     
     bool isPlaying(){
-        return bPaused;
+        return !bPaused; // Changed to ! by omid; TODO: Ask matt
     }
     
     void rewind(){
@@ -192,6 +254,31 @@ public:
         //normalise();
     }
     
+    void pushAt(MovieInfo m, int index){
+        ostringstream os; os << m;
+        ofxLogVerbose() << "Push Sequence: " << os.str() << endl;
+        sequence.insert(sequence.begin()+index, m);
+        rebuildSequenceFrames();
+    }
+    
+    void fixLastSequenceFrame(int oldLength, int newLength) {
+        totalSequenceFrames -= oldLength;
+        sequenceFrames[sequenceFrames.size()-1] = totalSequenceFrames+newLength;
+        totalSequenceFrames += newLength;
+    }
+    
+    void rebuildSequenceFrames() {
+        totalSequenceFrames = 0;
+        sequenceFrames.clear();
+        
+        sequenceFrames.push_back(0);
+        
+        for (int i=0;i<sequence.size();i++) {
+            sequenceFrames.push_back(totalSequenceFrames + sequence[i].endframe - sequence[i].startframe);
+            totalSequenceFrames += sequence[i].endframe - sequence[i].startframe;
+        }
+    }
+    
     void clear(){
         ofxLogVerbose() << "Clear Sequence" << endl;
         bPaused = false;
@@ -205,6 +292,10 @@ public:
         currentMovie = NoMovie;
         currentSequenceIndex = lastnormalindex = -1;
         currentSequenceFrame = totalSequenceFrames = 0;
+        
+        pauseActionIndex = -1;
+        pauseFrame = -1;
+        behaviourMode = bAUTO_REALISTIC;
     }
     
     void setNormalPosition(ofPoint p){
@@ -253,7 +344,21 @@ public:
         
     }
     
-    void normalise(){
+    void shiftPosition(char direction, float length) {
+        ofPoint t;
+        if (direction == 'l')
+            t = ofPoint (-length,0,0);
+        else if (direction == 'r')
+            t = ofPoint (length,0,0);
+        else if (direction == 'u')
+            t = ofPoint (0,-length,0);
+        else if (direction == 'd')
+            t = ofPoint (0,-length,0);
+        
+        normalise(0,t);
+    }
+    
+    void normalise(int startNormalIndex = 0, ofPoint lNormal = ofPoint(0,0,0)){
 
         // set up temp store vars
         ofPoint     position;
@@ -265,9 +370,9 @@ public:
         ofPoint scentre;
         
         ofPoint mNormal;
-        ofPoint lNormal = ofPoint(0,0,0);
+//        ofPoint lNormal = ofPoint(0,0,0);
         
-        int startNormalIndex = 0;
+//        int startNormalIndex = 0;
 //        if(lastnormalindex == -1){
         
             ofxLogVerbose() << "Normalize Whole Sequence" << endl;
@@ -332,7 +437,7 @@ public:
                 
             }
             
-            lNormal = position;
+            lNormal = position + ofPoint(0,0);
             
         }
         
@@ -347,6 +452,14 @@ public:
     
     ofPoint getScaledFloorOffset(){
         ofRectangle r = getScaledBoundingAt(1); //TODO: there's a bug with frame 0!!!
+        ofPoint floorOffset;
+        floorOffset.x = (r.x + r.width / 2.0);
+        floorOffset.y = (r.y + r.height) + 0; // TODDO: needs a plus if i'm doing collisions!
+        return floorOffset;
+    }
+    
+    ofPoint getScaledFloorOffsetAt(int f){
+        ofRectangle r = getScaledBoundingAt(f); //TODO: there's a bug with frame 0!!!
         ofPoint floorOffset;
         floorOffset.x = (r.x + r.width / 2.0);
         floorOffset.y = (r.y + r.height) + 0; // TODDO: needs a plus if i'm doing collisions!
@@ -377,6 +490,15 @@ public:
     ofRectangle& getScaledBoundingAt(int sequenceFrame){
         sequenceFrame = CLAMP(sequenceFrame, 0, positions.size() - 1);
         return sboundings[sequenceFrame];
+    }
+    
+    ofRectangle& getOrgScaledBoundingAt(int sequenceFrame){
+        sequenceFrame = CLAMP(sequenceFrame, 0, positions.size() - 1);
+        return orgsboundings[sequenceFrame];
+    }
+    
+    vector<ofRectangle>& getOrgScaledBoundings(){
+        return orgsboundings;
     }
     
     ofPoint& getScaledCentreAt(int sequenceFrame){
@@ -453,49 +575,42 @@ public:
     
     friend ostream& operator<< (ostream &os, MovieSequence &mS);
     
-    //============================== \/ these shoudl be track elsewhere or in a class via member/inheritance \/
+    ofPoint shiftPoint;
     
-    void setGoalFrame(int f){
-        gframe = f;
+    int getBehaviourMode() {
+        return behaviourMode;
     }
     
-    int getGoalFrame(){
-        return gframe;
+    void setBehaviourMode(int b) {
+        behaviourMode = b;
     }
     
-    void setSyncFrame(int f){
-        sframe = f;
+    void removeMoviesFromIndex (int ind) {
+        
+        ind++;
+        sequence.erase(sequence.begin()+ind,sequence.end()+1);
+//        sequence.erase(sequence.end());
+        
+         for (int i=sequenceFrames.size()-1; i>=ind;i--) {
+             totalSequenceFrames -= sequenceFrames[i] - sequenceFrames[i-1];
+         }
+        
+        currentSequenceFrame = totalSequenceFrames + currentMovie.frame;
+        
+        sequenceFrames.erase(sequenceFrames.begin()+ind,sequenceFrames.end());
+        //sequenceFrames.erase(sequenceFrames.end());
+        //Remember to normalise after
     }
     
-    int getSyncFrame(){
-        return sframe;
+    vector<int> getSequenceFrames() {
+        return sequenceFrames;
     }
     
-    void setWindow(int w){
-        window = w;
-    }
-    
-    int getWindow(){
-        return window;
-    }
-    
-    void setHug(bool b){
-        bHug = b;
-    }
-    
-    bool getHug(){
-        return bHug;
+    void storeSBoundings() {
+        orgsboundings = vector<ofRectangle>(sboundings);
     }
     
 protected:
-    
-    bool bHug;
-    int window;
-    int sframe;
-    int gframe;
-    
-    //============================== /\ these shoudl be track elsewhere or in a class via member/inheritance /\
-    
     float speed;
     bool bPaused;
     bool bSequenceIsDone;
@@ -524,10 +639,19 @@ protected:
     vector<ofRectangle> sboundings;
     vector<ofPoint>     scentres;
     
+    vector<ofRectangle> orgsboundings;
+
+    
     ofRectangle totalBounding;
     ofRectangle stotalBounding;
     
+    int pauseFrame;
+    int pauseActionIndex;
+    int behaviourMode;
+    bool willCollide;
 };
+
+
 
 inline ostream& operator<<(ostream& os, MovieSequence *mS){
     os << mS->getCurrentMovie() << " || " << mS->getCurrentMovieIndex() << " / " << mS->getSequenceSize() << " " << mS->getCurrentSequenceFrame() << " / " << mS->getTotalSequenceFrames();

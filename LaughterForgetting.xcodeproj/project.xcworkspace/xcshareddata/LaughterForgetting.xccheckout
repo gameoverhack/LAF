@@ -5,74 +5,86 @@
 	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
 	<false/>
 	<key>IDESourceControlProjectIdentifier</key>
-	<string>92E33013-B6EC-4323-A938-F7F3E8D9F3AD</string>
+	<string>B436E9AA-9579-4CAA-934E-36CB3711B10B</string>
 	<key>IDESourceControlProjectName</key>
 	<string>LaughterForgetting</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
-		<key>1D164511-3DA5-40A5-9D1A-30FCB5525766</key>
-		<string>ssh://github.com/gameoverhack/ofxThreadedVideo.git</string>
-		<key>3E7CEE11-D9C0-4DB0-B3BB-A5E8E05B8C45</key>
-		<string>ssh://github.com/gameoverhack/ofxMSAOpenCL.git</string>
-		<key>8BD1A036-60D2-4EB5-9CA6-C56575876361</key>
-		<string>ssh://github.com/gameoverhack/ofxMVC.git</string>
-		<key>8FCC853C-976F-4C36-847E-6A72C9D2EF82</key>
-		<string>ssh://github.com/gameoverhack/openFrameworks.git</string>
-		<key>A1B5EF7A-BF0E-4DF9-979A-D3B8DECF1506</key>
-		<string>ssh://github.com/gameoverhack/ofxMSAPingPong.git</string>
-		<key>C2CEF2A4-B306-498F-9328-08CDB1656949</key>
-		<string>ssh://github.com/gameoverhack/ofxBezierWarp.git</string>
-		<key>D566D66E-75DA-48F4-94A9-3EC42A4FB726</key>
-		<string>ssh://github.com/gameoverhack/LAF.git</string>
-		<key>E575E8BE-80B2-44EA-9D29-293D4C3A2BC6</key>
-		<string>ssh://github.com/kylemcdonald/ofxCv.git</string>
-		<key>F49C8AEC-CE28-45C0-9026-7BF8088E1094</key>
-		<string>https://github.com/gameoverhack/ofxLogger.git</string>
+		<key>21F33C64-9E23-49F5-A29D-E615492BB1D6</key>
+		<string>ssh://github.com/omimo/LAF.git</string>
+		<key>34B262B7-7622-4B84-B870-7875DE7EEA0A</key>
+		<string>ssh://github.com/omimo/ofxMVC.git</string>
+		<key>3F801EA8-F853-4CDC-B4CB-BD269D552822</key>
+		<string>https://github.com/kylemcdonald/ofxCv.git</string>
+		<key>4E521AE9-DEA1-48C8-9A01-BEEBF9DC51B4</key>
+		<string>ssh://github.com/omimo/ofxMSAPingPong.git</string>
+		<key>7C0055F5-7A97-4250-BCC8-59AC60CE90EC</key>
+		<string>ssh://github.com/omimo/ofxThreadedVideo.git</string>
+		<key>852C529E-E3EF-4D6C-B0A7-3C1F497A4ACC</key>
+		<string>ssh://github.com/omimo/ofxBezierWarp.git</string>
+		<key>8FB237BE-C7ED-41B6-A77A-7A0B680DBF24</key>
+		<string>ssh://github.com/omimo/ofxBoost.git</string>
+		<key>927F728D-EE99-4DD4-96CD-A5CBAE55BD8A</key>
+		<string>ssh://github.com/omimo/ofxXMP.git</string>
+		<key>C34842C8-F095-4091-A0D6-EFFD96700BA3</key>
+		<string>ssh://github.com/omimo/ofxMSAOpenCL.git</string>
+		<key>E63AADE1-6839-4028-A8DA-98118E3B6303</key>
+		<string>ssh://github.com/omimo/ofxLogger.git</string>
+		<key>ECA98880-78C6-4431-A5BE-50826A35079F</key>
+		<string>https://github.com/omimo/openFrameworks.git</string>
+		<key>FC602ABB-03FF-4E18-8B79-E7CD551B67FF</key>
+		<string>https://github.com/omimo/ofxKeyModifiers.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
-	<string>apps/devDONOTDELETE/LaughterAndForgetting/LaughterForgetting.xcodeproj/project.xcworkspace</string>
+	<string>apps/myApps/LAF/LaughterForgetting.xcodeproj/project.xcworkspace</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
-		<key>1D164511-3DA5-40A5-9D1A-30FCB5525766</key>
-		<string>../../../../../addons/ofxThreadedVideo</string>
-		<key>3E7CEE11-D9C0-4DB0-B3BB-A5E8E05B8C45</key>
-		<string>../../../../../addons/ofxMSAOpenCL</string>
-		<key>8BD1A036-60D2-4EB5-9CA6-C56575876361</key>
-		<string>../../../../../addons/ofxMVC</string>
-		<key>8FCC853C-976F-4C36-847E-6A72C9D2EF82</key>
-		<string>../../../../..</string>
-		<key>A1B5EF7A-BF0E-4DF9-979A-D3B8DECF1506</key>
-		<string>../../../../../addons/ofxMSAPingPong</string>
-		<key>C2CEF2A4-B306-498F-9328-08CDB1656949</key>
-		<string>../../../../../addons/ofxBezierWarp</string>
-		<key>D566D66E-75DA-48F4-94A9-3EC42A4FB726</key>
+		<key>21F33C64-9E23-49F5-A29D-E615492BB1D6</key>
 		<string>../..</string>
-		<key>E575E8BE-80B2-44EA-9D29-293D4C3A2BC6</key>
+		<key>34B262B7-7622-4B84-B870-7875DE7EEA0A</key>
+		<string>../../../../../addons/ofxMVC</string>
+		<key>3F801EA8-F853-4CDC-B4CB-BD269D552822</key>
 		<string>../../../../../addons/ofxCv</string>
-		<key>F49C8AEC-CE28-45C0-9026-7BF8088E1094</key>
+		<key>4E521AE9-DEA1-48C8-9A01-BEEBF9DC51B4</key>
+		<string>../../../../../addons/ofxMSAPingPong</string>
+		<key>7C0055F5-7A97-4250-BCC8-59AC60CE90EC</key>
+		<string>../../../../../addons/ofxThreadedVideo</string>
+		<key>852C529E-E3EF-4D6C-B0A7-3C1F497A4ACC</key>
+		<string>../../../../../addons/ofxBezierWarp</string>
+		<key>8FB237BE-C7ED-41B6-A77A-7A0B680DBF24</key>
+		<string>../../../../../addons/ofxBoost</string>
+		<key>927F728D-EE99-4DD4-96CD-A5CBAE55BD8A</key>
+		<string>../../../../../addons/ofxXMP</string>
+		<key>C34842C8-F095-4091-A0D6-EFFD96700BA3</key>
+		<string>../../../../../addons/ofxMSAOpenCL</string>
+		<key>E63AADE1-6839-4028-A8DA-98118E3B6303</key>
 		<string>../../../../../addons/ofxLogger</string>
+		<key>ECA98880-78C6-4431-A5BE-50826A35079F</key>
+		<string>../../../../..</string>
+		<key>FC602ABB-03FF-4E18-8B79-E7CD551B67FF</key>
+		<string>../../../../../addons/ofxKeyModifiers</string>
 	</dict>
 	<key>IDESourceControlProjectURL</key>
-	<string>ssh://github.com/gameoverhack/LAF.git</string>
+	<string>ssh://github.com/omimo/LAF.git</string>
 	<key>IDESourceControlProjectVersion</key>
 	<integer>110</integer>
 	<key>IDESourceControlProjectWCCIdentifier</key>
-	<string>8FCC853C-976F-4C36-847E-6A72C9D2EF82</string>
+	<string>ECA98880-78C6-4431-A5BE-50826A35079F</string>
 	<key>IDESourceControlProjectWCConfigurations</key>
 	<array>
 		<dict>
 			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
 			<string>public.vcs.git</string>
 			<key>IDESourceControlWCCIdentifierKey</key>
-			<string>D566D66E-75DA-48F4-94A9-3EC42A4FB726</string>
+			<string>21F33C64-9E23-49F5-A29D-E615492BB1D6</string>
 			<key>IDESourceControlWCCName</key>
-			<string>LaughterAndForgetting</string>
+			<string>LAF</string>
 		</dict>
 		<dict>
 			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
 			<string>public.vcs.git</string>
 			<key>IDESourceControlWCCIdentifierKey</key>
-			<string>8FCC853C-976F-4C36-847E-6A72C9D2EF82</string>
+			<string>ECA98880-78C6-4431-A5BE-50826A35079F</string>
 			<key>IDESourceControlWCCName</key>
 			<string>of007</string>
 		</dict>
@@ -80,7 +92,7 @@
 			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
 			<string>public.vcs.git</string>
 			<key>IDESourceControlWCCIdentifierKey</key>
-			<string>C2CEF2A4-B306-498F-9328-08CDB1656949</string>
+			<string>852C529E-E3EF-4D6C-B0A7-3C1F497A4ACC</string>
 			<key>IDESourceControlWCCName</key>
 			<string>ofxBezierWarp</string>
 		</dict>
@@ -88,7 +100,15 @@
 			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
 			<string>public.vcs.git</string>
 			<key>IDESourceControlWCCIdentifierKey</key>
-			<string>E575E8BE-80B2-44EA-9D29-293D4C3A2BC6</string>
+			<string>8FB237BE-C7ED-41B6-A77A-7A0B680DBF24</string>
+			<key>IDESourceControlWCCName</key>
+			<string>ofxBoost</string>
+		</dict>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>3F801EA8-F853-4CDC-B4CB-BD269D552822</string>
 			<key>IDESourceControlWCCName</key>
 			<string>ofxCv</string>
 		</dict>
@@ -96,7 +116,15 @@
 			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
 			<string>public.vcs.git</string>
 			<key>IDESourceControlWCCIdentifierKey</key>
-			<string>F49C8AEC-CE28-45C0-9026-7BF8088E1094</string>
+			<string>FC602ABB-03FF-4E18-8B79-E7CD551B67FF</string>
+			<key>IDESourceControlWCCName</key>
+			<string>ofxKeyModifiers</string>
+		</dict>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>E63AADE1-6839-4028-A8DA-98118E3B6303</string>
 			<key>IDESourceControlWCCName</key>
 			<string>ofxLogger</string>
 		</dict>
@@ -104,7 +132,7 @@
 			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
 			<string>public.vcs.git</string>
 			<key>IDESourceControlWCCIdentifierKey</key>
-			<string>3E7CEE11-D9C0-4DB0-B3BB-A5E8E05B8C45</string>
+			<string>C34842C8-F095-4091-A0D6-EFFD96700BA3</string>
 			<key>IDESourceControlWCCName</key>
 			<string>ofxMSAOpenCL</string>
 		</dict>
@@ -112,7 +140,7 @@
 			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
 			<string>public.vcs.git</string>
 			<key>IDESourceControlWCCIdentifierKey</key>
-			<string>A1B5EF7A-BF0E-4DF9-979A-D3B8DECF1506</string>
+			<string>4E521AE9-DEA1-48C8-9A01-BEEBF9DC51B4</string>
 			<key>IDESourceControlWCCName</key>
 			<string>ofxMSAPingPong</string>
 		</dict>
@@ -120,7 +148,7 @@
 			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
 			<string>public.vcs.git</string>
 			<key>IDESourceControlWCCIdentifierKey</key>
-			<string>8BD1A036-60D2-4EB5-9CA6-C56575876361</string>
+			<string>34B262B7-7622-4B84-B870-7875DE7EEA0A</string>
 			<key>IDESourceControlWCCName</key>
 			<string>ofxMVC</string>
 		</dict>
@@ -128,9 +156,17 @@
 			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
 			<string>public.vcs.git</string>
 			<key>IDESourceControlWCCIdentifierKey</key>
-			<string>1D164511-3DA5-40A5-9D1A-30FCB5525766</string>
+			<string>7C0055F5-7A97-4250-BCC8-59AC60CE90EC</string>
 			<key>IDESourceControlWCCName</key>
 			<string>ofxThreadedVideo</string>
+		</dict>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>927F728D-EE99-4DD4-96CD-A5CBAE55BD8A</string>
+			<key>IDESourceControlWCCName</key>
+			<string>ofxXMP</string>
 		</dict>
 	</array>
 </dict>

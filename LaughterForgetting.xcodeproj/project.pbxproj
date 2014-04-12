@@ -16,6 +16,8 @@
 		2023ef517ed2d8b397511d4bf2052690 /* Helpers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = b9076967f8c54a04362c04aa9e3bb906 /* Helpers.cpp */; };
 		250a95ba26587be85db0a353e6e1dea2 /* ofxCvColorImage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ce9c7160245b19131dae61282ee6cb53 /* ofxCvColorImage.cpp */; };
 		28090deb5109115003e8f1c540f04092 /* UdpSocketWin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5928aa323f5c2690b06c837d8d036f55 /* UdpSocketWin.cpp */; };
+		2E97C18618B66D6B00CF1BA5 /* AStarSearch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E97C18418B66D6B00CF1BA5 /* AStarSearch.cpp */; };
+		2EC73FF318D6ABB100B74AE1 /* PlayControllerAgent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2EC73FF118D6ABB100B74AE1 /* PlayControllerAgent.cpp */; };
 		33b32c35c83434bbea521bb68d8af36c /* MSAOpenCLImage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = d5fd533ac868acec76d7cbbc2b5f654c /* MSAOpenCLImage.cpp */; };
 		43a33bf0edf818e4fb3cab1836289157 /* ofxThreadedVideo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5e45d8c6fd325c1bb31af2ce68a43b0b /* ofxThreadedVideo.cpp */; };
 		45cc483a999bf1065a6b926c53724159 /* Distance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9dbd717072c35d324e1016697d7aa720 /* Distance.cpp */; };
@@ -183,6 +185,18 @@
 		23640f57df6c4bb6bfc5da4c2199c7dd /* PacketListener.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = PacketListener.h; path = ../../../addons/ofxOsc/libs/oscpack/src/ip/PacketListener.h; sourceTree = SOURCE_ROOT; };
 		26ef3e71a07c6948eaf6709ef2dcacc0 /* ofxTCPManager.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = ofxTCPManager.h; path = ../../../addons/ofxNetwork/src/ofxTCPManager.h; sourceTree = SOURCE_ROOT; };
 		2834d88a62cd23f3de2c47d1c39bd645 /* ofxButton.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = ofxButton.h; path = ../../../addons/ofxGui/src/ofxButton.h; sourceTree = SOURCE_ROOT; };
+		2E155A1618E4837E00BC86A2 /* AgentBehaviours.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AgentBehaviours.h; sourceTree = "<group>"; };
+		2E97C17F18B66B3900CF1BA5 /* A_star.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = A_star.cpp; sourceTree = "<group>"; };
+		2E97C18018B66B3900CF1BA5 /* A_star.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = A_star.h; sourceTree = "<group>"; };
+		2E97C18118B66B3900CF1BA5 /* README.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
+		2E97C18218B66B3900CF1BA5 /* yagsbpl_base.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = yagsbpl_base.cpp; sourceTree = "<group>"; };
+		2E97C18318B66B3900CF1BA5 /* yagsbpl_base.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = yagsbpl_base.h; sourceTree = "<group>"; };
+		2E97C18418B66D6B00CF1BA5 /* AStarSearch.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AStarSearch.cpp; sourceTree = "<group>"; };
+		2E97C18518B66D6B00CF1BA5 /* AStarSearch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AStarSearch.h; sourceTree = "<group>"; };
+		2E97C18718B68A6500CF1BA5 /* myNode.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = myNode.h; sourceTree = "<group>"; };
+		2E97C18818B6E83000CF1BA5 /* Agent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Agent.h; sourceTree = "<group>"; };
+		2EC73FF118D6ABB100B74AE1 /* PlayControllerAgent.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PlayControllerAgent.cpp; path = yagsbpl/PlayControllerAgent.cpp; sourceTree = "<group>"; };
+		2EC73FF218D6ABB100B74AE1 /* PlayControllerAgent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PlayControllerAgent.h; path = yagsbpl/PlayControllerAgent.h; sourceTree = "<group>"; };
 		2a5b1fad3f30c8065c396acbb72e5d95 /* NetworkingUtilsWin.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 30; name = NetworkingUtilsWin.cpp; path = ../../../addons/ofxOsc/libs/oscpack/src/ip/win32/NetworkingUtilsWin.cpp; sourceTree = SOURCE_ROOT; };
 		2b0a017124e9362d0bd153a135315311 /* WXMPIterator.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = WXMPIterator.hpp; path = "../../../addons/ofxXMP/libs/xmp/include/client-glue/WXMPIterator.hpp"; sourceTree = SOURCE_ROOT; };
 		2b40eda85beb63e46785bc299a638898 /* tinyxml.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 30; name = tinyxml.cpp; path = ../../../addons/ofxXmlSettings/libs/tinyxml.cpp; sourceTree = SOURCE_ROOT; };
@@ -699,6 +713,34 @@
 			name = "client-glue";
 			sourceTree = "<group>";
 		};
+		2E97C17C18B66B3900CF1BA5 /* yagsbpl */ = {
+			isa = PBXGroup;
+			children = (
+				2E97C17D18B66B3900CF1BA5 /* graph_encapsulations */,
+				2E97C17E18B66B3900CF1BA5 /* planners */,
+				2E97C18118B66B3900CF1BA5 /* README.txt */,
+				2E97C18218B66B3900CF1BA5 /* yagsbpl_base.cpp */,
+				2E97C18318B66B3900CF1BA5 /* yagsbpl_base.h */,
+			);
+			path = yagsbpl;
+			sourceTree = "<group>";
+		};
+		2E97C17D18B66B3900CF1BA5 /* graph_encapsulations */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = graph_encapsulations;
+			sourceTree = "<group>";
+		};
+		2E97C17E18B66B3900CF1BA5 /* planners */ = {
+			isa = PBXGroup;
+			children = (
+				2E97C17F18B66B3900CF1BA5 /* A_star.cpp */,
+				2E97C18018B66B3900CF1BA5 /* A_star.h */,
+			);
+			path = planners;
+			sourceTree = "<group>";
+		};
 		2d2e457ee45b779bb1ba5cc9d9d064fc /* src */ = {
 			isa = PBXGroup;
 			children = (
@@ -932,6 +974,8 @@
 				77D988B118861798003926D4 /* MovieSequence.h */,
 				7701FDD7187F49750092EDD9 /* AppStates.h */,
 				DCAC66DF1890AF3A00316A1F /* Pointer.h */,
+				2E97C18818B6E83000CF1BA5 /* Agent.h */,
+				2E155A1618E4837E00BC86A2 /* AgentBehaviours.h */,
 			);
 			name = DataTypes;
 			sourceTree = "<group>";
@@ -947,6 +991,8 @@
 				771C8CE818805D4300B7859B /* AnalyzeController.h */,
 				771C8CEA18805D4F00B7859B /* PlayController.cpp */,
 				771C8CEB18805D4F00B7859B /* PlayController.h */,
+				2EC73FF118D6ABB100B74AE1 /* PlayControllerAgent.cpp */,
+				2EC73FF218D6ABB100B74AE1 /* PlayControllerAgent.h */,
 			);
 			name = Controllers;
 			sourceTree = "<group>";
@@ -1064,10 +1110,14 @@
 		77EF15D7187724EB00104A92 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				2E97C17C18B66B3900CF1BA5 /* yagsbpl */,
 				DCAC66DC1890AEF600316A1F /* Kalman.cpp */,
 				DCAC66DD1890AEF600316A1F /* Kalman.h */,
 				77DCBB031871E30C00EB911C /* FileList.h */,
 				77DCBB001871E00E00EB911C /* VectorUtils.h */,
+				2E97C18418B66D6B00CF1BA5 /* AStarSearch.cpp */,
+				2E97C18518B66D6B00CF1BA5 /* AStarSearch.h */,
+				2E97C18718B68A6500CF1BA5 /* myNode.h */,
 			);
 			name = Utils;
 			sourceTree = "<group>";
@@ -1536,6 +1586,8 @@
 /* Begin PBXProject section */
 		E4B69B4C0A3A1720003C02F2 /* Project object */ = {
 			isa = PBXProject;
+			attributes = {
+			};
 			buildConfigurationList = E4B69B4D0A3A1720003C02F2 /* Build configuration list for PBXProject "LaughterForgetting" */;
 			compatibilityVersion = "Xcode 2.4";
 			developmentRegion = English;
@@ -1640,6 +1692,7 @@
 				8f5205aef8861ef234f0651aba6be2ee /* ofxOscSender.cpp in Sources */,
 				ade367465d2a8ebad4c7a8d92a3ef718 /* IpEndpointName.cpp in Sources */,
 				67fe4c7b15c2f0478c8126c28fa6aad0 /* NetworkingUtils.cpp in Sources */,
+				2E97C18618B66D6B00CF1BA5 /* AStarSearch.cpp in Sources */,
 				510cafe035e576a4e1502d52c11243bb /* UdpSocket.cpp in Sources */,
 				a29d8c96ae042eceaa1bd4f3cbbf0c9d /* NetworkingUtilsWin.cpp in Sources */,
 				DCAC66DE1890AEF600316A1F /* Kalman.cpp in Sources */,
@@ -1658,6 +1711,7 @@
 				77DCBB141871E36B00EB911C /* BaseController.cpp in Sources */,
 				77DCBB151871E36B00EB911C /* BaseModel.cpp in Sources */,
 				77DCBB161871E36B00EB911C /* BaseView.cpp in Sources */,
+				2EC73FF318D6ABB100B74AE1 /* PlayControllerAgent.cpp in Sources */,
 				77DCBB171871E36B00EB911C /* BaseWarp.cpp in Sources */,
 				77DCBB181871E36B00EB911C /* NoWarp.cpp in Sources */,
 				7701FDD6187F48FD0092EDD9 /* AppController.cpp in Sources */,

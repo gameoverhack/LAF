@@ -40,6 +40,18 @@ public:
     vector<ofRectangle> boundings;
     vector<ofPoint> centres;
     ofRectangle totalbounding;
+    
+    bool isLooped = false;
+    int agentActionIndex=-1;
+    bool isCut = false;
+    bool isEnd = false; // if the movie is part of the end motion (including the transitions leading to it)
+    
+    string currentDirection;
+    string getCurrentDirection() {
+        // markername
+        
+        return ofSplitString(markername, "_")[1];
+    }
 
 };
 
@@ -59,6 +71,8 @@ inline ostream& operator<<(ostream& os, MovieInfo &mI){
         << mI.frame;
     return os;
 };
+
+
    
     
 static MovieInfo NoMovie;
