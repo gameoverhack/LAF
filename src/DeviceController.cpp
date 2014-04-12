@@ -24,7 +24,7 @@ void DeviceController::setup() {
     initColors();
     
     yarp::os::impl::NameConfig nc;
-    yarp::os::impl::Address addr("207.23.212.30", 10000);
+    yarp::os::impl::Address addr("10.0.1.104", 10000);
     //yarp::os::impl::Address addr("206.12.30.240", 10000);
     nc.setAddress(addr);
     nc.toFile();
