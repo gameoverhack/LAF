@@ -72,6 +72,7 @@
 		77DCDBEC1871E39000EB911C /* libboost_wserialization-xgcc42-mt-1_46_1.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 77DCBB2C1871E37700EB911C /* libboost_wserialization-xgcc42-mt-1_46_1.a */; };
 		77EBC7661870E66700D86F91 /* libXMPCoreStatic.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 77EBC7641870E66700D86F91 /* libXMPCoreStatic.a */; };
 		77EBC7671870E66700D86F91 /* libXMPFilesStatic.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 77EBC7651870E66700D86F91 /* libXMPFilesStatic.a */; };
+		77F0F74B18F9ED0E00948003 /* DeviceController2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 77F0F74918F9ED0E00948003 /* DeviceController2.cpp */; };
 		7cdad32be4fa46701e3552c7b6b91e58 /* RunningBackground.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5cbf6aed6a17ac0c17f63cc4b079b0b9 /* RunningBackground.cpp */; };
 		837220e80eb56cd44ad27f2a12ff4869 /* ofxSlider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 15f2c6477a769c03a56d1401690aafec /* ofxSlider.cpp */; };
 		856aa354d08ab4b323081444d6da4e5a /* ofxBaseGui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9604b925d32ee39065747725f0245d66 /* ofxBaseGui.cpp */; };
@@ -322,6 +323,8 @@
 		77EBC7641870E66700D86F91 /* libXMPCoreStatic.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libXMPCoreStatic.a; sourceTree = "<group>"; };
 		77EBC7651870E66700D86F91 /* libXMPFilesStatic.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libXMPFilesStatic.a; sourceTree = "<group>"; };
 		77EBC7691871C82400D86F91 /* PlayerView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PlayerView.h; sourceTree = "<group>"; };
+		77F0F74918F9ED0E00948003 /* DeviceController2.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DeviceController2.cpp; sourceTree = "<group>"; };
+		77F0F74A18F9ED0E00948003 /* DeviceController2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeviceController2.h; sourceTree = "<group>"; };
 		77F9D7401888C33B005AC6FD /* LaughterForgettingDebug.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LaughterForgettingDebug.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		78c3fff9884db60ce1449d8e7b789e36 /* MSAPingPong.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = MSAPingPong.h; path = ../../../addons/ofxMSAPingPong/src/MSAPingPong.h; sourceTree = SOURCE_ROOT; };
 		78d67a00eb899fac0943059784f8212a /* ofxLabel.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 30; name = ofxLabel.cpp; path = ../../../addons/ofxGui/src/ofxLabel.cpp; sourceTree = SOURCE_ROOT; };
@@ -999,6 +1002,8 @@
 		7701FDD2187F48E70092EDD9 /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
+				77F0F74918F9ED0E00948003 /* DeviceController2.cpp */,
+				77F0F74A18F9ED0E00948003 /* DeviceController2.h */,
 				DCAC66D91890AEDD00316A1F /* DeviceController.cpp */,
 				DCAC66DA1890AEDD00316A1F /* DeviceController.h */,
 				7701FDD4187F48FD0092EDD9 /* AppController.cpp */,
@@ -1732,6 +1737,7 @@
 				771C8CE918805D4300B7859B /* AnalyzeController.cpp in Sources */,
 				771C8CEC18805D4F00B7859B /* PlayController.cpp in Sources */,
 				7761E65318984442005EF134 /* KeyModifiers.mm in Sources */,
+				77F0F74B18F9ED0E00948003 /* DeviceController2.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -15,7 +15,7 @@
 #include "DebugView.h"
 #include "PlayController.h"
 #include "AnalyzeController.h"
-#include "DeviceController.h"
+#include "DeviceController2.h"
 
 class AppController : public BaseController{
     
@@ -49,7 +49,7 @@ protected:
     
     AnalyzeController * analyzeController;
     PlayController * playController;
-    DeviceController * deviceController;
+    DeviceController2 * deviceController;
     
 };
 

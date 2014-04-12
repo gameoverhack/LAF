@@ -164,7 +164,7 @@ void AppController::setup(){
     playController = new PlayController();
     playController->setup();
     
-    deviceController = new DeviceController();
+    deviceController = new DeviceController2();
     deviceController->setup();
     
     /******************************************************
@@ -251,7 +251,7 @@ void AppController::draw(){
             ofEnableBlendMode(OF_BLENDMODE_SCREEN);
 
             appView->draw();
-            deviceController->draw();
+            //deviceController->draw(); TODO: move to a view!
             
         }
             break;
