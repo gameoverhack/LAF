@@ -48,12 +48,16 @@ protected:
     void cutMoviesForActionsNormalised(Agent* agent);
     bool cutMoviesForActionsNormalised2(Agent* agent);
 
+    void planAndGenerateMovies(Agent* agent, ofPoint pathStartPosition, ofPoint pathTargetPosition, ofRectangle worldRect, vector<ofRectangle> obstacles, bool changeNorm);
+    void insertEndMotion(Agent* agent);
+    
     float calcMovieDistance(Agent* agent, MovieInfo* movie, char dir);
     float calcMovieDistanceToFrame(Agent* agent, MovieInfo* movie, char dir, int frame);
     float calcMovieDistanceNormalised(Agent* agent, int index,  MovieInfo* movie, char dir);
     float calcMovieDistanceToFrameNormalised(Agent* agent, int index, MovieInfo* movie, char dir, int frame);
     float calcMoviesDistanceNormalised(Agent* agent, int indexS, int indexE, char dir);
     
+
     //void recoverFromCollisionWithPlayer(Agent* playerSequence, Agent* collisionSequence);
     //void recoverFromCollisionWithWindow(Agent* playerSequence, int window);
     

@@ -297,20 +297,6 @@ public:
         else
             ofxLogVerbose() << "No path found for me "  << endl;
         
-        //    vector< ofPoint > pp;
-        //    ofPoint nextPoint = ofPoint(agent->getScaledCentreAt(1).x,agent->getScaledCentreAt(1).y);
-        //    pp.push_back(nextPoint);
-        //    ofPoint nextPoint2 = ofPoint(agent->getScaledCentreAt(1).x,agent->getScaledCentreAt(1).y+270);
-        //    pp.push_back(nextPoint2);
-        //    ofPoint nextPoint3 = ofPoint(agent->getScaledCentreAt(1).x+320,agent->getScaledCentreAt(1).y+270);
-        //    pp.push_back(nextPoint3);
-        //    ofPoint nextPoint4 = ofPoint(agent->getScaledCentreAt(1).x+320,agent->getScaledCentreAt(1).y+640);
-        //    pp.push_back(nextPoint4);
-        //    ofPoint nextPoint5 = ofPoint(agent->getScaledCentreAt(1).x+320,agent->getScaledCentreAt(1).y+680);
-        //    pp.push_back(nextPoint5);
-        //
-        //    agent->setCurrentPath(pp);
-        //    agent->actions = PathPlanning::getDirectionsInPath(pp);
     }
     
     //-----------------------------------------------------------
