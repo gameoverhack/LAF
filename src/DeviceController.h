@@ -14,6 +14,10 @@
 #include "ofxOsc.h"
 #include "AppModel.h"
 
+#include "yarp/os/impl/NameConfig.h"
+#include "yarp/os/all.h"
+
+
 enum DeviceType{
     DEVICETYPE_IPHONE = 0,
     DEVICETYPE_ANDROID
@@ -80,6 +84,31 @@ enum ServerType{
 //        };
 //    };
 //};
+
+static vector<ofColor> colors;
+
+//--------------------------------------------------------------
+static void initColors(){
+    colors.clear();
+    colors.push_back(ofColor::white);
+    colors.push_back(ofColor::gray);
+    colors.push_back(ofColor::blue);
+    colors.push_back(ofColor::cyan);
+    colors.push_back(ofColor::olive);
+    colors.push_back(ofColor::gold);
+    colors.push_back(ofColor::magenta);
+    colors.push_back(ofColor::violet);
+}
+
+//--------------------------------------------------------------
+static ofColor generateRandomColor(){
+    ofColor c;
+    if(colors.size() == 0) initColors();
+    int index = ofRandom(0, colors.size() - 1);
+    c = colors[index];
+    colors.erase(colors.begin() + index);
+    return c;
+}
 
 class DeviceMessage {
     
@@ -419,7 +448,36 @@ public:
     ServerType serverType;
     int clientID;
     
+    ofColor deviceColorUp;
+    ofColor deviceColorDown;
+    
     Kalman kalmanFilter;
+    
+};
+
+class DeviceControllerThread : public ofThread {
+    
+    // johnty: this class is a hack, but fastest
+    // way to get usable performance using more than 2 phones.
+    // this thread handles the network receive.
+    // contains a bunch of pointers to original data (initialized on setup)
+    // in device controller and updates them during port read
+public:
+    void setup(map<int, DeviceClient>* d,
+               map<int, OSCRecorder>* r,
+               map<int, vector<float> > *xo,
+               map<int, vector<float> > *yo,
+               yarp::os::BufferedPort<yarp::os::Bottle>* p);
+    void threadedFunction();
+private:
+    
+    void createClient(int clientID, DeviceType deviceType, ServerType serverType);
+    map<int, DeviceClient>* devs;
+    map<int, OSCRecorder>* recs;
+    map<int, vector<float> > *xopts;
+    map<int, vector<float> > *yopts;
+    map<int, vector<float> > *zopts;
+    yarp::os::BufferedPort<yarp::os::Bottle>* port;
     
 };
 
@@ -432,8 +490,12 @@ public:
     void setup();
 	void update();
 	void draw();
+    
+    void exit();
 	
     void keyPressed(int key);
+    
+    float getAvgVel(vector<float>& vals);
     
     void drawVector(float x, float y, float scale, vector<ofPoint> & vec, float fade);
     
@@ -453,10 +515,25 @@ public:
     
     map<int, DeviceClient> devices;
     map<int, OSCRecorder> recorders;
+    map<int, vector<float> > xoptical_vals;
+    map<int, vector<float> > yoptical_vals;
+    map<int, vector<float> > zoptical_vals;
     
-    string getDeviceTypeAsString(DeviceType deviceType);
-    string getServerTypeAsString(ServerType serverType);
+    static string getDeviceTypeAsString(DeviceType deviceType);
+    static string getServerTypeAsString(ServerType serverType);
+    //vector<float> xOpticalVals, yOpticalVals; johnty: moved to map structure above
+    
+private:
+    yarp::os::Network yarp;
+    yarp::os::BufferedPort<yarp::os::Bottle> port;
+    yarp::os::BufferedPort<yarp::os::Bottle> outPort;
+    yarp::os::Bottle* outBot;
+    DeviceControllerThread readThread;
+    
+    bool mDown;
     
 };
+
+
 
 #endif /* defined(__protoApp__DeviceController__) */

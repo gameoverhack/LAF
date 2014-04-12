@@ -24,6 +24,9 @@
 		483908258d00b98b4be69f0765fb3433 /* ofxLabel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78d67a00eb899fac0943059784f8212a /* ofxLabel.cpp */; };
 		4adb88e2fb52e76a471065dea2ebee70 /* ofxOscParameterSync.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0aed834ce4dec5260af302a2a542d901 /* ofxOscParameterSync.cpp */; };
 		510cafe035e576a4e1502d52c11243bb /* UdpSocket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = e6def695b88ba5faaceaa93785a12fd9 /* UdpSocket.cpp */; };
+		53EF273918F760EF00DD56B3 /* libACE.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 53EF273618F760EF00DD56B3 /* libACE.dylib */; };
+		53EF273A18F760EF00DD56B3 /* libYARP_init.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 53EF273718F760EF00DD56B3 /* libYARP_init.a */; };
+		53EF273B18F760EF00DD56B3 /* libYARP_OS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 53EF273818F760EF00DD56B3 /* libYARP_OS.a */; };
 		585e7681fd079cf174cd3a135f96031e /* ofxLogger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = d35ae5f8bb0f4c64fd6ff03c46541109 /* ofxLogger.cpp */; };
 		5864ad82e20f15536d054ea319473de3 /* ofxOscMessage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = df49d76c45d5db505a234880104e4dc7 /* ofxOscMessage.cpp */; };
 		5a4349e9754d6fa14c0f2a3a1abc30b6 /* tinyxmlparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = fc5da1c87211d4f6377da7199d8c5a1e /* tinyxmlparser.cpp */; };
@@ -231,6 +234,9 @@
 		516717f84c0146512c47a3ec3f268851 /* ofxCvHaarFinder.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = ofxCvHaarFinder.h; path = ../../../addons/ofxOpenCv/src/ofxCvHaarFinder.h; sourceTree = SOURCE_ROOT; };
 		52afa1f08c420992caaae6484f64f920 /* ofxSlider.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = ofxSlider.h; path = ../../../addons/ofxGui/src/ofxSlider.h; sourceTree = SOURCE_ROOT; };
 		53765b8abef3da185b026f5fd6f56311 /* XMP.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = XMP.hpp; path = ../../../addons/ofxXMP/libs/xmp/include/XMP.hpp; sourceTree = SOURCE_ROOT; };
+		53EF273618F760EF00DD56B3 /* libACE.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libACE.dylib; sourceTree = "<group>"; };
+		53EF273718F760EF00DD56B3 /* libYARP_init.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libYARP_init.a; sourceTree = "<group>"; };
+		53EF273818F760EF00DD56B3 /* libYARP_OS.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libYARP_OS.a; sourceTree = "<group>"; };
 		556659f377d1a251ae7001aeab38ac53 /* TXMPFiles.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = TXMPFiles.hpp; path = ../../../addons/ofxXMP/libs/xmp/include/TXMPFiles.hpp; sourceTree = SOURCE_ROOT; };
 		58140e0f92d37844e9c8883d2197e83e /* Calibration.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = Calibration.h; path = ../../../addons/ofxCv/libs/ofxCv/include/ofxCv/Calibration.h; sourceTree = SOURCE_ROOT; };
 		586a8ec141bdfa82b3b0518c5749a6b0 /* config.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = config.h; path = ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/config.h; sourceTree = SOURCE_ROOT; };
@@ -495,6 +501,7 @@
 				E45BE97E0E8CC7DD009D7055 /* Carbon.framework in Frameworks */,
 				E45BE97F0E8CC7DD009D7055 /* CoreAudio.framework in Frameworks */,
 				E45BE9800E8CC7DD009D7055 /* CoreFoundation.framework in Frameworks */,
+				53EF273A18F760EF00DD56B3 /* libYARP_init.a in Frameworks */,
 				E45BE9810E8CC7DD009D7055 /* CoreServices.framework in Frameworks */,
 				E45BE9830E8CC7DD009D7055 /* OpenGL.framework in Frameworks */,
 				E45BE9840E8CC7DD009D7055 /* QuickTime.framework in Frameworks */,
@@ -507,8 +514,10 @@
 				77EBC7671870E66700D86F91 /* libXMPFilesStatic.a in Frameworks */,
 				77DCDBDC1871E39000EB911C /* libboost_date_time-xgcc42-mt-1_46_1.a in Frameworks */,
 				77DCDBDD1871E39000EB911C /* libboost_filesystem-xgcc42-mt-1_46_1.a in Frameworks */,
+				53EF273B18F760EF00DD56B3 /* libYARP_OS.a in Frameworks */,
 				77DCDBDE1871E39000EB911C /* libboost_graph-xgcc42-mt-1_46_1.a in Frameworks */,
 				77DCDBDF1871E39000EB911C /* libboost_iostreams-xgcc42-mt-1_46_1.a in Frameworks */,
+				53EF273918F760EF00DD56B3 /* libACE.dylib in Frameworks */,
 				77DCDBE01871E39000EB911C /* libboost_prg_exec_monitor-xgcc42-mt-1_46_1.a in Frameworks */,
 				77DCDBE11871E39000EB911C /* libboost_program_options-xgcc42-mt-1_46_1.a in Frameworks */,
 				77DCDBE21871E39000EB911C /* libboost_python-xgcc42-mt-1_46_1.a in Frameworks */,
@@ -856,6 +865,16 @@
 				d902eb2409214285bcf5f1914864e8b9 /* stream_accessor.hpp */,
 			);
 			name = gpu;
+			sourceTree = "<group>";
+		};
+		53EF273518F760EF00DD56B3 /* libs */ = {
+			isa = PBXGroup;
+			children = (
+				53EF273618F760EF00DD56B3 /* libACE.dylib */,
+				53EF273718F760EF00DD56B3 /* libYARP_init.a */,
+				53EF273818F760EF00DD56B3 /* libYARP_OS.a */,
+			);
+			path = libs;
 			sourceTree = "<group>";
 		};
 		6025faf6414c2ca589764d26b59a2f04 /* ofxCv */ = {
@@ -1295,6 +1314,7 @@
 		E4B69B4A0A3A1720003C02F2 = {
 			isa = PBXGroup;
 			children = (
+				53EF273518F760EF00DD56B3 /* libs */,
 				E4B6FCAD0C3E899E008CF71C /* openFrameworks-Info.plist */,
 				E4EB6923138AFD0F00A09F29 /* Project.xcconfig */,
 				E4B69E1C0A3A1BDC003C02F2 /* src */,
@@ -1964,6 +1984,83 @@
 				GCC_MODEL_TUNING = NONE;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
+				HEADER_SEARCH_PATHS = (
+					"$(OF_CORE_HEADERS)",
+					../../../addons/ofxBezierWarp/libs,
+					../../../addons/ofxBezierWarp/src,
+					../../../addons/ofxBlur/libs,
+					../../../addons/ofxBlur/src,
+					../../../addons/ofxCv/libs,
+					../../../addons/ofxCv/libs/CLD,
+					../../../addons/ofxCv/libs/CLD/include,
+					../../../addons/ofxCv/libs/CLD/include/CLD,
+					../../../addons/ofxCv/libs/CLD/src,
+					../../../addons/ofxCv/libs/ofxCv,
+					../../../addons/ofxCv/libs/ofxCv/include,
+					../../../addons/ofxCv/libs/ofxCv/include/ofxCv,
+					../../../addons/ofxCv/libs/ofxCv/src,
+					../../../addons/ofxCv/src,
+					../../../addons/ofxGui/libs,
+					../../../addons/ofxGui/src,
+					../../../addons/ofxKeyModifiers/libs,
+					../../../addons/ofxKeyModifiers/src,
+					../../../addons/ofxLogger/libs,
+					../../../addons/ofxLogger/src,
+					../../../addons/ofxMSAOpenCL/libs,
+					../../../addons/ofxMSAOpenCL/src,
+					../../../addons/ofxMSAPingPong/libs,
+					../../../addons/ofxMSAPingPong/src,
+					../../../addons/ofxNetwork/libs,
+					../../../addons/ofxNetwork/src,
+					../../../addons/ofxOpenCv/libs,
+					../../../addons/ofxOpenCv/libs/opencv,
+					../../../addons/ofxOpenCv/libs/opencv/include,
+					../../../addons/ofxOpenCv/libs/opencv/include/opencv,
+					../../../addons/ofxOpenCv/libs/opencv/include/opencv2,
+					../../../addons/ofxOpenCv/libs/opencv/include/opencv2/calib3d,
+					../../../addons/ofxOpenCv/libs/opencv/include/opencv2/contrib,
+					../../../addons/ofxOpenCv/libs/opencv/include/opencv2/core,
+					../../../addons/ofxOpenCv/libs/opencv/include/opencv2/features2d,
+					../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann,
+					../../../addons/ofxOpenCv/libs/opencv/include/opencv2/gpu,
+					../../../addons/ofxOpenCv/libs/opencv/include/opencv2/highgui,
+					../../../addons/ofxOpenCv/libs/opencv/include/opencv2/imgproc,
+					../../../addons/ofxOpenCv/libs/opencv/include/opencv2/legacy,
+					../../../addons/ofxOpenCv/libs/opencv/include/opencv2/ml,
+					../../../addons/ofxOpenCv/libs/opencv/include/opencv2/objdetect,
+					../../../addons/ofxOpenCv/libs/opencv/include/opencv2/ts,
+					../../../addons/ofxOpenCv/libs/opencv/include/opencv2/video,
+					../../../addons/ofxOpenCv/libs/opencv/lib,
+					../../../addons/ofxOpenCv/libs/opencv/lib/osx,
+					../../../addons/ofxOpenCv/libs/opencv/lib/vs,
+					../../../addons/ofxOpenCv/src,
+					../../../addons/ofxOsc/libs,
+					../../../addons/ofxOsc/libs/oscpack,
+					../../../addons/ofxOsc/libs/oscpack/src,
+					../../../addons/ofxOsc/libs/oscpack/src/ip,
+					../../../addons/ofxOsc/libs/oscpack/src/ip/posix,
+					../../../addons/ofxOsc/libs/oscpack/src/ip/win32,
+					../../../addons/ofxOsc/libs/oscpack/src/osc,
+					../../../addons/ofxOsc/src,
+					../../../addons/ofxPostProcessing/libs,
+					../../../addons/ofxPostProcessing/src,
+					../../../addons/ofxThreadedVideo/libs,
+					../../../addons/ofxThreadedVideo/src,
+					../../../addons/ofxXmlSettings/libs,
+					../../../addons/ofxXmlSettings/libs/tinyxml,
+					../../../addons/ofxXmlSettings/src,
+					../../../addons/ofxXMP/libs,
+					../../../addons/ofxXMP/libs/xmp,
+					../../../addons/ofxXMP/libs/xmp/include,
+					"../../../addons/ofxXMP/libs/xmp/include/client-glue",
+					../../../addons/ofxXMP/libs/xmp/lib,
+					../../../addons/ofxXMP/src,
+					../../../addons/ofxBoost/lib/mac,
+					../../../addons/ofxBoost/src/lib,
+					"$(ACE_ROOT)",
+					"$(YARP_DIR)/generated_include",
+					"$(YARP_DIR)/src/libYARP_OS/include",
+				);
 				INFOPLIST_FILE = "openFrameworks-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = (
@@ -2033,6 +2130,7 @@
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_2)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_3)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_4)",
+					"$(PROJECT_DIR)/libs",
 				);
 				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/../../../addons/ofxXMP/libs/xmp/lib\"";
 				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_2 = "\"$(SRCROOT)/../../../addons/ofxBoost/lib/mac\"";
@@ -2065,6 +2163,83 @@
 				GCC_MODEL_TUNING = NONE;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
+				HEADER_SEARCH_PATHS = (
+					"$(OF_CORE_HEADERS)",
+					../../../addons/ofxBezierWarp/libs,
+					../../../addons/ofxBezierWarp/src,
+					../../../addons/ofxBlur/libs,
+					../../../addons/ofxBlur/src,
+					../../../addons/ofxCv/libs,
+					../../../addons/ofxCv/libs/CLD,
+					../../../addons/ofxCv/libs/CLD/include,
+					../../../addons/ofxCv/libs/CLD/include/CLD,
+					../../../addons/ofxCv/libs/CLD/src,
+					../../../addons/ofxCv/libs/ofxCv,
+					../../../addons/ofxCv/libs/ofxCv/include,
+					../../../addons/ofxCv/libs/ofxCv/include/ofxCv,
+					../../../addons/ofxCv/libs/ofxCv/src,
+					../../../addons/ofxCv/src,
+					../../../addons/ofxGui/libs,
+					../../../addons/ofxGui/src,
+					../../../addons/ofxKeyModifiers/libs,
+					../../../addons/ofxKeyModifiers/src,
+					../../../addons/ofxLogger/libs,
+					../../../addons/ofxLogger/src,
+					../../../addons/ofxMSAOpenCL/libs,
+					../../../addons/ofxMSAOpenCL/src,
+					../../../addons/ofxMSAPingPong/libs,
+					../../../addons/ofxMSAPingPong/src,
+					../../../addons/ofxNetwork/libs,
+					../../../addons/ofxNetwork/src,
+					../../../addons/ofxOpenCv/libs,
+					../../../addons/ofxOpenCv/libs/opencv,
+					../../../addons/ofxOpenCv/libs/opencv/include,
+					../../../addons/ofxOpenCv/libs/opencv/include/opencv,
+					../../../addons/ofxOpenCv/libs/opencv/include/opencv2,
+					../../../addons/ofxOpenCv/libs/opencv/include/opencv2/calib3d,
+					../../../addons/ofxOpenCv/libs/opencv/include/opencv2/contrib,
+					../../../addons/ofxOpenCv/libs/opencv/include/opencv2/core,
+					../../../addons/ofxOpenCv/libs/opencv/include/opencv2/features2d,
+					../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann,
+					../../../addons/ofxOpenCv/libs/opencv/include/opencv2/gpu,
+					../../../addons/ofxOpenCv/libs/opencv/include/opencv2/highgui,
+					../../../addons/ofxOpenCv/libs/opencv/include/opencv2/imgproc,
+					../../../addons/ofxOpenCv/libs/opencv/include/opencv2/legacy,
+					../../../addons/ofxOpenCv/libs/opencv/include/opencv2/ml,
+					../../../addons/ofxOpenCv/libs/opencv/include/opencv2/objdetect,
+					../../../addons/ofxOpenCv/libs/opencv/include/opencv2/ts,
+					../../../addons/ofxOpenCv/libs/opencv/include/opencv2/video,
+					../../../addons/ofxOpenCv/libs/opencv/lib,
+					../../../addons/ofxOpenCv/libs/opencv/lib/osx,
+					../../../addons/ofxOpenCv/libs/opencv/lib/vs,
+					../../../addons/ofxOpenCv/src,
+					../../../addons/ofxOsc/libs,
+					../../../addons/ofxOsc/libs/oscpack,
+					../../../addons/ofxOsc/libs/oscpack/src,
+					../../../addons/ofxOsc/libs/oscpack/src/ip,
+					../../../addons/ofxOsc/libs/oscpack/src/ip/posix,
+					../../../addons/ofxOsc/libs/oscpack/src/ip/win32,
+					../../../addons/ofxOsc/libs/oscpack/src/osc,
+					../../../addons/ofxOsc/src,
+					../../../addons/ofxPostProcessing/libs,
+					../../../addons/ofxPostProcessing/src,
+					../../../addons/ofxThreadedVideo/libs,
+					../../../addons/ofxThreadedVideo/src,
+					../../../addons/ofxXmlSettings/libs,
+					../../../addons/ofxXmlSettings/libs/tinyxml,
+					../../../addons/ofxXmlSettings/src,
+					../../../addons/ofxXMP/libs,
+					../../../addons/ofxXMP/libs/xmp,
+					../../../addons/ofxXMP/libs/xmp/include,
+					"../../../addons/ofxXMP/libs/xmp/include/client-glue",
+					../../../addons/ofxXMP/libs/xmp/lib,
+					../../../addons/ofxXMP/src,
+					../../../addons/ofxBoost/lib/mac,
+					../../../addons/ofxBoost/src/lib,
+					"$(ACE_ROOT)",
+					"$(YARP_DIR)/generated_include",
+					"$(YARP_DIR)/src/libYARP_OS/include",
+				);
 				INFOPLIST_FILE = "openFrameworks-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = (
@@ -2134,6 +2309,7 @@
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_2)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_3)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_4)",
+					"$(PROJECT_DIR)/libs",
 				);
 				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/../../../addons/ofxXMP/libs/xmp/lib\"";
 				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_2 = "\"$(SRCROOT)/../../../addons/ofxBoost/lib/mac\"";

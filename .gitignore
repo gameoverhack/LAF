@@ -23,3 +23,7 @@ bin/data/csv/*.csv
 *.lai
 *.la
 *.a
+
+!libACE.dylib
+!libYARP_init.a
+!libYARP_OS.a
