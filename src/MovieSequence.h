@@ -458,6 +458,14 @@ public:
         return floorOffset;
     }
     
+    ofPoint getScaledFloorOffsetAt(int f){
+        ofRectangle r = getScaledBoundingAt(f); //TODO: there's a bug with frame 0!!!
+        ofPoint floorOffset;
+        floorOffset.x = (r.x + r.width / 2.0);
+        floorOffset.y = (r.y + r.height) + 0; // TODDO: needs a plus if i'm doing collisions!
+        return floorOffset;
+    }
+    
     MovieInfo& getLastMovieInSequence(){
         return sequence[sequence.size() - 1];
     }

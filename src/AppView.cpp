@@ -423,34 +423,11 @@ void AppView::update(){
                     distanceTrailCenter.set(playCenter.x, wC.y);
                 ofLine(sequence->getScaledCentre(), distanceTrailCenter);
                 */
+               
                 ofPolyline pathFromHere; //= ofPolyline(agent->getCurrentPath().getVertices());
-                vector<MovieInfo>& movies = agent->getMovieSequence();
-                
-                int currentAct = agent->getCurrentMovie().agentActionIndex;
                 ofPoint point;
                 
-//                if (currentAct == -1) {
-//                    point = agent->getScaledCentreAt(1);
-//                    pathFromHere.addVertex(point);
-//                }
-//                else {
-//                    point = agent->getScaledCentre();
-//                    
-//                    for (int i=0;i<movies.size();i++)
-//                        
-//                    if (agent->actions[a].first == 'l')
-//                        point.x-=agent->actions[currentAct].second;
-//                    else if (agent->actions[a].first == 'r')
-//                        point.x+=agent->actions[currentAct].second;
-//                    else if (agent->actions[a].first == 'u')
-//                        point.y-=agent->actions[currentAct].second;
-//                    else if (agent->actions[a].first == 'd')
-//                        point.y+=agent->actions[currentAct].second;
-//                    
-//                    pathFromHere.addVertex(point);
-//                }
-               
-                point = agent->getScaledCentreAt(1);
+                point = agent->getScaledFloorOffsetAt(1);
                 pathFromHere.addVertex(point);
                 
                 
@@ -478,8 +455,8 @@ void AppView::update(){
                 
                 ofSetColor(100, 10, 0);
                 ofSetLineWidth(3.0f);
-               // if (agent->getCurrentPath().size() >0)
-               //     agent->getCurrentPath().draw();
+                if (agent->getCurrentPath().size() >0)
+                    agent->getCurrentPath().draw();
                 
                 ofSetLineWidth(1.0f);
             }

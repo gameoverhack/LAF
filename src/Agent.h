@@ -285,7 +285,7 @@ public:
         pp.obstAvoidBoundingH = this->drawSize;
         
         // find the paths using A*.
-        ofxLogVerbose() << "Finding a path from (" << this->getScaledCentreAt(1).x << "," << this->getScaledCentreAt(1).y  << ") to  (" << targetPosition.x << "," << targetPosition.y << ")"  << endl;
+        ofxLogVerbose() << "Finding a path from (" << startPosition.x << "," << startPosition.y  << ") to  (" << targetPosition.x << "," << targetPosition.y << ")"  << endl;
         
         //vector< vector< ofPoint > > paths = pp.findPaths(this->getScaledCentreAt(1),targetPosition,this->getWindow());
         vector< vector< ofPoint > > paths = pp.findPaths(startPosition,targetPosition,this->getWindow());
@@ -409,6 +409,28 @@ public:
         return faultFlag;
     }
     
+    ofPoint getTargetErrorOffset() { //TODO: Write this!!
+        ofPolyline pathFromHere; 
+        ofPoint point;
+        
+        point = this->getScaledFloorOffsetAt(1);
+        pathFromHere.addVertex(point);
+        
+        
+        for (int a=0;a<this->actions.size();a++) {
+            if (this->actions[a].first == 'l')
+                point.x-=this->actions[a].second;
+            else if (this->actions[a].first == 'r')
+                point.x+=this->actions[a].second;
+            else if (this->actions[a].first == 'u')
+                point.y-=this->actions[a].second;
+            else if (this->actions[a].first == 'd')
+                point.y+=this->actions[a].second;
+            
+            pathFromHere.addVertex(point);
+        }
+    }
+    
 protected:
     const int COLLISIONSKIP = 6;
     
@@ -416,7 +438,7 @@ protected:
     int window;
     int sframe;
     int gframe;
-        
+    
     string playerName;
     PlayerModel* playerModel;
     
