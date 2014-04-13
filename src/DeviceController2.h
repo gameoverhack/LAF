@@ -26,8 +26,15 @@ public:
     
     void threadedFunction();
     
-    ofxTCPServer commandServer;
-    ofxTCPClient commandClient;
+    // UDP broadcast
+    ofxUDPManager UDPbroadcast;
+    int timerUDPBroadcastPing;
+    
+    // ip address storage
+    string serverIPfull;
+    string serverIProot;
+    string serverIPpart;
+    string serverIPbroadcast;
     
 };
 

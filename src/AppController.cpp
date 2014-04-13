@@ -101,6 +101,8 @@ void AppController::setup(){
 //    appModel->setProperty("pathBoundingSizeW", 70.0f); // 15
 //    appModel->setProperty("pathBoundingSizeH", 110.0f); // 15
     
+    appModel->setProperty("PingBroadcast", 3000);
+    
     appModel->setProperty("DistanceThreshold", 200.0f);
     appModel->setProperty("FadeTime", 0);
     appModel->setProperty("SyncTime", 2);
@@ -266,6 +268,11 @@ void AppController::draw(){
 //--------------------------------------------------------------
 void AppController::exit(){
     appModel->save("config", ARCHIVE_BINARY);
+    delete appView;
+    delete debugView;
+    delete analyzeController;
+    delete playController;
+    delete deviceController;
 }
 
 //--------------------------------------------------------------
