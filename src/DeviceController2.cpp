@@ -65,6 +65,36 @@ void DeviceController2::setup(){
         UDPbroadcast.SetEnableBroadcast(true);
         UDPbroadcast.SetNonBlocking(true);
         
+        // OPEN COMMUNICATION PORTS FOR UDP, OSC and YARP
+        
+        // UDP
+        UDPmanager.Create();
+        if(UDPmanager.Connect(serverIPfull.c_str(), 10002)){
+            ofxLogNotice() << "Connected UDPmanager on " << serverIPfull << ":10002" << endl;
+            UDPmanager.SetNonBlocking(true);
+        }
+        
+        
+        // OSC - need test for these?
+        OSCReceiver.setup(10003);
+        ofxLogNotice() << "Connected OSCReceiver on " << serverIPfull << ":10003" << endl;
+        OSCSender.setup(serverIPfull.c_str(), 10004);
+        ofxLogNotice() << "Connected OSCSender on " << serverIPfull << ":10004" << endl;
+        
+        // YARP
+        yarp::os::impl::NameConfig yarpNameConfig;
+        yarp::os::impl::Address yarpAddress(serverIPfull.c_str(), 10000);
+        yarpNameConfig.setAddress(yarpAddress);
+        yarpNameConfig.toFile();
+        yarpNameConfig.fromFile();
+        
+        if(YARPReceiver.open("/motionReceiver")){
+            ofxLogNotice() << "Connected YARPReceiver on " << serverIPfull << ":10000" << endl;
+            if(YARPSender.open("/mouseEmulator")){
+                ofxLogNotice() << "Connected YARPSender on " << serverIPfull << ":10000" << endl;
+            }
+        }
+        
         // set timer
         timerUDPBroadcastPing = ofGetElapsedTimeMillis();
         
