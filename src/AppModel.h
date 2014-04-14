@@ -26,6 +26,7 @@
 #include "KeyModifiers.h"
 #include "Pointer.h"
 #include "Agent.h"
+#include "DeviceClient.h"
 
 typedef struct{
     
@@ -446,6 +447,10 @@ public:
         return s;
     }
     
+    map<int, DeviceClient>& getAllDevices(){
+        return devices;
+    }
+    
 protected:
     
     KeyModifiers                keyModifiers;
@@ -481,6 +486,9 @@ protected:
     vector<int> uniqueStartingPositions;
     
     map<string, MotionGraph> motionGraphs;
+    
+    // device client storage
+    map<int, DeviceClient> devices;
     
     friend class boost::serialization::access;
 	template<class Archive>

@@ -69,17 +69,14 @@ void DeviceController2::setup(){
         
         // UDP
         UDPmanager.Create();
-        if(UDPmanager.Connect(serverIPfull.c_str(), 10002)){
-            ofxLogNotice() << "Connected UDPmanager on " << serverIPfull << ":10002" << endl;
+        if(UDPmanager.Bind(10002)){
+            ofxLogNotice() << "Bind UDPmanager on " << serverIPfull << ":10002" << endl;
             UDPmanager.SetNonBlocking(true);
         }
         
-        
         // OSC - need test for these?
         OSCReceiver.setup(10003);
-        ofxLogNotice() << "Connected OSCReceiver on " << serverIPfull << ":10003" << endl;
-        OSCSender.setup(serverIPfull.c_str(), 10004);
-        ofxLogNotice() << "Connected OSCSender on " << serverIPfull << ":10004" << endl;
+        ofxLogNotice() << "Bind OSCReceiver on " << serverIPfull << ":10003" << endl;
         
         // YARP
         yarp::os::impl::NameConfig yarpNameConfig;
@@ -89,10 +86,7 @@ void DeviceController2::setup(){
         yarpNameConfig.fromFile();
         
         if(YARPReceiver.open("/motionReceiver")){
-            ofxLogNotice() << "Connected YARPReceiver on " << serverIPfull << ":10000" << endl;
-            if(YARPSender.open("/mouseEmulator")){
-                ofxLogNotice() << "Connected YARPSender on " << serverIPfull << ":10000" << endl;
-            }
+            ofxLogNotice() << "Bind YARPReceiver on " << serverIPfull << ":10000" << endl;
         }
         
         // set timer
@@ -129,6 +123,12 @@ void DeviceController2::threadedFunction(){
         
         if(lock()){
             
+            // get devices from the appmodel
+            map<int, DeviceClient> devices = appModel->getAllDevices();
+            
+            cout << "dm: " << sizeof(DeviceMessage) << endl;
+            cout << "c : " << sizeof(char) << endl;
+            
             // broadcast (ping) the ip address of the server allowing auto connection
             // on DHCP host for any IP addresses of both client and server
             if(ofGetElapsedTimeMillis() - timerUDPBroadcastPing > appModel->getProperty<int>("PingBroadcast")){
@@ -152,6 +152,25 @@ void DeviceController2::threadedFunction(){
                     
                     ofxLogNotice() << "Client connected at: " << serverIProot << "." << command[1] << endl;
                     
+                    int clientID = ofToInt(command[1]);
+                    
+                    map<int, DeviceClient>::iterator it = devices.find(clientID);
+                    if(it == devices.end()){
+                        ofxLogNotice() << "Creating client device with ID: " << clientID << endl;
+                    }else{
+                        ofxLogWarning() << "Replacing client device with ID: " << clientID << endl;
+                    }
+                    
+                    // create the device
+                    DeviceClient d;
+                    devices[clientID] = d;
+                    DeviceClient& client = devices[clientID];
+                    client.accelerationBuffer.resize(50, 3);
+                    client.attitudeBuffer.resize(50, 3);
+                    client.positionBuffer.resize(50, 3);
+                    client.kalmanFilter.setup(2, 3);
+                    client.clientID = clientID;
+                    client.deviceColor = generateRandomColor();
                 }
                 
             }

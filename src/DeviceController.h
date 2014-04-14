@@ -18,16 +18,16 @@
 #include "yarp/os/all.h"
 
 
-enum DeviceType{
-    DEVICETYPE_IPHONE = 0,
-    DEVICETYPE_ANDROID
-};
-
-enum ServerType{
-    SERVERTYPE_MATTG = 0,
-    SERVERTYPE_MATTL,
-    SERVERTYPE_NORMJ
-};
+//enum DeviceType{
+//    DEVICETYPE_IPHONE = 0,
+//    DEVICETYPE_ANDROID
+//};
+//
+//enum ServerType{
+//    SERVERTYPE_MATTG = 0,
+//    SERVERTYPE_MATTL,
+//    SERVERTYPE_NORMJ
+//};
 
 //BOOST_SERIALIZATION_ASSUME_ABSTRACT(ofxOscArgInt32);
 //BOOST_SERIALIZATION_ASSUME_ABSTRACT(ofxOscArgInt64);
@@ -321,139 +321,139 @@ public:
     
 };
 
-class RingBuffer{
-    
-public:
-    
-    RingBuffer(){
-        clear();
-    }
-    
-    RingBuffer(int s, int d){
-        clear();
-        resize(s, d);
-    }
-    
-    ~RingBuffer(){
-        clear();
-    }
-    
-    void resize(int s, int d){
-        dimensions = d;
-        buffer.resize(dimensions);
-        representation.resize(s);
-        for(int i = 0; i < dimensions; i++){
-            buffer[i].resize(s);
-        }
-    }
-    
-    void push_back(ofPoint point){
-        assert(buffer.size() > 0);
-        buffer[0][position] = point.x;
-        buffer[1][position] = point.y;
-        buffer[2][position] = point.z;
-        representation[position] = point;
-        position++;
-        if(position == representation.size()) position = 0;
-    }
-    
-    int getMaxDimension(){
-        vector<float> maximums(3);
-        for(int i = 0; i < dimensions; i++){
-            maximums[i] = getVecMaxValue(buffer[i]);
-        }
-        return getVecMaxIndex(maximums);
-    }
-    
-    int getMinDimension(){
-        vector<float> minimums(3);
-        for(int i = 0; i < dimensions; i++){
-            minimums[i] = getVecMinValue(buffer[i]);
-        }
-        return getVecMinIndex(minimums);
-    }
-    
-    void clear(){
-        position = 0;
-        buffer.clear();
-        representation.clear();
-    }
-    
-    int size(){
-        return buffer.size();
-    }
-    
-    vector< vector<float> >& getBuffer(){
-        return buffer;
-    }
-    
-    vector<ofPoint>& getRepresentation(){
-        return representation;
-    }
-    
-protected:
-    
-    int position; int dimensions;
-    vector< vector<float> > buffer;
-    vector<ofPoint> representation;
-    
-    
-};
+//class RingBuffer{
+//    
+//public:
+//    
+//    RingBuffer(){
+//        clear();
+//    }
+//    
+//    RingBuffer(int s, int d){
+//        clear();
+//        resize(s, d);
+//    }
+//    
+//    ~RingBuffer(){
+//        clear();
+//    }
+//    
+//    void resize(int s, int d){
+//        dimensions = d;
+//        buffer.resize(dimensions);
+//        representation.resize(s);
+//        for(int i = 0; i < dimensions; i++){
+//            buffer[i].resize(s);
+//        }
+//    }
+//    
+//    void push_back(ofPoint point){
+//        assert(buffer.size() > 0);
+//        buffer[0][position] = point.x;
+//        buffer[1][position] = point.y;
+//        buffer[2][position] = point.z;
+//        representation[position] = point;
+//        position++;
+//        if(position == representation.size()) position = 0;
+//    }
+//    
+//    int getMaxDimension(){
+//        vector<float> maximums(3);
+//        for(int i = 0; i < dimensions; i++){
+//            maximums[i] = getVecMaxValue(buffer[i]);
+//        }
+//        return getVecMaxIndex(maximums);
+//    }
+//    
+//    int getMinDimension(){
+//        vector<float> minimums(3);
+//        for(int i = 0; i < dimensions; i++){
+//            minimums[i] = getVecMinValue(buffer[i]);
+//        }
+//        return getVecMinIndex(minimums);
+//    }
+//    
+//    void clear(){
+//        position = 0;
+//        buffer.clear();
+//        representation.clear();
+//    }
+//    
+//    int size(){
+//        return buffer.size();
+//    }
+//    
+//    vector< vector<float> >& getBuffer(){
+//        return buffer;
+//    }
+//    
+//    vector<ofPoint>& getRepresentation(){
+//        return representation;
+//    }
+//    
+//protected:
+//    
+//    int position; int dimensions;
+//    vector< vector<float> > buffer;
+//    vector<ofPoint> representation;
+//    
+//    
+//};
 
-class DeviceClient {
-    
-public:
-    
-    DeviceClient(){}
-    ~DeviceClient(){}
-    
-    float refreshLastTime;
-    float refreshAverage;
-    
-    vector<ofPoint> accelerationHistoryRaw;
-    vector<ofPoint> rotationHistoryRaw;
-    
-    vector<ofPoint> attitudeHistoryRaw;
-    vector<ofPoint> gravityHistoryRaw;
-    vector<ofPoint> userAccelerationHistoryRaw;
-    
-    RingBuffer accelerationWindowSmall;
-    
-    vector<int> timeHistory;
-    
-    vector<ofPoint> accelerationHistoryKalman;
-    vector<ofPoint> rotationHistoryKalman;
-    vector<ofPoint> attitudeHistoryKalman;
-    vector<ofPoint> gravityHistoryKalman;
-    vector<ofPoint> userAccelerationHistoryKalman;
-    
-    ofPoint lastAccelerationRaw;
-    ofPoint lastRotationRaw;
-    ofPoint lastAttitudeRaw;
-    ofPoint lastGravityRaw;
-    ofPoint lastUserAccelerationRaw;
-    
-    ofPoint lastAccelerationKalman;
-    ofPoint lastRotationKalman;
-    ofPoint lastAttitudeKalman;
-    ofPoint lastGravityKalman;
-    ofPoint lastUserAccelerationKalman;
-    
-    int lastTimeStamp;
-    
-    ofPoint maxAcceleration = ofPoint(-INFINITY, -INFINITY, -INFINITY);
-    ofPoint minAcceleration = ofPoint(INFINITY, INFINITY, INFINITY);
-    
-    DeviceType deviceType;
-    ServerType serverType;
-    int clientID;
-    
-    ofColor deviceColorUp;
-    ofColor deviceColorDown;
-    
-    Kalman kalmanFilter;
-    
-};
+//class DeviceClient {
+//    
+//public:
+//    
+//    DeviceClient(){}
+//    ~DeviceClient(){}
+//    
+//    float refreshLastTime;
+//    float refreshAverage;
+//    
+//    vector<ofPoint> accelerationHistoryRaw;
+//    vector<ofPoint> rotationHistoryRaw;
+//    
+//    vector<ofPoint> attitudeHistoryRaw;
+//    vector<ofPoint> gravityHistoryRaw;
+//    vector<ofPoint> userAccelerationHistoryRaw;
+//    
+//    RingBuffer accelerationWindowSmall;
+//    
+//    vector<int> timeHistory;
+//    
+//    vector<ofPoint> accelerationHistoryKalman;
+//    vector<ofPoint> rotationHistoryKalman;
+//    vector<ofPoint> attitudeHistoryKalman;
+//    vector<ofPoint> gravityHistoryKalman;
+//    vector<ofPoint> userAccelerationHistoryKalman;
+//    
+//    ofPoint lastAccelerationRaw;
+//    ofPoint lastRotationRaw;
+//    ofPoint lastAttitudeRaw;
+//    ofPoint lastGravityRaw;
+//    ofPoint lastUserAccelerationRaw;
+//    
+//    ofPoint lastAccelerationKalman;
+//    ofPoint lastRotationKalman;
+//    ofPoint lastAttitudeKalman;
+//    ofPoint lastGravityKalman;
+//    ofPoint lastUserAccelerationKalman;
+//    
+//    int lastTimeStamp;
+//    
+//    ofPoint maxAcceleration = ofPoint(-INFINITY, -INFINITY, -INFINITY);
+//    ofPoint minAcceleration = ofPoint(INFINITY, INFINITY, INFINITY);
+//    
+//    DeviceType deviceType;
+//    ServerType serverType;
+//    int clientID;
+//    
+//    ofColor deviceColorUp;
+//    ofColor deviceColorDown;
+//    
+//    Kalman kalmanFilter;
+//    
+//};
 
 class DeviceControllerThread : public ofThread {
     
