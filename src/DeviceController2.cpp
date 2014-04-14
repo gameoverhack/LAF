@@ -133,8 +133,27 @@ void DeviceController2::threadedFunction(){
             // on DHCP host for any IP addresses of both client and server
             if(ofGetElapsedTimeMillis() - timerUDPBroadcastPing > appModel->getProperty<int>("PingBroadcast")){
                 ofxLogVerbose() << "UDP broadcast ping on ip: " << serverIPbroadcast << endl;
-                UDPbroadcast.Send(serverIPpart.c_str(), serverIPpart.size());
+                string msg = "S_" + serverIPpart;
+                UDPbroadcast.Send(msg.c_str(), msg.size());
                 timerUDPBroadcastPing = ofGetElapsedTimeMillis();
+            }
+            
+            char udpBroadcastMessageChar[1024];
+            UDPbroadcast.Receive(udpBroadcastMessageChar, 1024);
+            string udpBroadcastMessageStr = udpBroadcastMessageChar;
+            
+            if(udpBroadcastMessageStr != ""){
+                
+                ofxLogVerbose() << "UDP Broadcast Message: " << udpBroadcastMessageStr << endl;
+                
+                vector<string> command = ofSplitString(udpBroadcastMessageStr, "_");
+                
+                if(command[0] == "C"){
+                    
+                    ofxLogNotice() << "Client connected at: " << serverIProot << "." << command[1] << endl;
+                    
+                }
+                
             }
             
             unlock();
