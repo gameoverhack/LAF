@@ -71,6 +71,8 @@ public:
     
     void push(ofxOscMessage& oscData){
         
+        cout << "New OSC" << endl;
+        
         DeviceMessage dm;
         
         dm.clientID =       oscData.getArgAsInt32(0);
@@ -98,9 +100,11 @@ public:
     };
     
     void push(char * c){
+        
         DeviceMessageUnion dm;
         for(int i = 0; i < sizeof(DeviceMessage); i++) dm.data[i] = c[i];
         push(dm.deviceMessage);
+        
     };
     
     void push(yarp::os::Bottle *yarpData){
@@ -168,6 +172,8 @@ public:
         }
         lastFrameTime	= diff;
         timeThen		= timeNow;
+        
+        cout << "New DeviceMessage: " << frameRate << endl;
         
     }
     

@@ -124,10 +124,7 @@ void DeviceController2::threadedFunction(){
         if(lock()){
             
             // get devices from the appmodel
-            map<int, DeviceClient> devices = appModel->getAllDevices();
-            
-            cout << "dm: " << sizeof(DeviceMessage) << endl;
-            cout << "c : " << sizeof(char) << endl;
+            map<int, DeviceClient>& devices = appModel->getAllDevices();
             
             // broadcast (ping) the ip address of the server allowing auto connection
             // on DHCP host for any IP addresses of both client and server
@@ -160,7 +157,7 @@ void DeviceController2::threadedFunction(){
                     }else{
                         ofxLogWarning() << "Replacing client device with ID: " << clientID << endl;
                     }
-                    
+
                     // create the device
                     DeviceClient d;
                     devices[clientID] = d;
@@ -171,6 +168,37 @@ void DeviceController2::threadedFunction(){
                     client.kalmanFilter.setup(2, 3);
                     client.clientID = clientID;
                     client.deviceColor = generateRandomColor();
+                }
+                
+            }
+            
+            while(OSCReceiver.hasWaitingMessages()){
+                
+                ofxOscMessage m;
+                OSCReceiver.getNextMessage(&m);
+                
+                if(m.getAddress() == "/device"){
+                    
+                    int clientID = m.getArgAsInt32(0);
+
+                    map<int, DeviceClient>::iterator it = devices.find(clientID);
+                    if(it != devices.end()) it->second.push(m);
+                    
+                }
+                
+            }
+            
+            if(YARPReceiver.getPendingReads()){
+                
+                yarp::os::Bottle *input = YARPReceiver.read();
+                
+                if(input->get(0).toString() == "/device"){
+                    
+                    int clientID = input->get(1).asInt();
+                    
+                    map<int, DeviceClient>::iterator it = devices.find(clientID);
+                    if(it != devices.end()) it->second.push(input);
+                    
                 }
                 
             }
