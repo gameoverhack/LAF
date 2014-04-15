@@ -47,6 +47,10 @@ void DeviceController2::setup(){
 
     deviceControllerControllerStates.setState(kDEVICECONTROLLER_INIT);
     
+    /******************************************************
+     *******                Servers                 *******
+     *****************************************************/
+    
     // get ip address of the server
     serverIPfull = appModel->getIPAddress();
     
@@ -114,31 +118,51 @@ void DeviceController2::update(){
     
     if(lock()){
 
+        // using a global mutex on the device data as well as local locks
+        // so that interconnect between MVC objects does not get out of sync
         appModel->getDeviceMutex().lock();
+        
         map<int, DeviceClient>& devices = appModel->getAllDevices();
         
+        // here we are checking that clients are alive and getting data from them
+        // probably both things could be moved -> deletion to the appModel
+        // info -> into a view...but for now it's convenient to have them here
+        
         ostringstream os;
-        int clients = 0;
-        set<int> clientsToDelete;
+        
+        int clients = 0; set<int> clientsToDelete;
+        
         for(map<int, DeviceClient>::iterator it = devices.begin(); it != devices.end(); ++it){
             
             DeviceClient& client = it->second;
             
+            // check for ping timeout from clients
+            // and mark for deletion if we haven't
+            // heard from them in "PingClient" millis
             if(ofGetElapsedTimeMillis() - client.timeLastPing > 2 * appModel->getProperty<int>("PingClient")){
+                
+                // mark for deletion
                 clientsToDelete.insert(it->first);
+                
             }else{
+                
+                // else cache info
                 os << clients << " " << client << endl;
                 clients++;
+                
             }
             
         }
         
+        // delete timed-out clients
         for(set<int>::iterator dt = clientsToDelete.begin(); dt != clientsToDelete.end(); ++dt){
             eraseAll(devices, *dt);
         }
         
+        // store client data on the model
         appModel->setProperty("DeviceClientInfo", os.str());
         
+        // unlock the mutexes
         appModel->getDeviceMutex().unlock();
         unlock();
     }
@@ -152,19 +176,33 @@ void DeviceController2::threadedFunction(){
         
         if(lock()){
             
+            // lock global data mutex
             appModel->getDeviceMutex().lock();
             
             // get devices from the appmodel
             map<int, DeviceClient>& devices = appModel->getAllDevices();
             
+            /******************************************************
+             *******                Broadcast               *******
+             *****************************************************/
+            
             // broadcast (ping) the ip address of the server allowing auto connection
             // on DHCP host for any IP addresses of both client and server
+            // ie., we send ip to all clients on x.x.x.255 at "PingBroadcast" millis intervals
+            // essentially this is a uber basic 'name' server with no names ;)
+            
             if(ofGetElapsedTimeMillis() - timerUDPBroadcastPing > appModel->getProperty<int>("PingBroadcast")){
                 ofxLogVerbose() << "UDP broadcast ping on ip: " << serverIPbroadcast << endl;
                 string msg = "S_" + serverIPpart;
                 UDPbroadcast.Send(msg.c_str(), msg.size());
                 timerUDPBroadcastPing = ofGetElapsedTimeMillis();
             }
+            
+            /******************************************************
+             *******             Client Receive             *******
+             *****************************************************/
+            
+            // UDP connection and control
             
             char udpReceiveMessageChar[1024];
             UDPmanager.Receive(udpReceiveMessageChar, 1024);
@@ -181,8 +219,16 @@ void DeviceController2::threadedFunction(){
                     int clientID = ofToInt(command[1]);
                     
                     map<int, DeviceClient>::iterator it = devices.find(clientID);
+                    
+                    // clients are sending there IP address everytime
+                    // they hear the BroadcastPing so we can either
+                    // create new client or timeout if we don't hear
+                    // the ping. TODO: calculate round trip latency??
+                    
                     if(it == devices.end()){
+                        
                         ofxLogNotice() << "Creating client device with ID: " << clientID << endl;
+                        
                         // create the device
                         DeviceClient d;
                         devices[clientID] = d;
@@ -197,10 +243,13 @@ void DeviceController2::threadedFunction(){
                         client.timeLastPing = ofGetElapsedTimeMillis();
                         client.deviceColor = generateRandomColor();
                         
+                        // this ensures that clientMode and yarpMode are resent on reconnections
+                        // NB: not that efficient but it works ;)
                         clientMode = clientYarpMode = "";
                         
                     }else{
                         
+                        // store ping from clients
                         DeviceClient& client = devices[clientID];
                         client.timeLastPing = ofGetElapsedTimeMillis();
                         
@@ -208,16 +257,24 @@ void DeviceController2::threadedFunction(){
 
                 }else{
                     
+                    // if the udp data is not a ping then we assume it's sending us data packets
+                    
                     DeviceMessageUnion dmu;
+                    
+                    // readout data from char to union
                     for(int i = 0; i < sizeof(DeviceMessage); i++) dmu.data[i] = udpReceiveMessageChar[i];
                     
-                    int clientID = dmu.deviceMessage.clientID;
+                    // process data
                     
+                    int clientID = dmu.deviceMessage.clientID;
                     map<int, DeviceClient>::iterator it = devices.find(clientID);
                     if(it != devices.end()) it->second.push(dmu.deviceMessage);
+                    
                 }
                 
             }
+            
+            // BROADCAST MODES TO CLIENTS
             
             string pClientMode = appModel->getProperty<string>("ClientMode");
             if(clientMode != pClientMode){
@@ -235,6 +292,10 @@ void DeviceController2::threadedFunction(){
                 clientYarpMode = pClientYarpMode;
             }
             
+            /******************************************************
+             *******                   OSC                  *******
+             *****************************************************/
+            
             while(OSCReceiver.hasWaitingMessages()){
                 
                 ofxOscMessage m;
@@ -251,6 +312,10 @@ void DeviceController2::threadedFunction(){
                 
             }
             
+            /******************************************************
+             *******                  YARP                  *******
+             *****************************************************/
+            
             if(YARPReceiver.getPendingReads()){
                 
                 yarp::os::Bottle *input = YARPReceiver.read();
@@ -266,8 +331,10 @@ void DeviceController2::threadedFunction(){
                 
             }
             
+            // don't thrash the thread!
             ofSleepMillis(1);
             
+            // unlock global data mutex
             appModel->getDeviceMutex().unlock();
             unlock();
         }
