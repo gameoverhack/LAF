@@ -33,15 +33,15 @@ public:
         
         dimensions = d;
         
-        buffer.resize(dimensions);
+        buffer.resize(s);
         
         minimums.assign(dimensions, minimum);
         maximums.assign(dimensions, maximum);
 
         representation.resize(s);
         
-        for(int i = 0; i < dimensions; i++){
-            buffer[i].resize(s);
+        for(int i = 0; i < s; i++){
+            buffer[i].resize(dimensions);
         }
         
     }
@@ -53,7 +53,7 @@ public:
         for(int i = 0; i < dimensions; i++){
             
             // store data
-            buffer[i][position] = data[i];
+            buffer[position][i] = data[i];
             
             // cache min and max values
             if(data[i] > maximums[i]) maximums[i] = data[i];
@@ -61,6 +61,10 @@ public:
             if(data[i] > maximum) maximum = data[i];
             if(data[i] < minimum) minimum = data[i];
             
+        }
+        
+        if(dimensions <= 3){
+            representation[position] = ofPoint(buffer[position][0], buffer[position][1], buffer[position][2]);
         }
         
         position++;
@@ -75,7 +79,6 @@ public:
         data[1] = point.y;
         data[2] = point.z;
         push(data);
-        representation[position] = point;
         
     }
     
@@ -99,13 +102,25 @@ public:
         return buffer;
     }
     
-    vector<float> front(){
+    ofPoint& frontAsPoint(){
+        int f = position - 1;
+        if(f < 0) f = buffer.size() - 1;
+        return representation[f];
+    }
+    
+    ofPoint& backAsPoint(){
+        int b = position + 1;
+        if(b == buffer.size()) b = 0;
+        return representation[b];
+    }
+    
+    vector<float>& front(){
         int f = position - 1;
         if(f < 0) f = buffer.size() - 1;
         return buffer[f];
     }
     
-    vector<float> back(){
+    vector<float>& back(){
         int b = position + 1;
         if(b == buffer.size()) b = 0;
         return buffer[b];

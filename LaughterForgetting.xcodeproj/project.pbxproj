@@ -47,6 +47,7 @@
 		7748f9f07c993f15f2868e78ad18d494 /* MSAOpenCLProgram.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 09af7bdccc3eb01b0ea4ef80abd6b37c /* MSAOpenCLProgram.cpp */; };
 		775dd568d4b9548749580bc90df8274d /* MSAOpenCL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 025fd7fd4b1c9eb6897a0ea91c36cdd2 /* MSAOpenCL.cpp */; };
 		7761E65318984442005EF134 /* KeyModifiers.mm in Sources */ = {isa = PBXBuildFile; fileRef = 7761E65218984442005EF134 /* KeyModifiers.mm */; };
+		777BC2E718FCF9EF0021E08F /* DeviceView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 777BC2E518FCF9EF0021E08F /* DeviceView.cpp */; };
 		779B7AFA1860DE1A008B3D26 /* OpenCL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 779B7AF91860DE1A008B3D26 /* OpenCL.framework */; };
 		77DCBB141871E36B00EB911C /* BaseController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 77DCBB071871E36B00EB911C /* BaseController.cpp */; };
 		77DCBB151871E36B00EB911C /* BaseModel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 77DCBB091871E36B00EB911C /* BaseModel.cpp */; };
@@ -282,6 +283,8 @@
 		771C8CEE188065F800B7859B /* PlayerModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PlayerModel.h; sourceTree = "<group>"; };
 		7761E65118984442005EF134 /* KeyModifiers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KeyModifiers.h; sourceTree = "<group>"; };
 		7761E65218984442005EF134 /* KeyModifiers.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = KeyModifiers.mm; sourceTree = "<group>"; };
+		777BC2E518FCF9EF0021E08F /* DeviceView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DeviceView.cpp; sourceTree = "<group>"; };
+		777BC2E618FCF9EF0021E08F /* DeviceView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeviceView.h; sourceTree = "<group>"; };
 		779B7AF91860DE1A008B3D26 /* OpenCL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenCL.framework; path = ../../../../../../../System/Library/Frameworks/OpenCL.framework; sourceTree = "<group>"; };
 		77BCF6B718FC5D7900C2D366 /* DeviceClient.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DeviceClient.h; sourceTree = "<group>"; };
 		77BCF6B818FC5FF800C2D366 /* RingBuffer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RingBuffer.h; sourceTree = "<group>"; };
@@ -1023,6 +1026,8 @@
 				7701FDD8187F49EE0092EDD9 /* AppView.cpp */,
 				7701FDD9187F49EE0092EDD9 /* AppView.h */,
 				77EBC7691871C82400D86F91 /* PlayerView.h */,
+				777BC2E518FCF9EF0021E08F /* DeviceView.cpp */,
+				777BC2E618FCF9EF0021E08F /* DeviceView.h */,
 			);
 			name = Views;
 			sourceTree = "<group>";
@@ -1678,6 +1683,7 @@
 				10b69de456aed1288fc9316b62b715d7 /* Tracker.cpp in Sources */,
 				a6668c5b1272d7fcd5b5a16fd76b2bf8 /* Utilities.cpp in Sources */,
 				dbcb84a37f9aecc254870d79a0a7486e /* Wrappers.cpp in Sources */,
+				777BC2E718FCF9EF0021E08F /* DeviceView.cpp in Sources */,
 				856aa354d08ab4b323081444d6da4e5a /* ofxBaseGui.cpp in Sources */,
 				5cbb2ab3a60f65431d7b555db46d6bb4 /* ofxButton.cpp in Sources */,
 				b266578fc55d23bfebc042e7628673a3 /* ofxGuiGroup.cpp in Sources */,

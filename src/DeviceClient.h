@@ -81,20 +81,20 @@ public:
         dm.serverType =     (ServerType)oscData.getArgAsInt32(2);
         dm.timestamp =      oscData.getArgAsInt32(3);
         dm.accelerationX =  oscData.getArgAsFloat(4);
-        dm.accelerationY =  oscData.getArgAsFloat(4);
-        dm.accelerationZ =  oscData.getArgAsFloat(4);
-        dm.rotationX =      oscData.getArgAsFloat(4);
-        dm.rotationY =      oscData.getArgAsFloat(4);
-        dm.rotationZ =      oscData.getArgAsFloat(4);
-        dm.attitudeX =      oscData.getArgAsFloat(4);
-        dm.attitudeY =      oscData.getArgAsFloat(4);
-        dm.attitudeZ =      oscData.getArgAsFloat(4);
-        dm.gravityX =       oscData.getArgAsFloat(4);
-        dm.gravityY =       oscData.getArgAsFloat(4);
-        dm.gravityZ =       oscData.getArgAsFloat(4);
-        dm.uaccelerationX = oscData.getArgAsFloat(4);
-        dm.uaccelerationY = oscData.getArgAsFloat(4);
-        dm.uaccelerationZ = oscData.getArgAsFloat(4);
+        dm.accelerationY =  oscData.getArgAsFloat(5);
+        dm.accelerationZ =  oscData.getArgAsFloat(6);
+        dm.rotationX =      oscData.getArgAsFloat(7);
+        dm.rotationY =      oscData.getArgAsFloat(8);
+        dm.rotationZ =      oscData.getArgAsFloat(9);
+        dm.attitudeX =      oscData.getArgAsFloat(10);
+        dm.attitudeY =      oscData.getArgAsFloat(11);
+        dm.attitudeZ =      oscData.getArgAsFloat(12);
+        dm.gravityX =       oscData.getArgAsFloat(13);
+        dm.gravityY =       oscData.getArgAsFloat(14);
+        dm.gravityZ =       oscData.getArgAsFloat(15);
+        dm.uaccelerationX = oscData.getArgAsFloat(16);
+        dm.uaccelerationY = oscData.getArgAsFloat(17);
+        dm.uaccelerationZ = oscData.getArgAsFloat(18);
         
         push(dm);
         
@@ -132,9 +132,9 @@ public:
         
         lastDeviceMessage = dm;
         
+        ofPoint lastAttitudeRaw = ofPoint(dm.attitudeX, dm.attitudeY, dm.attitudeZ);
         ofPoint lastUserAccelerationRaw = ofPoint(dm.uaccelerationX, dm.uaccelerationY, dm.uaccelerationZ);
-        ofPoint lastAttitudeRaw = ofPoint(dm.attitudeX, dm.attitudeX, dm.attitudeX);
-        
+
         vector<ofPoint> measurement;
         measurement.push_back(lastAttitudeRaw);
         measurement.push_back(lastUserAccelerationRaw);
@@ -143,9 +143,7 @@ public:
         
         ofPoint lastAttitudeKalman = toOf(cv::Point3f(k.at<float>(0), k.at<float>(1), k.at<float>(2)));
         ofPoint lastUserAccelerationKalman = toOf(cv::Point3f(k.at<float>(3), k.at<float>(4), k.at<float>(5)));
-        
-        ofPoint lastPositionKalman;
-        
+
         lastPositionKalman.x = ofMap(-lastAttitudeKalman.z, ofDegToRad(-35), ofDegToRad(35), 0.0f, ofGetWidth());
         lastPositionKalman.y = ofMap(-lastAttitudeKalman.x, ofDegToRad(-35), ofDegToRad(15), 0.0f, ofGetHeight());
         lastPositionKalman.z = ofMap(-lastAttitudeKalman.y, ofDegToRad(-15), ofDegToRad(35), 0.0f, ofGetHeight());
@@ -171,6 +169,8 @@ public:
     RingBuffer attitudeBuffer;
     RingBuffer accelerationBuffer;
     RingBuffer positionBuffer;
+    
+    ofPoint lastPositionKalman;
     
     DeviceMessage lastDeviceMessage;
     

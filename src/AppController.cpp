@@ -150,6 +150,14 @@ void AppController::setup(){
                    ViewOption(), //VIEW_USE_FBO
                    (string)"output");
     
+    // create deviceView windows
+    deviceView = new DeviceView();
+    deviceView->setup(appModel->getProperty<float>("OutputWidth"),
+                      appModel->getProperty<float>("OutputHeight"),
+                      ViewOption(), //VIEW_USE_FBO
+                      (string)"device");
+    
+    
     // make a debug window
     debugView = new DebugView();
     debugView->setup(ofGetWidth(),
@@ -240,6 +248,7 @@ void AppController::draw(){
     StateGroup & playControllerStates = appModel->getStateGroup("PlayControllerStates");
     
     appView->update();
+    deviceView->update();
     
     if(debugViewStates.getState(kDEBUGVIEW_SHOWINFO)) debugView->update();
     
@@ -255,7 +264,7 @@ void AppController::draw(){
             ofEnableBlendMode(OF_BLENDMODE_SCREEN);
 
             appView->draw();
-            //deviceController->draw(); //TODO: move to a view!
+            deviceView->draw();
             
         }
             break;

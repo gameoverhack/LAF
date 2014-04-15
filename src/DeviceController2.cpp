@@ -91,11 +91,11 @@ void DeviceController2::setup(){
         
         // set timer
         timerUDPBroadcastPing = ofGetElapsedTimeMillis();
-        clientMode = "NONE";
-        clientYarpMode = "udp";
+        clientMode = "";
+        clientYarpMode = "";
         
-        appModel->setProperty("ClientMode", clientMode);
-        appModel->setProperty("ClientYarpMode", clientYarpMode);
+        appModel->setProperty("ClientMode", (string)"UDP");
+        appModel->setProperty("ClientYarpMode", (string)"udp");
         
         // start threading - non-blocking, non-verbose
         startThread(true, false);                      // QUESTION: maybe blocking and flags is better for this?
@@ -123,6 +123,7 @@ void DeviceController2::update(){
         for(map<int, DeviceClient>::iterator it = devices.begin(); it != devices.end(); ++it){
             
             DeviceClient& client = it->second;
+            
             if(ofGetElapsedTimeMillis() - client.timeLastPing > 2 * appModel->getProperty<int>("PingClient")){
                 clientsToDelete.insert(it->first);
             }else{
@@ -204,9 +205,7 @@ void DeviceController2::threadedFunction(){
                         client.timeLastPing = ofGetElapsedTimeMillis();
                         
                     }
-                    
-                    
-                    
+
                 }else{
                     
                     DeviceMessageUnion dmu;

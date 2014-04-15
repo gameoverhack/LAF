@@ -12,6 +12,7 @@
 #include "BaseController.h"
 #include "AppModel.h"
 #include "AppView.h"
+#include "DeviceView.h"
 #include "DebugView.h"
 #include "PlayController.h"
 #include "AnalyzeController.h"
@@ -45,6 +46,7 @@ protected:
     float offsetX, offsetY;
     
     AppView * appView;
+    DeviceView * deviceView;
     DebugView * debugView;
     
     AnalyzeController * analyzeController;
