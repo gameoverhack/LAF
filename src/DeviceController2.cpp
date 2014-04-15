@@ -191,7 +191,7 @@ void DeviceController2::threadedFunction(){
                         DeviceClient& client = devices[clientID];
                         client.accelerationBuffer.resize(50, 3);
                         client.attitudeBuffer.resize(50, 3);
-                        client.positionBuffer.resize(50, 3);
+                        client.positionBuffer.resize(20, 3);
                         client.kalmanFilter.setup(2, 3);
                         client.clientID = clientID;
                         client.timeLastPing = ofGetElapsedTimeMillis();

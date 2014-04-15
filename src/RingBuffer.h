@@ -10,6 +10,7 @@
 #define __H_RINGBUFFER
 
 #include "ofMain.h"
+#include "VectorUtils.h"
 
 class RingBuffer{
     
@@ -37,7 +38,9 @@ public:
         
         minimums.assign(dimensions, minimum);
         maximums.assign(dimensions, maximum);
-
+        
+        averages.assign(dimensions, 0.0f);
+        
         representation.resize(s);
         
         for(int i = 0; i < s; i++){
@@ -50,10 +53,13 @@ public:
         
         assert(buffer.size() > 0);
         assert(data.size() == dimensions);
+        
         for(int i = 0; i < dimensions; i++){
             
             // store data
             buffer[position][i] = data[i];
+            
+            averages[i] = getVecAvg(buffer[position]);
             
             // cache min and max values
             if(data[i] > maximums[i]) maximums[i] = data[i];
@@ -91,6 +97,7 @@ public:
         buffer.clear();
         minimums.clear();
         maximums.clear();
+        averages.clear();
         representation.clear();
     }
     
@@ -124,6 +131,10 @@ public:
         int b = position + 1;
         if(b == buffer.size()) b = 0;
         return buffer[b];
+    }
+    
+    vector<float>& getAverages(){
+        return averages;
     }
     
     vector<float>& getMinimums(){
@@ -160,15 +171,14 @@ protected:
     
     vector<float> minimums;
     vector<float> maximums;
+    vector<float> averages;
     float minimum;
     float maximum;
     int minDimension;
     int maxDimension;
     
-    
     vector< vector<float> > buffer;
     vector<ofPoint> representation;
-    
     
 };
 
