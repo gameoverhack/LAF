@@ -101,7 +101,9 @@ void AppController::setup(){
 //    appModel->setProperty("pathBoundingSizeW", 70.0f); // 15
 //    appModel->setProperty("pathBoundingSizeH", 110.0f); // 15
     
-    appModel->setProperty("PingBroadcast", 3000);
+    appModel->setProperty("PingBroadcast", 2000);
+    appModel->setProperty("PingClient", 2000);
+    appModel->setProperty("DeviceClientInfo", (string)"");
     
     appModel->setProperty("DistanceThreshold", 200.0f);
     appModel->setProperty("FadeTime", 0);
@@ -253,7 +255,7 @@ void AppController::draw(){
             ofEnableBlendMode(OF_BLENDMODE_SCREEN);
 
             appView->draw();
-            //deviceController->draw(); TODO: move to a view!
+            //deviceController->draw(); //TODO: move to a view!
             
         }
             break;
@@ -284,7 +286,29 @@ void AppController::keyPressed(ofKeyEventArgs & e){
     StateGroup & appControllerStates = appModel->getStateGroup("AppControllerStates");
     
     switch(e.key) {
-            
+        case 'N':
+            appModel->setProperty("ClientMode", (string)"NONE");
+            break;
+        case 'O':
+            appModel->setProperty("ClientMode", (string)"OSC");
+            break;
+        case 'U':
+            appModel->setProperty("ClientMode", (string)"UDP");
+            break;
+        case 'Y':
+            appModel->setProperty("ClientMode", (string)"YRP");
+            break;
+        case 'T':
+        {
+            string clientYarpMode = appModel->getProperty<string>("ClientYarpMode");
+            if(clientYarpMode == "udp"){
+                clientYarpMode = "tcp";
+            }else{
+                clientYarpMode = "udp";
+            }
+            appModel->setProperty("ClientYarpMode", clientYarpMode);
+        }
+            break;
         case '1':
             appModel->toggleProperty("ShowAvatarsSmall");
             break;

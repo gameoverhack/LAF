@@ -35,9 +35,9 @@ public:
         
         buffer.resize(dimensions);
         
-        minimums.assign(minimum, dimensions);
-        maximums.assign(maximum, dimensions);
-        
+        minimums.assign(dimensions, minimum);
+        maximums.assign(dimensions, maximum);
+
         representation.resize(s);
         
         for(int i = 0; i < dimensions; i++){
@@ -46,7 +46,7 @@ public:
         
     }
     
-    void push(vector<float>& data){
+    void push(vector<float> data){
         
         assert(buffer.size() > 0);
         assert(data.size() == dimensions);
@@ -73,7 +73,7 @@ public:
         vector<float> data(3);
         data[0] = point.x;
         data[1] = point.y;
-        data[3] = point.z;
+        data[2] = point.z;
         push(data);
         representation[position] = point;
         

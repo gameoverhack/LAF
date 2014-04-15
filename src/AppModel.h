@@ -451,6 +451,10 @@ public:
         return devices;
     }
     
+    ofMutex& getDeviceMutex(){
+        return deviceMutex;
+    }
+    
 protected:
     
     KeyModifiers                keyModifiers;
@@ -489,6 +493,7 @@ protected:
     
     // device client storage
     map<int, DeviceClient> devices;
+    ofMutex deviceMutex;
     
     friend class boost::serialization::access;
 	template<class Archive>

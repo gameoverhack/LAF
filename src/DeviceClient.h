@@ -66,12 +66,13 @@ class DeviceClient {
     
 public:
     
-    DeviceClient(){}
+    DeviceClient(){
+        clientID = -1;
+        timeThisMessage = timeLastMessage = fps = frameRate = 0;
+    }
     ~DeviceClient(){}
     
     void push(ofxOscMessage& oscData){
-        
-        cout << "New OSC" << endl;
         
         DeviceMessage dm;
         
@@ -96,14 +97,6 @@ public:
         dm.uaccelerationZ = oscData.getArgAsFloat(4);
         
         push(dm);
-        
-    };
-    
-    void push(char * c){
-        
-        DeviceMessageUnion dm;
-        for(int i = 0; i < sizeof(DeviceMessage); i++) dm.data[i] = c[i];
-        push(dm.deviceMessage);
         
     };
     
@@ -135,7 +128,7 @@ public:
         
     };
     
-    void push(DeviceMessage& dm){
+    void push(DeviceMessage dm){
         
         lastDeviceMessage = dm;
         
@@ -161,21 +154,19 @@ public:
         accelerationBuffer.push(lastUserAccelerationKalman);
         positionBuffer.push(lastPositionKalman);
         
-        // calculate frameRate -> taken from ofAppRunner
-        prevMillis = ofGetElapsedTimeMillis();
-        timeNow = ofGetElapsedTimef();
-        double diff = timeNow-timeThen;
+        // calculate frameRate
+        timeThisMessage = ofGetElapsedTimef();
+        double diff = timeThisMessage - timeLastMessage;
         if( diff  > 0.00001 ){
             fps			= 1.0 / diff;
             frameRate	*= 0.9f;
             frameRate	+= 0.1f*fps;
         }
-        lastFrameTime	= diff;
-        timeThen		= timeNow;
-        
-        cout << "New DeviceMessage: " << frameRate << endl;
+        timeLastMessage	= timeThisMessage;
         
     }
+    
+    friend inline ostream& operator<<(ostream& os, DeviceClient& dc);
     
     RingBuffer attitudeBuffer;
     RingBuffer accelerationBuffer;
@@ -191,8 +182,20 @@ public:
     
     Kalman kalmanFilter;
     
-    double prevMillis, lastFrameTime, timeNow, timeThen, fps, frameRate;
+    int timeLastPing;
+    
+    double timeThisMessage, timeLastMessage, fps, frameRate;
     
 };
+
+inline ostream& operator<<(ostream& os, DeviceMessage& dm){
+    os << " at: (" << dm.attitudeX << ", " << dm.attitudeY << ", " << dm.attitudeZ << ") ";
+    return os;
+}
+
+inline ostream& operator<<(ostream& os, DeviceClient& dc){
+    os << dc.clientID << "  " << dc.frameRate << "  " << dc.lastDeviceMessage;
+    return os;
+}
 
 #endif

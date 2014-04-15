@@ -59,6 +59,7 @@ public:
     
     // UDP
     ofxUDPManager UDPmanager;
+    string clientMode;
     
     // OSC
     ofxOscReceiver OSCReceiver;
@@ -69,6 +70,7 @@ public:
     yarp::os::BufferedPort<yarp::os::Bottle> YARPReceiver;
     yarp::os::BufferedPort<yarp::os::Bottle> YARPSender;
     yarp::os::Bottle* YARPBottle;
+    string clientYarpMode;
     
     // UDP broadcast server
     ofxUDPManager UDPbroadcast;
