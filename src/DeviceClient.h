@@ -74,6 +74,8 @@ public:
     
     void push(ofxOscMessage& oscData){
         
+        // process an osc message
+        
         DeviceMessage dm;
         
         dm.clientID =       oscData.getArgAsInt32(0);
@@ -101,6 +103,8 @@ public:
     };
     
     void push(yarp::os::Bottle *yarpData){
+        
+        // process a yarp message
         
         DeviceMessage dm;
         
@@ -130,24 +134,30 @@ public:
     
     void push(DeviceMessage dm){
         
+        // cache this message
         lastDeviceMessage = dm;
         
+        // convert to ofPoint
         ofPoint lastAttitudeRaw = ofPoint(dm.attitudeX, dm.attitudeY, dm.attitudeZ);
         ofPoint lastUserAccelerationRaw = ofPoint(dm.uaccelerationX, dm.uaccelerationY, dm.uaccelerationZ);
 
+        // do kalman filtering on attitude v acceleration
         vector<ofPoint> measurement;
         measurement.push_back(lastAttitudeRaw);
         measurement.push_back(lastUserAccelerationRaw);
         kalmanFilter.setMeasured(measurement);
         cv::Mat k = kalmanFilter.getCorrected();
         
+        // get results in ofPoint
         ofPoint lastAttitudeKalman = toOf(cv::Point3f(k.at<float>(0), k.at<float>(1), k.at<float>(2)));
         ofPoint lastUserAccelerationKalman = toOf(cv::Point3f(k.at<float>(3), k.at<float>(4), k.at<float>(5)));
 
+        // calculate and cache position TODO: add resistance to position
         lastPositionKalman.x = ofMap(-lastAttitudeKalman.z, ofDegToRad(-35), ofDegToRad(35), 0.0f, ofGetWidth());
         lastPositionKalman.y = ofMap(-lastAttitudeKalman.x, ofDegToRad(-35), ofDegToRad(15), 0.0f, ofGetHeight());
         lastPositionKalman.z = ofMap(-lastAttitudeKalman.y, ofDegToRad(-15), ofDegToRad(35), 0.0f, ofGetHeight());
         
+        // cache attitude, acceleration and position in ringbuffers
         attitudeBuffer.push(lastAttitudeRaw);
         accelerationBuffer.push(lastUserAccelerationKalman);
         positionBuffer.push(lastPositionKalman);
@@ -189,12 +199,12 @@ public:
 };
 
 inline ostream& operator<<(ostream& os, DeviceMessage& dm){
-    os << " at: (" << dm.attitudeX << ", " << dm.attitudeY << ", " << dm.attitudeZ << ") ";
+    os << "at: (" << dm.attitudeX << ", " << dm.attitudeY << ", " << dm.attitudeZ << ")";
     return os;
 }
 
 inline ostream& operator<<(ostream& os, DeviceClient& dc){
-    os << dc.clientID << "  " << dc.frameRate << "  " << dc.lastDeviceMessage;
+    os << dc.clientID << "  " << dc.frameRate << "  " << dc.lastDeviceMessage << " opt: " << dc.positionBuffer.getDifferenceAsPoint() << " t: " << dc.positionBuffer.getFlowAngle();
     return os;
 }
 

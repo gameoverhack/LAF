@@ -12,6 +12,13 @@
 #include "ofMain.h"
 #include "VectorUtils.h"
 
+enum FlowDirection{
+    FLOW_LEFT = 0,
+    FLOW_RIGHT,
+    FLOW_UP,
+    FLOW_DOWN
+};
+
 class RingBuffer{
     
 public:
@@ -60,6 +67,7 @@ public:
             // store data
             buffer[position][i] = data[i];
             
+            // calculate + cache averages and differences between front and back
             averages[i] = getVecAvg(buffer[position]);
             differences[i] = buffer[position][i] - buffer[(position + 1 < buffer.size() ? position + 1 : 0)][i];
 
@@ -71,13 +79,30 @@ public:
             
         }
         
-        for(int i = 0; i < dimensions; i++)
+        // should i do this for > 3 dimensions???
         if(dimensions <= 3){
-            representation[position] = frontPoint = ofPoint(buffer[position][0], buffer[position][1], buffer[position][2]);
+            
+            // cache an ofPoint version of the data
+            representation[position] = ofPoint(buffer[position][0], buffer[position][1], buffer[position][2]);
+            
+            // calc + cache front + back values in the buffer
+            frontPoint = representation[position];
             backPoint = representation[(position + 1 < buffer.size() ? position + 1 : 0)];
+            
+            // calc + cache difference, average and angle (of flow)
             differencePoint = frontPoint - backPoint;
+            averagePoint = ofPoint(averages[0], averages[1], averages[2]);
+            angle = ofRadToDeg(atan2(differencePoint.x, differencePoint.y));
+            
+            // calc + cache 'direction' of flow
+            if(angle > 45.0f && angle <= 135.0f) direction = FLOW_RIGHT;
+            if((angle > 135.0f && angle <= 180.0f) || (angle >= -180.0f && angle <= -135.0f)) direction = FLOW_UP;
+            if(angle > -135.0f && angle <= -45.0f) direction = FLOW_LEFT;
+            if((angle > -45.0f && angle <= 0.0f) || (angle > 0.0f && angle < 45.0f)) direction = FLOW_DOWN;
+            
         }
         
+        // update position in buffer, fyi -> we are pushing to the FRONT of the buffer!
         position++;
         if(position == buffer.size()) position = 0;
         
@@ -85,6 +110,7 @@ public:
     
     void push(ofPoint point){
         
+        // convenience wrapper for ofPoint
         vector<float> data(3);
         data[0] = point.x;
         data[1] = point.y;
@@ -115,6 +141,35 @@ public:
         return buffer;
     }
     
+    float getFlowAngle(){
+        return angle;
+    }
+    
+    FlowDirection getFlowDirection(){
+        return direction;
+    }
+    
+    string getFlowDirectionAsString(){
+        return getFlowDirectionAsString(direction);
+    }
+    
+    string getFlowDirectionAsString(FlowDirection f){
+        switch(f){
+            case FLOW_LEFT:
+                return "FLOW_LEFT";
+                break;
+            case FLOW_RIGHT:
+                return "FLOW_RIGHT";
+                break;
+            case FLOW_UP:
+                return "FLOW_UP";
+                break;
+            case FLOW_DOWN:
+                return "FLOW_DOWN";
+                break;
+        }
+    };
+    
     ofPoint& getDifferenceAsPoint(){
         return differencePoint;
     }
@@ -143,6 +198,10 @@ public:
         return averages;
     }
     
+    ofPoint& getAveragesAsPoint(){
+        return averagePoint;
+    }
+    
     vector<float>& getMinimums(){
         return minimums;
     }
@@ -159,7 +218,7 @@ public:
     }
     
     int getMaxDimension(){
-        return getVecMaxIndex(minimums); // TODO: cache
+        return getVecMaxIndex(maximums); // TODO: cache
     }
     
     int getMinDimension(){
@@ -184,7 +243,10 @@ protected:
     int minDimension;
     int maxDimension;
     
-    ofPoint differencePoint, frontPoint, backPoint;
+    ofPoint averagePoint, differencePoint, frontPoint, backPoint;
+    
+    float angle;
+    FlowDirection direction;
     
     vector< vector<float> > buffer;
     vector<ofPoint> representation;
