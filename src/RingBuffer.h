@@ -40,6 +40,7 @@ public:
         maximums.assign(dimensions, maximum);
         
         averages.assign(dimensions, 0.0f);
+        differences.assign(dimensions, 0.0f);
         
         representation.resize(s);
         
@@ -60,7 +61,8 @@ public:
             buffer[position][i] = data[i];
             
             averages[i] = getVecAvg(buffer[position]);
-            
+            differences[i] = buffer[position][i] - buffer[(position + 1 < buffer.size() ? position + 1 : 0)][i];
+
             // cache min and max values
             if(data[i] > maximums[i]) maximums[i] = data[i];
             if(data[i] < minimums[i]) minimums[i] = data[i];
@@ -69,8 +71,11 @@ public:
             
         }
         
+        for(int i = 0; i < dimensions; i++)
         if(dimensions <= 3){
-            representation[position] = ofPoint(buffer[position][0], buffer[position][1], buffer[position][2]);
+            representation[position] = frontPoint = ofPoint(buffer[position][0], buffer[position][1], buffer[position][2]);
+            backPoint = representation[(position + 1 < buffer.size() ? position + 1 : 0)];
+            differencePoint = frontPoint - backPoint;
         }
         
         position++;
@@ -98,6 +103,7 @@ public:
         minimums.clear();
         maximums.clear();
         averages.clear();
+        differences.clear();
         representation.clear();
     }
     
@@ -109,16 +115,16 @@ public:
         return buffer;
     }
     
-    ofPoint& frontAsPoint(){
-        int f = position - 1;
-        if(f < 0) f = buffer.size() - 1;
-        return representation[f];
+    ofPoint& getDifferenceAsPoint(){
+        return differencePoint;
     }
     
-    ofPoint& backAsPoint(){
-        int b = position + 1;
-        if(b == buffer.size()) b = 0;
-        return representation[b];
+    ofPoint& getFrontAsPoint(){
+        return frontPoint;
+    }
+    
+    ofPoint& getBackAsPoint(){
+        return backPoint;
     }
     
     vector<float>& front(){
@@ -172,10 +178,13 @@ protected:
     vector<float> minimums;
     vector<float> maximums;
     vector<float> averages;
+    vector<float> differences;
     float minimum;
     float maximum;
     int minDimension;
     int maxDimension;
+    
+    ofPoint differencePoint, frontPoint, backPoint;
     
     vector< vector<float> > buffer;
     vector<ofPoint> representation;

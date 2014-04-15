@@ -49,14 +49,14 @@ void DeviceView::update(){
             ofNoFill();
             ofSetColor(client.deviceColor);
             
-            ofPoint& pF = client.positionBuffer.frontAsPoint();
-            ofPoint& pB = client.positionBuffer.backAsPoint();
+            ofPoint& pF = client.positionBuffer.getFrontAsPoint();
+            ofPoint& pD = client.positionBuffer.getDifferenceAsPoint();
             int pS = client.positionBuffer.size();
             
             ofCircle(pF.x, pF.y, 50);
             
             //ofLine(pF.x, pF.y, pF.x + (((pB.x - pF.x) / pS) * pS), pF.y + (((pB.y - pF.y) / pS) * pS));
-            ofLine(pF.x, pF.y, pF.x + (((pF.x - pB.x) / pS) * pS), pF.y + (((pF.y - pB.y) / pS) * pS));
+            ofLine(pF.x, pF.y, pF.x + pD.x, pF.y + pD.y);
             
         }
         
