@@ -47,7 +47,11 @@ void DebugView::update(){
     if(debugViewStates.getState(kDEBUGVIEW_SHOWINFO)){
         
         os << ofGetFrameRate() << endl << endl;
-        os << appModel->getProperty<string>("ClientMode") << endl;
+        os << appModel->getProperty<string>("ClientMode");
+        if (appModel->getProperty<string>("ClientMode") == "YRP") {
+            os << "-" << appModel->getProperty<string>("ClientYarpMode");
+        }
+        os << endl;
         os << appModel->getProperty<string>("DeviceClientInfo") << endl << endl;
         
     }
