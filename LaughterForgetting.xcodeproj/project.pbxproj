@@ -330,6 +330,7 @@
 		77F0F74918F9ED0E00948003 /* DeviceController2.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DeviceController2.cpp; sourceTree = "<group>"; };
 		77F0F74A18F9ED0E00948003 /* DeviceController2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeviceController2.h; sourceTree = "<group>"; };
 		77F9D7401888C33B005AC6FD /* LaughterForgettingDebug.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LaughterForgettingDebug.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		77FD878018FE6467001A8634 /* PhilippeModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PhilippeModel.h; sourceTree = "<group>"; };
 		78c3fff9884db60ce1449d8e7b789e36 /* MSAPingPong.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = MSAPingPong.h; path = ../../../addons/ofxMSAPingPong/src/MSAPingPong.h; sourceTree = SOURCE_ROOT; };
 		78d67a00eb899fac0943059784f8212a /* ofxLabel.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 30; name = ofxLabel.cpp; path = ../../../addons/ofxGui/src/ofxLabel.cpp; sourceTree = SOURCE_ROOT; };
 		7b6a03390302d5a2c9f0e4ab630ae8d6 /* ofxCvFloatImage.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 30; name = ofxCvFloatImage.cpp; path = ../../../addons/ofxOpenCv/src/ofxCvFloatImage.cpp; sourceTree = SOURCE_ROOT; };
@@ -982,6 +983,7 @@
 			children = (
 				771C8CEE188065F800B7859B /* PlayerModel.h */,
 				77E63E9818771D020003A224 /* AppModel.h */,
+				77FD878018FE6467001A8634 /* PhilippeModel.h */,
 			);
 			name = Models;
 			sourceTree = "<group>";

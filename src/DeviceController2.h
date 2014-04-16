@@ -11,6 +11,7 @@
 
 #include "BaseController.h"
 #include "AppModel.h"
+#include "PhilippeModel.h"
 
 #include "ofxNetwork.h"
 #include "ofxOSC.h"
@@ -63,7 +64,6 @@ public:
     
     // OSC
     ofxOscReceiver OSCReceiver;
-    ofxOscSender OSCSender;
     
     // YARP
     yarp::os::Network YARPManager;

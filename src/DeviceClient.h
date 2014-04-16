@@ -15,6 +15,7 @@
 #include "RingBuffer.h"
 #include "ofxNetwork.h"
 #include "ofxOSC.h"
+#include "PhilippeModel.h"
 
 #include "yarp/os/impl/NameConfig.h"
 #include "yarp/os/all.h"
@@ -154,13 +155,51 @@ public:
 
         // calculate and cache position TODO: add resistance to position
         lastPositionKalman.x = ofMap(-lastAttitudeKalman.z, ofDegToRad(-35), ofDegToRad(35), 0.0f, ofGetWidth());
-        lastPositionKalman.y = ofMap(-lastAttitudeKalman.x, ofDegToRad(-35), ofDegToRad(15), 0.0f, ofGetHeight());
-        lastPositionKalman.z = ofMap(-lastAttitudeKalman.y, ofDegToRad(-15), ofDegToRad(35), 0.0f, ofGetHeight());
+        lastPositionKalman.y = ofMap(-lastAttitudeKalman.x, ofDegToRad(-15), ofDegToRad(15), 0.0f, ofGetHeight());
+        //lastPositionKalman.z = ofMap(-lastAttitudeKalman.y, ofDegToRad(-35), ofDegToRad(35), 0.0f, ofGetHeight());
         
         // cache attitude, acceleration and position in ringbuffers
         attitudeBuffer.push(lastAttitudeRaw);
         accelerationBuffer.push(lastUserAccelerationKalman);
         positionBuffer.push(lastPositionKalman);
+        
+        // and send to OSCSender -> philippe
+        ofxOscSender& OSCSender = philModel->getOSCSender();
+
+        ofxOscMessage m;
+        
+        ofPoint& pF = positionBuffer.getFrontAsPoint();
+        ofPoint& tF = attitudeBuffer.getFrontAsPoint();
+        ofPoint& aF = accelerationBuffer.getFrontAsPoint();
+        
+        ofPoint& pD = positionBuffer.getDifferenceAsPoint();
+        float aN = positionBuffer.getFlowAngle();
+        FlowDirection fD = positionBuffer.getFlowDirection();
+        
+        m.setAddress("/device");
+        
+        m.addIntArg(clientID);
+        
+        m.addFloatArg(pD.x);
+        m.addFloatArg(pD.y);
+        m.addFloatArg(pD.z);
+        
+        m.addFloatArg(aN);
+        m.addIntArg((int)fD);
+        
+        m.addFloatArg(pF.x);
+        m.addFloatArg(pF.y);
+        m.addFloatArg(pF.z);
+        
+        m.addFloatArg(tF.x);
+        m.addFloatArg(tF.y);
+        m.addFloatArg(tF.z);
+        
+        m.addFloatArg(aF.x);
+        m.addFloatArg(aF.y);
+        m.addFloatArg(aF.z);
+        
+        OSCSender.sendMessage(m);
         
         // calculate frameRate
         timeThisMessage = ofGetElapsedTimef();

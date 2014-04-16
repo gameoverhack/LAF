@@ -82,6 +82,11 @@ void DeviceController2::setup(){
         OSCReceiver.setup(10003);
         ofxLogNotice() << "Bind OSCReceiver on " << serverIPfull << ":10003" << endl;
         
+        ofxOscSender& OSCSender = philModel->getOSCSender();
+        
+        OSCSender.setup("10.0.1.69", 10004);
+        ofxLogNotice() << "Bind OSCSender on " << "10.0.1.69" << ":10004" << endl;
+        
         // YARP
         yarp::os::impl::NameConfig yarpNameConfig;
         yarp::os::impl::Address yarpAddress(serverIPfull.c_str(), 10000);

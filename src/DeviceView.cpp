@@ -59,10 +59,27 @@ void DeviceView::update(){
             
             // draw 'optical flow'
             ofLine(pF.x, pF.y, pF.x + pD.x, pF.y + pD.y);
+
+            //cout << pD.length() << endl;
             
             // testing jerk and direction
             if(pD.length() > 200.0f){
+                
+                
+                // and send to OSCSender -> philippe
+                ofxOscSender& OSCSender = philModel->getOSCSender();
+                
+                ofxOscMessage m;
+                m.setAddress("/" + client.positionBuffer.getFlowDirectionAsString());
+                
+                m.addIntArg(client.clientID);
+                m.addFloatArg(pD.length());
+                m.addFloatArg(angle);
+                
+                OSCSender.sendMessage(m);
+                
                 cout << "JERK->" << client.positionBuffer.getFlowDirectionAsString() << endl;
+                
             }
             
         }
