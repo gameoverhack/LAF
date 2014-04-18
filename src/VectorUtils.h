@@ -81,7 +81,12 @@ inline void eraseAll(vector<T> &v, T element){
 
 template<typename A, typename B>
 inline void eraseAll(map<A, B> &m, A element){
-    m.erase(m.find(element));
+    typename map<A, B>::iterator it = m.find(element);
+    if(it != m.end()){
+        m.erase(m.find(element));
+    }else{
+        cout << "WARNING: VectorUtils::eraseAll - Warning element did not exist in map!" << endl;
+    }
 }
 
 template<typename T>
@@ -104,6 +109,16 @@ inline vector<T> unique(vector<T> &v){
     }
     return r;
 }
+
+template<typename A, typename B>
+inline ostream& operator<<(ostream& os, map<A, B> &m){
+    int count = 0;
+    for(typename map<A, B>::iterator it = m.begin(); it != m.end(); ++it){
+        os << it->first << (count == m.size() - 1 ? "" : ", ");
+        count++;
+    }
+	return os;
+};
 
 template<typename T>
 inline ostream& operator<<(ostream& os, vector<T> &v){

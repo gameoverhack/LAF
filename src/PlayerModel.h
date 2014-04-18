@@ -74,49 +74,71 @@ public:
             tFileList.allowExt("mov");
             tFileList.listDir(playerFolder, false);
             
+            
+            vector<string> fileNamesToCheck;
+            vector<string> fileNamesToDelete;
+            
             for(int i = 0; i < fileList.size(); i++){
                 
                 File oldFile = fileList.getFile(i);
-                bool checkFile = false;
-                bool deleteFile = true;
-                
-                for(int j = 0; j < tFileList.size(); j++){
-                    
-                    File newFile = tFileList.getFile(i);
-                    if(oldFile.name == newFile.name){
-                        deleteFile = false;
-                        if(oldFile.date != newFile.date){
-                            checkFile = true;
-                        }
-                    }
-                }
-                
-                if(deleteFile){
-                    
-                    ofxLogNotice() << "Deleting media listing for " << oldFile.name << endl;
-                    
-                    eraseAll(rectframes, oldFile.name);
-                    eraseAll(keyframes, oldFile.name);
-                    eraseAll(metadata, oldFile.name);
-                    eraseAll(fileDictionary, oldFile.name);
-                    
-                    for(map<string, vector<string> >::iterator it = markDictionary.begin(); it != markDictionary.end(); ++it){
-                        vector<string>& v = it->second;
-                        eraseAll(v, oldFile.name);
-                        if(v.size() == 0) markDictionary.erase(it); --it;
-                    }
-                    
-                }
-                
-                if(checkFile || bForceCheck){
-                    
-                    ofxLogNotice() << "Marking media listing for " << oldFile.name << endl;
-                    
-                    fileNames.push_back(oldFile.name);
-                    filePaths.push_back(oldFile.path);
+                if(!tFileList.getFileExists(oldFile.name)){
+                    ofxLogVerbose() << "Mark for delete: " << oldFile.name << endl;
+                    fileNamesToDelete.push_back(oldFile.name);
                 }
                 
             }
+            
+            for(int i = 0; i < tFileList.size(); i++){
+                
+                File currentFile = tFileList.getFile(i);
+                
+                if(bForceCheck){
+                    ofxLogVerbose() << "Mark for check (forced): " << currentFile.name << endl;
+                    fileNamesToCheck.push_back(currentFile.name);
+                }else{
+                    if(fileList.getFileExists(currentFile.name)){
+                        File oldFile = fileList.getFile(currentFile.name);
+                        if(oldFile.date != currentFile.date){
+                            ofxLogVerbose() << "Mark for check (datematch): " << currentFile.name << endl;
+                            fileNamesToCheck.push_back(currentFile.name);
+                        }
+                    }else{
+                        ofxLogVerbose() << "Mark for check (newfile): " << currentFile.name << endl;
+                        fileNamesToCheck.push_back(currentFile.name);
+                    }
+                }
+                
+                
+                
+            }
+            
+            for(int i = 0; i < fileNamesToDelete.size(); i++){
+                ofxLogNotice() << "Deleting media listing for " << fileNamesToDelete[i] << endl;
+                
+                eraseAll(rectframes, fileNamesToDelete[i]);
+                eraseAll(keyframes, fileNamesToDelete[i]);
+                eraseAll(metadata, fileNamesToDelete[i]);
+                eraseAll(fileDictionary, fileNamesToDelete[i]);
+                
+                set<string> mDelete;
+                for(map<string, vector<string> >::iterator it = markDictionary.begin(); it != markDictionary.end(); ++it){
+                    vector<string>& v = it->second;
+                    eraseAll(v, fileNamesToDelete[i]);
+                    if(v.size() == 0) mDelete.insert(it->first);
+                }
+                
+                for(set<string>::iterator it = mDelete.begin(); it != mDelete.end(); ++it){
+                    eraseAll(markDictionary, *it);
+                }
+            }
+            
+            for(int i = 0; i < fileNamesToCheck.size(); i++){
+                ofxLogNotice() << "Checking media listing for " << fileNamesToCheck[i] << endl;
+                File currentFile = tFileList.getFile(fileNamesToCheck[i]);
+                fileNames.push_back(currentFile.name);
+                filePaths.push_back(currentFile.path);
+            }
+
         }
         
         fileList.clear();
@@ -186,11 +208,11 @@ public:
             
             xmp.setup();
             xmp.setNormaliseMarkers(true);
-            xmp.setAllowDoubles(true);
+            xmp.setAllowDoubles(false);
             xmp.setRemoveCarriageReturns(true);
             xmp.loadXMP(filePath);
             xmp.listMarkers();
-            //xmp.dumpDynamicMetaData();
+            xmp.dumpDynamicMetaData();
             
             vector<string> nameParts = ofSplitString(fileName, "_");
             string firstMarker = nameParts[0] + "_" + nameParts[1] + "_" + nameParts[0] + "_" + nameParts[1];

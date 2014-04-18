@@ -64,7 +64,7 @@ void AppController::setup(){
     appModel->setProperty("Ortho", true);
     
     //appModel->setProperty("MediaPath", (string)"/Users/gameoverlf/Desktop/LAF/media");
-    appModel->setProperty("MediaPath", (string)"/Users/gameover/Desktop/LOTE/media");
+    appModel->setProperty("MediaPath", (string)"/Users/gameover/Desktop/LOTE/medianew");
     //appModel->setProperty("MediaPath", (string)"/Volumes/LongingAndForgetting02/LOTE/TESTRENDERS/mediaANIME");
     //appModel->setProperty("MediaPath", (string)"/Users/omid/Desktop/LAF/media");
     appModel->setProperty("NumberPlayers", 10);
@@ -76,13 +76,13 @@ void AppController::setup(){
     appModel->setProperty("CheckXMP", false);
     appModel->setProperty("CheckRects", false);
     appModel->setProperty("ForceCheckRects", false);
-    
-    appModel->setProperty("ContourMinArea", 10);
+
+    appModel->setProperty("ContourMinArea", 30);
     appModel->setProperty("ContourMaxArea", 1200);
     appModel->setProperty("ContourThreshold", 11);
     
-    appModel->setProperty("VideoWidth", 550.0f);
-    appModel->setProperty("VideoHeight", 550.0f);
+    appModel->setProperty("VideoWidth", 650.0f);
+    appModel->setProperty("VideoHeight", 650.0f);
     appModel->setProperty("DefaultDrawSize", 100.0f);
     
     appModel->setProperty("TransitionLength", 12);
@@ -222,7 +222,10 @@ void AppController::update(){
         case kAPPCONTROLLER_INIT:
         {
             analyzeController->update();
-            if(analyzeControllerStates.getState(kANALYZECONTROLER_DONE)) appControllerStates.setState(kAPPCONTROLLER_PLAY);
+            if(analyzeControllerStates.getState(kANALYZECONTROLER_DONE)){
+                appModel->save("config", ARCHIVE_BINARY);
+                appControllerStates.setState(kAPPCONTROLLER_PLAY);
+            }
         }
             break;
         case kAPPCONTROLLER_MAKEWINDOWS:
