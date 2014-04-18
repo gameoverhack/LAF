@@ -29,6 +29,7 @@ void AnalyzeController::setup(){
 
     StateGroup newAnalyzeControllerStates("AnalyzeControllerStates");
     newAnalyzeControllerStates.addState(State(kANALYZECONTROLER_LOAD, "kANALYZECONTROLER_LOAD"));
+    newAnalyzeControllerStates.addState(State(kANALYZECONTROLER_CHECK, "kANALYZECONTROLER_CHECK"));
     newAnalyzeControllerStates.addState(State(kANALYZECONTROLER_ANALYZE, "kANALYZECONTROLER_ANALYZE"));
     newAnalyzeControllerStates.addState(State(kANALYZECONTROLER_DONE, "kANALYZECONTROLER_DONE"));
     
@@ -49,6 +50,93 @@ void AnalyzeController::update(){
 //    vector<PlayerController*> & players = appModel->getPlayers();
     
     switch (analyzeControllerStates.getState()) {
+            
+        case kANALYZECONTROLER_CHECK:
+        {
+            vector<string> problems; int total = 0;
+            map<string, PlayerModel>& playerModels = appModel->getPlayerTemplates();
+            
+            for(map<string, PlayerModel>::iterator it = playerModels.begin(); it != playerModels.end(); ++it){
+                
+                string name = it->first;
+                PlayerModel& model = it->second;
+                
+                cout << "XXXChecking XMP for: " << name << endl;
+                map<string, ofxXMP>& xmps = model.getXMP();
+                
+                for(map<string, ofxXMP>::iterator itx = xmps.begin(); itx != xmps.end(); ++itx){
+                    
+                    string movie = itx->first;
+                    ofxXMP& xmp = itx->second;
+                    total++;
+                    
+                    ostringstream os;
+                    
+                    os << "   " << movie << endl;
+                    
+                    ofxXMPMarker lastMarker;
+                    bool bProblem = false;
+                    for(int m = 0; m < xmp.size(); m++){
+                        
+                        ofxXMPMarker marker = xmp.getMarker(m);
+                        os << "      " << marker.getName() << " ";
+                        
+                        
+                        string check = "GOOD";
+                        if(m == 0){
+                            
+                            if(!model.isLoopMarker(marker)){
+                                check = "BAD";
+                            }
+                            
+                        }else{
+                            
+                            string lastHMotion = model.getEndMotionFromMarker(lastMarker);
+                            string nextMotion = model.getStartMotionFromMarker(marker);
+                            
+                            if(nextMotion != lastHMotion){
+                                if(lastMarker.getName() != "STND_FRNT_HUGG_FRNT" && lastMarker.getName() != "STND_FRNT_FALL_BACK"){
+                                    
+                                    if(!model.isLoopMarker(lastMarker)){
+                                        if(marker.getName() != "CREP_RIGT_STND_FRNT" && marker.getName() != "FREE_TODO_FREE_TODO"){
+                                            check = "BAD";
+                                        }
+                                    }
+                                    if(model.isLoopMarker(lastMarker) && model.isLoopMarker(marker) && nextMotion != ""){
+                                        check = "BAD";
+                                    }
+                                }
+                                
+                            }
+                            
+                        }
+                        
+                        os << check << endl;
+                        
+                        if(check == "BAD"){
+                            bProblem = true;
+                        }
+                        
+                        lastMarker = marker;
+                        
+                    } // for(int m = 0; m < xmp.size(); m++){
+                    cout << os.str() << endl;
+                    if(bProblem) problems.push_back(os.str());
+                    
+                } // for(map<string, ofxXMP>::iterator itx = xmps.begin(); itx != xmps.end(); ++itx){
+                
+            } // for(map<string, PlayerModel>::iterator it = playerModels.begin(); it != playerModels.end(); ++it){
+            
+            for(int p = 0; p < problems.size(); p++){
+                cout << p + 1 << "  " << problems[p] << endl;
+            }
+            
+            cout << "Found " << problems.size() << " problems out of " << total << " movies" << endl;
+            
+            //assert(false);
+            analyzeControllerStates.setState(kANALYZECONTROLER_DONE);
+        }
+            break;
         case kANALYZECONTROLER_LOAD:
         {
             
@@ -97,7 +185,7 @@ void AnalyzeController::update(){
             if(appModel->getProperty<int>("AnalysePlayers") > 0){
                 analyzeControllerStates.setState(kANALYZECONTROLER_ANALYZE);
             }else{
-                analyzeControllerStates.setState(kANALYZECONTROLER_DONE);
+                analyzeControllerStates.setState(kANALYZECONTROLER_CHECK);
             }
             
         }
@@ -146,12 +234,19 @@ void AnalyzeController::update(){
                         
                         bool checkRects = false;
                         if(appModel->getProperty<bool>("CheckRects")){
+                            ofxLogVerbose() << "Check Rects for: " << fileName << endl;
                             if(rects.size() != video.getTotalNumFrames()){
                                 checkRects = true;
-                                cout << "WRONG NUMBER OF FRAMES " << rects.size() << " " << video.getTotalNumFrames() << endl;
+                                ofxLogVerbose() << "   WRONG NUMBER OF FRAMES " << rects.size() << " " << video.getTotalNumFrames() << endl;
                             }else{
-                                if(appModel->getProperty<bool>("ForceCheckRects")) checkRects = true;
-                                cout << "RIGHT NUMBER OF FRAMES " << rects.size() << " " << video.getTotalNumFrames() << endl;
+                                if(rects[1].width == 0){
+                                    checkRects = true;
+                                    ofxLogVerbose() << "   WRONG RECT SIZE [1] " << rects[1].width << endl;
+                                }else{
+                                    if(appModel->getProperty<bool>("ForceCheckRects")) checkRects = true;
+                                    ofxLogVerbose() << "   RIGHT NUMBER OF FRAMES " << rects.size() << " " << video.getTotalNumFrames() << endl;
+                                }
+                                
                             }
                         }
                         
@@ -245,7 +340,7 @@ void AnalyzeController::update(){
                 
                 // if we don't have one then let's play!
                 if(appModel->getProperty<string>("AnalyseName") == ""){
-                    analyzeControllerStates.setState(kANALYZECONTROLER_DONE);
+                    analyzeControllerStates.setState(kANALYZECONTROLER_CHECK);
                 }
             }
 
