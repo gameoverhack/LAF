@@ -70,7 +70,7 @@ void AppController::setup(){
     appModel->setProperty("NumberPlayers", 10);
     appModel->setProperty("RectTrail", 200);
     
-    appModel->setProperty("ForceFileListUpdate", true);
+    appModel->setProperty("ForceFileListUpdate", false);
     appModel->setProperty("ForceFileListCheck", false);
     appModel->setProperty("CheckKeyFrames", false);
     appModel->setProperty("CheckXMP", false);

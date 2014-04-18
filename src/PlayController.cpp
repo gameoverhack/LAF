@@ -658,8 +658,8 @@ void PlayController::insertMoviesFromAction(Agent* agent, pair<char,float> act) 
 //--------------------------------------------------------------
 void PlayController::makeManualAgent(string name) {
     ofxLogNotice() << "Making an agent for " << name << endl;
-    name = "PRIYAR";
-    name = "MARTINW";
+    //name = "PRIYAR";
+    //name = "MARTINW";
     
     // get the players model
     PlayerModel& model = appModel->getPlayerTemplate(name);
@@ -882,7 +882,7 @@ void PlayController::makeSequence(string name, int window){
 //--------------------------------------------------------------
 void PlayController::makeAgent3(string name, int startX, int window){
     //window = 3;
-    name = "MARTINW";
+    //name = "MARTINW";
     //name = "PRIYAR";
     //name = "JOSHUAO";
     
