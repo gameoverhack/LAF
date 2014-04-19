@@ -427,7 +427,14 @@ void AppView::update(){
                 ofPolyline pathFromHere; //= ofPolyline(agent->getCurrentPath().getVertices());
                 ofPoint point;
                 
-                point = agent->getScaledFloorOffsetAt(1);
+                int index;
+                for (int i=0; i < agent->getMovieSequence().size(); i++)
+                    if (agent->getMovieSequence()[i].agentActionIndex == 0) {
+                        index = i;
+                        break;
+                    }
+                
+                point = agent->getScaledFloorOffsetAt(agent->getSequenceFrames()[index]);
                 pathFromHere.addVertex(point);
                 
                 

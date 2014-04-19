@@ -192,7 +192,7 @@ void Agent2::plan(ofRectangle _target, int _numSequenceRetries){
 void Agent2::_plan(){
     //pause();
     
-    int lastSequenceFrameOfCurrentMovie = getCurrentSequenceFrame(); //getSequenceFrames()[getCurrentMovieIndex()+1]-1;
+    int lastSequenceFrameOfCurrentMovie = getSequenceFrames()[getCurrentMovieIndex()+1]-1;
     ofPoint startPosition = getScaledFloorOffset();//At(lastSequenceFrameOfCurrentMovie); // where am i now?
     ofPoint targetPosition = ofPoint(target.x + target.width / 2.0, target.y, 0.0f); // where I'm going
     
@@ -200,8 +200,10 @@ void Agent2::_plan(){
     
     /////////////
     
-    //getCurrentMovie().agentActionIndex = -1;
-    //getMovieSequence()[getCurrentMovieIndex()].agentActionIndex  = -1;
+    getCurrentMovie().agentActionIndex = -1;
+    
+    for (int i = 0; i < getMovieSequence().size(); i++)
+        getMovieSequence()[i].agentActionIndex  = -1;
     
     /////////////
     
@@ -400,8 +402,8 @@ bool Agent2::cutMoviesForActionsNormalised(){
         
         firstMovIndex = lastMovIndex + 1;
 
-        for (int i = firstMovIndex; i < movieSequence.size() && movieSequence[i].agentActionIndex == a; i++) {
-            lastMovIndex = i;
+        for (int i = firstMovIndex; i < movieSequence.size(); i++) {
+            if (movieSequence[i].agentActionIndex == a) lastMovIndex = i;
         }
         
         lastActionMovie = &movieSequence[lastMovIndex];
@@ -458,8 +460,8 @@ bool Agent2::cutMoviesForActionsNormalised(){
         
         
         // find the last movie for this action after insertion
-        for (int i = firstMovIndex; i < movieSequence.size() && movieSequence[i].agentActionIndex == a; i++) {
-            lastMovIndex = i;
+        for (int i = firstMovIndex; i < movieSequence.size(); i++) {
+            if (movieSequence[i].agentActionIndex == a)  lastMovIndex = i;
         }
         for (int i = lastMovIndex+1; i < movieSequence.size() && movieSequence[i].agentActionIndex == a+1; i++) {
             if (model.isLoopMarker(movieSequence[i].markername)){

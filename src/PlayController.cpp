@@ -226,15 +226,16 @@ void PlayController::createAgent(string name, ofPoint origin, ofRectangle target
 
 //--------------------------------------------------------------
 void PlayController::triggerReplan() {
-    int newWindowIndex = 11;
+    int newWindowIndex = ofRandom(11);
     ofRectangle newWindow = appModel->getWindows()[newWindowIndex];
     
     vector<Agent2*>& agents = appModel->getAgents();
     
     for (int i=0; i < agents.size(); i++) {
         //agents[i]->setPaused(<#bool b#>)
-        agents[i]->plan(newWindow);
         agents[i]->setWindow(newWindowIndex);
+        agents[i]->plan(newWindow);
+        
     }
     
 }
