@@ -44,6 +44,7 @@
 		7701FDDF18804A3F0092EDD9 /* DebugView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7701FDDD18804A3F0092EDD9 /* DebugView.cpp */; };
 		771C8CE918805D4300B7859B /* AnalyzeController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 771C8CE718805D4300B7859B /* AnalyzeController.cpp */; };
 		771C8CEC18805D4F00B7859B /* PlayController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 771C8CEA18805D4F00B7859B /* PlayController.cpp */; };
+		773571561901B61A0086FBFB /* Agent2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 773571541901B6190086FBFB /* Agent2.cpp */; };
 		7748f9f07c993f15f2868e78ad18d494 /* MSAOpenCLProgram.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 09af7bdccc3eb01b0ea4ef80abd6b37c /* MSAOpenCLProgram.cpp */; };
 		775dd568d4b9548749580bc90df8274d /* MSAOpenCL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 025fd7fd4b1c9eb6897a0ea91c36cdd2 /* MSAOpenCL.cpp */; };
 		7761E65318984442005EF134 /* KeyModifiers.mm in Sources */ = {isa = PBXBuildFile; fileRef = 7761E65218984442005EF134 /* KeyModifiers.mm */; };
@@ -281,6 +282,8 @@
 		771C8CEA18805D4F00B7859B /* PlayController.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PlayController.cpp; sourceTree = "<group>"; };
 		771C8CEB18805D4F00B7859B /* PlayController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlayController.h; sourceTree = "<group>"; };
 		771C8CEE188065F800B7859B /* PlayerModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PlayerModel.h; sourceTree = "<group>"; };
+		773571541901B6190086FBFB /* Agent2.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Agent2.cpp; sourceTree = "<group>"; };
+		773571551901B61A0086FBFB /* Agent2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Agent2.h; sourceTree = "<group>"; };
 		7761E65118984442005EF134 /* KeyModifiers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KeyModifiers.h; sourceTree = "<group>"; };
 		7761E65218984442005EF134 /* KeyModifiers.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = KeyModifiers.mm; sourceTree = "<group>"; };
 		777BC2E518FCF9EF0021E08F /* DeviceView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DeviceView.cpp; sourceTree = "<group>"; };
@@ -1001,6 +1004,8 @@
 				2E155A1618E4837E00BC86A2 /* AgentBehaviours.h */,
 				77BCF6B718FC5D7900C2D366 /* DeviceClient.h */,
 				77BCF6B818FC5FF800C2D366 /* RingBuffer.h */,
+				773571541901B6190086FBFB /* Agent2.cpp */,
+				773571551901B61A0086FBFB /* Agent2.h */,
 			);
 			name = DataTypes;
 			sourceTree = "<group>";
@@ -1731,6 +1736,7 @@
 				43a33bf0edf818e4fb3cab1836289157 /* ofxThreadedVideo.cpp in Sources */,
 				63b57ac5bf4ef088491e0317dbb2ecaa /* ofxXmlSettings.cpp in Sources */,
 				933a2227713c720ceff80fd967d0a8ee /* tinyxml.cpp in Sources */,
+				773571561901B61A0086FBFB /* Agent2.cpp in Sources */,
 				9d44dc88ef9e7991b4a09951e2e4769f /* tinyxmlerror.cpp in Sources */,
 				5a4349e9754d6fa14c0f2a3a1abc30b6 /* tinyxmlparser.cpp in Sources */,
 				876ce8a80f97c94a547893f8137afa37 /* ofxXMP.cpp in Sources */,

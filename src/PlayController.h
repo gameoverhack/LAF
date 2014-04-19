@@ -28,6 +28,9 @@ public:
     void makeAgent(string name, int window);
     void makeAgent2(string name, int start, int window);
     void makeAgent3(string name, int start, int window);
+    
+    void createAgent(string name, ofPoint origin, ofRectangle target, CollisionMode cMode, BehaviousnMode bMode);
+    
     void doAction(string name, char action);
     void makeManualAgent(string name);
     void moveAgent(Agent* agent, char op);

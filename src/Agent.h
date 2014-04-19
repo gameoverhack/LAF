@@ -9,7 +9,7 @@
 #ifndef LaughterForgetting_Agent_h
 #define LaughterForgetting_Agent_h
 
-#include "AppModel.h"
+#include "AgentBehaviours.h"
 #include "AStarSearch.h"
 
 class Agent : public MovieSequence{
@@ -30,7 +30,7 @@ public:
     }
     
     void setWillCollide(bool w) {
-        willCollide=w;
+        willCollide = w;
     }
     
     bool getWillCollide() {
@@ -103,6 +103,19 @@ public:
         return bHug;
     }
 
+    int getBehaviourMode() {
+        return behaviourMode;
+    }
+    
+    void setBehaviourMode(int b) {
+        if(b == bAUTO_REALISTIC){
+            MovieSequence::setAutoSequenceStop(true);
+        }else{
+            MovieSequence::setAutoSequenceStop(false);
+        }
+        behaviourMode = b;
+    }
+    
     void clear(){
         MovieSequence::clear();
         
@@ -117,6 +130,7 @@ public:
         currentAction = 0;
         actionIndex = 0;
         collisionSkipCounter = COLLISIONSKIP;
+        behaviourMode = bAUTO_REALISTIC;
     }
     
     void update(){
@@ -278,7 +292,6 @@ public:
         pp.obstacles = obstacles;
         
         // the agent can collide with its target window
-        pp.targetWindow = this->window;
         
         // set the size of the area that the agent's bounding box can grow used in path finding to avoid possible collisions
         pp.obstAvoidBoundingW = 2.5 * this->drawSize /3.0;
@@ -288,7 +301,7 @@ public:
         ofxLogVerbose() << "Finding a path from (" << startPosition.x << "," << startPosition.y  << ") to  (" << targetPosition.x << "," << targetPosition.y << ")"  << endl;
         
         //vector< vector< ofPoint > > paths = pp.findPaths(this->getScaledCentreAt(1),targetPosition,this->getWindow());
-        vector< vector< ofPoint > > paths = pp.findPaths(startPosition,targetPosition,this->getWindow());
+        vector< vector< ofPoint > > paths = pp.findPaths(startPosition,targetPosition);
         
         if (paths.size()>0){
             this->setCurrentPath(paths[0]);
@@ -441,6 +454,8 @@ protected:
     int collisionSkipCounter = 1;
     
     bool faultFlag = false;
+    int behaviourMode;
+    bool willCollide;
 };
 
 

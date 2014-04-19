@@ -19,15 +19,13 @@ public:
     float gridScaleX,gridScaleY;
     float obstAvoidBoundingW, obstAvoidBoundingH;
     
-    int targetWindow;
-    
     float offsetX, offsetY;
     
     ofRectangle worldRect;
     vector<ofRectangle> obstacles;
     
     
-    vector< vector< ofPoint > > findPaths(ofPoint startPoint, ofPoint finishPoint,int _targetWindow);
+    vector< vector< ofPoint > > findPaths(ofPoint startPoint, ofPoint finishPoint);
     char getDirection(ofPoint one, ofPoint two);
     vector< pair<char,float> > getDirectionsInPath(vector<ofPoint> path);
     

@@ -12,8 +12,6 @@
 #include "MovieInfo.h"
 #include "ofxLogger.h"
 #include "ofxThreadedVideo.h"
-#include "AgentBehaviours.h"
-
 
 class MovieSequence{
     
@@ -62,11 +60,8 @@ public:
             video->setSpeed(speed);
         }
         
-        if(bPaused) {
-//            if (!willCollide && behaviourMode == bMANUAL && currentSequenceIndex<sequence.size()-1)
-//                bPaused=false;
-//            else
-                return;
+        if(bPaused){
+            return;
         }
         
         if(video->isFrameNew()){
@@ -144,15 +139,14 @@ public:
         else{
             // TODO: add loop?
             //currentSequenceIndex = 0;
-            if (behaviourMode!=bMANUAL)
-                bSequenceIsDone = true;
+            if (bAutoSequenceStop) bSequenceIsDone = true;
             stop();
             return;
         }
         
         MovieInfo& nextMovie = sequence[currentSequenceIndex];
         
-        if (nextMovie.agentActionIndex!=currentMovie.agentActionIndex) {
+        if(nextMovie.agentActionIndex != currentMovie.agentActionIndex){
             ofxLogVerbose() << "Starting to perform the next action old = " << currentMovie.agentActionIndex << "  new = " << nextMovie.agentActionIndex << endl;
             cout << endl;
            // if (currentMovie.agentActionIndex!=-1) stop();
@@ -169,11 +163,10 @@ public:
             ofxLogVerbose() << "Loading same movie: " << nextMovie.name << " " << nextMovie.startframe << endl;
         }
         
-        if (speed> 0) {
-        video->setFrame(nextMovie.startframe + frameSeek);
-        video->setSpeed(nextMovie.speed);
-        }
-        else {
+        if(speed> 0){
+            video->setFrame(nextMovie.startframe + frameSeek);
+            video->setSpeed(nextMovie.speed);
+        }else{
             video->setFrame(nextMovie.endframe);
             video->setSpeed(nextMovie.speed);
         }
@@ -292,10 +285,11 @@ public:
         currentMovie = NoMovie;
         currentSequenceIndex = lastnormalindex = -1;
         currentSequenceFrame = totalSequenceFrames = 0;
+        bAutoSequenceStop = true;
         
         pauseActionIndex = -1;
         pauseFrame = -1;
-        behaviourMode = bAUTO_REALISTIC;
+        
     }
     
     void setNormalPosition(ofPoint p){
@@ -316,6 +310,14 @@ public:
     
     float getNormalScale(){
         return scale;
+    }
+    
+    void setAutoSequenceStop(bool b){
+        bAutoSequenceStop = b;
+    }
+    
+    bool getAutoSequenceStop(){
+        return bAutoSequenceStop;
     }
     
     void rescale(){
@@ -451,11 +453,7 @@ public:
     }
     
     ofPoint getScaledFloorOffset(){
-        ofRectangle r = getScaledBoundingAt(1); //TODO: there's a bug with frame 0!!!
-        ofPoint floorOffset;
-        floorOffset.x = (r.x + r.width / 2.0);
-        floorOffset.y = (r.y + r.height) + 0; // TODDO: needs a plus if i'm doing collisions!
-        return floorOffset;
+        return getScaledFloorOffsetAt(currentSequenceFrame);
     }
     
     ofPoint getScaledFloorOffsetAt(int f){
@@ -577,14 +575,6 @@ public:
     
     ofPoint shiftPoint;
     
-    int getBehaviourMode() {
-        return behaviourMode;
-    }
-    
-    void setBehaviourMode(int b) {
-        behaviourMode = b;
-    }
-    
     void removeMoviesFromIndex (int ind) {
         
         ind++;
@@ -611,6 +601,7 @@ public:
     }
     
 protected:
+    
     float speed;
     bool bPaused;
     bool bSequenceIsDone;
@@ -647,8 +638,7 @@ protected:
     
     int pauseFrame;
     int pauseActionIndex;
-    int behaviourMode;
-    bool willCollide;
+    bool bAutoSequenceStop;
 };
 
 

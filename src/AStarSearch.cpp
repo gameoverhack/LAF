@@ -157,8 +157,6 @@ bool myGraphDescription::isInObstacle(myNode& n) {
    
     
     for (int w=0;w<pathPlanner->obstacles.size();w++) {
-        if (w==pathPlanner->targetWindow)
-            continue;
         if (pathPlanner->obstacles[w].intersects(bounding))
             return true;
     }
@@ -175,8 +173,6 @@ float myGraphDescription::calcDistToObstacles(myNode& n) {
     
     
     for (int w=0;w<pathPlanner->obstacles.size();w++) {
-        if (w==pathPlanner->targetWindow)
-            continue;
         if (distancePointToRectangle(scaledNode,pathPlanner->obstacles[w]) < 1000)  //TODO: use a dynamic parameter
             cost += distancePointToRectangle(scaledNode,pathPlanner->obstacles[w]);
     }
@@ -227,9 +223,7 @@ float myGraphDescription::distancePointToRectangle(ofPoint point, ofRectangle re
 
 // =============================================================================
 
-vector< vector< ofPoint > > PathPlanner::findPaths(ofPoint _startPoint, ofPoint _finishPoint, int _targetWindow){
-    
-    this->targetWindow = _targetWindow;
+vector< vector< ofPoint > > PathPlanner::findPaths(ofPoint _startPoint, ofPoint _finishPoint){
     
     
 	// Profiling observation: Using int instead of double cost provides marginal improvement (~10%)

@@ -300,6 +300,13 @@ public:
     }
     
     //--------------------------------------------------------------
+    bool isLoopMarker(string m){
+        vector<string> markerParts = ofSplitString(m, "_");
+        if(markerParts.size() != 4) return true;
+        return (markerParts[0] + "_" + markerParts[1] == markerParts[2] + "_" + markerParts[3]);
+    }
+    
+    //--------------------------------------------------------------
     string getStartMotionFromMarker(ofxXMPMarker& m){
         vector<string> mP = ofSplitString(m.getName(), "_");
         if(mP.size() < 4) return "";

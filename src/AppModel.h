@@ -26,6 +26,7 @@
 #include "KeyModifiers.h"
 #include "Pointer.h"
 #include "Agent.h"
+#include "Agent2.h"
 #include "DeviceClient.h"
 
 typedef struct{
@@ -314,6 +315,30 @@ public:
     }
     
     //--------------------------------------------------------------
+    void addAgent(Agent2 * agent){
+        if(assigned.size() < videos.size()){
+            ofxLogNotice() << "Assigning video to sequence with " << assigned.size() << " assigned out of " << videos.size() << " views" << endl;
+            for(int i = 0; i < videos.size(); i++){
+                if(assigned.find(i) == assigned.end()){
+                    agent->setVideo(videos[i], i);
+                    assigned.insert(i);
+                    ofxLogVerbose() << "Assigned video to sequence with view " << i << " " << videos.size() - assigned.size() << " free" << endl;
+                    break;
+                }
+            }
+        }else{
+            ofxLogError() << "Not enough views to assign video" << endl;
+            assert(false);
+        }
+        agents.push_back(agent);
+    }
+    
+    //--------------------------------------------------------------
+    vector<Agent2*>& getAgents(){
+        return agents;
+    }
+    
+    //--------------------------------------------------------------
     void addSequence(MovieSequence * sequence){
         if(assigned.size() < videos.size()){
             ofxLogNotice() << "Assigning video to sequence with " << assigned.size() << " assigned out of " << videos.size() << " views" << endl;
@@ -469,6 +494,7 @@ protected:
     
     vector<ofxThreadedVideo*>   videos;
     vector<MovieSequence*>      sequences;
+    vector<Agent2*>             agents;
     
     vector<PlayerTargets>   playertargets;
     

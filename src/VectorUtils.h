@@ -270,6 +270,23 @@ inline B& getMapValueFromIndex(map<A, B>& m, int index){
 };
 
 template<typename T>
+inline int getVecFirstIndexForValue(vector<T> & v, T & value){
+    return getVecIndexFromValue(v, value);
+}
+
+template<typename T>
+inline int getVecLastIndexForValue(vector<T> & v, T & value){
+    int index = -1;
+    for(int i = v.size() - 1; i >= 0; i--){
+        if(v[i] == value){
+            index = i;
+            break;
+        }
+    }
+    return index;
+}
+
+template<typename T>
 inline int getVecIndexFromValue(vector<T> & v, T & value){
     int index = -1;
     for(int i = 0; i < v.size(); i++){

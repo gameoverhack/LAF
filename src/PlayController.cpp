@@ -148,6 +148,41 @@ void PlayController::update(){
 }
 
 //--------------------------------------------------------------
+void PlayController::createAgent(string name, ofPoint origin, ofRectangle target, CollisionMode cMode, BehaviousnMode bMode){
+    
+    // make the agent and set model
+    Agent2 * agent = new Agent2;
+    agent->setModel(appModel->getPlayerTemplate(name));
+    
+    // get and set motion  graphs
+    agent->setMotionGraph(appModel->getGraph("ForwardMotionGraph"),
+                          appModel->getGraph("DirectionGraph"),
+                          appModel->getGraph("EndGraph"));
+    
+    // set position and target
+    agent->setOrigin(origin);
+    
+    // calculate plan boundary and draw size
+    float tDrawSize = appModel->getProperty<float>("DefaultDrawSize");
+    ofRectangle tPlanBoundary = ofRectangle(0, 0, appModel->getProperty<float>("OutputWidth"), appModel->getProperty<float>("OutputHeight"));
+    tPlanBoundary.growToInclude(-tDrawSize, -tDrawSize);
+    tPlanBoundary.growToInclude(tPlanBoundary.width + tDrawSize, tPlanBoundary.height + tDrawSize);
+    
+    // set plan boundary and draw size
+    agent->setPlanBoundary(tPlanBoundary);
+    agent->setDrawSize(tDrawSize);
+    agent->setGridSize(tDrawSize / 2.0f, tDrawSize / 2.0f);
+    
+    // set modes
+    agent->setCollisionMode(cMode);
+    agent->setBehaviousnMode(bMode);
+    
+    // start threading
+    agent->start();
+    appModel->addAgent(agent);
+}
+
+//--------------------------------------------------------------
 void PlayController::cutSequenceFromCurrentMovie(Agent* agent, bool cutFromCurrentFrame) {
     // Remove the rest of the movies in the sequence as we are overwriting them
     if (agent->getCurrentMovieIndex() < agent->getSequenceSize()-1)
@@ -973,10 +1008,18 @@ void PlayController::planAndGenerateMovies(Agent* agent, ofPoint pathStartPositi
     ofPoint floorOffset = agent->getScaledFloorOffset();
     ofPoint videoStartPosition = pathStartPosition  -   floorOffset; // agent's video position
     
+    
+    vector<ofRectangle> tObstacles;
+    for(int i = 0; i < obstacles.size(); i++){
+        if(!appModel->getWindows()[agent->getWindow()].intersects(obstacles[i])){ // is this test ok!!!
+            tObstacles.push_back(obstacles[i]);
+        }
+    }
+    
     // Make the agent plan a path based on the start and target positions, within the world rectangle, and avoiding the windows
     // A path is a sequence of actions
     // Each action represents a direction and a length that the agent has to travel to perform that action
-    agent->plan(pathStartPosition, pathTargetPosition, worldRect, obstacles);
+    agent->plan(pathStartPosition, pathTargetPosition, worldRect, tObstacles);
     
     if (changeNorm)
         agent->setNormalPosition(videoStartPosition);
