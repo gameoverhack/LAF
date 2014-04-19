@@ -67,22 +67,25 @@ void PlayController::update(){
             break;
         case kPLAYCONTROLLER_MAKE:
         {
-            if(appModel->getProperty<bool>("AutoGenerate")){
-                vector<int>& targetWindows = appModel->getWindowTargets();
-                int wTarget = appModel->getUniqueWindowTarget();// if it is not taken
-                //if(wTarget != -1) makeSequence(appModel->getRandomPlayerName(), wTarget);
-                
-                int start = appModel->getUniqueStartPosition();
-                
-                if (wTarget != -1)
-                    makeAgent3(appModel->getRandomPlayerName(), start, wTarget);
-                //if(wTarget != -1) makeAgent("BLADIMIRSL", wTarget);
-            }
             
-            if(appModel->getProperty<bool>("ManualAgentControl")){
-                makeManualAgent("BLADIMIRSL");
-                appModel->setProperty("ManualAgentControl", true);
-            }
+            createAgent();
+            
+//            if(appModel->getProperty<bool>("AutoGenerate")){
+//                vector<int>& targetWindows = appModel->getWindowTargets();
+//                int wTarget = appModel->getUniqueWindowTarget();// if it is not taken
+//                //if(wTarget != -1) makeSequence(appModel->getRandomPlayerName(), wTarget);
+//                
+//                int start = appModel->getUniqueStartPosition();
+//                
+//                if (wTarget != -1)
+//                    makeAgent3(appModel->getRandomPlayerName(), start, wTarget);
+//                //if(wTarget != -1) makeAgent("BLADIMIRSL", wTarget);
+//            }
+//            
+//            if(appModel->getProperty<bool>("ManualAgentControl")){
+//                makeManualAgent("BLADIMIRSL");
+//                appModel->setProperty("ManualAgentControl", true);
+//            }
             
             playControllerStates.setState(kPLAYCONTROLLER_PLAY);
         }
@@ -94,12 +97,12 @@ void PlayController::update(){
                 if(appModel->checkHeroTimer()) appModel->activateHero();
             }
 
-            vector<MovieSequence*>& sequences = appModel->getSequences();
-            for(int i = 0; i < sequences.size(); i++){
-                Agent* agent = (Agent*)sequences[i];
+            vector<Agent2*>& agents = appModel->getAgents();
+            for(int i = 0; i < agents.size(); i++){
+                Agent2* agent = agents[i];
                 
             
-                agent->update(appModel->getProperty<bool>("AvoidCollisions"), windowPositions, sequences);
+//                agent->update(appModel->getProperty<bool>("AvoidCollisions"), windowPositions, sequences);
                 
                // updatePosition(agent);
 
@@ -111,14 +114,14 @@ void PlayController::update(){
             
             appModel->deleteMarkedPlayers();
             
-            if(sequences.size() < appModel->getProperty<int>("NumberPlayers") &&
+            if(agents.size() < appModel->getProperty<int>("NumberPlayers") &&
                appModel->getProperty<bool>("AutoGenerate") &&
                appModel->hasUniqueWindowTargets()) playControllerStates.setState(kPLAYCONTROLLER_MAKE);
             
             ofxThreadedVideo* hero = appModel->getCurrentHeroVideo();
             
             if(hero != NULL){
-                if(hero->getFade() > 0.95 && sequences.size() > 0){
+                if(hero->getFade() > 0.95 && agents.size() > 0){
                     playControllerStates.setState(kPLAYCONTROLLER_STOP);
                 }
             }
@@ -127,17 +130,17 @@ void PlayController::update(){
             break;
         case kPLAYCONTROLLER_STOP:
         {
-            vector<MovieSequence*>& sequences = appModel->getSequences();
-            for(int i = 0; i < sequences.size(); i++){
-                MovieSequence* sequence = sequences[i];
-                appModel->markPlayerForDeletion(sequence->getViewID());
+            vector<Agent2*>& agents = appModel->getAgents();
+            for(int i = 0; i < agents.size(); i++){
+                Agent2* agent = agents[i];
+                appModel->markPlayerForDeletion(agent->getViewID());
             }
             appModel->deleteMarkedPlayers();
             
             ofxThreadedVideo* hero = appModel->getCurrentHeroVideo();
             
             if(hero != NULL){
-                if(hero->getFade() < 0.95 && sequences.size() == 0){
+                if(hero->getFade() < 0.95 && agents.size() == 0){
                     playControllerStates.setState(kPLAYCONTROLLER_MAKE);
                 }
             }
@@ -148,10 +151,37 @@ void PlayController::update(){
 }
 
 //--------------------------------------------------------------
-void PlayController::createAgent(string name, ofPoint origin, ofRectangle target, CollisionMode cMode, BehaviousnMode bMode){
+bool PlayController::createAgent(){
+
+    int wTarget = appModel->getUniqueWindowTarget();
+    
+    if(wTarget != -1){
+        
+        string name = appModel->getRandomPlayerName();
+        ofPoint origin = appModel->getRandomPlayerPosition();
+        ofRectangle target = appModel->getWindows()[wTarget];
+        createAgent(name, origin, target, COLLISION_AVOID, BEHAVIOUR_AUTO, wTarget);
+        return true;
+        
+    }
+    
+    return false;
+    
+    
+}
+
+//--------------------------------------------------------------
+void PlayController::createAgent(string name, ofPoint origin, ofRectangle target, CollisionMode cMode, BehaviousnMode bMode, int wTarget){
+    
+    float tDrawSize = appModel->getProperty<float>("DefaultDrawSize");
+
+    name = "MARTINW";
     
     // make the agent and set model
     Agent2 * agent = new Agent2;
+    
+    agent->setDrawSize(tDrawSize);
+
     agent->setModel(appModel->getPlayerTemplate(name));
     
     // get and set motion  graphs
@@ -161,16 +191,16 @@ void PlayController::createAgent(string name, ofPoint origin, ofRectangle target
     
     // set position and target
     agent->setOrigin(origin);
+    agent->setWindow(wTarget);
     
     // calculate plan boundary and draw size
-    float tDrawSize = appModel->getProperty<float>("DefaultDrawSize");
     ofRectangle tPlanBoundary = ofRectangle(0, 0, appModel->getProperty<float>("OutputWidth"), appModel->getProperty<float>("OutputHeight"));
     tPlanBoundary.growToInclude(-tDrawSize, -tDrawSize);
-    tPlanBoundary.growToInclude(tPlanBoundary.width + tDrawSize, tPlanBoundary.height + tDrawSize);
+    tPlanBoundary.growToInclude(appModel->getProperty<float>("OutputWidth") + tDrawSize, appModel->getProperty<float>("OutputHeight") + tDrawSize);
     
     // set plan boundary and draw size
+    agent->setWorldObstacles(appModel->getWindows());
     agent->setPlanBoundary(tPlanBoundary);
-    agent->setDrawSize(tDrawSize);
     agent->setGridSize(tDrawSize / 2.0f, tDrawSize / 2.0f);
     
     // set modes
@@ -180,6 +210,8 @@ void PlayController::createAgent(string name, ofPoint origin, ofRectangle target
     // start threading
     agent->start();
     appModel->addAgent(agent);
+    agent->play();
+    agent->plan(target);
 }
 
 //--------------------------------------------------------------

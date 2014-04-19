@@ -231,14 +231,14 @@ void AppView::update(){
          *******            Draw Agents              *******
          *****************************************************/
             
-        vector<MovieSequence*>& sequences = appModel->getSequences();
+        vector<Agent2*>& agents = appModel->getAgents();
         
-        for(int i = 0; i < sequences.size(); i++){
+        for(int i = 0; i < agents.size(); i++){
             
             ofNoFill();
             ofSetColor(255, 255, 255);
             
-            Agent* agent = (Agent*)sequences[i];
+            Agent2* agent = agents[i];
             MovieInfo& currentMovie = agent->getCurrentMovie();
             ofxThreadedVideo* video = agent->getVideo();
             

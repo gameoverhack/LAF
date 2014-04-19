@@ -90,6 +90,40 @@ public:
     
     AgentInfo getAgentInfo();
     
+    // annoying
+    void setWindow(int wTarget);
+    int getWindow();
+    
+    void setGoalFrame(int f);
+    int getGoalFrame();
+    void setSyncFrame(int f);
+    int getSyncFrame();
+    
+    void setStartPosSegment(int posSegment);
+    int getStartPosSegment();
+    
+    void setHug(bool b){
+        bHug = b;
+    }
+    
+    bool getHug(){
+        return bHug;
+    }
+    
+    ofPolyline getCurrentPath() {
+        return currentPath;
+    }
+    
+    bool getWillCollide() {
+        return willCollide;
+    }
+    
+    bool getFaultyFlag() {
+        return bFaultyMovieSequence;
+    }
+
+    vector< pair<char, float> > actions;
+    
 protected:
     
     // METHODS
@@ -127,10 +161,15 @@ protected:
     
     // plan vars
     ofPolyline currentPath;
-    vector< pair<char, float> > actions;
     bool bFaultyMovieSequence;
     int numSequenceRetries;
+    int startPosSegment;
+    int windowTargetIndex;
     
+    int sframe, gframe;
+    bool bHug;
+    bool willCollide;
+
     // semi-persistant
     CollisionMode collisionMode;
     BehaviousnMode behaviourMode;

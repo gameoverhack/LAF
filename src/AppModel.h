@@ -240,6 +240,49 @@ public:
     }
     
     //--------------------------------------------------------------
+    ofPoint getRandomPlayerPosition(){
+
+        float startYRegion = (int)ofRandom(2)*600;
+        int startX = getUniqueStartPosition();
+        int startY = (int)ofRandom(2);
+        float xSpace = (getProperty<float>("OutputWidth") - 100) / getProperty<int>("NumberPlayers");
+        startX--;
+        ofPoint p = ofPoint(startX * xSpace + 50 , startY * getProperty<float>("DefaultDrawSize") / 2.0f + startYRegion);
+        
+        //ofPoint p = ofPoint(100,100);
+        
+        /*
+        
+        bool bFitted = false;
+        
+        while(!bFitted){
+            
+            float xOffset = ofRandom(0, getProperty<float>("DefaultDrawSize") * 2.0f) - getProperty<float>("DefaultDrawSize");
+            float yOffset = ofRandom(0, getProperty<float>("DefaultDrawSize") * 2.0f) - getProperty<float>("DefaultDrawSize");
+            
+            if(xOffset > 0) xOffset += getProperty<float>("OutputWidth");
+            if(yOffset > 0) yOffset += getProperty<float>("OutputHeight");
+            
+            p = ofPoint(xOffset, yOffset);
+            
+            for(int i = 0; i < agents.size(); i++){
+                ofRectangle& r = agents[i]->getScaledBounding();
+                if(r.inside(p)){
+                    bFitted = false;
+                    break;
+                }else{
+                    bFitted = true;
+                }
+            }
+        }
+        
+        */
+         
+        return p;
+        
+    }
+    
+    //--------------------------------------------------------------
     string getRandomPlayerName(){
         int rSelect = (int)ofRandom(playerModels.size());
         int count = 0;
@@ -294,13 +337,13 @@ public:
         for(set<int>::iterator it = todelete.begin(); it != todelete.end(); ++it){
             int viewID = *it; int index;
             ofxLogVerbose() << "Deleting Marked Player: " << viewID << endl;
-            MovieSequence* movieSequence;
-            for(int i = 0; i < sequences.size(); i++){
-                movieSequence = sequences[i];
-                if(movieSequence->getViewID() == viewID){
-                    targetunique.push_back(((Agent*)movieSequence)->getWindow());
-                    uniqueStartingPositions.push_back(((Agent*)movieSequence)->getStartPosSegment());
-                    delete movieSequence;
+            Agent2* agent;
+            for(int i = 0; i < agents.size(); i++){
+                agent = agents[i];
+                if(agent->getViewID() == viewID){
+                    targetunique.push_back(agent->getWindow());
+                    uniqueStartingPositions.push_back(agent->getStartPosSegment());
+                    delete agent;
                     index = i;
                     break;
                 }
@@ -308,7 +351,7 @@ public:
             assigned.erase(assigned.find(viewID));
             string prop = "MovieInfo_" + ofToString(viewID);
             if(hasProperty<string>(prop)) removeProperty<string>(prop);
-            eraseAt(sequences, index);
+            eraseAt(agents, index);
             
         }
         todelete.clear();

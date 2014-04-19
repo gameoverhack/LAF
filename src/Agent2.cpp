@@ -28,6 +28,10 @@ Agent2::~Agent2(){
 //--------------------------------------------------------------
 void Agent2::setModel(PlayerModel _model){
     model = _model;
+    
+    float scale = drawSize / model.getWidth();
+    setNormalScale(scale);
+    
     push(model.getFirstMovie());
     getPositionsForMovieSequence();
     normalise();
@@ -44,18 +48,18 @@ void Agent2::setMotionGraph(MotionGraph _forwardGraph, MotionGraph _directionGra
 //--------------------------------------------------------------
 void Agent2::setOrigin(ofPoint _origin){
     ofPoint origin = _origin;
+    setNormalPosition(origin - getScaledFloorOffsetAt(1));
+    normalise();
 }
 
 //--------------------------------------------------------------
 void Agent2::setPlanBoundary(ofRectangle _planBoundary){
-    ofRectangle planBoundary = _planBoundary;
+    planBoundary = _planBoundary;
 }
 
 //--------------------------------------------------------------
 void Agent2::setDrawSize(float _drawSize){
-    assert(model.getPlayerName() != "");
     drawSize = _drawSize;
-    MovieSequence::setNormalScale(drawSize / model.getWidth());
 }
 
 //--------------------------------------------------------------
@@ -65,14 +69,58 @@ void Agent2::setGridSize(float _w, float _h){
 }
 
 //--------------------------------------------------------------
+void Agent2::setWindow(int wTarget){
+    windowTargetIndex = wTarget;
+}
+
+//--------------------------------------------------------------
+int Agent2::getWindow(){
+    return windowTargetIndex;
+}
+
+//--------------------------------------------------------------
+void Agent2::setStartPosSegment(int posSegment){
+    startPosSegment = posSegment;
+}
+
+//--------------------------------------------------------------
+int Agent2::getStartPosSegment(){
+    return startPosSegment;
+}
+
+//--------------------------------------------------------------
 void Agent2::start(){
     startThread(true, false);
 }
 
+//--------------------------------------------------------------
 void Agent2::stop(){
     waitForThread();
     stopThread();
 }
+
+
+//--------------------------------------------------------------
+void Agent2::setGoalFrame(int f){
+    gframe = f;
+}
+
+//--------------------------------------------------------------
+int Agent2::getGoalFrame(){
+    return gframe;
+}
+
+//--------------------------------------------------------------
+void Agent2::setSyncFrame(int f){
+    sframe = f;
+}
+
+//--------------------------------------------------------------
+int Agent2::getSyncFrame(){
+    return sframe;
+}
+
+
 
 //--------------------------------------------------------------
 void Agent2::update(){
@@ -148,7 +196,7 @@ void Agent2::_plan(){
     ofPoint startPosition = getScaledFloorOffset(); // where am i now?
     ofPoint targetPosition = ofPoint(target.x + target.width / 2.0, target.y, 0.0f); // where I'm going
     
-    ofPoint sequenceNormalPosition = startPosition - getScaledFloorOffsetAt(1); // agent's video position
+    ofPoint sequenceNormalPosition = getScaledPosition();// agent's video position
     
     /////////////
     
@@ -288,26 +336,28 @@ bool Agent2::isAgentLocked(){
 
 //--------------------------------------------------------------
 void Agent2::lockAgentFlag(){
-    ofScopedLock lock(mutex);
+    lock();
     bIsAgentLocked = true;
+    unlock();
 }
 
 void Agent2::unlockAgentFlag(){
-    ofScopedLock lock(mutex);
+    lock();
     bIsAgentLocked = false;
+    unlock();
 }
 
 //--------------------------------------------------------------
 void Agent2::lockAgent(){
     if(isThreadRunning()){
-        lockAgentFlag();
         lock();
+        bIsAgentLocked = true;
     }
 }
 
 void Agent2::unlockAgent(){
     if(isThreadRunning()){
-        unlockAgentFlag();
+        bIsAgentLocked = false;
         unlock();
     }
 }

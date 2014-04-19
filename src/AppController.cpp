@@ -223,7 +223,7 @@ void AppController::update(){
         {
             analyzeController->update();
             if(analyzeControllerStates.getState(kANALYZECONTROLER_DONE)){
-                appModel->save("config", ARCHIVE_BINARY);
+                //appModel->save("config", ARCHIVE_BINARY);
                 appControllerStates.setState(kAPPCONTROLLER_PLAY);
             }
         }
