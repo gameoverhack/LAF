@@ -242,12 +242,14 @@ public:
     //--------------------------------------------------------------
     ofPoint getRandomPlayerPosition(){
 
-        float startYRegion = (int)ofRandom(2)*600;
+        cout << "uniqueStartingPositions: " <<  uniqueStartingPositions.size() << endl;
+        
+        float startYRegion = (int)ofRandom(2)*700;
         int startX = getUniqueStartPosition();
         int startY = (int)ofRandom(2);
         float xSpace = (getProperty<float>("OutputWidth") - 100) / getProperty<int>("NumberPlayers");
         startX--;
-        ofPoint p = ofPoint(startX * xSpace + 50 , startY * getProperty<float>("DefaultDrawSize") / 2.0f + startYRegion);
+        ofPoint p = ofPoint(startX * xSpace + 50 , startY * getProperty<float>("DefaultDrawSize") / 2.0f + startYRegion, startX + 1); // what the fuck?
         
         //ofPoint p = ofPoint(100,100);
         
@@ -341,6 +343,7 @@ public:
             for(int i = 0; i < agents.size(); i++){
                 agent = agents[i];
                 if(agent->getViewID() == viewID){
+                    agent->stop();
                     targetunique.push_back(agent->getWindow());
                     uniqueStartingPositions.push_back(agent->getStartPosSegment());
                     delete agent;
@@ -381,29 +384,29 @@ public:
         return agents;
     }
     
-    //--------------------------------------------------------------
-    void addSequence(MovieSequence * sequence){
-        if(assigned.size() < videos.size()){
-            ofxLogNotice() << "Assigning video to sequence with " << assigned.size() << " assigned out of " << videos.size() << " views" << endl;
-            for(int i = 0; i < videos.size(); i++){
-                if(assigned.find(i) == assigned.end()){
-                    sequence->setVideo(videos[i], i);
-                    assigned.insert(i);
-                    ofxLogVerbose() << "Assigned video to sequence with view " << i << " " << videos.size() - assigned.size() << " free" << endl;
-                    break;
-                }
-            }
-        }else{
-            ofxLogError() << "Not enough views to assign video" << endl;
-            assert(false);
-        }
-        sequences.push_back(sequence);
-    }
-    
-    //--------------------------------------------------------------
-    vector<MovieSequence*>& getSequences(){
-        return sequences;
-    }
+//    //--------------------------------------------------------------
+//    void addSequence(MovieSequence * sequence){
+//        if(assigned.size() < videos.size()){
+//            ofxLogNotice() << "Assigning video to sequence with " << assigned.size() << " assigned out of " << videos.size() << " views" << endl;
+//            for(int i = 0; i < videos.size(); i++){
+//                if(assigned.find(i) == assigned.end()){
+//                    sequence->setVideo(videos[i], i);
+//                    assigned.insert(i);
+//                    ofxLogVerbose() << "Assigned video to sequence with view " << i << " " << videos.size() - assigned.size() << " free" << endl;
+//                    break;
+//                }
+//            }
+//        }else{
+//            ofxLogError() << "Not enough views to assign video" << endl;
+//            assert(false);
+//        }
+//        sequences.push_back(sequence);
+//    }
+//    
+//    //--------------------------------------------------------------
+//    vector<MovieSequence*>& getSequences(){
+//        return sequences;
+//    }
     
     //--------------------------------------------------------------
     void addHeroVideo(string path){
@@ -507,7 +510,7 @@ public:
     }
     
     int getUniqueStartPosition() {
-        int s;
+        int s = -1;
         if(uniqueStartingPositions.size() > 0){
             s = random(uniqueStartingPositions);
             eraseAll(uniqueStartingPositions, s);

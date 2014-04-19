@@ -409,7 +409,7 @@ void AppView::update(){
                     ofSetColor(100,40,40);
                 else
                     ofSetColor(0,40,iFade * 2);
-                ofRect(agent->getScaledBounding());
+                if(!agent->isAgentLocked())  ofRect(agent->getScaledBounding());
             }
             
             if(appModel->getProperty<bool>("ShowDistanceSmall")){ // Omid
@@ -482,7 +482,7 @@ void AppView::update(){
                         ofSetColor(0, 60, 60);
                         //ofSetColor(0, iSmal, iSmal);
                     
-                    ofRect(agent->getScaledBoundingAt(j));
+                    if(!agent->isAgentLocked()) ofRect(agent->getScaledBoundingAt(j));
                     
                     ofSetColor(60, 10, 60);
                     

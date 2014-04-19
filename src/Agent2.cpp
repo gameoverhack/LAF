@@ -10,7 +10,7 @@
 
 //--------------------------------------------------------------
 Agent2::Agent2(){
-    ofxLogVerbose() << "Creating Agent" << endl;
+    cout << "Creating Agent" << endl;
     
     // init internal state
     MovieSequence::MovieSequence();
@@ -21,8 +21,8 @@ Agent2::Agent2(){
 
 //--------------------------------------------------------------
 Agent2::~Agent2(){
-    ofxLogVerbose() << "Destroying Agent" << endl;
-    MovieSequence::~MovieSequence();
+    cout << "Destroying Agent" << endl;
+    //MovieSequence::~MovieSequence();
 }
 
 //--------------------------------------------------------------
@@ -120,8 +120,6 @@ int Agent2::getSyncFrame(){
     return sframe;
 }
 
-
-
 //--------------------------------------------------------------
 void Agent2::update(){
     
@@ -192,11 +190,18 @@ void Agent2::plan(ofRectangle _target, int _numSequenceRetries){
 
 //--------------------------------------------------------------
 void Agent2::_plan(){
+    //pause();
     
-    ofPoint startPosition = getScaledFloorOffset(); // where am i now?
+    int lastSequenceFrameOfCurrentMovie = getCurrentSequenceFrame(); //getSequenceFrames()[getCurrentMovieIndex()+1]-1;
+    ofPoint startPosition = getScaledFloorOffset();//At(lastSequenceFrameOfCurrentMovie); // where am i now?
     ofPoint targetPosition = ofPoint(target.x + target.width / 2.0, target.y, 0.0f); // where I'm going
     
-    ofPoint sequenceNormalPosition = getScaledPosition();// agent's video position
+   // ofPoint sequenceNormalPosition = getScaledPosition();// agent's video position
+    
+    /////////////
+    
+    //getCurrentMovie().agentActionIndex = -1;
+    //getMovieSequence()[getCurrentMovieIndex()].agentActionIndex  = -1;
     
     /////////////
     
@@ -221,7 +226,7 @@ void Agent2::_plan(){
     pp.obstAvoidBoundingH = drawSize;
     
     // find the paths using A*.
-    ofxLogVerbose() << "Finding a path from (" << startPosition.x << "," << startPosition.y  << ") to  (" << targetPosition.x << "," << targetPosition.y << ")"  << endl;
+    cout << "Finding a path from (" << startPosition.x << "," << startPosition.y  << ") to  (" << targetPosition.x << "," << targetPosition.y << ")"  << endl;
     
     vector< vector< ofPoint > > paths = pp.findPaths(startPosition, targetPosition);
     
@@ -229,24 +234,27 @@ void Agent2::_plan(){
         currentPath = paths[0];
         actions =  pp.getDirectionsInPath(paths[0]);
     }else{
-        ofxLogVerbose() << "No path found for me "  << endl;
+        cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!No path found for me !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"  << endl;
         assert(false); // oh oh!
+        
     }
     
     /////////
     
-    setNormalPosition(sequenceNormalPosition);
-    
-    normalise();
+    //setNormalPosition(sequenceNormalPosition);
+    //normalise();
     
     // Make the start positon of the path to the start position of the agent
     // The target position is aligned
     
-    float xOffset =  currentPath[0].x - origin.x;
-    float yOffset =  currentPath[0].y - origin.y;
+    float xOffset;
+    float yOffset;
     
     
     if (actions.size() > 0) {
+        xOffset =  currentPath[0].x - startPosition.x;
+        yOffset =  currentPath[0].y - startPosition.y;
+        
         if (actions[0].first == 'l') actions[0].second -=xOffset;
         if (actions[0].first == 'r') actions[0].second +=xOffset;
         if (actions[0].first == 'u') actions[0].second -=yOffset;
@@ -254,6 +262,7 @@ void Agent2::_plan(){
     }
     
     if (actions.size() > 1) {
+        
         if (actions[1].first == 'l') actions[1].second -=xOffset;
         if (actions[1].first == 'r') actions[1].second +=xOffset;
         if (actions[1].first == 'u') actions[1].second -=yOffset;
@@ -265,7 +274,7 @@ void Agent2::_plan(){
     
     for (int t = 0; t < numSequenceRetries && !solved; t++ ) {
         // Remove the rest of the movies in the sequence as we are overwriting them
-        removeMoviesFromIndex(1);
+        removeMoviesFromIndex(getCurrentMovieIndex()+1);
         getPositionsForMovieSequence();
         normalise();
         bFaultyMovieSequence = false;
@@ -444,7 +453,7 @@ bool Agent2::cutMoviesForActionsNormalised(){
             
             totalDistance += calculateMovieDistanceNormalised(lastMovIndex, lastMovIndex + 1, currentActionDirection, 0);
             
-            ofxLogVerbose() << "Repeating the last movie: total distance = " << totalDistance << endl;
+            cout << "Repeating the last movie: total distance = " << totalDistance << endl;
         }
         
         
@@ -480,7 +489,7 @@ bool Agent2::cutMoviesForActionsNormalised(){
             float dist = calculateMovieDistanceNormalised(lastMovIndex, lastMovIndex, currentActionDirection, f - lastActionMovie->startframe);
             if ((totalDistance+dist) >= currentActionLength) { // if one movie is enough to cover the distance, this is the right cut frame
                 cout << "dist at frame " << f << " = " << dist << endl;
-                ofxLogVerbose() << "Ending the last movie at " << f << " instead of " << lastActionMovie->endframe << endl;
+                cout << "Ending the last movie at " << f << " instead of " << lastActionMovie->endframe << endl;
                 int oldLength = lastActionMovie->endframe - lastActionMovie->startframe;
                 lastActionMovie->endframe=f;
                 lastActionMovie->isCut = true;
@@ -534,7 +543,7 @@ void Agent2::insertMoviesFromAction(pair<char,float> act) {
     char op = act.first;
     float length = act.second;
     
-    ofxLogNotice() << "Performing action " << op << " for " << model.getPlayerName() << endl;
+    cout << "Performing action " << op << " for " << model.getPlayerName() << endl;
     
     
     MovieInfo lastMovie = getLastMovieInSequence();
@@ -678,7 +687,7 @@ void Agent2::generateMoviesFromMotions(vector<string>& motionSequence, bool isEn
         markerSequence.push_back(markerName);
     }
     
-    ofxLogVerbose() << "Generating movies for marker sequence: " << markerSequence << endl;
+    cout << "Generating movies for marker sequence: " << markerSequence << endl;
     
     MovieInfo lastMovie = getLastMovieInSequence();
     
@@ -686,10 +695,10 @@ void Agent2::generateMoviesFromMotions(vector<string>& motionSequence, bool isEn
     
     for(int i = 0; i < markerSequence.size(); i++){
         
-        ofxLogVerbose() << "Find movies with: " << markerSequence[i] << endl;
+        cout << "Find movies with: " << markerSequence[i] << endl;
         
         if(i == 0 && markerSequence[i] == lastMovie.markername){
-            ofxLogVerbose() << "...movie already in sequence, continuing" << endl;
+            cout << "...movie already in sequence, continuing" << endl;
             continue;
         }
         
@@ -718,10 +727,10 @@ void Agent2::generateMoviesFromMotions(vector<string>& motionSequence, bool isEn
             pStartMarker = markers[(int)ofRandom(markers.size())];
             pEndMarker = xmp[rMovieName].getNextMarker(pStartMarker.getStartFrame() + 1);
             
-            ofxLogVerbose() << "Selecting RAND marker match: " << motionSequence[i] << " == " << pStartMarker.getName() << " of " << markers.size() << endl;
+            cout << "Selecting RAND marker match: " << motionSequence[i] << " == " << pStartMarker.getName() << " of " << markers.size() << endl;
             
         }else{
-            ofxLogVerbose() << "Selecting NEXT marker match: " << motionSequence[i] << " == " << pStartMarker.getName() << endl;
+            cout << "Selecting NEXT marker match: " << motionSequence[i] << " == " << pStartMarker.getName() << endl;
         }
         
         int startFrame = pStartMarker.getStartFrame();
@@ -738,7 +747,7 @@ void Agent2::generateMoviesFromMotions(vector<string>& motionSequence, bool isEn
         nextMovie.isEnd = isEnd;
         
         ostringstream os; os << nextMovie;
-        ofxLogVerbose() << "Adding movie: " << os.str() << endl;
+        cout << "Adding movie: " << os.str() << endl;
         
         push(nextMovie);
         lastMovie = nextMovie;
@@ -757,11 +766,11 @@ void Agent2::getPositionsForMovieSequence(){
         ostringstream os; os << m;
         cout<< "####### totoal frames = " << totalframes << endl;
         if(m.positions.size() == totalframes && m.boundings.size() == totalframes){
-            ofxLogWarning() << "Assuming positions are the same for " << os.str() << endl;
+            cout << "Assuming positions are the same for " << os.str() << endl;
             continue;
         }
         
-        ofxLogVerbose() << "Getting positions and boundings for " << os.str() << endl;
+        cout << "Getting positions and boundings for " << os.str() << endl;
         
         m.positions.resize(totalframes);
         m.boundings.resize(totalframes);
@@ -787,7 +796,7 @@ void Agent2::generateMotionsBetween(string startMotion, string endMotion, vector
     
     vector<string> allPossibleTransitions;
     
-    ofxLogVerbose() << "Finding shortest path between:   " << startMotion << " -> " << endMotion << " for player " << model.getPlayerName() << endl;
+    cout << "Finding shortest path between:   " << startMotion << " -> " << endMotion << " for player " << model.getPlayerName() << endl;
     
     allPossibleTransitions = forwardGraph.getPossibleTransitions(startMotion);
     
@@ -919,8 +928,8 @@ void Agent2::generateMotionsBetween(string startMotion, string endMotion, vector
         
     }else{
         
-        ofxLogVerbose() << "Solution found for path between: " << startMotion << " -> " << endMotion << " for player " << model.getPlayerName() << endl;
-        ofxLogVerbose() << "                                 " << solutions[index] << endl;
+        cout << "Solution found for path between: " << startMotion << " -> " << endMotion << " for player " << model.getPlayerName() << endl;
+        cout << "                                 " << solutions[index] << endl;
         
         for(int i = 0; i < solutions[index].size(); i++){
             motionSequence.push_back(solutions[index][i]);

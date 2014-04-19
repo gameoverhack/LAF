@@ -587,9 +587,7 @@ public:
         
         currentSequenceFrame = totalSequenceFrames + currentMovie.frame;
         
-        sequenceFrames.erase(sequenceFrames.begin()+ind,sequenceFrames.end());
-        //sequenceFrames.erase(sequenceFrames.end());
-        //Remember to normalise after
+        rebuildSequenceFrames();
     }
     
     vector<int> getSequenceFrames() {

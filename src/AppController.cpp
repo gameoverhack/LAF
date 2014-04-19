@@ -411,6 +411,7 @@ void AppController::keyPressed(ofKeyEventArgs & e){
             }else{
                 playControllerStates.setState(kPLAYCONTROLLER_MAKE);
             }
+            break;
         }
         case 'g':
         {
@@ -463,28 +464,28 @@ void AppController::keyPressed(ofKeyEventArgs & e){
             break;
         case OF_KEY_LEFT:
         {
-            if (appModel->getProperty<bool>("ManualAgentControl"))
-                playController->moveAgent((Agent*)appModel->getSequences()[0], 'l');
+//            if (appModel->getProperty<bool>("ManualAgentControl"))
+//                playController->moveAgent((Agent*)appModel->getSequences()[0], 'l');
         }
             break;
             
         case OF_KEY_RIGHT:
         {
-            if (appModel->getProperty<bool>("ManualAgentControl"))
-                playController->moveAgent((Agent*)appModel->getSequences()[0], 'r');
+//            if (appModel->getProperty<bool>("ManualAgentControl"))
+//                playController->moveAgent((Agent*)appModel->getSequences()[0], 'r');
         }
             break;
         case OF_KEY_UP:
         {
-            if (appModel->getProperty<bool>("ManualAgentControl"))
-                playController->moveAgent((Agent*)appModel->getSequences()[0], 'u');
+//            if (appModel->getProperty<bool>("ManualAgentControl"))
+//                playController->moveAgent((Agent*)appModel->getSequences()[0], 'u');
         }
             break;
             
         case OF_KEY_DOWN:
         {
-            if (appModel->getProperty<bool>("ManualAgentControl"))
-                playController->moveAgent((Agent*)appModel->getSequences()[0], 'd');
+//            if (appModel->getProperty<bool>("ManualAgentControl"))
+//                playController->moveAgent((Agent*)appModel->getSequences()[0], 'd');
         }
             break;
         
@@ -496,77 +497,77 @@ void AppController::keyPressed(ofKeyEventArgs & e){
         
         case ']':
         {
-            vector<MovieSequence*>& sequences = appModel->getSequences();
-            for(int i = 0; i < sequences.size(); i++){
-                MovieSequence* sequence = sequences[i];
-                sequence->setSpeed(sequence->getSpeed()+0.2);
-            }
+//            vector<MovieSequence*>& sequences = appModel->getSequences();
+//            for(int i = 0; i < sequences.size(); i++){
+//                MovieSequence* sequence = sequences[i];
+//                sequence->setSpeed(sequence->getSpeed()+0.2);
+//            }
         }
             break;
             
         case '[':
         {
-            vector<MovieSequence*>& sequences = appModel->getSequences();
-            for(int i = 0; i < sequences.size(); i++){
-                MovieSequence* sequence = sequences[i];
-                sequence->setSpeed(sequence->getSpeed()-0.2);
-            }
+//            vector<MovieSequence*>& sequences = appModel->getSequences();
+//            for(int i = 0; i < sequences.size(); i++){
+//                MovieSequence* sequence = sequences[i];
+//                sequence->setSpeed(sequence->getSpeed()-0.2);
+//            }
             
         }
             break;
 
         case 'h':
         {
-            vector<MovieSequence*>& sequences = appModel->getSequences();
-            for(int i = 0; i < sequences.size(); i++){
-                MovieSequence* sequence = sequences[i];
-                sequence->setSpeed(-1);
-            }
+//            vector<MovieSequence*>& sequences = appModel->getSequences();
+//            for(int i = 0; i < sequences.size(); i++){
+//                MovieSequence* sequence = sequences[i];
+//                sequence->setSpeed(-1);
+//            }
         }
             break;
         case 'j':
         {
-            vector<MovieSequence*>& sequences = appModel->getSequences();
-            for(int i = 0; i < sequences.size(); i++){
-                MovieSequence* sequence = sequences[i];
-                sequence->setSpeed(-0.5);
-            }
+//            vector<MovieSequence*>& sequences = appModel->getSequences();
+//            for(int i = 0; i < sequences.size(); i++){
+//                MovieSequence* sequence = sequences[i];
+//                sequence->setSpeed(-0.5);
+//            }
         }
             break;
         case 'k':
         {
-            vector<MovieSequence*>& sequences = appModel->getSequences();
-            for(int i = 0; i < sequences.size(); i++){
-                MovieSequence* sequence = sequences[i];
-                sequence->setSpeed(0);
-            }
+//            vector<MovieSequence*>& sequences = appModel->getSequences();
+//            for(int i = 0; i < sequences.size(); i++){
+//                MovieSequence* sequence = sequences[i];
+//                sequence->setSpeed(0);
+//            }
         }
             break;
         case 'l':
         {
-            vector<MovieSequence*>& sequences = appModel->getSequences();
-            for(int i = 0; i < sequences.size(); i++){
-                MovieSequence* sequence = sequences[i];
-                sequence->setSpeed(1);
-            }
+//            vector<MovieSequence*>& sequences = appModel->getSequences();
+//            for(int i = 0; i < sequences.size(); i++){
+//                MovieSequence* sequence = sequences[i];
+//                sequence->setSpeed(1);
+//            }
         }
             break;
         case ';':
         {
-            vector<MovieSequence*>& sequences = appModel->getSequences();
-            for(int i = 0; i < sequences.size(); i++){
-                MovieSequence* sequence = sequences[i];
-                sequence->setSpeed(3);
-            }
+//            vector<MovieSequence*>& sequences = appModel->getSequences();
+//            for(int i = 0; i < sequences.size(); i++){
+//                MovieSequence* sequence = sequences[i];
+//                sequence->setSpeed(3);
+//            }
         }
             break;
         case '\'':
         {
-            vector<MovieSequence*>& sequences = appModel->getSequences();
-            for(int i = 0; i < sequences.size(); i++){
-                MovieSequence* sequence = sequences[i];
-                sequence->setSpeed(6);
-            }
+//            vector<MovieSequence*>& sequences = appModel->getSequences();
+//            for(int i = 0; i < sequences.size(); i++){
+//                MovieSequence* sequence = sequences[i];
+//                sequence->setSpeed(6);
+//            }
         }
             break;
             
