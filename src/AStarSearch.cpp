@@ -25,6 +25,25 @@
 	bool myGraphDescription::isAccessible(myNode& n)
 	{
         
+        
+//        ofPoint scaledNode;
+//        scaledNode.x = n.x * pathPlanner->gridScaleX + pathPlanner->offsetX;
+//        scaledNode.y = n.y * pathPlanner->gridScaleY + pathPlanner->offsetY;
+//        
+//        if (!pathPlanner->screenBoundary.inside(scaledNode)) {
+//            if ((scaledNode.y > pathPlanner->screenBoundary.height) || (scaledNode.y < pathPlanner->screenBoundary.y)) {
+//                if (n.prevNode)
+//                    if (n.y == n.prevNode->y)
+//                        return false;
+//            }
+//            
+//            if ((scaledNode.x > pathPlanner->screenBoundary.width) || (scaledNode.x < pathPlanner->screenBoundary.x)) {
+//                if (n.prevNode)
+//                    if (n.x == n.prevNode->x)
+//                        return false;
+//            }
+//        }
+        
         if (!isInEnv(n))
             return false;
         
@@ -41,22 +60,11 @@
         
 		s->clear(); c->clear(); // Planner is supposed to clear these. Still, for safety we clear it again.
 
-        // Define a 8-connected graph
-        /*
-		for (int a=-1; a<=1; a++)
-			for (int b=-1; b<=1; b++) {
-				if (a==0 && b==0) continue;
-				tn.x = n.x + a;
-				tn.y = n.y + b;
-				s->push_back(tn);
-				c->push_back(sqrt((double)(a*a+b*b)));
-			}
-         */
         
         int xCost = 0;
         int yCost = 0;
         
-        int penalty = 100000; //TODO: This is now just experimental. Calculate it!
+        int penalty = 1000000; //TODO: This is now just experimental. Calculate it!
         
         if (n.prevX == n.x)
             xCost = penalty;
@@ -141,60 +149,8 @@
             }
         }
         
-        
-        
-        
-        // Define a 4-connected graph
-        if (n.prevNode) {
-            if (n.x == n.prevNode->x)
-                for (int a=-1; a<=1; a+=2) {
-                    tn.x = n.x+a;
-                    tn.y = n.y;
-                    if (!isInObstacle(tn) && isInEnv(tn)) {
-                        s->push_back(tn);
-                        //c->push_back(sqrt((double)(a*a)));
-                        c->push_back(calcDistToObstacles(tn)+xCost);
-                        
-                    }
-                }
-        } else {
-            for (int a=-1; a<=1; a+=2) {
-                tn.x = n.x+a;
-                tn.y = n.y;
-                if (!isInObstacle(tn) && isInEnv(tn)) {
-                    s->push_back(tn);
-                    //c->push_back(sqrt((double)(a*a)));
-                    c->push_back(calcDistToObstacles(tn)+xCost);
-                    
-                }
-            }
 
-        }
         
-        
-        
-        if (n.prevNode) {
-            if (n.y == n.prevNode->y )
-                for (int b=-1; b<=1; b+=2) {
-                    tn.x = n.x;
-                    tn.y = n.y+b;
-                    if (!isInObstacle(tn) && isInEnv(tn)) {
-                        s->push_back(tn);
-                        //c->push_back(sqrt((double)(b*b)));
-                        c->push_back(calcDistToObstacles(tn)+yCost);
-                    }
-                }
-        } else {
-            for (int b=-1; b<=1; b+=2) {
-                tn.x = n.x;
-                tn.y = n.y+b;
-                if (!isInObstacle(tn) && isInEnv(tn)) {
-                    s->push_back(tn);
-                    //c->push_back(sqrt((double)(b*b)));
-                    c->push_back(calcDistToObstacles(tn)+yCost);
-                }
-            }
-        }
         
 	}
 
@@ -235,22 +191,12 @@
 
 bool myGraphDescription::isInEnv(myNode& n) {
     ofRectangle biggerEnv;
-//    biggerEnv.x = -appModel->getProperty<float>("OutputWidth")/2;
-//    biggerEnv.y = -appModel->getProperty<float>("OutputHeight");
-//    biggerEnv.width = appModel->getProperty<float>("OutputWidth")*2;
-//    biggerEnv.height = appModel->getProperty<float>("OutputHeight")*3;
-    
-//    biggerEnv.x = 0;
-//    biggerEnv.y = 0;
-//    biggerEnv.width = appModel->getProperty<float>("OutputWidth");
-//    biggerEnv.height = appModel->getProperty<float>("OutputHeight");
-    
     
     ofPoint scaledNode;
     scaledNode.x = n.x * pathPlanner->gridScaleX + pathPlanner->offsetX;
     scaledNode.y = n.y * pathPlanner->gridScaleY + pathPlanner->offsetY;
     
-    return this->pathPlanner->worldRect.inside(scaledNode);
+    return pathPlanner->worldRect.inside(scaledNode);
 
 }
 
@@ -259,14 +205,12 @@ bool myGraphDescription::isInObstacle(myNode& n) {
     
     ofPoint scaledNode;
     scaledNode.x = n.x * pathPlanner->gridScaleX + pathPlanner->offsetX;
-    scaledNode.y = n.y * pathPlanner->gridScaleY + pathPlanner->offsetY;
+    scaledNode.y = (n.y * pathPlanner->gridScaleY + pathPlanner->offsetY) - pathPlanner->obstAvoidBoundingH/2;
     
 
-    bounding.setFromCenter(scaledNode,this->pathPlanner->obstAvoidBoundingW, this->pathPlanner->obstAvoidBoundingH);
+    bounding.setFromCenter(scaledNode,pathPlanner->obstAvoidBoundingW, pathPlanner->obstAvoidBoundingH);
 
-    
-   
-    
+
     for (int w=0;w<pathPlanner->obstacles.size();w++) {
         if (pathPlanner->obstacles[w].intersects(bounding))
             return true;
@@ -278,16 +222,16 @@ bool myGraphDescription::isInObstacle(myNode& n) {
 float myGraphDescription::calcDistToObstacles(myNode& n) {
     float cost = 0;
     
-    ofPoint scaledNode;
-    scaledNode.x = n.x * pathPlanner->gridScaleX + pathPlanner->offsetX;
-    scaledNode.y = n.y * pathPlanner->gridScaleY + pathPlanner->offsetY;
-    
-    
-    for (int w=0;w<pathPlanner->obstacles.size();w++) {
-        if (distancePointToRectangle(scaledNode,pathPlanner->obstacles[w]) < 1000)  //TODO: use a dynamic parameter
-            cost += distancePointToRectangle(scaledNode,pathPlanner->obstacles[w]);
-    }
-    
+//    ofPoint scaledNode;
+//    scaledNode.x = n.x * pathPlanner->gridScaleX + pathPlanner->offsetX;
+//    scaledNode.y = n.y * pathPlanner->gridScaleY + pathPlanner->offsetY;
+//    
+//    
+//    for (int w=0;w<pathPlanner->obstacles.size();w++) {
+//        if (distancePointToRectangle(scaledNode,pathPlanner->obstacles[w]) < 1000)  //TODO: use a dynamic parameter
+//            cost += distancePointToRectangle(scaledNode,pathPlanner->obstacles[w]);
+//    }
+
     return cost;
 }
 
@@ -365,6 +309,12 @@ vector< vector< ofPoint > > PathPlanner::findPaths(ofPoint _startPoint, ofPoint 
 	myGraph.hashTableSize = 1001; // Since in this problem, "getHashBin" can return a max of value 201.
 	myGraph.hashBinSizeIncreaseStep = 512; // By default it's 128. For this problem, we choose a higher value.
 	
+    ///
+    
+    screenBoundary = ofRectangle(100, 100, 1820, 566);
+    
+    
+    
     // snap the input nodes to the grid
 
     myNode startPoint;

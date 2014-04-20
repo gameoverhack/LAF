@@ -240,7 +240,7 @@ void Agent2::_plan(){
         actions =  pp.getDirectionsInPath(paths[0]);
     }else{
         cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!No path found for me !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"  << endl;
-        assert(false); // oh oh!
+        //assert(false); // oh oh!
         
     }
     

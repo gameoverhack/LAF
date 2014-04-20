@@ -29,6 +29,7 @@ public:
     char getDirection(ofPoint one, ofPoint two);
     vector< pair<char,float> > getDirectionsInPath(vector<ofPoint> path);
     
+    ofRectangle screenBoundary;
 };
 
 class myGraphDescription {

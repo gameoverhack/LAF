@@ -203,13 +203,14 @@ void PlayController::createAgent(string name, ofPoint origin, ofRectangle target
     
     // calculate plan boundary and draw size
     ofRectangle tPlanBoundary = ofRectangle(0, 0, appModel->getProperty<float>("OutputWidth"), appModel->getProperty<float>("OutputHeight"));
-    //tPlanBoundary.growToInclude(-tDrawSize, -tDrawSize);
+    tPlanBoundary.growToInclude(-tDrawSize, -tDrawSize);
     tPlanBoundary.growToInclude(appModel->getProperty<float>("OutputWidth") + tDrawSize, appModel->getProperty<float>("OutputHeight") + tDrawSize);
     
     // set plan boundary and draw size
     agent->setWorldObstacles(appModel->getWindows());
     agent->setPlanBoundary(tPlanBoundary);
-    agent->setGridSize(tDrawSize / 2.0f, tDrawSize / 2.0f);
+    //agent->setGridSize(tDrawSize / 2.0f, tDrawSize / 2.0f);
+    agent->setGridSize(50, 50);
     
     // set modes
     agent->setCollisionMode(cMode);
