@@ -64,29 +64,140 @@
             yCost = penalty;
         
         
-        // Define a 4-connected graph
-        for (int a=-1; a<=1; a+=2) {
-            tn.x = n.x+a;
-            tn.y = n.y;
-            if (!isInObstacle(tn) && isInEnv(tn)) {
-                s->push_back(tn);
-                //c->push_back(sqrt((double)(a*a)));
-                c->push_back(calcDistToObstacles(tn)+xCost);
+        if (n.prevNode && n.prevNode->prevNode) {
+            
+            if (n.x == n.prevNode->x) {
                 
+                for (int b=-1; b<=1; b+=2) {
+                    tn.x = n.x;
+                    tn.y = n.y+b;
+                    if (!isInObstacle(tn) && isInEnv(tn)) {
+                        s->push_back(tn);
+                        //c->push_back(sqrt((double)(b*b)));
+                        c->push_back(calcDistToObstacles(tn)+yCost);
+                    }
+                }
+                
+                if (n.x == n.prevNode->prevNode->x) {
+                    for (int a=-1; a<=1; a+=2) {
+                        tn.x = n.x+a;
+                        tn.y = n.y;
+                        if (!isInObstacle(tn) && isInEnv(tn)) {
+                            s->push_back(tn);
+                            //c->push_back(sqrt((double)(a*a)));
+                            c->push_back(calcDistToObstacles(tn)+xCost);
+                            
+                        }
+                    }
+                }
+                
+            } else if (n.y == n.prevNode->y) {
+                
+                for (int a=-1; a<=1; a+=2) {
+                    tn.x = n.x+a;
+                    tn.y = n.y;
+                    if (!isInObstacle(tn) && isInEnv(tn)) {
+                        s->push_back(tn);
+                        //c->push_back(sqrt((double)(a*a)));
+                        c->push_back(calcDistToObstacles(tn)+xCost);
+                    }
+                }
+                
+                if (n.y == n.prevNode->prevNode->y) {
+                    for (int b=-1; b<=1; b+=2) {
+                        tn.x = n.x;
+                        tn.y = n.y+b;
+                        if (!isInObstacle(tn) && isInEnv(tn)) {
+                            s->push_back(tn);
+                            //c->push_back(sqrt((double)(b*b)));
+                            c->push_back(calcDistToObstacles(tn)+yCost);
+                        }
+                    }
+                }
+                
+            }
+            
+            
+        } else {
+            for (int a=-1; a<=1; a+=2) {
+                tn.x = n.x+a;
+                tn.y = n.y;
+                if (!isInObstacle(tn) && isInEnv(tn)) {
+                    s->push_back(tn);
+                    //c->push_back(sqrt((double)(a*a)));
+                    c->push_back(calcDistToObstacles(tn)+xCost);
+                    
+                }
+            }
+
+            for (int b=-1; b<=1; b+=2) {
+                tn.x = n.x;
+                tn.y = n.y+b;
+                if (!isInObstacle(tn) && isInEnv(tn)) {
+                    s->push_back(tn);
+                    //c->push_back(sqrt((double)(b*b)));
+                    c->push_back(calcDistToObstacles(tn)+yCost);
+                }
             }
         }
         
-        for (int b=-1; b<=1; b+=2) {
-            tn.x = n.x;
-            tn.y = n.y+b;
-            if (!isInObstacle(tn) && isInEnv(tn)) {
-                s->push_back(tn);
-                //c->push_back(sqrt((double)(b*b)));
-                c->push_back(calcDistToObstacles(tn)+yCost);
+        
+        
+        
+        // Define a 4-connected graph
+        if (n.prevNode) {
+            if (n.x == n.prevNode->x)
+                for (int a=-1; a<=1; a+=2) {
+                    tn.x = n.x+a;
+                    tn.y = n.y;
+                    if (!isInObstacle(tn) && isInEnv(tn)) {
+                        s->push_back(tn);
+                        //c->push_back(sqrt((double)(a*a)));
+                        c->push_back(calcDistToObstacles(tn)+xCost);
+                        
+                    }
+                }
+        } else {
+            for (int a=-1; a<=1; a+=2) {
+                tn.x = n.x+a;
+                tn.y = n.y;
+                if (!isInObstacle(tn) && isInEnv(tn)) {
+                    s->push_back(tn);
+                    //c->push_back(sqrt((double)(a*a)));
+                    c->push_back(calcDistToObstacles(tn)+xCost);
+                    
+                }
+            }
+
+        }
+        
+        
+        
+        if (n.prevNode) {
+            if (n.y == n.prevNode->y )
+                for (int b=-1; b<=1; b+=2) {
+                    tn.x = n.x;
+                    tn.y = n.y+b;
+                    if (!isInObstacle(tn) && isInEnv(tn)) {
+                        s->push_back(tn);
+                        //c->push_back(sqrt((double)(b*b)));
+                        c->push_back(calcDistToObstacles(tn)+yCost);
+                    }
+                }
+        } else {
+            for (int b=-1; b<=1; b+=2) {
+                tn.x = n.x;
+                tn.y = n.y+b;
+                if (!isInObstacle(tn) && isInEnv(tn)) {
+                    s->push_back(tn);
+                    //c->push_back(sqrt((double)(b*b)));
+                    c->push_back(calcDistToObstacles(tn)+yCost);
+                }
             }
         }
+        
 	}
-    
+
 	double myGraphDescription::getHeuristics(myNode& n1, myNode& n2)
 	{
         int directH = 0;

@@ -277,8 +277,7 @@ void Agent2::_plan(){
     
     bool solved = false;
     
-    //for (int t = 0; t < numSequenceRetries && !solved; t++ ) {
-    for (int t = 0; t < 1 && !solved; t++ ) {
+    for (int t = 0; t < numSequenceRetries && !solved; t++ ) {
         // Remove the rest of the movies in the sequence as we are overwriting them
 //        removeMoviesFromIndex(getCurrentMovieIndex()+1);
 //        getPositionsForMovieSequence();
