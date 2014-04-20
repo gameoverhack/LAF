@@ -124,7 +124,7 @@ int Agent2::getSyncFrame(){
 void Agent2::update(){
     
     MovieSequence::update();
-    agentInfo.currentBounding = MovieSequence::getBounding();
+   // agentInfo.currentBounding = MovieSequence::getBounding();
     
     if(!isAgentLocked()){
         
@@ -181,6 +181,7 @@ void Agent2::setOtherAgents(vector<AgentInfo> _otherAgentInfo){
 void Agent2::plan(ofRectangle _target, int _numSequenceRetries){
     lockAgent();
     {
+      //  setPaused(true);
         numSequenceRetries = _numSequenceRetries;
         target = _target;
         state = AGENT_PLAN;
@@ -190,20 +191,22 @@ void Agent2::plan(ofRectangle _target, int _numSequenceRetries){
 
 //--------------------------------------------------------------
 void Agent2::_plan(){
-    //pause();
-    
+    //setPaused(true);
+
     int lastSequenceFrameOfCurrentMovie = getSequenceFrames()[getCurrentMovieIndex()+1]-1;
-    ofPoint startPosition = getScaledFloorOffset();//At(lastSequenceFrameOfCurrentMovie); // where am i now?
+    ofPoint startPosition = getScaledFloorOffsetAt(lastSequenceFrameOfCurrentMovie); // where am i now?
     ofPoint targetPosition = ofPoint(target.x + target.width / 2.0, target.y, 0.0f); // where I'm going
     
+    //removeAllMovies();
+
    // ofPoint sequenceNormalPosition = getScaledPosition();// agent's video position
     
     /////////////
     
-    getCurrentMovie().agentActionIndex = -1;
-    
-    for (int i = 0; i < getMovieSequence().size(); i++)
-        getMovieSequence()[i].agentActionIndex  = -1;
+//    getCurrentMovie().agentActionIndex = -1;
+//    
+//    for (int i = 0; i < getMovieSequence().size(); i++)
+//        getMovieSequence()[i].agentActionIndex  = -1;
     
     /////////////
     
@@ -274,11 +277,13 @@ void Agent2::_plan(){
     
     bool solved = false;
     
-    for (int t = 0; t < numSequenceRetries && !solved; t++ ) {
+    //for (int t = 0; t < numSequenceRetries && !solved; t++ ) {
+    for (int t = 0; t < 1 && !solved; t++ ) {
         // Remove the rest of the movies in the sequence as we are overwriting them
-        removeMoviesFromIndex(getCurrentMovieIndex()+1);
-        getPositionsForMovieSequence();
-        normalise();
+//        removeMoviesFromIndex(getCurrentMovieIndex()+1);
+//        getPositionsForMovieSequence();
+//        normalise();
+        removeAllMovies();
         bFaultyMovieSequence = false;
         
         // Now that the agent has a set of actions, let's insert movies for them
@@ -299,9 +304,59 @@ void Agent2::_plan(){
     
     bFaultyMovieSequence = !solved;
     
-    
+    play();
     state = AGENT_RUN;
     
+}
+
+
+//--------------------------------------------------------------
+void Agent2::removeAllMovies(){
+    
+    
+    ofPoint sequenceNormalPosition = getScaledPosition();// agent's video position
+
+    
+    // keep a copy of the current movie
+    MovieInfo movieToKeep;
+    
+    if (currentSequenceIndex == -1 || currentSequenceIndex == 0) {
+        movieToKeep.name = sequence[0].name;
+        movieToKeep.path = sequence[0].path;
+        movieToKeep.startframe = sequence[0].startframe + sequence[0].frame;
+        movieToKeep.endframe = sequence[0].endframe;
+        movieToKeep.speed = sequence[0].speed;
+        movieToKeep.markername = sequence[0].markername;
+        movieToKeep.agentActionIndex = -1;
+    } else {
+        movieToKeep.name = getCurrentMovie().name;
+        movieToKeep.path = getCurrentMovie().path;
+        movieToKeep.startframe = getCurrentMovie().startframe + getCurrentMovie().frame;
+        movieToKeep.endframe = getCurrentMovie().endframe;
+        movieToKeep.speed = getCurrentMovie().speed;
+        movieToKeep.markername = getCurrentMovie().markername;
+        movieToKeep.agentActionIndex = -1;
+    }
+    
+    
+    //
+    getMovieSequence().clear();
+    positions.clear();
+    boundings.clear();
+    currentMovie = NoMovie;
+    currentSequenceIndex = -1;
+    currentSequenceFrame = totalSequenceFrames = 0;
+    
+    push(movieToKeep);
+    
+    getCurrentMovie().startframe = getCurrentMovie().frame;
+    
+    rebuildSequenceFrames();
+    
+    setNormalPosition(sequenceNormalPosition);
+    
+    getPositionsForMovieSequence();
+    normalise();
 }
 
 //--------------------------------------------------------------

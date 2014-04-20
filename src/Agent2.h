@@ -81,6 +81,8 @@ public:
     // immediate occasionaly called commands
     void plan(ofRectangle _target, int _numSequenceRetries = 3);
     
+    void removeAllMovies();
+    
     // CHECKS
     
     // external check on thread state

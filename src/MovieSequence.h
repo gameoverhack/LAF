@@ -577,8 +577,8 @@ public:
     
     void removeMoviesFromIndex (int ind) {
         
-        ind++;
-        sequence.erase(sequence.begin()+ind,sequence.end()+1);
+        //ind++;
+        sequence.erase(sequence.begin()+ind,sequence.end());
 //        sequence.erase(sequence.end());
         
          for (int i=sequenceFrames.size()-1; i>=ind;i--) {

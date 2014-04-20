@@ -433,7 +433,7 @@ void AppView::update(){
                         index = i;
                         break;
                     }
-                
+                if (!agent->isAgentLocked()) {
                 point = agent->getScaledFloorOffsetAt(agent->getSequenceFrames()[index]);
                 pathFromHere.addVertex(point);
                 
@@ -449,6 +449,7 @@ void AppView::update(){
                         point.y+=agent->actions[a].second;
                     
                     pathFromHere.addVertex(point);
+                }
                 }
 
                 //TODO: delelet the traveled path points

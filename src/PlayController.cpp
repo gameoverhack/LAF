@@ -232,7 +232,7 @@ void PlayController::triggerReplan() {
     vector<Agent2*>& agents = appModel->getAgents();
     
     for (int i=0; i < agents.size(); i++) {
-        //agents[i]->setPaused(<#bool b#>)
+        //agents[i]->removeAllMovies();
         agents[i]->setWindow(newWindowIndex);
         agents[i]->plan(newWindow);
         
