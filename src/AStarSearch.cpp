@@ -25,6 +25,28 @@
 	bool myGraphDescription::isAccessible(myNode& n)
 	{
         
+        if (n.prevNode && n.prevNode->prevNode && n.prevNode->prevNode->prevNode) {
+            if (n.x != n.prevNode->x) {
+                if ((n.prevNode->x == n.prevNode->prevNode->x && n.prevNode->x == n.prevNode->prevNode->prevNode->x) ||
+                    (n.prevNode->y == n.prevNode->prevNode->y && n.prevNode->y == n.prevNode->prevNode->prevNode->y) ||
+                    (n.y == n.prevNode->y && n.y == n.prevNode->prevNode->y))
+                    return true;
+                else
+                    return false;
+            }
+            
+            if (n.y != n.prevNode->y) {
+                if ((n.prevNode->y == n.prevNode->prevNode->y && n.prevNode->y == n.prevNode->prevNode->prevNode->y) ||
+                    (n.prevNode->x == n.prevNode->prevNode->x && n.prevNode->x == n.prevNode->prevNode->prevNode->x) ||
+                    (n.x == n.prevNode->x && n.x == n.prevNode->prevNode->x))
+                    return true;
+                else
+                    return false;
+            }
+            
+        } else {
+            return true;
+        }
         
 //        ofPoint scaledNode;
 //        scaledNode.x = n.x * pathPlanner->gridScaleX + pathPlanner->offsetX;
@@ -72,7 +94,7 @@
             yCost = penalty;
         
         
-        if (n.prevNode && n.prevNode->prevNode) {
+       /* if (n.prevNode && n.prevNode->prevNode) {
             
             if (n.x == n.prevNode->x) {
                 
@@ -126,7 +148,7 @@
             }
             
             
-        } else {
+        } else */{
             for (int a=-1; a<=1; a+=2) {
                 tn.x = n.x+a;
                 tn.y = n.y;

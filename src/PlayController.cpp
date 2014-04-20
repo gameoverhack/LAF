@@ -222,7 +222,7 @@ void PlayController::createAgent(string name, ofPoint origin, ofRectangle target
     agent->plan(target);
     appModel->addAgent(agent);
     agent->setSpeed(3);
-    agent->play();
+    //agent->play();
 }
 
 //--------------------------------------------------------------

@@ -129,6 +129,7 @@ public:
 protected:
     
     // METHODS
+    void clear();
     
     void insertMoviesFromAction(pair<char,float> act);
     void insertEndMotion();
