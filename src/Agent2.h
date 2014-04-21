@@ -124,6 +124,39 @@ public:
         return bFaultyMovieSequence;
     }
 
+    ofPolyline getCorrectedPath() {
+        ofPolyline pathFromHere; //= ofPolyline(agent->getCurrentPath().getVertices());
+        ofPoint point;
+        
+        //if (!isAgentLocked())
+        {
+            
+        int index;
+        for (int i=0; i < getMovieSequence().size(); i++)
+            if (getMovieSequence()[i].agentActionIndex == 0) {
+                index = i;
+                break;
+            }
+        
+            point = getScaledFloorOffsetAt(getSequenceFrames()[index]);
+            pathFromHere.addVertex(point);
+            
+            for (int a=0;a<actions.size();a++) {
+                if (actions[a].first == 'l')
+                    point.x-=actions[a].second;
+                else if (actions[a].first == 'r')
+                    point.x+=actions[a].second;
+                else if (actions[a].first == 'u')
+                    point.y-=actions[a].second;
+                else if (actions[a].first == 'd')
+                    point.y+=actions[a].second;
+                
+                pathFromHere.addVertex(point);
+            }
+        }
+        return pathFromHere;
+    }
+    
     vector< pair<char, float> > actions;
     
 protected:

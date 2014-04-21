@@ -25,6 +25,25 @@
 	bool myGraphDescription::isAccessible(myNode& n)
 	{
         
+//        ofPoint scaledNode;
+//        scaledNode.x = n.x * pathPlanner->gridScaleX + pathPlanner->offsetX;
+//        scaledNode.y = n.y * pathPlanner->gridScaleY + pathPlanner->offsetY;
+//        
+//        if (!pathPlanner->screenBoundary.inside(scaledNode)) {
+//            if ((scaledNode.y > pathPlanner->screenBoundary.height) || (scaledNode.y < pathPlanner->screenBoundary.y)) {
+//                if (n.prevNode)
+//                    if (n.y == n.prevNode->y)
+//                        return false;
+//            }
+//            
+//            if ((scaledNode.x > pathPlanner->screenBoundary.width) || (scaledNode.x < pathPlanner->screenBoundary.x)) {
+//                if (n.prevNode)
+//                    if (n.x == n.prevNode->x)
+//                        return false;
+//            }
+//        }
+
+        
         if (n.prevNode && n.prevNode->prevNode && n.prevNode->prevNode->prevNode) {
             if (n.x != n.prevNode->x) {
                 if ((n.prevNode->x == n.prevNode->prevNode->x && n.prevNode->x == n.prevNode->prevNode->prevNode->x) ||
@@ -48,23 +67,6 @@
             return true;
         }
         
-//        ofPoint scaledNode;
-//        scaledNode.x = n.x * pathPlanner->gridScaleX + pathPlanner->offsetX;
-//        scaledNode.y = n.y * pathPlanner->gridScaleY + pathPlanner->offsetY;
-//        
-//        if (!pathPlanner->screenBoundary.inside(scaledNode)) {
-//            if ((scaledNode.y > pathPlanner->screenBoundary.height) || (scaledNode.y < pathPlanner->screenBoundary.y)) {
-//                if (n.prevNode)
-//                    if (n.y == n.prevNode->y)
-//                        return false;
-//            }
-//            
-//            if ((scaledNode.x > pathPlanner->screenBoundary.width) || (scaledNode.x < pathPlanner->screenBoundary.x)) {
-//                if (n.prevNode)
-//                    if (n.x == n.prevNode->x)
-//                        return false;
-//            }
-//        }
         
         if (!isInEnv(n))
             return false;
@@ -247,8 +249,18 @@ float myGraphDescription::calcDistToObstacles(myNode& n) {
 //    ofPoint scaledNode;
 //    scaledNode.x = n.x * pathPlanner->gridScaleX + pathPlanner->offsetX;
 //    scaledNode.y = n.y * pathPlanner->gridScaleY + pathPlanner->offsetY;
+//
 //    
-//    
+//    if (abs(scaledNode.x - pathPlanner->screenBoundary.x) < 800)
+//        cost += 1.0f/(abs(scaledNode.x - pathPlanner->screenBoundary.x))*10000.0;
+//    else
+//        cost += 1.0f/(abs(scaledNode.x - (pathPlanner->screenBoundary.x + pathPlanner->screenBoundary.width)))*10000.0;
+//   
+//    if (abs(scaledNode.y - pathPlanner->screenBoundary.y) < 300)
+//        cost += 1.0f/(abs(scaledNode.y - pathPlanner->screenBoundary.y))*10000.0;
+//    else
+//        cost += 1.0f/(abs(scaledNode.y - (pathPlanner->screenBoundary.height)))*10000.0;
+    
 //    for (int w=0;w<pathPlanner->obstacles.size();w++) {
 //        if (distancePointToRectangle(scaledNode,pathPlanner->obstacles[w]) < 1000)  //TODO: use a dynamic parameter
 //            cost += distancePointToRectangle(scaledNode,pathPlanner->obstacles[w]);
@@ -333,7 +345,7 @@ vector< vector< ofPoint > > PathPlanner::findPaths(ofPoint _startPoint, ofPoint 
 	
     ///
     
-    screenBoundary = ofRectangle(100, 100, 1820, 566);
+    screenBoundary = ofRectangle(100, 100, 1920, 666);
     
     
     
