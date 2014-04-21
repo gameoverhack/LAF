@@ -199,7 +199,7 @@ void Agent2::plan(ofRectangle _target, int _numSequenceRetries){
 void Agent2::_plan(){
     //setPaused(true);
 
-    int lastSequenceFrameOfCurrentMovie = getSequenceFrames()[getCurrentMovieIndex()+1]-1;
+    int lastSequenceFrameOfCurrentMovie = getSequenceFrames()[getCurrentMovieIndex()+1];
     ofPoint startPosition = getScaledFloorOffsetAt(lastSequenceFrameOfCurrentMovie); // where am i now?
     ofPoint targetPosition = ofPoint(target.x + target.width / 2.0, target.y, 0.0f); // where I'm going
     
@@ -242,9 +242,6 @@ void Agent2::_plan(){
     
     /////////
     
-    //setNormalPosition(sequenceNormalPosition);
-    //normalise();
-    
     // Make the start positon of the path to the start position of the agent
     // The target position is aligned
     
@@ -283,13 +280,9 @@ void Agent2::_plan(){
             cout << "########## action " << actions[a].first << endl;
             insertMoviesFromAction(actions[a]);
         }
-        
-      
 
         insertEndMotion();
 
-       
-        
         //agent->storeSBoundings();
         
         // Make sure the moveis for each action travel the exact lenth
@@ -348,6 +341,8 @@ void Agent2::removeAllMovies(){
     
     //
     getMovieSequence().clear();
+    getSequenceFrames().clear();
+    getSequenceFrames().push_back(0);
     positions.clear();
     boundings.clear();
     currentMovie = NoMovie;
@@ -356,9 +351,9 @@ void Agent2::removeAllMovies(){
     
     push(movieToKeep);
     
-    getCurrentMovie().startframe = getCurrentMovie().frame;
+    //getCurrentMovie().startframe = getCurrentMovie().frame;
     
-    rebuildSequenceFrames();
+    //rebuildSequenceFrames();
     
     setNormalPosition(sequenceNormalPosition);
     
