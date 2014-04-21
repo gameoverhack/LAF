@@ -196,7 +196,7 @@ public:
         //playerSequence->stop();
         setSpeed(-1* abs(speed));
 
-        StopAt(lastMarker.getStartFrame());
+        stopAt(lastMarker.getStartFrame());
 
         
     }
@@ -278,7 +278,7 @@ public:
         
         
         setSpeed(-1* abs(speed));
-        StopAt(lastMarker.getStartFrame());
+        stopAt(lastMarker.getStartFrame());
     }
     
     //-----------------------------------------------------------

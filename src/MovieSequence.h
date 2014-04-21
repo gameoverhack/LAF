@@ -190,7 +190,7 @@ public:
     }
     
     
-    void StopAt(int frame) {
+    void stopAt(int frame) {
          ofxLogVerbose() << "Stoping current movie at frame " << frame << "" << endl;
         pauseFrame = frame;
     }

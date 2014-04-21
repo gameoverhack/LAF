@@ -12,10 +12,14 @@
 Agent2::Agent2(){
     cout << "Creating Agent" << endl;
     
+    sAgentID++;
+    
     // init internal state
     MovieSequence::MovieSequence();
-    bIsAgentLocked = false;
-    state = AGENT_RUN;
+    agentInfo.currentMovieInfo = NoMovie;
+    agentInfo.bIsAgentLocked = false;
+    agentInfo.state = AGENT_INIT;
+    agentInfo.agentID = sAgentID;
     
 }
 
@@ -124,16 +128,24 @@ int Agent2::getSyncFrame(){
 void Agent2::update(){
     
     MovieSequence::update();
-    agentInfo.currentBounding = MovieSequence::getBounding();
     
     if(!isAgentLocked()){
-        
+
         lockAgent();
         
+        agentInfo.currentMovieInfo = MovieSequence::getCurrentMovie();
+        agentInfo.currentBounding = MovieSequence::getScaledBounding();
+        
         unlockAgent();
+        
     }
     
-    
+}
+
+//--------------------------------------------------------------
+AgentInfo Agent2::getCurrentAgentInfo(){
+    ofScopedLock lock(mutex);
+    return agentInfo;
 }
 
 //--------------------------------------------------------------
@@ -183,7 +195,7 @@ void Agent2::plan(ofRectangle _target, int _numSequenceRetries){
     {
         numSequenceRetries = _numSequenceRetries;
         target = _target;
-        state = AGENT_PLAN;
+        agentInfo.state = AGENT_PLAN;
     }
     unlockAgent();
 }
@@ -298,7 +310,7 @@ void Agent2::_plan(){
     bFaultyMovieSequence = !solved;
     
     
-    state = AGENT_RUN;
+    agentInfo.state = AGENT_RUN;
     
 }
 
@@ -318,7 +330,7 @@ void Agent2::threadedFunction(){
             
             lockAgentFlag();
             
-            switch (state) {
+            switch (agentInfo.state) {
                 case AGENT_RUN:
                     // nothing for now
                     break;
@@ -340,19 +352,19 @@ void Agent2::threadedFunction(){
 //--------------------------------------------------------------
 bool Agent2::isAgentLocked(){
     ofScopedLock lock(mutex);
-    return bIsAgentLocked;
+    return agentInfo.bIsAgentLocked;
 }
 
 //--------------------------------------------------------------
 void Agent2::lockAgentFlag(){
     lock();
-    bIsAgentLocked = true;
+    agentInfo.bIsAgentLocked = true;
     unlock();
 }
 
 void Agent2::unlockAgentFlag(){
     lock();
-    bIsAgentLocked = false;
+    agentInfo.bIsAgentLocked = false;
     unlock();
 }
 
@@ -360,13 +372,13 @@ void Agent2::unlockAgentFlag(){
 void Agent2::lockAgent(){
     if(isThreadRunning()){
         lock();
-        bIsAgentLocked = true;
+        agentInfo.bIsAgentLocked = true;
     }
 }
 
 void Agent2::unlockAgent(){
     if(isThreadRunning()){
-        bIsAgentLocked = false;
+        agentInfo.bIsAgentLocked = false;
         unlock();
     }
 }
@@ -566,6 +578,9 @@ void Agent2::insertMoviesFromAction(pair<char,float> act) {
             eraseAll(transitions, (string)"CRCH_LEFT");
             eraseAll(transitions, (string)"STND_LEFT");
             
+            // remove transitions for specific players when we don't have the matching movies
+            if(model.getPlayerName() == "CARAS") eraseAll(transitions, (string)"TRAV_LEFT");
+            
             // get the first possible transition to the next action to left
             string motion = transitions[(int)ofRandom(transitions.size())];
             if (motion != "") {
@@ -587,6 +602,8 @@ void Agent2::insertMoviesFromAction(pair<char,float> act) {
             eraseAll(transitions, (string)"CRCH_RIGT");
             eraseAll(transitions, (string)"STND_RIGT");
             
+            // remove transitions for specific players when we don't have the matching movies
+            if(model.getPlayerName() == "CARAS") eraseAll(transitions, (string)"TRAV_RIGT");
             
             // get the first possible transition to the next action to right
             string motion = transitions[(int)ofRandom(transitions.size())];

@@ -19,7 +19,8 @@
 #include "AStarSearch.h"
 
 enum AgentState{
-    AGENT_PLAN = 0,
+    AGENT_INIT = 0, 
+    AGENT_PLAN,
     AGENT_RUN
 };
 
@@ -35,9 +36,15 @@ enum CollisionMode{
 
 typedef struct{
     
+    MovieInfo currentMovieInfo;
     ofRectangle currentBounding;
+    bool bIsAgentLocked;
+    AgentState state;
+    int agentID;
     
 } AgentInfo;
+
+static int sAgentID = -1;
 
 class Agent2 : public MovieSequence, ofThread{
     
@@ -62,6 +69,8 @@ public:
     
     // update is both threaded and unthreaded
     void update();
+    
+    AgentInfo getCurrentAgentInfo();
     
     // SEMI-PERSISTANT
     
@@ -175,8 +184,6 @@ protected:
     BehaviousnMode behaviourMode;
     
     // agent state info
-    bool bIsAgentLocked;
-    AgentState state;
     AgentInfo agentInfo;
     
     // agents 'memory'

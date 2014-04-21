@@ -98,13 +98,15 @@ void PlayController::update(){
             }
 
             vector<Agent2*>& agents = appModel->getAgents();
+
+            vector<AgentInfo> allAgentInfo;
+            for(int i = 0; i < agents.size(); i++) allAgentInfo.push_back(agents[i]->getAgentInfo());
+            for(int i = 0; i < agents.size(); i++) agents[i]->setOtherAgents(allAgentInfo);
+            
             for(int i = 0; i < agents.size(); i++){
                 Agent2* agent = agents[i];
-                agent->update();
-            
-//                agent->update(appModel->getProperty<bool>("AvoidCollisions"), windowPositions, sequences);
                 
-               // updatePosition(agent);
+                agent->update();
 
                 if(agent->isSequequenceDone()) appModel->markPlayerForDeletion(agent->getViewID());
                 ostringstream os;
@@ -153,7 +155,7 @@ void PlayController::update(){
 //--------------------------------------------------------------
 bool PlayController::createAgent(){
 
-    int wTarget = ofRandom(appModel->getWindows().size());//appModel->getUniqueWindowTarget();
+    int wTarget = appModel->getUniqueWindowTarget(); // ofRandom(appModel->getWindows().size());
     
     if(wTarget != -1){
         
@@ -180,10 +182,9 @@ void PlayController::createAgent(string name, ofPoint origin, ofRectangle target
     
     float tDrawSize = appModel->getProperty<float>("DefaultDrawSize");
 
-    name = "MARTINW";
-    
     // make the agent and set model
     Agent2 * agent = new Agent2;
+    appModel->addAgent(agent);
     
     agent->setDrawSize(tDrawSize);
 
@@ -218,10 +219,11 @@ void PlayController::createAgent(string name, ofPoint origin, ofRectangle target
     // start threading
     agent->start();
     
-    agent->plan(target);
-    appModel->addAgent(agent);
     agent->setSpeed(3);
     agent->play();
+    agent->plan(target);
+    
+    
 }
 
 //--------------------------------------------------------------

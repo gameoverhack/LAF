@@ -239,7 +239,7 @@ void AppView::update(){
             ofSetColor(255, 255, 255);
             
             Agent2* agent = agents[i];
-            MovieInfo& currentMovie = agent->getCurrentMovie();
+            MovieInfo currentMovie = agent->getCurrentAgentInfo().currentMovieInfo;
             ofxThreadedVideo* video = agent->getVideo();
             
             /******************************************************
