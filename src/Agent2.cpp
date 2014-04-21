@@ -345,6 +345,11 @@ void Agent2::removeAllMovies(){
     getSequenceFrames().push_back(0);
     positions.clear();
     boundings.clear();
+    centres.clear();
+    spositions.clear();
+    sboundings.clear();
+    scentres.clear();
+    
     currentMovie = NoMovie;
     currentSequenceIndex = -1;
     currentSequenceFrame = totalSequenceFrames = 0;

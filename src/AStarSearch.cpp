@@ -30,13 +30,13 @@
 //        scaledNode.y = n.y * pathPlanner->gridScaleY + pathPlanner->offsetY;
 //        
 //        if (!pathPlanner->screenBoundary.inside(scaledNode)) {
-//            if ((scaledNode.y > pathPlanner->screenBoundary.height) || (scaledNode.y < pathPlanner->screenBoundary.y)) {
+//            if ((scaledNode.y > pathPlanner->screenBoundary.y+pathPlanner->screenBoundary.height) || (scaledNode.y < pathPlanner->screenBoundary.y)) {
 //                if (n.prevNode)
 //                    if (n.y == n.prevNode->y)
 //                        return false;
 //            }
 //            
-//            if ((scaledNode.x > pathPlanner->screenBoundary.width) || (scaledNode.x < pathPlanner->screenBoundary.x)) {
+//            if ((scaledNode.x > scaledNode.x < pathPlanner->screenBoundary.x+ pathPlanner->screenBoundary.width) || (scaledNode.x < pathPlanner->screenBoundary.x)) {
 //                if (n.prevNode)
 //                    if (n.x == n.prevNode->x)
 //                        return false;
@@ -62,7 +62,6 @@
                 else
                     return false;
             }
-            
         } else {
             return true;
         }
@@ -345,7 +344,7 @@ vector< vector< ofPoint > > PathPlanner::findPaths(ofPoint _startPoint, ofPoint 
 	
     ///
     
-    screenBoundary = ofRectangle(100, 100, 1920, 666);
+    screenBoundary = ofRectangle(100, 100, 1820, 566);
     
     
     

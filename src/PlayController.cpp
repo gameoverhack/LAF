@@ -234,6 +234,7 @@ void PlayController::triggerReplan() {
     
     for (int i=0; i < agents.size(); i++) {
         //agents[i]->removeAllMovies();
+        agents[i]->stop();
         agents[i]->setWindow(newWindowIndex);
         agents[i]->plan(newWindow);
         
