@@ -83,7 +83,7 @@ void AppController::setup(){
     
     appModel->setProperty("VideoWidth", 650.0f);
     appModel->setProperty("VideoHeight", 650.0f);
-    appModel->setProperty("DefaultDrawSize", 100.0f);
+    appModel->setProperty("DefaultDrawSize", 200.0f);
     
     appModel->setProperty("TransitionLength", 12);
     

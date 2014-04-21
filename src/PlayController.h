@@ -24,7 +24,7 @@ public:
     void update();
     
     bool createAgent();
-    void createAgent(string name, ofPoint origin, ofRectangle target, CollisionMode cMode, BehaviousnMode bMode, int wTarget);
+    void createAgent(string name, ofPoint origin, ofRectangle target, CollisionMode cMode, BehaviourMode bMode);
     
     void triggerReplan();
 protected:

@@ -24,7 +24,7 @@ enum AgentState{
     AGENT_RUN
 };
 
-enum BehaviousnMode{
+enum BehaviourMode{
     BEHAVIOUR_AUTO = 0,
     BEHAVIOUR_MANUAL
 };
@@ -36,11 +36,25 @@ enum CollisionMode{
 
 typedef struct{
     
-    MovieInfo currentMovieInfo;
+    // persistant
+    int agentID;
+    
+    // changelable
+//    MovieInfo currentMovieInfo;
     ofRectangle currentBounding;
+    
+    // semi-persistant
+    CollisionMode collisionMode;
+    BehaviourMode behaviourMode;
+    
+    ofRectangle target;
+    ofPoint origin;
+    
+    // agent states
     bool bIsAgentLocked;
     AgentState state;
-    int agentID;
+    
+    
     
 } AgentInfo;
 
@@ -75,7 +89,7 @@ public:
     // SEMI-PERSISTANT
     
     void setCollisionMode(CollisionMode _collisionMode);
-    void setBehaviousnMode(BehaviousnMode _behaviourMode);
+    void setBehaviourMode(BehaviourMode _behaviourMode);
     
     // PERCEPTIONS
     
@@ -162,7 +176,6 @@ protected:
     
     // persistant agent vars
     PlayerModel model;
-    ofPoint origin;
     ofRectangle planBoundary;
     float drawSize;
     float gridSizeX, gridSizeY;
@@ -178,10 +191,6 @@ protected:
     int sframe, gframe;
     bool bHug;
     bool willCollide;
-
-    // semi-persistant
-    CollisionMode collisionMode;
-    BehaviousnMode behaviourMode;
     
     // agent state info
     AgentInfo agentInfo;
@@ -189,7 +198,6 @@ protected:
     // agents 'memory'
     vector<AgentInfo> otherAgentInfo;
     vector<ofRectangle> obstacles;
-    ofRectangle target;
     
 };
 

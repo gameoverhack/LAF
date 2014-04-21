@@ -490,6 +490,10 @@ public:
         return sboundings[sequenceFrame];
     }
     
+    vector<ofRectangle>& getScaledBoundings(){
+        return sboundings;
+    }
+    
     ofRectangle& getOrgScaledBoundingAt(int sequenceFrame){
         sequenceFrame = CLAMP(sequenceFrame, 0, positions.size() - 1);
         return orgsboundings[sequenceFrame];

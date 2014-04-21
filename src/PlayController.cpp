@@ -155,21 +155,13 @@ void PlayController::update(){
 //--------------------------------------------------------------
 bool PlayController::createAgent(){
 
-    int wTarget = appModel->getUniqueWindowTarget(); // ofRandom(appModel->getWindows().size());
-    
-    if(wTarget != -1){
         
-        string name = appModel->getRandomPlayerName();
-        ofPoint origin = appModel->getRandomPlayerPosition();
-        if(origin.z >= 0){
-            ofRectangle target = appModel->getWindows()[wTarget];
-            createAgent(name, origin, target, COLLISION_AVOID, BEHAVIOUR_AUTO, wTarget);
-            return true;
-        }else{
-            return false;
-        }
-        
-        
+    string name = appModel->getRandomPlayerName();
+    ofPoint origin = appModel->getUniqueAgentOrigin();
+    ofRectangle target = appModel->getUniqueAgentTarget();
+    if(origin != NoOrigin && target != NoTarget){
+        createAgent(name, origin, target, COLLISION_AVOID, BEHAVIOUR_AUTO);
+        return true;
     }
     
     return false;
@@ -178,7 +170,7 @@ bool PlayController::createAgent(){
 }
 
 //--------------------------------------------------------------
-void PlayController::createAgent(string name, ofPoint origin, ofRectangle target, CollisionMode cMode, BehaviousnMode bMode, int wTarget){
+void PlayController::createAgent(string name, ofPoint origin, ofRectangle target, CollisionMode cMode, BehaviourMode bMode){
     
     float tDrawSize = appModel->getProperty<float>("DefaultDrawSize");
 
@@ -195,26 +187,28 @@ void PlayController::createAgent(string name, ofPoint origin, ofRectangle target
                           appModel->getGraph("DirectionGraph"),
                           appModel->getGraph("EndGraph"));
     
-    agent->setStartPosSegment(origin.z);
+//    agent->setStartPosSegment(origin.z);
     
     // set position and target
-    origin.z = 0;
+    //origin.z = 0;
     agent->setOrigin(origin);
-    agent->setWindow(wTarget);
+    //agent->setWindow(wTarget);
     
     // calculate plan boundary and draw size
-    ofRectangle tPlanBoundary = ofRectangle(0, 0, appModel->getProperty<float>("OutputWidth"), appModel->getProperty<float>("OutputHeight"));
-    //tPlanBoundary.growToInclude(-tDrawSize, -tDrawSize);
-    tPlanBoundary.growToInclude(appModel->getProperty<float>("OutputWidth") + tDrawSize, appModel->getProperty<float>("OutputHeight") + tDrawSize);
+    ofRectangle tPlanBoundary = ofRectangle(-tDrawSize * 2.0, -tDrawSize * 2.0, appModel->getProperty<float>("OutputWidth") + tDrawSize * 2.0, appModel->getProperty<float>("OutputHeight") + tDrawSize * 2.0);
     
     // set plan boundary and draw size
-    agent->setWorldObstacles(appModel->getWindows());
+    vector<ofRectangle> obstacles;
+    vector<int>& windowTargets = appModel->getWindowTargets();
+    for(int i = 0; i < windowTargets.size(); i++) obstacles.push_back(appModel->getWindows()[windowTargets[i]]);
+    
+    agent->setWorldObstacles(obstacles);
     agent->setPlanBoundary(tPlanBoundary);
     agent->setGridSize(tDrawSize / 2.0f, tDrawSize / 2.0f);
     
     // set modes
     agent->setCollisionMode(cMode);
-    agent->setBehaviousnMode(bMode);
+    agent->setBehaviourMode(bMode);
     
     // start threading
     agent->start();

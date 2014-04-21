@@ -38,6 +38,9 @@ typedef struct{
     
 } PlayerTargets;
 
+static ofPoint NoOrigin = ofPoint(-INFINITY, -INFINITY);
+static ofRectangle NoTarget = ofRectangle(-INFINITY, -INFINITY, 0, 0);
+
 class AppModel : public BaseModel{
     
 public:
@@ -237,6 +240,120 @@ public:
         for(map<string, PlayerModel>::iterator it = playerModels.begin(); it != playerModels.end(); ++it){
             ofxLogNotice() << "Template: " << it->first << endl;
         }
+    }
+    
+    //--------------------------------------------------------------
+    ofRectangle getUniqueAgentTarget(){
+        
+        bool bUnique = false;
+
+        ofRectangle rWindow;
+        
+        while(!bUnique){
+            
+            rWindow = windows[random(targetwindows)];
+            
+            bUnique = true;
+            for(int i = 0; i < agents.size(); i++){
+                
+                Agent2* agent = agents[i];
+                AgentInfo agentInfo = agents[i]->getAgentInfo();
+                
+                if(agentInfo.target == rWindow){
+                    bUnique = false;
+                    break;
+                }
+                
+            }
+            
+        }
+
+        cout << rWindow << " " << bUnique << endl;
+        
+        if(!bUnique){
+            return NoTarget;
+        }else{
+            return rWindow;
+        }
+        
+    }
+    
+    //--------------------------------------------------------------
+    ofPoint getUniqueAgentOrigin(){
+        
+        float dDrawSize = 0;//getProperty<float>("DefaultDrawSize");
+        float dWidth = getProperty<float>("OutputWidth");
+        float dHeight = getProperty<float>("OutputHeight");
+        
+        bool bUnique = false;
+        float xPos, yPos;
+        
+        while(!bUnique){
+            
+            int tSegIndex = ofRandom(0, 4);
+            
+            switch(tSegIndex){
+                case 0:
+                    // top line
+                    xPos = ofRandom(-dDrawSize, dWidth + dDrawSize);
+                    yPos = -dDrawSize;
+                    break;
+                case 1:
+                    // left line
+                    xPos = -dDrawSize;
+                    yPos = ofRandom(-dDrawSize, dHeight + dDrawSize);
+                    break;
+                case 2:
+                    // bottom line
+                    xPos = ofRandom(-dDrawSize, dWidth + dDrawSize);
+                    yPos = dHeight + dDrawSize;
+                    break;
+                case 3:
+                    // right line
+                    xPos = dWidth + dDrawSize;
+                    yPos = ofRandom(-dDrawSize, dHeight + dDrawSize);
+                    break;
+            }
+            
+            ofRectangle r = ofRectangle(xPos - dDrawSize / 2.0f, yPos - dDrawSize / 2.0f, dDrawSize, dDrawSize);
+            
+            bUnique = true;
+            for(int i = 0; i < agents.size(); i++){
+                
+                Agent2* agent = agents[i];
+                AgentInfo agentInfo = agents[i]->getAgentInfo();
+                
+                ofRectangle o = ofRectangle(agentInfo.origin.x - dDrawSize / 2.0f, agentInfo.origin.x - dDrawSize / 2.0f, dDrawSize, dDrawSize);
+                
+                if(o.intersects(r)){
+                    bUnique = false;
+                    break;
+                }
+                
+            }
+            
+            for(int i = 0; i < targetwindows.size(); i++){
+                
+                ofRectangle o = windows[targetwindows[i]];
+                
+                if(o.intersects(r)){
+                    bUnique = false;
+                    break;
+                }
+                
+            }
+            
+        }
+        
+        cout << "(" << xPos << ", " << yPos << ") " << bUnique << endl;
+        
+        if(bUnique){
+            return ofPoint(xPos, yPos);
+        }else{
+            return NoOrigin;
+        }
+        
+        
     }
     
     //--------------------------------------------------------------

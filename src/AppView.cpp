@@ -239,7 +239,8 @@ void AppView::update(){
             ofSetColor(255, 255, 255);
             
             Agent2* agent = agents[i];
-            MovieInfo currentMovie = agent->getCurrentAgentInfo().currentMovieInfo;
+            AgentInfo agentInfo = agents[i]->getAgentInfo();
+//            MovieInfo currentMovie = agentInfo.currentMovieInfo;
             ofxThreadedVideo* video = agent->getVideo();
             
             /******************************************************
@@ -249,7 +250,7 @@ void AppView::update(){
             // TODO: this is all a terrible mess -> should be a cue system a la ofxThreadedVideoFade...but on the agent...grrrr...
             
             // centres
-            ofRectangle& windowRect = windowPositions[agent->getWindow()];
+            ofRectangle& windowRect = agentInfo.target;//windowPositions[agent->getWindow()];
             ofPoint wC = windowRect.getCenter(); // need to cache?
             float distance = agent->getScaledCentre().distance(wC);
             float maxDistance = agent->getScaledCentreAt(1).distance(wC);
@@ -320,8 +321,8 @@ void AppView::update(){
             iSmal = 8   * CLAMP((      pct2), 0.0f, 1.0f) * iY;
             
             
-            windowFades[agent->getWindow()].cFade += cFade;
-            windowFades[agent->getWindow()].numPlayers ++;
+            //windowFades[agent->getWindow()].cFade += cFade;
+            //windowFades[agent->getWindow()].numPlayers ++;
             
             /******************************************************
              *******            Small Draw Players          *******
@@ -409,7 +410,9 @@ void AppView::update(){
                     ofSetColor(100,40,40);
                 else
                     ofSetColor(0,40,iFade * 2);
-                if(!agent->isAgentLocked())  ofRect(agent->getScaledBounding());
+                
+                if(agent->getScaledBoundings().size() > agent->getCurrentSequenceFrame()) ofRect(agent->getScaledBounding());
+                //if(!agent->isAgentLocked())  ofRect(agent->getScaledBounding());
             }
             
             if(appModel->getProperty<bool>("ShowDistanceSmall")){ // Omid
@@ -482,12 +485,12 @@ void AppView::update(){
                         ofSetColor(0, 60, 60);
                         //ofSetColor(0, iSmal, iSmal);
                     
-                    if(!agent->isAgentLocked()) ofRect(agent->getScaledBoundingAt(j));
+                    if(agent->getScaledBoundings().size() > j) ofRect(agent->getScaledBoundingAt(j));
+                    //if(!agent->isAgentLocked()) ofRect(agent->getScaledBoundingAt(j));
                     
                     ofSetColor(60, 10, 60);
                     
-                    if (agent->getOrgScaledBoundings().size() > 0)
-                        ofRect(agent->getOrgScaledBoundingAt(j));
+                    if (agent->getOrgScaledBoundings().size() > 0) ofRect(agent->getOrgScaledBoundingAt(j));
                     //ofRect(sequence->getBoundingAt(j));
                 }
                 

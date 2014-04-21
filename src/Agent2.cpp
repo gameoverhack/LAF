@@ -16,9 +16,12 @@ Agent2::Agent2(){
     
     // init internal state
     MovieSequence::MovieSequence();
-    agentInfo.currentMovieInfo = NoMovie;
+//    agentInfo.currentMovieInfo = NoMovie;
     agentInfo.bIsAgentLocked = false;
     agentInfo.state = AGENT_INIT;
+    agentInfo.behaviourMode = BEHAVIOUR_AUTO;
+    agentInfo.collisionMode = COLLISION_AVOID;
+    agentInfo.target = ofRectangle(0, 0, 0, 0);
     agentInfo.agentID = sAgentID;
     
 }
@@ -133,7 +136,7 @@ void Agent2::update(){
 
         lockAgent();
         
-        agentInfo.currentMovieInfo = MovieSequence::getCurrentMovie();
+//        agentInfo.currentMovieInfo = MovieSequence::getCurrentMovie();
         agentInfo.currentBounding = MovieSequence::getScaledBounding();
         
         unlockAgent();
@@ -152,17 +155,17 @@ AgentInfo Agent2::getCurrentAgentInfo(){
 void Agent2::setCollisionMode(CollisionMode _collisionMode){
     lockAgent();
     {
-        collisionMode = _collisionMode;
+        agentInfo.collisionMode = _collisionMode;
     }
     unlockAgent();
 }
 
 //--------------------------------------------------------------
-void Agent2::setBehaviousnMode(BehaviousnMode _behaviourMode){
+void Agent2::setBehaviourMode(BehaviourMode _behaviourMode){
     lockAgent();
     {
-        behaviourMode = _behaviourMode;
-        if(behaviourMode == BEHAVIOUR_MANUAL){
+        agentInfo.behaviourMode = _behaviourMode;
+        if(agentInfo.behaviourMode == BEHAVIOUR_MANUAL){
             MovieSequence::setAutoSequenceStop(true);
         }else{
             MovieSequence::setAutoSequenceStop(false);
@@ -194,7 +197,7 @@ void Agent2::plan(ofRectangle _target, int _numSequenceRetries){
     lockAgent();
     {
         numSequenceRetries = _numSequenceRetries;
-        target = _target;
+        agentInfo.target = _target;
         agentInfo.state = AGENT_PLAN;
     }
     unlockAgent();
@@ -206,7 +209,7 @@ void Agent2::_plan(){
     
     int lastSequenceFrameOfCurrentMovie = getCurrentSequenceFrame(); //getSequenceFrames()[getCurrentMovieIndex()+1]-1;
     ofPoint startPosition = getScaledFloorOffset();//At(lastSequenceFrameOfCurrentMovie); // where am i now?
-    ofPoint targetPosition = ofPoint(target.x + target.width / 2.0, target.y, 0.0f); // where I'm going
+    ofPoint targetPosition = ofPoint(agentInfo.target.x + agentInfo.target.width / 2.0, agentInfo.target.y, 0.0f); // where I'm going
     
    // ofPoint sequenceNormalPosition = getScaledPosition();// agent's video position
     
@@ -226,7 +229,7 @@ void Agent2::_plan(){
     
     vector<ofRectangle> tObstacles;
     for(int i = 0; i < obstacles.size(); i++){
-        if(!target.intersects(obstacles[i])){ // is this test ok!!!
+        if(!agentInfo.target.intersects(obstacles[i])){ // is this test ok!!!
             tObstacles.push_back(obstacles[i]);
         }
     }
@@ -234,8 +237,8 @@ void Agent2::_plan(){
     pp.obstacles = tObstacles;
     
     // set the size of the area that the agent's bounding box can grow used in path finding to avoid possible collisions
-    pp.obstAvoidBoundingW = 2.5 * drawSize /3.0;
-    pp.obstAvoidBoundingH = drawSize;
+    pp.obstAvoidBoundingW = drawSize / 4.0;
+    pp.obstAvoidBoundingH = drawSize / 4.0;
     
     // find the paths using A*.
     cout << "Finding a path from (" << startPosition.x << "," << startPosition.y  << ") to  (" << targetPosition.x << "," << targetPosition.y << ")"  << endl;
@@ -308,7 +311,6 @@ void Agent2::_plan(){
     }
     
     bFaultyMovieSequence = !solved;
-    
     
     agentInfo.state = AGENT_RUN;
     

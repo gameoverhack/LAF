@@ -221,18 +221,8 @@ inline float getRandomRanges(vector<float> ranges){
     return choice;
 };
 
-inline float getRandomRanges(int sizeofranges, ...){
-    vector<float> ranges;
-    //assert(sizeofranges % 2 == 0);
-    ranges.resize(sizeofranges);
-    va_list r;
-    va_start(r, sizeofranges);
-    for (int i = 0; i < sizeofranges; i++){
-        float f = va_arg(r, double);
-        ranges[i] = f;
-    }
-    va_end(r);
-    return getRandomRanges(ranges);
+inline float getRandomRanges(float ranges[], int sizeofranges){
+    return getRandomRanges(arrayToVec(ranges, sizeofranges));
 };
 
 template<typename A, typename B>
