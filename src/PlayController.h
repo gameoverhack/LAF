@@ -23,7 +23,7 @@ public:
     void setup();
     void update();
     
-    bool createAgent();
+    bool createAgent(BehaviourMode bMode);
     void createAgent(string name, ofPoint origin, ofRectangle target, CollisionMode cMode, BehaviourMode bMode);
     
     void triggerReplan();

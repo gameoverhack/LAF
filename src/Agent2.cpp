@@ -111,6 +111,9 @@ void Agent2::stopAgent(){
     waitForThread();
     stopThread();
     stop();
+//    video->flush();
+//    video->stop();
+//    video->finish();
 }
 
 
@@ -175,6 +178,9 @@ void Agent2::setBehaviourMode(BehaviourMode _behaviourMode){
     {
         agentInfo.behaviourMode = _behaviourMode;
         if(agentInfo.behaviourMode == BEHAVIOUR_MANUAL){
+            if(currentSequenceIndex <= 0){ // ie., we haven't started the agent/moviesequence playing
+                sequence[0].isLooped = true;
+            }
             MovieSequence::setAutoSequenceStop(false);
         }else{
             MovieSequence::setAutoSequenceStop(true);
@@ -205,10 +211,16 @@ void Agent2::setOtherAgents(vector<AgentInfo> _otherAgentInfo){
 void Agent2::plan(ofRectangle _target, int _numSequenceRetries){
     lockAgent();
     {
-      //  setPaused(true);
         numSequenceRetries = _numSequenceRetries;
         agentInfo.target = _target;
-        agentInfo.state = AGENT_PLAN;
+        if(agentInfo.behaviourMode == BEHAVIOUR_AUTO){
+            cout << "CALLED PLAN" << endl;
+            agentInfo.state = AGENT_PLAN;
+        }else{
+            cout << "CALLED PLAN - Aborting as we're manual agent!" << endl;
+            agentInfo.state = AGENT_RUN;
+        }
+        
     }
     unlockAgent();
 }

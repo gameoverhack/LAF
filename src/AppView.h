@@ -35,8 +35,8 @@ public:
 protected:
 	
     ofEasyCam cam;
-    ofFbo videoFBOBig;
-    ofFbo videoFBOSmall;
+//    ofFbo videoFBOBig;
+//    ofFbo videoFBOSmall;
     ofFbo videoFBOHero;
     
     ofShader shader;

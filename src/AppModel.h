@@ -29,15 +29,6 @@
 #include "Agent2.h"
 #include "DeviceClient.h"
 
-typedef struct{
-    
-    int masterPlayer;
-    int slavePlayer;
-    int syncFrame;
-    int targetWindow;
-    
-} PlayerTargets;
-
 static ofPoint NoOrigin = ofPoint(-INFINITY, -INFINITY);
 static ofRectangle NoTarget = ofRectangle(-INFINITY, -INFINITY, 0, 0);
 
@@ -357,64 +348,6 @@ public:
     }
     
     //--------------------------------------------------------------
-    ofPoint getRandomPlayerPosition(){
-
-        cout << "uniqueStartingPositions: " <<  uniqueStartingPositions.size() << endl;
-
-        int startPos = getUniqueStartPosition();
-        int start2 = (int)ofRandom(2);
-        
-        float startXRegion = (int)ofRandom(2)*1850;
-        float startYRegion = (int)ofRandom(2)*700;
-        
-        
-        float xSpace = (getProperty<float>("OutputWidth") - 100) / getProperty<int>("NumberPlayers");
-        float ySpace = (getProperty<float>("OutputHeight") - 100) / getProperty<int>("NumberPlayers");
-        
-        ofPoint p;
-        if (startPos % 2 == 0){
-            startPos--;
-            p = ofPoint(startPos * xSpace + 50 , start2 * getProperty<float>("DefaultDrawSize") / 2.0f + startYRegion, startPos + 1); // what the fuck?
-        } else {
-            startPos--;
-            p = ofPoint(start2 * getProperty<float>("DefaultDrawSize") / 2.0f + startXRegion, startPos *  ySpace + 50, startPos + 1); // what the fuck?
-        }
-        
-        
-        //ofPoint p = ofPoint(100,100);
-        
-        /*
-        
-        bool bFitted = false;
-        
-        while(!bFitted){
-            
-            float xOffset = ofRandom(0, getProperty<float>("DefaultDrawSize") * 2.0f) - getProperty<float>("DefaultDrawSize");
-            float yOffset = ofRandom(0, getProperty<float>("DefaultDrawSize") * 2.0f) - getProperty<float>("DefaultDrawSize");
-            
-            if(xOffset > 0) xOffset += getProperty<float>("OutputWidth");
-            if(yOffset > 0) yOffset += getProperty<float>("OutputHeight");
-            
-            p = ofPoint(xOffset, yOffset);
-            
-            for(int i = 0; i < agents.size(); i++){
-                ofRectangle& r = agents[i]->getScaledBounding();
-                if(r.inside(p)){
-                    bFitted = false;
-                    break;
-                }else{
-                    bFitted = true;
-                }
-            }
-        }
-        
-        */
-         
-        return p;
-        
-    }
-    
-    //--------------------------------------------------------------
     string getRandomPlayerName(){
         int rSelect = (int)ofRandom(playerModels.size());
         int count = 0;
@@ -432,28 +365,32 @@ public:
     //--------------------------------------------------------------
     void createPlayerViews(int number){
         ofxLogNotice() << "Creating " << number << " PlayerViews" << endl;
-        for(int i = 0; i < number; i++){
+        views.resize(number);
+        for(int i = 0; i < views.size(); i++){
             ofxLogVerbose() << "Creating PlayerView " << i << endl;
-            ofxThreadedVideo* video = new ofxThreadedVideo;
+            views[i].video = new ofxThreadedVideo;
 #ifdef USE_PRORES
-            video->setPixelFormat(OF_PIXELS_2YUV);
+            views[i].video->setPixelFormat(OF_PIXELS_2YUV);
 #else
-            video->setPixelFormat(OF_PIXELS_BGRA);
+            views[i].video->setPixelFormat(OF_PIXELS_BGRA);
 #endif
-            videos.push_back(video);
+            views[i].fboSmall = new ofFbo;
+            views[i].fboSmall->allocate(getProperty<float>("DefaultDrawSize"), getProperty<float>("DefaultDrawSize"));
+            
+            views[i].fboBig = new ofFbo;
+            views[i].fboBig->allocate(getProperty<float>("VideoWidth"), getProperty<float>("VideoHeight"));
         }
     }
     
     //--------------------------------------------------------------
     void deletePlayerViews(){
-        ofxLogNotice() << "Deleting " << videos.size() << " PlayerViews" << endl;
-        for(int i = 0; i < videos.size(); i++){
+        ofxLogNotice() << "Deleting " << views.size() << " PlayerViews" << endl;
+        for(int i = 0; i < views.size(); i++){
             ofxLogVerbose() << "Deleting PlayerView " << i << endl;
-            videos[i]->flush();
-            videos[i]->close();
-            delete videos[i];
+            views[i].video->flush();
+            views[i].video->close();
         }
-        videos.clear();
+        views.clear();
     }
     
     //--------------------------------------------------------------
@@ -465,22 +402,48 @@ public:
     //--------------------------------------------------------------
     void deleteMarkedPlayers(){
         if(todelete.size() == 0) return;
+        
         ofxLogNotice() << "Deleting Marked Players" << endl;
+        
         for(set<int>::iterator it = todelete.begin(); it != todelete.end(); ++it){
+            
             int viewID = *it; int index;
+            
             ofxLogVerbose() << "Deleting Marked Player: " << viewID << endl;
+            
             Agent2* agent;
+            
             for(int i = 0; i < agents.size(); i++){
+                
                 agent = agents[i];
+                
                 if(agent->getViewID() == viewID){
+                    
                     agent->stopAgent();
-//                    targetunique.push_back(agent->getWindow());
-//                    uniqueStartingPositions.push_back(agent->getStartPosSegment());
+                    
+//                    ofFbo* fboSmall = agent->getFboSmall();
+//                    ofFbo* fboBig = agent->getFboBig();
+//                    
+//                    fboSmall->begin();
+//                    {
+//                        ofClear(0, 0, 0);
+//                    }
+//                    fboSmall->end();
+//                    
+//                    fboBig->begin();
+//                    {
+//                        ofClear(0, 0, 0);
+//                    }
+//                    fboBig->end();
+                    
                     delete agent;
                     index = i;
                     break;
+                    
                 }
+                
             }
+            
             assigned.erase(assigned.find(viewID));
             string prop = "MovieInfo_" + ofToString(viewID);
             if(hasProperty<string>(prop)) removeProperty<string>(prop);
@@ -492,13 +455,13 @@ public:
     
     //--------------------------------------------------------------
     void addAgent(Agent2 * agent){
-        if(assigned.size() < videos.size()){
-            ofxLogNotice() << "Assigning video to sequence with " << assigned.size() << " assigned out of " << videos.size() << " views" << endl;
-            for(int i = 0; i < videos.size(); i++){
+        if(assigned.size() < views.size()){
+            ofxLogNotice() << "Assigning video to sequence with " << assigned.size() << " assigned out of " << views.size() << " views" << endl;
+            for(int i = 0; i < views.size(); i++){
                 if(assigned.find(i) == assigned.end()){
-                    agent->setVideo(videos[i], i);
+                    agent->setView(views[i], i);
                     assigned.insert(i);
-                    ofxLogVerbose() << "Assigned video to sequence with view " << i << " " << videos.size() - assigned.size() << " free" << endl;
+                    ofxLogVerbose() << "Assigned video to sequence with view " << i << " " << views.size() - assigned.size() << " free" << endl;
                     break;
                 }
             }
@@ -513,30 +476,6 @@ public:
     vector<Agent2*>& getAgents(){
         return agents;
     }
-    
-//    //--------------------------------------------------------------
-//    void addSequence(MovieSequence * sequence){
-//        if(assigned.size() < videos.size()){
-//            ofxLogNotice() << "Assigning video to sequence with " << assigned.size() << " assigned out of " << videos.size() << " views" << endl;
-//            for(int i = 0; i < videos.size(); i++){
-//                if(assigned.find(i) == assigned.end()){
-//                    sequence->setVideo(videos[i], i);
-//                    assigned.insert(i);
-//                    ofxLogVerbose() << "Assigned video to sequence with view " << i << " " << videos.size() - assigned.size() << " free" << endl;
-//                    break;
-//                }
-//            }
-//        }else{
-//            ofxLogError() << "Not enough views to assign video" << endl;
-//            assert(false);
-//        }
-//        sequences.push_back(sequence);
-//    }
-//    
-//    //--------------------------------------------------------------
-//    vector<MovieSequence*>& getSequences(){
-//        return sequences;
-//    }
     
     //--------------------------------------------------------------
     void addHeroVideo(string path){
@@ -632,22 +571,6 @@ public:
         return keyModifiers;
     }
     
-    void initStartingPositions() {
-        // set the possible starting positions for agents
-        for (int i=0;i<getProperty<int>("NumberPlayers");i++) {
-            uniqueStartingPositions.push_back(i+1);
-        }
-    }
-    
-    int getUniqueStartPosition() {
-        int s = -1;
-        if(uniqueStartingPositions.size() > 0){
-            s = random(uniqueStartingPositions);
-            eraseAll(uniqueStartingPositions, s);
-        }
-        return s;
-    }
-    
     map<int, DeviceClient>& getAllDevices(){
         return devices;
     }
@@ -668,11 +591,8 @@ protected:
     vector<ofxThreadedVideo*>   herovideos;
     int                         herovideoindex;
     
-    vector<ofxThreadedVideo*>   videos;
-    vector<MovieSequence*>      sequences;
+    vector<MovieView>           views;
     vector<Agent2*>             agents;
-    
-    vector<PlayerTargets>   playertargets;
     
     set<int>                todelete;
     set<int>                assigned;
@@ -688,8 +608,6 @@ protected:
     vector<ofRectangle> targets;
     vector<int>         targetunique;
     vector<int>         targetwindows;
-    
-    vector<int> uniqueStartingPositions;
     
     map<string, MotionGraph> motionGraphs;
     

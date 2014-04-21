@@ -43,8 +43,8 @@ AppView::~AppView(){
 //--------------------------------------------------------------
 void AppView::resetCamera(){
     
-    videoFBOBig.allocate(appModel->getProperty<float>("VideoWidth"), appModel->getProperty<float>("VideoHeight"));
-    videoFBOSmall.allocate(appModel->getProperty<float>("DefaultDrawSize"), appModel->getProperty<float>("DefaultDrawSize"));
+//    videoFBOBig.allocate(appModel->getProperty<float>("VideoWidth"), appModel->getProperty<float>("VideoHeight"));
+//    videoFBOSmall.allocate(appModel->getProperty<float>("DefaultDrawSize"), appModel->getProperty<float>("DefaultDrawSize"));
     
 #ifdef USE_PRORES
     videoFBOHero.allocate(ofGetWidth(), ofGetHeight());
@@ -328,25 +328,25 @@ void AppView::update(){
              *******            Small Draw Players          *******
              *****************************************************/
             
-            if(appModel->getProperty<bool>("ShowAvatarsSmall")){
+            if(appModel->getProperty<bool>("ShowAvatarsSmall") && agentInfo.state != AGENT_INIT && agentInfo.currentPosition.x != 0 && agentInfo.currentPosition.y != 0){
                 
-                videoFBOSmall.begin();
+                agent->getFboSmall()->begin();
                 {
                     ofClear(0, 0, 0);
                     video->draw(0, 0, video->getWidth() * agent->getNormalScale(), video->getHeight() * agent->getNormalScale());
                 }
-                videoFBOSmall.end();
+                agent->getFboSmall()->end();
                 
 #ifdef USE_PRORES
                 shader.begin();
-                shader.setUniformTexture("yuvTex", videoFBOSmall.getTextureReference(), 1);
+                shader.setUniformTexture("yuvTex", agent->getFboSmall()->getTextureReference(), 1);
                 shader.setUniform1i("conversionType", (true ? 709 : 601));
                 shader.setUniform1f("fade", CLAMP(pct1, 0.0f, 1.0f) * iY);
-                videoFBOSmall.draw(agentInfo.currentPosition.x, agentInfo.currentPosition.y);
+                agent->getFboSmall()->draw(agentInfo.currentPosition.x, agentInfo.currentPosition.y);
                 shader.end();
 #else
                 ofSetColor(sFade, sFade, sFade);
-                videoFBOSmall.draw(agentInfo.currentPosition.x, agentInfo.currentPosition.y);
+                agent->getFboSmall()->draw(agentInfo.currentPosition.x, agentInfo.currentPosition.y);
 #endif
                 
             }
@@ -355,25 +355,25 @@ void AppView::update(){
              *******            Big Draw Players            *******
              *****************************************************/
             
-            if(appModel->getProperty<bool>("ShowAvatarsLarge")){
+            if(appModel->getProperty<bool>("ShowAvatarsLarge") && agentInfo.state != AGENT_INIT && agentInfo.currentPosition.x != 0 && agentInfo.currentPosition.y != 0){
                 
-                videoFBOBig.begin();
+                agent->getFboBig()->begin();
                 {
                     ofClear(0, 0, 0, 0);
                     video->draw(0, 0, video->getWidth(), video->getHeight());
                 }
-                videoFBOBig.end();
+                agent->getFboBig()->end();
                 
 #ifdef USE_PRORES
                 shader.begin();
-                shader.setUniformTexture("yuvTex", videoFBOBig.getTextureReference(), 1);
+                shader.setUniformTexture("yuvTex", agent->getFboBig()->getTextureReference(), 1);
                 shader.setUniform1i("conversionType", (true ? 709 : 601));
                 shader.setUniform1f("fade", CLAMP(pct4, 0.0f, 1.0f) * iY);
-                videoFBOBig.draw(agent->getPosition().x, agent->getPosition().y);
+                agent->getFboBig()->draw(agent->getPosition().x, agent->getPosition().y);
                 shader.end();
 #else
                 ofSetColor(bFade, bFade, bFade);
-                videoFBOBig.draw(agent->getPosition().x, agent->getPosition().y);
+                agent->getFboBig()->draw(agent->getPosition().x, agent->getPosition().y);
 #endif
 
             }
@@ -437,7 +437,7 @@ void AppView::update(){
                         break;
                     }
                 
-                if (agentInfo.state != AGENT_PLAN) {
+                if (agentInfo.state != AGENT_PLAN && agentInfo.behaviourMode == BEHAVIOUR_AUTO) {
                     
                     point = agent->getScaledFloorOffsetAt(agent->getSequenceFrames()[index]);
                     pathFromHere.addVertex(point);
@@ -487,7 +487,9 @@ void AppView::update(){
                 int startFrame = MAX(agent->getCurrentSequenceFrame() - range, 0);
                 int endFrame = MIN(agent->getCurrentSequenceFrame() + range, agent->getTotalSequenceFrames());
                 
-                for(int j = startFrame; j < endFrame; j++){
+                int step = 1;
+                
+                for(int j = startFrame; j < endFrame; j = j + step){
                     
                     if (agent->getFaultyFlag())
                         ofSetColor(250,250,10);

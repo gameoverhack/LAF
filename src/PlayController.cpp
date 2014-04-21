@@ -56,8 +56,6 @@ void PlayController::update(){
             
             appModel->resetUniqueTargets();
             appModel->resetHeroTimer();
-            
-            appModel->initStartingPositions();
 
             // make the player views
             appModel->createPlayerViews(appModel->getProperty<int>("NumberPlayers"));
@@ -68,24 +66,11 @@ void PlayController::update(){
         case kPLAYCONTROLLER_MAKE:
         {
             
-            createAgent();
-            
-//            if(appModel->getProperty<bool>("AutoGenerate")){
-//                vector<int>& targetWindows = appModel->getWindowTargets();
-//                int wTarget = appModel->getUniqueWindowTarget();// if it is not taken
-//                //if(wTarget != -1) makeSequence(appModel->getRandomPlayerName(), wTarget);
-//                
-//                int start = appModel->getUniqueStartPosition();
-//                
-//                if (wTarget != -1)
-//                    makeAgent3(appModel->getRandomPlayerName(), start, wTarget);
-//                //if(wTarget != -1) makeAgent("BLADIMIRSL", wTarget);
-//            }
-//            
-//            if(appModel->getProperty<bool>("ManualAgentControl")){
-//                makeManualAgent("BLADIMIRSL");
-//                appModel->setProperty("ManualAgentControl", true);
-//            }
+            if(appModel->getAgents().size() < 5){
+                createAgent(BEHAVIOUR_MANUAL);
+            }else{
+                createAgent(BEHAVIOUR_AUTO);
+            }
             
             playControllerStates.setState(kPLAYCONTROLLER_PLAY);
         }
@@ -153,20 +138,26 @@ void PlayController::update(){
 }
 
 //--------------------------------------------------------------
-bool PlayController::createAgent(){
-
-        
+bool PlayController::createAgent(BehaviourMode bMode){
+    
     string name = appModel->getRandomPlayerName();
-    ofPoint origin = appModel->getUniqueAgentOrigin();
     ofRectangle target = appModel->getUniqueAgentTarget();
+    ofPoint origin;
+    switch (bMode) {
+        case BEHAVIOUR_AUTO:
+            origin = appModel->getUniqueAgentOrigin();
+            break;
+        case BEHAVIOUR_MANUAL:
+            origin = ofPoint(target.x + target.width / 2.0, target.y, 0.0f);
+            break;
+    }
     if(origin != NoOrigin && target != NoTarget){
-        createAgent(name, origin, target, COLLISION_AVOID, BEHAVIOUR_AUTO);
+        createAgent(name, origin, target, COLLISION_AVOID, bMode);
         return true;
     }
     
     return false;
-    
-    
+
 }
 
 //--------------------------------------------------------------

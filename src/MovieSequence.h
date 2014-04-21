@@ -13,6 +13,12 @@
 #include "ofxLogger.h"
 #include "ofxThreadedVideo.h"
 
+typedef struct {
+    ofxThreadedVideo * video;
+    ofFbo * fboSmall;
+    ofFbo * fboBig;
+} MovieView;
+
 class MovieSequence{
     
 public:
@@ -30,11 +36,25 @@ public:
         return video;
     }
     
-    void setVideo(ofxThreadedVideo * v, int index){
+    void setView(MovieView& m, int index){
         ofxLogVerbose() << "Assigning video player" << endl;
-        video = v;
+        video = m.video;
+        fboSmall = m.fboSmall;
+        fboBig = m.fboBig;
         viewID = index;
     }
+    
+    ofFbo* getFboSmall(){
+        return fboSmall;
+    }
+    ofFbo* getFboBig(){
+        return fboBig;
+    }
+//    void setVideo(ofxThreadedVideo * v, int index){
+//        ofxLogVerbose() << "Assigning video player" << endl;
+//        video = v;
+//        viewID = index;
+//    }
     
     int getViewID(){
         return viewID;
@@ -604,6 +624,8 @@ protected:
     int viewID;
     
     ofxThreadedVideo * video;
+    ofFbo * fboSmall;
+    ofFbo * fboBig;
     
     vector<MovieInfo> sequence;
     vector<int> sequenceFrames;
