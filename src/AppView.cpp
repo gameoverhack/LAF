@@ -252,7 +252,7 @@ void AppView::update(){
             // centres
             ofRectangle& windowRect = agentInfo.target;//windowPositions[agent->getWindow()];
             ofPoint wC = windowRect.getCenter(); // need to cache?
-            float distance = agent->getScaledCentre().distance(wC);
+            float distance = agentInfo.currentCentre.distance(wC);
             float maxDistance = agent->getScaledCentreAt(1).distance(wC);
             
             float pct1 = 1.0f;
@@ -342,11 +342,11 @@ void AppView::update(){
                 shader.setUniformTexture("yuvTex", videoFBOSmall.getTextureReference(), 1);
                 shader.setUniform1i("conversionType", (true ? 709 : 601));
                 shader.setUniform1f("fade", CLAMP(pct1, 0.0f, 1.0f) * iY);
-                videoFBOSmall.draw(agent->getScaledPosition().x, agent->getScaledPosition().y);
+                videoFBOSmall.draw(agentInfo.currentPosition.x, agentInfo.currentPosition.y);
                 shader.end();
 #else
                 ofSetColor(sFade, sFade, sFade);
-                videoFBOSmall.draw(agent->getScaledPosition().x, agent->getScaledPosition().y);
+                videoFBOSmall.draw(agentInfo.currentPosition.x, agentInfo.currentPosition.y);
 #endif
                 
             }
@@ -430,21 +430,33 @@ void AppView::update(){
                 ofPolyline pathFromHere; //= ofPolyline(agent->getCurrentPath().getVertices());
                 ofPoint point;
                 
-                point = agent->getScaledFloorOffsetAt(1);
-                pathFromHere.addVertex(point);
+                int index;
+                for (int i=0; i < agent->getMovieSequence().size(); i++)
+                    if (agent->getMovieSequence()[i].agentActionIndex == 0) {
+                        index = i;
+                        break;
+                    }
                 
-                
-                for (int a=0;a<agent->actions.size();a++) {
-                    if (agent->actions[a].first == 'l')
-                        point.x-=agent->actions[a].second;
-                    else if (agent->actions[a].first == 'r')
-                        point.x+=agent->actions[a].second;
-                    else if (agent->actions[a].first == 'u')
-                        point.y-=agent->actions[a].second;
-                    else if (agent->actions[a].first == 'd')
-                        point.y+=agent->actions[a].second;
+                if (agentInfo.state != AGENT_PLAN) {
                     
+                    point = agent->getScaledFloorOffsetAt(agent->getSequenceFrames()[index]);
                     pathFromHere.addVertex(point);
+                    
+                    
+                    for (int a=0;a<agent->actions.size();a++) {
+                        if (agent->actions[a].first == 'l')
+                            point.x-=agent->actions[a].second;
+                        else if (agent->actions[a].first == 'r')
+                            point.x+=agent->actions[a].second;
+                        else if (agent->actions[a].first == 'u')
+                            point.y-=agent->actions[a].second;
+                        else if (agent->actions[a].first == 'd')
+                            point.y+=agent->actions[a].second;
+                        
+                        pathFromHere.addVertex(point);
+                    }
+                    
+                    
                 }
 
                 //TODO: delelet the traveled path points

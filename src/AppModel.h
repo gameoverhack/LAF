@@ -360,13 +360,26 @@ public:
     ofPoint getRandomPlayerPosition(){
 
         cout << "uniqueStartingPositions: " <<  uniqueStartingPositions.size() << endl;
+
+        int startPos = getUniqueStartPosition();
+        int start2 = (int)ofRandom(2);
         
+        float startXRegion = (int)ofRandom(2)*1850;
         float startYRegion = (int)ofRandom(2)*700;
-        int startX = getUniqueStartPosition();
-        int startY = (int)ofRandom(2);
+        
+        
         float xSpace = (getProperty<float>("OutputWidth") - 100) / getProperty<int>("NumberPlayers");
-        startX--;
-        ofPoint p = ofPoint(startX * xSpace + 50 , startY * getProperty<float>("DefaultDrawSize") / 2.0f + startYRegion, startX + 1); // what the fuck?
+        float ySpace = (getProperty<float>("OutputHeight") - 100) / getProperty<int>("NumberPlayers");
+        
+        ofPoint p;
+        if (startPos % 2 == 0){
+            startPos--;
+            p = ofPoint(startPos * xSpace + 50 , start2 * getProperty<float>("DefaultDrawSize") / 2.0f + startYRegion, startPos + 1); // what the fuck?
+        } else {
+            startPos--;
+            p = ofPoint(start2 * getProperty<float>("DefaultDrawSize") / 2.0f + startXRegion, startPos *  ySpace + 50, startPos + 1); // what the fuck?
+        }
+        
         
         //ofPoint p = ofPoint(100,100);
         
@@ -460,9 +473,9 @@ public:
             for(int i = 0; i < agents.size(); i++){
                 agent = agents[i];
                 if(agent->getViewID() == viewID){
-                    agent->stop();
-                    targetunique.push_back(agent->getWindow());
-                    uniqueStartingPositions.push_back(agent->getStartPosSegment());
+                    agent->stopAgent();
+//                    targetunique.push_back(agent->getWindow());
+//                    uniqueStartingPositions.push_back(agent->getStartPosSegment());
                     delete agent;
                     index = i;
                     break;

@@ -260,18 +260,6 @@ public:
         totalSequenceFrames += newLength;
     }
     
-    void rebuildSequenceFrames() {
-        totalSequenceFrames = 0;
-        sequenceFrames.clear();
-        
-        sequenceFrames.push_back(0);
-        
-        for (int i=0;i<sequence.size();i++) {
-            sequenceFrames.push_back(totalSequenceFrames + sequence[i].endframe - sequence[i].startframe);
-            totalSequenceFrames += sequence[i].endframe - sequence[i].startframe;
-        }
-    }
-    
     void clear(){
         ofxLogVerbose() << "Clear Sequence" << endl;
         bPaused = false;
@@ -581,17 +569,23 @@ public:
     
     void removeMoviesFromIndex (int ind) {
         
-        ind++;
-        sequence.erase(sequence.begin()+ind,sequence.end()+1);
-//        sequence.erase(sequence.end());
-        
-         for (int i=sequenceFrames.size()-1; i>=ind;i--) {
-             totalSequenceFrames -= sequenceFrames[i] - sequenceFrames[i-1];
-         }
-        
-        currentSequenceFrame = totalSequenceFrames + currentMovie.frame;
-        
+        sequence.erase(sequence.begin()+ind, sequence.end());
+
         rebuildSequenceFrames();
+        
+    }
+    
+    void rebuildSequenceFrames() {
+        
+        totalSequenceFrames = 0;
+        sequenceFrames.clear();
+        
+        sequenceFrames.push_back(0);
+        
+        for (int i=0;i<sequence.size();i++) {
+            sequenceFrames.push_back(totalSequenceFrames + sequence[i].endframe - sequence[i].startframe);
+            totalSequenceFrames += sequence[i].endframe - sequence[i].startframe;
+        }
     }
     
     vector<int> getSequenceFrames() {

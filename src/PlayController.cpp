@@ -195,7 +195,7 @@ void PlayController::createAgent(string name, ofPoint origin, ofRectangle target
     //agent->setWindow(wTarget);
     
     // calculate plan boundary and draw size
-    ofRectangle tPlanBoundary = ofRectangle(-tDrawSize * 2.0, -tDrawSize * 2.0, appModel->getProperty<float>("OutputWidth") + tDrawSize * 2.0, appModel->getProperty<float>("OutputHeight") + tDrawSize * 2.0);
+    ofRectangle tPlanBoundary = ofRectangle(-tDrawSize * 2.0, -tDrawSize * 2.0, appModel->getProperty<float>("OutputWidth") + tDrawSize * 4.0, appModel->getProperty<float>("OutputHeight") + tDrawSize * 4.0);
     
     // set plan boundary and draw size
     vector<ofRectangle> obstacles;
@@ -204,33 +204,38 @@ void PlayController::createAgent(string name, ofPoint origin, ofRectangle target
     
     agent->setWorldObstacles(obstacles);
     agent->setPlanBoundary(tPlanBoundary);
-    agent->setGridSize(tDrawSize / 2.0f, tDrawSize / 2.0f);
+    //agent->setGridSize(tDrawSize / 2.0f, tDrawSize / 2.0f);
+    agent->setGridSize(50, 50);
     
     // set modes
     agent->setCollisionMode(cMode);
     agent->setBehaviourMode(bMode);
     
     // start threading
-    agent->start();
+    agent->startAgent();
     
     agent->setSpeed(3);
     agent->play();
     agent->plan(target);
-    
-    
+
 }
 
 //--------------------------------------------------------------
 void PlayController::triggerReplan() {
-    int newWindowIndex = 11;
+    
+    cout << "++++++++++++++++++++++++++++++++ REPLAN" << endl;
+    
+    int newWindowIndex = ofRandom(11);
     ofRectangle newWindow = appModel->getWindows()[newWindowIndex];
     
     vector<Agent2*>& agents = appModel->getAgents();
     
     for (int i=0; i < agents.size(); i++) {
-        //agents[i]->setPaused(<#bool b#>)
+        //agents[i]->removeAllMovies();
+        //agents[i]->stop();
+        //agents[i]->setWindow(newWindowIndex);
         agents[i]->plan(newWindow);
-        agents[i]->setWindow(newWindowIndex);
+        
     }
     
 }

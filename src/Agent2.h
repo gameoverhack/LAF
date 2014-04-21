@@ -42,6 +42,8 @@ typedef struct{
     // changelable
 //    MovieInfo currentMovieInfo;
     ofRectangle currentBounding;
+    ofPoint currentPosition;
+    ofPoint currentCentre;
     
     // semi-persistant
     CollisionMode collisionMode;
@@ -78,8 +80,8 @@ public:
     void setGridSize(float _w, float _h);
     
     // start and stop threading/thinking
-    void start();
-    void stop();
+    void startAgent();
+    void stopAgent();
     
     // update is both threaded and unthreaded
     void update();
@@ -103,6 +105,8 @@ public:
     
     // immediate occasionaly called commands
     void plan(ofRectangle _target, int _numSequenceRetries = 3);
+    
+    void removeAllMovies();
     
     // CHECKS
     
@@ -145,11 +149,45 @@ public:
         return bFaultyMovieSequence;
     }
 
+    ofPolyline getCorrectedPath() {
+        ofPolyline pathFromHere; //= ofPolyline(agent->getCurrentPath().getVertices());
+        ofPoint point;
+        
+        //if (!isAgentLocked())
+        {
+            
+        int index;
+        for (int i=0; i < getMovieSequence().size(); i++)
+            if (getMovieSequence()[i].agentActionIndex == 0) {
+                index = i;
+                break;
+            }
+        
+            point = getScaledFloorOffsetAt(getSequenceFrames()[index]);
+            pathFromHere.addVertex(point);
+            
+            for (int a=0;a<actions.size();a++) {
+                if (actions[a].first == 'l')
+                    point.x-=actions[a].second;
+                else if (actions[a].first == 'r')
+                    point.x+=actions[a].second;
+                else if (actions[a].first == 'u')
+                    point.y-=actions[a].second;
+                else if (actions[a].first == 'd')
+                    point.y+=actions[a].second;
+                
+                pathFromHere.addVertex(point);
+            }
+        }
+        return pathFromHere;
+    }
+    
     vector< pair<char, float> > actions;
     
 protected:
     
     // METHODS
+    void clear();
     
     void insertMoviesFromAction(pair<char,float> act);
     void insertEndMotion();

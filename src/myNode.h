@@ -16,6 +16,7 @@ public:
 	int x, y; // Profiling observation: integer coordinates, hence operator==,
     //  makes the search significantly faster (almost 10 folds than double)
 	bool operator==(const myNode& n) { return (x==n.x && y==n.y); }; // This must be defined for the node
+    bool operator!=(const myNode* n) { return (x!=n->x || y!=n->y); };
     
     myNode *prevNode =  NULL;
     
