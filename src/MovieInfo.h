@@ -42,7 +42,8 @@ public:
     ofRectangle totalbounding;
     
     bool isLooped = false;
-    int agentActionIndex=-1;
+    bool isLoopedStatic = false;
+    int agentActionIndex = -1;
     bool isCut = false;
     bool isEnd = false; // if the movie is part of the end motion (including the transitions leading to it)
     

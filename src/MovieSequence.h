@@ -446,7 +446,7 @@ public:
                 
             }
             
-            lNormal = position + ofPoint(0,0);
+            lNormal = position;
             
         }
         

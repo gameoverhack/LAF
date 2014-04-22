@@ -382,16 +382,41 @@ void Agent2::move(char direction, float length){
         push(ms.getMovieSequence()[i]);
     }
     
+    vector<MovieInfo> sequencecopy = sequence;
+
+    ofPoint tCurrentPosition = getScaledPositionAt(sequenceFrames[currentSequenceIndex]);
+    int tCurrentVideoFrame = video->getCurrentFrame();
+    int tCurrentSequenceIndex = currentSequenceIndex;
+    int tCurrentSpeed = speed;
+    float tCurrentScale = scale;
+    bool tCurrentAutoStop = bAutoSequenceStop;
+    
+    MovieSequence::clear();
+
+    for(int i = tCurrentSequenceIndex; i < sequencecopy.size(); i++){
+        push(sequencecopy[i]);
+    }
+    
+    setNormalPosition(tCurrentPosition);
+    setNormalScale(tCurrentScale);
+    
     cout << "get positions" << endl;
     getPositionsForMovieSequence(sequence);
     normalise();
     
-    speed = 3;
+    bAutoSequenceStop = tCurrentAutoStop;
+    bPaused = false;
+    currentSequenceIndex = 0;
+    currentMovie = sequence[0];
+    speed = tCurrentSpeed;
+    updateFrame();
+    updatePosition();
     
-    if (!isPlaying()) {
-        cout << "is not playing " << endl;
-        play();
-    }
+    
+//    if (!isPlaying()) {
+//        cout << "is not playing " << endl;
+//        play();
+//    }
 
 }
 
