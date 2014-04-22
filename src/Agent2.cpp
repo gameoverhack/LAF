@@ -444,49 +444,6 @@ void Agent2::move(char direction, float length){
 
     actionBounding =  ms.getScaledTotalBounding();
     
-    /*
-    
-    // Calcuate the total bounding for this action
-    ofRectangle totalBoundingForAction;
-    
-    
-    
-    ofPoint mNormal;
-    ofPoint lNormal = ofPoint(0,0,0);
-    
-    ofPoint position;
-    ofRectangle bounding;
-    
-    for (int i=0;i<newMovies.size();i++) {
-        
-        MovieInfo& m = newMovies[i];
-        mNormal =  model.getKeyFrameAt(m.name, 1);
-
-        for(int f = m.startframe+1; f <= m.endframe; f++){
-      
-            position = lNormal + (mNormal - model.getKeyFrameAt(m.name, f));
-            bounding = model.getBoundingAt(m.name, f);
-            bounding.position = bounding.position + position;
-            
-            if (i == 0 && f == m.startframe+1) totalBoundingForAction = bounding;
-            
-            totalBoundingForAction.growToInclude(bounding);
-        }
-        
-        lNormal = position;
-    }
-    
-//    ofPoint pNormal = getScaledBounding().position;
-    totalBoundingForAction.position = totalBoundingForAction.position * scale +getScaledBounding().position;
-    totalBoundingForAction.scale(scale);
-
-
-
-    // get the scaled bounding
-
-    actionBounding = totalBoundingForAction;
-
-     */
      
     // if the bounding intersects with windows, then do not push the sequence in; return from the function
     // TODO: this limits the movements
