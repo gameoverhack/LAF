@@ -56,12 +56,15 @@ void AnalyzeController::update(){
             vector<string> problems; int total = 0;
             map<string, PlayerModel>& playerModels = appModel->getPlayerTemplates();
             
+            ostringstream ks;
+            
             for(map<string, PlayerModel>::iterator it = playerModels.begin(); it != playerModels.end(); ++it){
                 
                 string name = it->first;
                 PlayerModel& model = it->second;
                 
                 cout << "XXXChecking XMP for: " << name << endl;
+                ks << "XXXChecking XMP for: " << name << endl;
                 map<string, ofxXMP>& xmps = model.getXMP();
                 
                 for(map<string, ofxXMP>::iterator itx = xmps.begin(); itx != xmps.end(); ++itx){
@@ -91,10 +94,42 @@ void AnalyzeController::update(){
                             
                         }else{
                             
-                            string lastHMotion = model.getEndMotionFromMarker(lastMarker);
+                            string lastMotion = model.getEndMotionFromMarker(lastMarker);
                             string nextMotion = model.getStartMotionFromMarker(marker);
                             
-                            if(nextMotion != lastHMotion){
+                            if(model.isLoopMarker(lastMarker) && (lastMotion == "CLIM_UPPP" || lastMotion == "CLIM_DOWN")){
+                                float scale = appModel->getProperty<float>("DefaultDrawSize") / appModel->getProperty<float>("VideoWidth");
+                                
+                                int startframe = lastMarker.getStartFrame();
+                                int endframe = marker.getStartFrame();
+
+                                ofPoint startPosition = model.getKeyFrameAt(movie, startframe);
+                                ofPoint endPosition = model.getKeyFrameAt(movie, endframe - 1);
+                                
+                                ofRectangle bStart = model.getBoundingAt(movie, startframe);
+                                bStart.position = (bStart.position + startPosition) * scale;
+                                bStart.scale(scale);
+                                
+                                ofRectangle bEnd = model.getBoundingAt(movie, endframe);
+                                bEnd.position = (bEnd.position + endPosition) * scale;
+                                bEnd.scale(scale);
+                                
+                                if(ABS(startPosition.x - endPosition.x) > 0){
+                                    map<string, vector<ofPoint> >& keyframes = model.getKeyFrames();
+                                    for(int k = startframe; k < endframe; k++){
+                                        ks << "rewrite: " << keyframes[movie][k].x << " " << startPosition.x << endl;
+                                        keyframes[movie][k].x = startPosition.x;
+                                        
+                                    }
+                                }
+                                
+                                //os << endl;
+                                ks << "   " << movie << " CLIMBING KEY  : " << ABS(startPosition.x - endPosition.x) << " -- " << ABS(startPosition.y - endPosition.y) << endl;
+                                ks << "   " << movie << " CLIMBING BOUND: " << ABS(bStart.x - bEnd.x) << " -- " << ABS(bStart.y - bEnd.y) << endl;
+                                //os << "CLIMBING BOUND: " << ABS(bEnd.x - bStart.x) << " -- " << ABS(bEnd.y - bStart.y) << endl;
+                            }
+                            
+                            if(nextMotion != lastMotion){
                                 if(lastMarker.getName() != "STND_FRNT_HUGG_FRNT" && lastMarker.getName() != "STND_FRNT_FALL_BACK"){
                                     
                                     if(!model.isLoopMarker(lastMarker)){
@@ -121,6 +156,7 @@ void AnalyzeController::update(){
                         
                     } // for(int m = 0; m < xmp.size(); m++){
                     cout << os.str() << endl;
+                    
                     if(bProblem) problems.push_back(os.str());
                     
                 } // for(map<string, ofxXMP>::iterator itx = xmps.begin(); itx != xmps.end(); ++itx){
@@ -132,6 +168,8 @@ void AnalyzeController::update(){
             }
             
             cout << "Found " << problems.size() << " problems out of " << total << " movies" << endl;
+            
+            cout << ks.str() << endl;
             
             //assert(false);
             analyzeControllerStates.setState(kANALYZECONTROLER_DONE);

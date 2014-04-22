@@ -178,12 +178,8 @@ void PlayController::createAgent(string name, ofPoint origin, ofRectangle target
                           appModel->getGraph("DirectionGraph"),
                           appModel->getGraph("EndGraph"));
     
-//    agent->setStartPosSegment(origin.z);
-    
     // set position and target
-    //origin.z = 0;
     agent->setOrigin(origin);
-    //agent->setWindow(wTarget);
     
     // calculate plan boundary and draw size
     ofRectangle tPlanBoundary = ofRectangle(-tDrawSize * 2.0, -tDrawSize * 2.0, appModel->getProperty<float>("OutputWidth") + tDrawSize * 4.0, appModel->getProperty<float>("OutputHeight") + tDrawSize * 4.0);
@@ -195,7 +191,6 @@ void PlayController::createAgent(string name, ofPoint origin, ofRectangle target
     
     agent->setWorldObstacles(obstacles);
     agent->setPlanBoundary(tPlanBoundary);
-    //agent->setGridSize(tDrawSize / 2.0f, tDrawSize / 2.0f);
     agent->setGridSize(50, 50);
     
     // set modes
@@ -207,6 +202,7 @@ void PlayController::createAgent(string name, ofPoint origin, ofRectangle target
     
     agent->setSpeed(3);
     agent->play();
+    
     agent->plan(target);
 
 }

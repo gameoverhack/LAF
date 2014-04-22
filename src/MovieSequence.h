@@ -295,7 +295,7 @@ public:
         currentSequenceFrame = totalSequenceFrames = 0;
         bAutoSequenceStop = true;
         
-        pauseActionIndex = -1;
+        pauseActionIndex = -2;
         pauseFrame = -1;
         
     }

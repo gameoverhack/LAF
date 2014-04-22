@@ -437,7 +437,7 @@ void AppView::update(){
                         break;
                     }
                 
-                if (agentInfo.state != AGENT_PLAN && agentInfo.behaviourMode == BEHAVIOUR_AUTO) {
+                if (agentInfo.state != AGENT_PLAN && agentInfo.behaviourMode == BEHAVIOUR_AUTO && agent->getCurrentPath().size() > 0) {
                     
                     point = agent->getScaledFloorOffsetAt(agent->getSequenceFrames()[index]);
                     pathFromHere.addVertex(point);
