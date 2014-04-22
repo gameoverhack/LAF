@@ -122,6 +122,7 @@ public:
     // annoying
     
     ofRectangle actionBounding;
+    bool bActionCollide;
     
     void setWindow(int wTarget);
     int getWindow();

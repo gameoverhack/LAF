@@ -487,7 +487,8 @@ void AppController::keyPressed(ofKeyEventArgs & e){
         
         case 'z':
         {
-            playController->triggerReplan();
+            //playController->triggerReplan();
+            cout << appModel->getAgents()[0]->getMovieSequence() << endl;
         }
             break;
         

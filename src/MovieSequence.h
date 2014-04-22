@@ -173,12 +173,12 @@ public:
         nextMovie.speed = speed; //ASK: do we update the speed in each movie or for the sequence
         
         if(nextMovie.path != currentMovie.path){
-            ofxLogVerbose() << "Loading next movie: " << nextMovie.name << " " << nextMovie.startframe << endl;
+            ofxLogVerbose() << "Loading next movie: " << currentMovie.markername << " -> " << nextMovie.markername << " " << nextMovie.startframe << endl;
             video->loadMovie(nextMovie.path);
             video->setLoopState(OF_LOOP_NONE);
             video->play();
         }else{
-            ofxLogVerbose() << "Loading same movie: " << nextMovie.name << " " << nextMovie.startframe << endl;
+            ofxLogVerbose() << "Loading same movie: " << currentMovie.markername << " -> " << nextMovie.markername << " " << nextMovie.startframe << endl;
         }
         
         if(speed> 0){

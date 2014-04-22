@@ -414,8 +414,15 @@ void AppView::update(){
                 if(agent->getScaledBoundings().size() > agent->getCurrentSequenceFrame()) ofRect(agent->getScaledBounding());
                 //if(!agent->isAgentLocked())  ofRect(agent->getScaledBounding());
                 
-                if (agent->getAgentInfo().behaviourMode == BEHAVIOUR_MANUAL)
+                if (agent->getAgentInfo().behaviourMode == BEHAVIOUR_MANUAL){
+                    if(agent->bActionCollide){
+                        ofSetColor(127, 0, 0);
+                    }else{
+                        ofSetColor(0, 127, 127);
+                    }
                     ofRect(agent->actionBounding);
+                }
+                
             }
             
             if(appModel->getProperty<bool>("ShowDistanceSmall")){ // Omid

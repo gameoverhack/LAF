@@ -307,6 +307,20 @@ public:
     }
     
     //--------------------------------------------------------------
+    char getDirectionFromMarker(ofxXMPMarker& m){
+        vector<string> mP = ofSplitString(m.getName(), "_");
+        if(mP.size() < 4) return 'x';
+        return tolower(mP[3][0]);
+    }
+    
+    //--------------------------------------------------------------
+    char getDirectionFromString(string m){
+        vector<string> mP = ofSplitString(m, "_");
+        if(mP.size() < 4) return 'x';
+        return tolower(mP[3][0]);
+    }
+    
+    //--------------------------------------------------------------
     string getStartMotionFromMarker(ofxXMPMarker& m){
         vector<string> mP = ofSplitString(m.getName(), "_");
         if(mP.size() < 4) return "";
@@ -332,6 +346,15 @@ public:
         vector<string> mP = ofSplitString(m, "_");
         if(mP.size() < 4) return "";
         return string(mP[2] + "_" + mP[3]);
+    }
+    
+    string getReverseMotionFromString(string m){
+        vector<string> mP = ofSplitString(m, "_");
+        assert(mP.size() == 2);
+        if(mP[1] == "LEFT") return string(mP[0] + "_RIGT");
+        if(mP[1] == "RIGT") return string(mP[0] + "_LEFT");
+        if(mP[1] == "UPPP") return string(mP[0] + "_DOWN");
+        if(mP[1] == "DOWN") return string(mP[0] + "_UPPP");
     }
     
     //--------------------------------------------------------------

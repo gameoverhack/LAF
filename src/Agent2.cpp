@@ -215,124 +215,34 @@ void Agent2::setOtherAgents(vector<AgentInfo> _otherAgentInfo){
 //--------------------------------------------------------------
 void Agent2::move(char direction, float length){
     
-    ofxLogNotice() << "Moving " << direction << endl;
+    video->finish();
+    update();
     
-    // Cut the current movie and start the new movie at the current position
-    string lastMotion = ofSplitString(currentMovie.markername,"_")[2] + "_" + ofSplitString(currentMovie.markername,"_")[3];
-    string sLastDirection = ofSplitString(currentMovie.markername,"_")[3];
-    char lastDirection = tolower(sLastDirection[0]);
+    // get last direction
+    string lastMarkerOfSequence = getLastMovieInSequence().markername;
+    string lastMarkerAtCurrent = currentMovie.markername;
+    string lastEndMotionOfSequence = model.getEndMotionFromString(lastMarkerOfSequence);
+    string lastEndMotionOfCurrent = model.getEndMotionFromString(lastMarkerAtCurrent);
     
-    cout << lastDirection << endl;
-    cout << direction << endl;
+    char lastDirectionOfSequence = model.getDirectionFromString(lastMarkerOfSequence);
+    char lastDirectionOfCurrent = model.getDirectionFromString(lastMarkerAtCurrent);
     
-    bool willCutFromCurrentFrame = false;
+    cout << "Moving to " << direction << " from either " << lastDirectionOfSequence << " or " << lastDirectionOfCurrent << " for last in sequence " << lastMarkerOfSequence << " and last current " << lastMarkerAtCurrent << endl;
     
-    if (lastDirection == 'l') {
-        if (direction != 'r' && willCollide)
-            return;
-        if (direction == 'r' && speed > 0) {
-            cutSequenceFromCurrentMovie(false);
-            speed = -1;
-            if (!isPlaying()) {
-                currentMovie.frame = currentMovie.frame - 10;
-                video->setFrame(video->getCurrentFrame() - 10);
-            }
-            setPaused(false);
-            stopAtAction(currentMovie.agentActionIndex-1);
-            cout<<"reversing " <<endl;
-            return;
-            //currentMovie->speed =  -1 * abs(currentMovie->speed);
-        }
-        if (direction== 'l'){
-            willCutFromCurrentFrame = false;
-        }else{
-            willCutFromCurrentFrame = true;
-        }
-    }
     
-    if (lastDirection == 'r') {
-        if (direction!= 'l' && willCollide) {
-            return;
-        }
-        if (direction== 'l' && speed > 0) {
-            cutSequenceFromCurrentMovie(false);
-            speed = -1;
-            if (!isPlaying()) {
-                currentMovie.frame = currentMovie.frame - 10;
-                video->setFrame(video->getCurrentFrame() - 10);
-            }
-            
-            setPaused(false);
-            stopAtAction(currentMovie.agentActionIndex-1);
-            cout<<"reversing " <<endl;
-            return;
-            //currentMovie->speed =  -1 * abs(currentMovie->speed);
-        }
-        if (direction== 'r'){
-            willCutFromCurrentFrame = false;
-        }else{
-            willCutFromCurrentFrame = true;
-        }
-    }
-    
-    if (lastDirection == 'u') {
-        if (direction!= 'd' && willCollide)
-            return;
-        if (direction== 'd' && speed > 0) {
-            cutSequenceFromCurrentMovie(false);
-            speed = -1;
-            if (!isPlaying()) {
-                currentMovie.frame = currentMovie.frame - 10;
-                video->setFrame(video->getCurrentFrame() - 10);
-            }
-            setPaused(false);
-            stopAtAction(currentMovie.agentActionIndex-1);
-            cout<<"reversing " <<endl;
-            return;
-            //currentMovie->speed =  -1 * abs(currentMovie->speed);
-        }
-        if (direction== 'u'){
-            willCutFromCurrentFrame = false;
-        }else{
-            willCutFromCurrentFrame = true;
-        }
-//            cutSequenceFromCurrentMovie(true);
-    }
-    
-    if (lastDirection == 'd') {
-        if (direction!= 'u' && willCollide)
-            return;
-        if (direction == 'u' && speed > 0) {
-            cutSequenceFromCurrentMovie(false);
-            speed = -1;
-            if (!isPlaying()) {
-                currentMovie.frame = currentMovie.frame - 10;
-                video->setFrame(video->getCurrentFrame() - 10);
-            }
-            setPaused(false);
-            stopAtAction(currentMovie.agentActionIndex-1);
-            cout<<"reversing " <<endl;
-            return;
-            //currentMovie->speed =  -1 * abs(currentMovie->speed);
-        }
-        if (direction== 'd'){
-            willCutFromCurrentFrame = false;
-        }else{
-            willCutFromCurrentFrame = true;
-        }
-    }
-   
-    
+    // if we're going in the same direction then don't bother cutting frames
+    bool bSameDirection = false;
+    if (direction == lastDirectionOfSequence) bSameDirection = true;
+
     // create a sequence of motions
     vector<string> motionSequence;
-    
+    vector<string> transitions;
     
     switch (direction) {
         case 'l':
         {
             // get the possible approach motions for going left
-            
-            vector<string> transitions = directionGraph.getPossibleTransitions("LEFT");
+            transitions = directionGraph.getPossibleTransitions("LEFT");
             
             // removes the movies that do not exist
             eraseAll(transitions, (string)"CLIM_UPLF");
@@ -343,22 +253,12 @@ void Agent2::move(char direction, float length){
             
             // remove transitions for specific players when we don't have the matching movies
             if(model.getPlayerName() == "CARAS") eraseAll(transitions, (string)"TRAV_LEFT");
-            
-            // get the first possible transition to the next action to left
-            string motion = transitions[(int)ofRandom(transitions.size())];
-
-            if (motion!="") {
-                generateMotionsBetween(lastMotion, motion, motionSequence);
-                motionSequence.push_back(motion);
-                //setActionType("UD", "");
-            }
         }
-            
             break;
         case 'r':
         {
             // get the possible approach motions for going right
-            vector<string> transitions = directionGraph.getPossibleTransitions("RIGHT");
+            transitions = directionGraph.getPossibleTransitions("RIGHT");
             
             // removes the movies that do not exist
             eraseAll(transitions, (string)"CLIM_UPRT");
@@ -369,88 +269,120 @@ void Agent2::move(char direction, float length){
             
             // remove transitions for specific players when we don't have the matching movies
             if(model.getPlayerName() == "CARAS") eraseAll(transitions, (string)"TRAV_RIGT");
-            
-            // get the first possible transition to the next action to right
-            string motion = transitions[(int)ofRandom(transitions.size())];
-            
-            if (motion!="") {
-                generateMotionsBetween(lastMotion, motion, motionSequence);
-                motionSequence.push_back(motion);
-            }
         }
             break;
         case 'u':
         {
             // get the possible approach motions for going up
-            vector<string> transitions = directionGraph.getPossibleTransitions("UP");
+            transitions = directionGraph.getPossibleTransitions("UP");
             
             // removes the movies that do not exist
             eraseAll(transitions, (string)"CLIM_UPRT");
             eraseAll(transitions, (string)"CLIM_UPLF");
             eraseAll(transitions, (string)"STND_BACK");
-            
-            // get the first possible transition to the next action to up
-            string motion = transitions[(int)ofRandom(transitions.size())];
-            
-            if (motion!="") {
-                generateMotionsBetween(lastMotion, motion, motionSequence);
-                motionSequence.push_back(motion);
-            }
-            
         }
             break;
         case 'd':
         {
             // get the possible approach motions for going down
-            vector<string> transitions = directionGraph.getPossibleTransitions("DOWN");
+            transitions = directionGraph.getPossibleTransitions("DOWN");
             
             // removes the movies that do not exist
             eraseAll(transitions, (string)"CLIM_DNRT");
             eraseAll(transitions, (string)"CLIM_DNLF");
             eraseAll(transitions, (string)"CRCH_FRNT");
-            
-            // get the first possible transition to the next action to down
-            string motion = transitions[(int)ofRandom(transitions.size())];
-            
-            if (motion!="") {
-                generateMotionsBetween(lastMotion, motion, motionSequence);
-                motionSequence.push_back(motion);
-            }
         }
             break;
         default:
+            cout << "Invalid direction 1" << endl;
+            assert(false);
+            //return;
             break;
     }
     
-    for (int u=0;u<motionSequence.size();u++)
-        cout << " >>>>>>>>>>>> " << motionSequence[u] << endl;
+    string lastMotion;
+    // get last and generated random motions
+    if (!bSameDirection) lastMotion = lastEndMotionOfCurrent;
+    else lastMotion = lastEndMotionOfSequence;
     
+    string motion = transitions[(int)ofRandom(transitions.size())];
+    
+    cout << "Generating motionSequence using " << lastMotion << " to " << motion << endl;
+    
+    if (motion != "") {
+        generateMotionsBetween(lastMotion, motion, motionSequence);
+        motionSequence.push_back(motion);
+    }else{
+        cout << "No motion" << endl;
+        assert(false);
+    }
+    
+    //for (int u = 0; u < motionSequence.size(); u++) cout << " >>>>>>>>>>>> " << motionSequence[u] << endl;
+    
+    int boundingSequenceIndex = motionSequence.size() - 1;
+    string lastMotionInNewSequence = motionSequence[boundingSequenceIndex];
+    string reverseMotionInNewSequence = model.getReverseMotionFromString(lastMotionInNewSequence);
+    
+    generateMotionsBetween(lastMotionInNewSequence, reverseMotionInNewSequence, motionSequence);
+    
+    for (int u = 0; u < motionSequence.size(); u++) cout << " >>>>>>>>>>>> " << motionSequence[u] << endl;
+    
+    cout << "Check motion sequence for collisions" << endl;
     
     // Create a vector to store the movies generated for this specific action befor pushing them to the agent
     MovieSequence ms;
+    
     generateMoviesFromMotions(motionSequence, &ms);
     getPositionsForMovieSequence(ms.getMovieSequence());
     
+    
     ms.setNormalScale(scale);
-    ms.setNormalPosition(getScaledPosition());
+    if(!bSameDirection){
+        if (model.isLoopMarker(lastMarkerAtCurrent))
+            ms.setNormalPosition(getScaledPosition());
+        else
+            ms.setNormalPosition(getScaledPositionAt(sequenceFrames[currentSequenceIndex+1]));
+    }else{
+        ms.setNormalPosition(getScaledPositionAt(getTotalSequenceFrames()));
+    }
+    
     ms.normalise();
 
     actionBounding =  ms.getScaledTotalBounding();
-    
-     
+    bActionCollide = false;
     // if the bounding intersects with windows, then do not push the sequence in; return from the function
     // TODO: this limits the movements
     for (int w = 0; w < obstacles.size(); w++){
-        if (obstacles[w] != agentInfo.target && actionBounding.intersects(obstacles[w])) return;
+        cout << "We colliding with you>? " << w << " " << obstacles[w] << " " << actionBounding << endl;
+        if (obstacles[w] != agentInfo.target && actionBounding.intersects(obstacles[w])){
+            cout << "We collide!!!" << endl;
+            bActionCollide = true;
+            break;
+        }
     }
     
-    cutSequenceFromCurrentMovie(willCutFromCurrentFrame);
+    if(bActionCollide){
+        cout << "Bounding box collides with windows" << endl;
+        return;
+    }else{
+        cout << "No Collision" << endl;
+    }
     
+    if(!bSameDirection){
+        cout << "Cut movies: " << string(model.isLoopMarker(lastMarkerAtCurrent) ? " cut frames" : " no cut frames") << endl;
+        cutSequenceFromCurrentMovie(model.isLoopMarker(lastMarkerAtCurrent));
+    }
+    
+    
+    
+    cout << "push movies" << endl;
     // if it does not intersect, then push the new movie sequence for this action to the agent
-    for (int i=0;i<ms.getMovieSequence().size();i++){
+    for (int i = 0; i < boundingSequenceIndex; i++){
+        cout << "pushing " << ms.getMovieSequence()[i].markername << endl;
         push(ms.getMovieSequence()[i]);
     }
     
+    cout << "get positions" << endl;
     getPositionsForMovieSequence(sequence);
     normalise();
     
@@ -466,10 +398,9 @@ void Agent2::move(char direction, float length){
 //--------------------------------------------------------------
 void Agent2::cutSequenceFromCurrentMovie(bool cutFromCurrentFrame) {
     // Remove the rest of the movies in the sequence as we are overwriting them
-    if (currentSequenceIndex < sequence.size()-1)
+    if (currentSequenceIndex < sequence.size() - 1){
         removeMoviesFromIndex(currentSequenceIndex + 1);
-//    getPositionsForMovieSequence(sequence);
-//    normalise();
+    }
     
     if (!cutFromCurrentFrame){
         rebuildSequenceFrames();
@@ -501,10 +432,9 @@ void Agent2::cutSequenceFromCurrentMovie(bool cutFromCurrentFrame) {
     
     if(currentMovie.startframe == newEndFrame){
         cout << "Adding a frame when cutting!!!! " << currentMovie << endl;
-        currentMovie.endframe = newEndFrame + 1;
-    }else{
-        currentMovie.endframe = newEndFrame;
+        newEndFrame++;
     }
+    currentMovie.endframe = newEndFrame;
     sequence[currentSequenceIndex].endframe = newEndFrame;
     
     
@@ -1151,7 +1081,7 @@ void Agent2::generateMoviesFromMotions(vector<string>& motionSequence, MovieSequ
     
     MovieInfo lastMovie = getLastMovieInSequence();
     
-    int nextActionIndex = lastMovie.agentActionIndex+1;
+    int nextActionIndex = lastMovie.agentActionIndex + 1;
     
     for(int i = 0; i < markerSequence.size(); i++){
         
@@ -1204,6 +1134,8 @@ void Agent2::generateMoviesFromMotions(vector<string>& motionSequence, MovieSequ
         nextMovie.speed = lastMovie.speed;
         nextMovie.markername = markerSequence[i];
         nextMovie.agentActionIndex = nextActionIndex;
+        
+        assert(nextMovie.startframe != nextMovie.endframe);
         
         ostringstream os; os << nextMovie;
         cout << "Adding movie: " << os.str() << endl;
