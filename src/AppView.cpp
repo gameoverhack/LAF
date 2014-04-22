@@ -413,6 +413,9 @@ void AppView::update(){
                 
                 if(agent->getScaledBoundings().size() > agent->getCurrentSequenceFrame()) ofRect(agent->getScaledBounding());
                 //if(!agent->isAgentLocked())  ofRect(agent->getScaledBounding());
+                
+                if (agent->getAgentInfo().behaviourMode == BEHAVIOUR_MANUAL)
+                    ofRect(agent->actionBounding);
             }
             
             if(appModel->getProperty<bool>("ShowDistanceSmall")){ // Omid

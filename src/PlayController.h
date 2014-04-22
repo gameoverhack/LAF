@@ -27,6 +27,8 @@ public:
     void createAgent(string name, ofPoint origin, ofRectangle target, CollisionMode cMode, BehaviourMode bMode);
     
     void triggerReplan();
+    void moveAgent(int agentIndex, char direction);
+    
 protected:
 
     

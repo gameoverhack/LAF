@@ -64,9 +64,9 @@ void AppController::setup(){
     appModel->setProperty("Ortho", true);
     
     //appModel->setProperty("MediaPath", (string)"/Users/gameoverlf/Desktop/LAF/media");
-    appModel->setProperty("MediaPath", (string)"/Users/gameover/Desktop/LOTE/medianew");
+    //appModel->setProperty("MediaPath", (string)"/Users/gameover/Desktop/LOTE/medianew");
     //appModel->setProperty("MediaPath", (string)"/Volumes/LongingAndForgetting02/LOTE/TESTRENDERS/mediaANIME");
-    //appModel->setProperty("MediaPath", (string)"/Users/omid/Desktop/LAF/medianew");
+    appModel->setProperty("MediaPath", (string)"/Users/omid/Desktop/LAF/medianew");
     appModel->setProperty("NumberPlayers", 10);
     appModel->setProperty("RectTrail", 200);
     
@@ -464,28 +464,24 @@ void AppController::keyPressed(ofKeyEventArgs & e){
             break;
         case OF_KEY_LEFT:
         {
-//            if (appModel->getProperty<bool>("ManualAgentControl"))
-//                playController->moveAgent((Agent*)appModel->getSequences()[0], 'l');
+                playController->moveAgent(0, 'l');
         }
             break;
             
         case OF_KEY_RIGHT:
         {
-//            if (appModel->getProperty<bool>("ManualAgentControl"))
-//                playController->moveAgent((Agent*)appModel->getSequences()[0], 'r');
+                playController->moveAgent(0, 'r');
         }
             break;
         case OF_KEY_UP:
         {
-//            if (appModel->getProperty<bool>("ManualAgentControl"))
-//                playController->moveAgent((Agent*)appModel->getSequences()[0], 'u');
+                playController->moveAgent(0, 'u');
         }
             break;
             
         case OF_KEY_DOWN:
         {
-//            if (appModel->getProperty<bool>("ManualAgentControl"))
-//                playController->moveAgent((Agent*)appModel->getSequences()[0], 'd');
+                playController->moveAgent(0, 'd');
         }
             break;
         

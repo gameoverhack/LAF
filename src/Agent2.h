@@ -105,6 +105,8 @@ public:
     
     // immediate occasionaly called commands
     void plan(ofRectangle _target, int _numSequenceRetries = 3);
+    void move(char direction, float length = -1);
+    
     
     void removeAllMovies();
     
@@ -118,6 +120,9 @@ public:
     AgentInfo getAgentInfo();
     
     // annoying
+    
+    ofRectangle actionBounding;
+    
     void setWindow(int wTarget);
     int getWindow();
     
@@ -194,9 +199,12 @@ protected:
     bool cutMoviesForActionsNormalised();
     void generateMoviesFromMotions(vector<string>& motionSequence, bool isEnd = false);
     void getPositionsForMovieSequence();
+    void getPositionsForMovieSequence(vector<MovieInfo>& s);
     void generateMotionsBetween(string startMotion, string endMotion, vector<string>& motionSequence);
     
     float calculateMovieDistanceNormalised(int indexA, int indexB, char dir, int frameOffset);
+    void  cutSequenceFromCurrentMovie(bool cutFromCurrentFrame);
+    void generateMoviesFromMotionsNoPush(vector<string>& motionSequence, vector<MovieInfo>& resultMovies);
     
     // worker thread
     void threadedFunction();

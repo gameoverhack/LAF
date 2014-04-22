@@ -212,6 +212,11 @@ void PlayController::createAgent(string name, ofPoint origin, ofRectangle target
 }
 
 //--------------------------------------------------------------
+void PlayController::moveAgent(int agentIndex, char direction) {
+    appModel->getAgents()[agentIndex]->move(direction);
+}
+
+//--------------------------------------------------------------
 void PlayController::triggerReplan() {
     
     cout << "++++++++++++++++++++++++++++++++ REPLAN" << endl;
