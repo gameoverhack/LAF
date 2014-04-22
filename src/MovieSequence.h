@@ -71,14 +71,14 @@ public:
         if(video->getQueueSize() > 0) return;
         
         // make sure the video paused state is the same as the sequence
-        if(video->isPaused() != bPaused){
-            video->setPaused(bPaused);
+//        if(video->isPaused() != bPaused){
+//            video->setPaused(bPaused);
 //            return;
-        }
+//        }
         
-        if(video->getSpeed() != speed){
-            video->setSpeed(speed);
-        }
+//        if(video->getSpeed() != speed){
+//            video->setSpeed(speed);
+//        }
         
         if(bPaused){
             return;
@@ -105,9 +105,7 @@ public:
 
         
         // check if we're done TODO: reverse
-        if((video->getIsMovieDone()) || currentMovie.frame + currentMovie.startframe >= currentMovie.endframe
-        || (speed < 0 && currentMovie.frame  < 0)
-           ) {
+        if((video->getIsMovieDone()) || currentMovie.frame + currentMovie.startframe >= currentMovie.endframe || (speed < 0 && currentMovie.frame  < 0)) {
             
             // check if the next movie belongs to another action and if we want to stop now
             if ((speed > 0 && sequence[CLAMP(currentSequenceIndex+1,0,sequence.size()-1)].agentActionIndex == pauseActionIndex) ||
@@ -236,6 +234,7 @@ public:
     
     void setSpeed(float s){
         speed = s;
+        video->setSpeed(speed);
     }
     
     float getSpeed(){

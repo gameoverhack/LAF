@@ -11,18 +11,13 @@
 //--------------------------------------------------------------
 Agent2::Agent2(){
     cout << "Creating Agent" << endl;
+    clear();
     
     sAgentID++;
     
     // init internal state
     MovieSequence::MovieSequence();
-//    agentInfo.currentMovieInfo = NoMovie;
-    agentInfo.bIsAgentLocked = false;
-    agentInfo.state = AGENT_INIT;
-    agentInfo.behaviourMode = BEHAVIOUR_AUTO;
-    agentInfo.collisionMode = COLLISION_AVOID;
-    agentInfo.target = ofRectangle(0, 0, 0, 0);
-    agentInfo.agentID = sAgentID;
+
     
 }
 
@@ -36,6 +31,15 @@ Agent2::~Agent2(){
 void Agent2::clear(){
     MovieSequence::clear();
     willCollide = false;
+    //    agentInfo.currentMovieInfo = NoMovie;
+    agentInfo.bIsAgentLocked = false;
+    agentInfo.state = AGENT_INIT;
+    agentInfo.behaviourMode = BEHAVIOUR_AUTO;
+    agentInfo.collisionMode = COLLISION_AVOID;
+    agentInfo.target = ofRectangle(0, 0, 0, 0);
+    agentInfo.agentID = sAgentID;
+    
+    actionBounding = ofRectangle(0, 0, 0, 0);
 }
 
 //--------------------------------------------------------------
@@ -46,7 +50,7 @@ void Agent2::setModel(PlayerModel _model){
     setNormalScale(scale);
     
     push(model.getFirstMovie());
-    getPositionsForMovieSequence();
+    getPositionsForMovieSequence(sequence);
     normalise();
 }
 
@@ -189,6 +193,7 @@ void Agent2::setBehaviourMode(BehaviourMode _behaviourMode){
     unlockAgent();
 }
 
+
 //--------------------------------------------------------------
 void Agent2::setWorldObstacles(vector<ofRectangle> _obstacles){
     lockAgent();
@@ -205,6 +210,307 @@ void Agent2::setOtherAgents(vector<AgentInfo> _otherAgentInfo){
         otherAgentInfo = _otherAgentInfo;
     }
     unlockAgent();
+}
+
+//--------------------------------------------------------------
+void Agent2::move(char direction, float length){
+    
+    ofxLogNotice() << "Moving " << direction << endl;
+    
+    // Cut the current movie and start the new movie at the current position
+    string lastMotion = ofSplitString(currentMovie.markername,"_")[2] + "_" + ofSplitString(currentMovie.markername,"_")[3];
+    string sLastDirection = ofSplitString(currentMovie.markername,"_")[3];
+    char lastDirection = tolower(sLastDirection[0]);
+    
+    cout << lastDirection << endl;
+    cout << direction << endl;
+    
+    bool willCutFromCurrentFrame = false;
+    
+    if (lastDirection == 'l') {
+        if (direction != 'r' && willCollide)
+            return;
+        if (direction == 'r' && speed > 0) {
+            cutSequenceFromCurrentMovie(false);
+            speed = -1;
+            if (!isPlaying()) {
+                currentMovie.frame = currentMovie.frame - 10;
+                video->setFrame(video->getCurrentFrame() - 10);
+            }
+            setPaused(false);
+            stopAtAction(currentMovie.agentActionIndex-1);
+            cout<<"reversing " <<endl;
+            return;
+            //currentMovie->speed =  -1 * abs(currentMovie->speed);
+        }
+        if (direction== 'l'){
+            willCutFromCurrentFrame = false;
+        }else{
+            willCutFromCurrentFrame = true;
+        }
+    }
+    
+    if (lastDirection == 'r') {
+        if (direction!= 'l' && willCollide) {
+            return;
+        }
+        if (direction== 'l' && speed > 0) {
+            cutSequenceFromCurrentMovie(false);
+            speed = -1;
+            if (!isPlaying()) {
+                currentMovie.frame = currentMovie.frame - 10;
+                video->setFrame(video->getCurrentFrame() - 10);
+            }
+            
+            setPaused(false);
+            stopAtAction(currentMovie.agentActionIndex-1);
+            cout<<"reversing " <<endl;
+            return;
+            //currentMovie->speed =  -1 * abs(currentMovie->speed);
+        }
+        if (direction== 'r'){
+            willCutFromCurrentFrame = false;
+        }else{
+            willCutFromCurrentFrame = true;
+        }
+    }
+    
+    if (lastDirection == 'u') {
+        if (direction!= 'd' && willCollide)
+            return;
+        if (direction== 'd' && speed > 0) {
+            cutSequenceFromCurrentMovie(false);
+            speed = -1;
+            if (!isPlaying()) {
+                currentMovie.frame = currentMovie.frame - 10;
+                video->setFrame(video->getCurrentFrame() - 10);
+            }
+            setPaused(false);
+            stopAtAction(currentMovie.agentActionIndex-1);
+            cout<<"reversing " <<endl;
+            return;
+            //currentMovie->speed =  -1 * abs(currentMovie->speed);
+        }
+        if (direction== 'u'){
+            willCutFromCurrentFrame = false;
+        }else{
+            willCutFromCurrentFrame = true;
+        }
+//            cutSequenceFromCurrentMovie(true);
+    }
+    
+    if (lastDirection == 'd') {
+        if (direction!= 'u' && willCollide)
+            return;
+        if (direction == 'u' && speed > 0) {
+            cutSequenceFromCurrentMovie(false);
+            speed = -1;
+            if (!isPlaying()) {
+                currentMovie.frame = currentMovie.frame - 10;
+                video->setFrame(video->getCurrentFrame() - 10);
+            }
+            setPaused(false);
+            stopAtAction(currentMovie.agentActionIndex-1);
+            cout<<"reversing " <<endl;
+            return;
+            //currentMovie->speed =  -1 * abs(currentMovie->speed);
+        }
+        if (direction== 'd'){
+            willCutFromCurrentFrame = false;
+        }else{
+            willCutFromCurrentFrame = true;
+        }
+    }
+   
+    
+    // create a sequence of motions
+    vector<string> motionSequence;
+    
+    
+    switch (direction) {
+        case 'l':
+        {
+            // get the possible approach motions for going left
+            
+            vector<string> transitions = directionGraph.getPossibleTransitions("LEFT");
+            
+            // removes the movies that do not exist
+            eraseAll(transitions, (string)"CLIM_UPLF");
+            eraseAll(transitions, (string)"CLIM_DNLF");
+            eraseAll(transitions, (string)"CLIM_LEFT");
+            eraseAll(transitions, (string)"CRCH_LEFT");
+            eraseAll(transitions, (string)"STND_LEFT");
+            
+            // remove transitions for specific players when we don't have the matching movies
+            if(model.getPlayerName() == "CARAS") eraseAll(transitions, (string)"TRAV_LEFT");
+            
+            // get the first possible transition to the next action to left
+            string motion = transitions[(int)ofRandom(transitions.size())];
+
+            if (motion!="") {
+                generateMotionsBetween(lastMotion, motion, motionSequence);
+                motionSequence.push_back(motion);
+                //setActionType("UD", "");
+            }
+        }
+            
+            break;
+        case 'r':
+        {
+            // get the possible approach motions for going right
+            vector<string> transitions = directionGraph.getPossibleTransitions("RIGHT");
+            
+            // removes the movies that do not exist
+            eraseAll(transitions, (string)"CLIM_UPRT");
+            eraseAll(transitions, (string)"CLIM_DNRT");
+            eraseAll(transitions, (string)"CLIM_RIGT");
+            eraseAll(transitions, (string)"CRCH_RIGT");
+            eraseAll(transitions, (string)"STND_RIGT");
+            
+            // remove transitions for specific players when we don't have the matching movies
+            if(model.getPlayerName() == "CARAS") eraseAll(transitions, (string)"TRAV_RIGT");
+            
+            // get the first possible transition to the next action to right
+            string motion = transitions[(int)ofRandom(transitions.size())];
+            
+            if (motion!="") {
+                generateMotionsBetween(lastMotion, motion, motionSequence);
+                motionSequence.push_back(motion);
+            }
+        }
+            break;
+        case 'u':
+        {
+            // get the possible approach motions for going up
+            vector<string> transitions = directionGraph.getPossibleTransitions("UP");
+            
+            // removes the movies that do not exist
+            eraseAll(transitions, (string)"CLIM_UPRT");
+            eraseAll(transitions, (string)"CLIM_UPLF");
+            eraseAll(transitions, (string)"STND_BACK");
+            
+            // get the first possible transition to the next action to up
+            string motion = transitions[(int)ofRandom(transitions.size())];
+            
+            if (motion!="") {
+                generateMotionsBetween(lastMotion, motion, motionSequence);
+                motionSequence.push_back(motion);
+            }
+            
+        }
+            break;
+        case 'd':
+        {
+            // get the possible approach motions for going down
+            vector<string> transitions = directionGraph.getPossibleTransitions("DOWN");
+            
+            // removes the movies that do not exist
+            eraseAll(transitions, (string)"CLIM_DNRT");
+            eraseAll(transitions, (string)"CLIM_DNLF");
+            eraseAll(transitions, (string)"CRCH_FRNT");
+            
+            // get the first possible transition to the next action to down
+            string motion = transitions[(int)ofRandom(transitions.size())];
+            
+            if (motion!="") {
+                generateMotionsBetween(lastMotion, motion, motionSequence);
+                motionSequence.push_back(motion);
+            }
+        }
+            break;
+        default:
+            break;
+    }
+    
+    for (int u=0;u<motionSequence.size();u++)
+        cout << " >>>>>>>>>>>> " << motionSequence[u] << endl;
+    
+    
+    // Create a vector to store the movies generated for this specific action befor pushing them to the agent
+    MovieSequence ms;
+    generateMoviesFromMotions(motionSequence, &ms);
+    getPositionsForMovieSequence(ms.getMovieSequence());
+    
+    ms.setNormalScale(scale);
+    ms.setNormalPosition(getScaledPosition());
+    ms.normalise();
+
+    actionBounding =  ms.getScaledTotalBounding();
+    
+     
+    // if the bounding intersects with windows, then do not push the sequence in; return from the function
+    // TODO: this limits the movements
+    for (int w = 0; w < obstacles.size(); w++){
+        if (obstacles[w] != agentInfo.target && actionBounding.intersects(obstacles[w])) return;
+    }
+    
+    cutSequenceFromCurrentMovie(willCutFromCurrentFrame);
+    
+    // if it does not intersect, then push the new movie sequence for this action to the agent
+    for (int i=0;i<ms.getMovieSequence().size();i++){
+        push(ms.getMovieSequence()[i]);
+    }
+    
+    getPositionsForMovieSequence(sequence);
+    normalise();
+    
+    speed = 3;
+    
+    if (!isPlaying()) {
+        cout << "is not playing " << endl;
+        play();
+    }
+
+}
+
+//--------------------------------------------------------------
+void Agent2::cutSequenceFromCurrentMovie(bool cutFromCurrentFrame) {
+    // Remove the rest of the movies in the sequence as we are overwriting them
+    if (currentSequenceIndex < sequence.size()-1)
+        removeMoviesFromIndex(currentSequenceIndex + 1);
+//    getPositionsForMovieSequence(sequence);
+//    normalise();
+    
+    if (!cutFromCurrentFrame){
+        rebuildSequenceFrames();
+        return;
+    }
+    
+    
+    // Cut the current movie and start the new movie at the current position
+    string lastMotion = ofSplitString(currentMovie.markername,"_")[0] + "_" + ofSplitString(currentMovie.markername,"_")[1];
+    int oldLength = currentMovie.endframe - currentMovie.startframe;
+    
+    // find the next or last marker and cut at that point
+    
+    // get the players model
+    map<string, ofxXMP>& xmp = model.getXMP();
+    
+    ofxXMPMarker lastMarker = xmp[currentMovie.name].getLastMarker(currentMovie.frame);
+    ofxXMPMarker nextMarker = xmp[currentMovie.name].getNextMarker(currentMovie.frame);
+    
+    
+    cout << "lastmarker name = " << lastMarker.getName() << endl;
+    cout << "lastmarker st frame =  " << lastMarker.getStartFrame() << endl;
+    cout << "nextmarker st frame =  " << nextMarker.getStartFrame() << endl;
+    cout << "cframe = " << currentMovie.frame << endl;
+    
+
+    int newEndFrame = currentMovie.startframe + currentMovie.frame;
+    //int newEndFrame = currentMovie->startframe + nextMarker.getStartFrame();
+    
+    if(currentMovie.startframe == newEndFrame){
+        cout << "Adding a frame when cutting!!!! " << currentMovie << endl;
+        currentMovie.endframe = newEndFrame + 1;
+    }else{
+        currentMovie.endframe = newEndFrame;
+    }
+    sequence[currentSequenceIndex].endframe = newEndFrame;
+    
+    
+    
+    // we have pushed this movie before, so we need to fix the sequence frame
+    rebuildSequenceFrames();
 }
 
 //--------------------------------------------------------------
@@ -321,7 +627,7 @@ void Agent2::_plan(){
             removeMoviesFromIndex(currentSequenceIndex + 1);
         }
         
-        getPositionsForMovieSequence();
+        getPositionsForMovieSequence(sequence);
         normalise();
         bFaultyMovieSequence = false;
         
@@ -413,7 +719,7 @@ void Agent2::removeAllMovies(){
     
     setNormalPosition(sequenceNormalPosition);
     
-    getPositionsForMovieSequence();
+    getPositionsForMovieSequence(sequence);
     normalise();
 }
 
@@ -584,7 +890,7 @@ bool Agent2::cutMoviesForActionsNormalised(){
             cout << "WTF" << endl;
             pushAt(nextMovie, lastMovIndex);
             
-            getPositionsForMovieSequence();
+            getPositionsForMovieSequence(sequence);
             normalise();
             
             totalDistance += calculateMovieDistanceNormalised(lastMovIndex, lastMovIndex + 1, currentActionDirection, 0);
@@ -654,7 +960,7 @@ bool Agent2::cutMoviesForActionsNormalised(){
         
         
         rebuildSequenceFrames();
-        getPositionsForMovieSequence();
+        getPositionsForMovieSequence(sequence);
         normalise();
         
         d = calculateMovieDistanceNormalised(firstMovIndex, firstNextMovIndex+1, currentActionDirection, 0);
@@ -793,8 +1099,8 @@ void Agent2::insertMoviesFromAction(pair<char,float> act) {
     
     for (int u=0; u<motionSequence.size();u++) cout << " >>>>>>>>>>>> " << motionSequence[u] << endl;
     
-    generateMoviesFromMotions(motionSequence);
-    getPositionsForMovieSequence();
+    generateMoviesFromMotions(motionSequence, this);
+    getPositionsForMovieSequence(sequence);
     normalise();
 }
 
@@ -816,13 +1122,13 @@ void Agent2::insertEndMotion(){
     
     generateMotionsBetween(motion, emotion, motionSequence);
     
-    generateMoviesFromMotions(motionSequence, true);
-    getPositionsForMovieSequence();
+    generateMoviesFromMotions(motionSequence, this);
+    getPositionsForMovieSequence(sequence);
     normalise();
 }
 
 //--------------------------------------------------------------
-void Agent2::generateMoviesFromMotions(vector<string>& motionSequence, bool isEnd){
+void Agent2::generateMoviesFromMotions(vector<string>& motionSequence, MovieSequence* movieSequence){
     
     map<string, vector<string> >& markDictionary = model.getMarkerDictionary();
     map<string, ofxXMP>& xmp = model.getXMP();
@@ -898,12 +1204,11 @@ void Agent2::generateMoviesFromMotions(vector<string>& motionSequence, bool isEn
         nextMovie.speed = lastMovie.speed;
         nextMovie.markername = markerSequence[i];
         nextMovie.agentActionIndex = nextActionIndex;
-        nextMovie.isEnd = isEnd;
         
         ostringstream os; os << nextMovie;
         cout << "Adding movie: " << os.str() << endl;
         
-        push(nextMovie);
+        movieSequence->push(nextMovie);
         lastMovie = nextMovie;
         
     }
@@ -911,20 +1216,17 @@ void Agent2::generateMoviesFromMotions(vector<string>& motionSequence, bool isEn
 }
 
 //--------------------------------------------------------------
-void Agent2::getPositionsForMovieSequence(){
+void Agent2::getPositionsForMovieSequence(vector<MovieInfo>& movieSequence){
     
-    for(int i = 0; i < sequence.size(); i++){
+    for(int i = 0; i < movieSequence.size(); i++){
         
-        MovieInfo& m = sequence[i];
+        MovieInfo& m = movieSequence[i];
         int totalframes = m.endframe - m.startframe;
-        ostringstream os; os << m;
-        cout<< "####### totoal frames = " << totalframes << endl;
         if(m.positions.size() == totalframes && m.boundings.size() == totalframes){
-            cout << "Assuming positions are the same for " << os.str() << endl;
             continue;
         }
         
-        cout << "Getting positions and boundings for " << os.str() << endl;
+        cout << "Getting positions and boundings " << endl;
         
         m.positions.resize(totalframes);
         m.boundings.resize(totalframes);
