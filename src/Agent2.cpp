@@ -366,6 +366,10 @@ void Agent2::move(char direction, float length){
         return;
     }else{
         cout << "No Collision" << endl;
+        currentMovie.isLoopedStatic = false;
+        setSpeed(3);
+        update();
+        video->finish();
     }
     
     if(!bSameDirection){
@@ -408,7 +412,7 @@ void Agent2::move(char direction, float length){
     bPaused = false;
     currentSequenceIndex = 0;
     currentMovie = sequence[0];
-    speed = tCurrentSpeed;
+    setSpeed(tCurrentSpeed);
     updateFrame();
     updatePosition();
     

@@ -43,6 +43,7 @@ public:
     
     bool isLooped = false;
     bool isLoopedStatic = false;
+    int staticLoopFrames = 20;
     int agentActionIndex = -1;
     bool isCut = false;
     bool isEnd = false; // if the movie is part of the end motion (including the transitions leading to it)

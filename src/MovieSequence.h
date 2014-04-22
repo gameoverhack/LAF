@@ -97,6 +97,23 @@ public:
             
         }
         
+        if(currentMovie.isLoopedStatic){
+            
+            cout << "heav: " << speed << " " << currentMovie.frame + currentMovie.startframe << " < " << currentMovie.endframe - currentMovie.staticLoopFrames << endl;
+            cout << "dist: " << ABS(getScaledPositionAt(sequenceFrames[currentSequenceIndex + 1]).distance(getScaledPosition())) << endl;
+            if(speed < 0 && (ABS(getScaledPositionAt(sequenceFrames[currentSequenceIndex + 1]).distance(getScaledPosition())) > 2.0f || (currentMovie.frame + currentMovie.startframe < currentMovie.endframe - currentMovie.staticLoopFrames))){
+                cout << "hell forw" << endl;
+                setSpeed(ofRandom(0.2, 1));
+            }
+            
+            if(speed > 0 && (ABS(getScaledPositionAt(sequenceFrames[currentSequenceIndex + 1] - 2).distance(getScaledPosition())) <= 0.0f ||
+               (video->getIsMovieDone() || currentMovie.frame + currentMovie.startframe > currentMovie.endframe - 2))){
+                cout << "hell back" << endl;
+                setSpeed(-ofRandom(0.2, 1));
+            }
+            
+            return;
+        }
         
         if (pauseFrame > -1 && pauseFrame >= currentMovie.frame) {
             stop();
@@ -157,9 +174,19 @@ public:
         else{
             // TODO: add loop?
             //currentSequenceIndex = 0;
-            if (bAutoSequenceStop) bSequenceIsDone = true;
-            stop();
-            return;
+            cout << "...... DO STATIC LOOP" << endl;
+            if (bAutoSequenceStop){
+                cout << "bAuto whtf" << endl;
+                bSequenceIsDone = true;
+                stop();
+            }else{
+                cout << "bNICE whtf" << endl;
+                currentMovie.isLoopedStatic = true;
+                currentMovie.staticLoopFrames = 30;
+                setSpeed(-ofRandom(0.2, 1));
+                return;
+            }
+            
         }
         
         MovieInfo& nextMovie = sequence[currentSequenceIndex];
