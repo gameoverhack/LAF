@@ -10,9 +10,11 @@
 
 //--------------------------------------------------------------
 Agent2::Agent2(){
-    cout << "Creating Agent" << endl;
+    cout << "Creating Agent " << sAgentID << endl;
     clear();
     
+    
+    agentID = sAgentID;
     sAgentID++;
     
     // init internal state
@@ -37,7 +39,7 @@ void Agent2::clear(){
     agentInfo.behaviourMode = BEHAVIOUR_AUTO;
     agentInfo.collisionMode = COLLISION_AVOID;
     agentInfo.target = ofRectangle(0, 0, 0, 0);
-    agentInfo.agentID = sAgentID;
+    
     
     actionBounding = ofRectangle(0, 0, 0, 0);
 }
@@ -149,7 +151,7 @@ void Agent2::update(){
     if(!isAgentLocked()){
 
         lockAgent();
-        
+        agentInfo.agentID = agentID;
 //        agentInfo.currentMovieInfo = MovieSequence::getCurrentMovie();
         if(sboundings.size() > currentSequenceFrame) agentInfo.currentBounding = sboundings[currentSequenceFrame];
         if(spositions.size() > currentSequenceFrame) agentInfo.currentPosition = spositions[currentSequenceFrame];
@@ -163,7 +165,7 @@ void Agent2::update(){
 
 //--------------------------------------------------------------
 AgentInfo Agent2::getCurrentAgentInfo(){
-    ofScopedLock lock(mutex);
+    ofScopedLock lock(mMutex);
     return agentInfo;
 }
 
@@ -213,10 +215,28 @@ void Agent2::setOtherAgents(vector<AgentInfo> _otherAgentInfo){
 }
 
 //--------------------------------------------------------------
-void Agent2::move(char direction, float length){
+void Agent2::move(char _direction){
     
-    video->finish();
-    update();
+    lockAgent();
+    {
+        if(agentInfo.behaviourMode == BEHAVIOUR_AUTO){
+            cout << "CALLED MOVE - Aborting as we're auto agent" << endl;
+            agentInfo.state = AGENT_RUN;
+        }else{
+            cout << "CALLED MOVE" << endl;
+            agentInfo.direction = _direction;
+            agentInfo.state = AGENT_MOVE;
+        }
+    }
+    unlockAgent();
+    
+}
+
+//--------------------------------------------------------------
+void Agent2::_move(){
+    
+    //video->finish();
+    //update();
     
     // get last direction
     string lastMarkerOfSequence = getLastMovieInSequence().markername;
@@ -227,18 +247,18 @@ void Agent2::move(char direction, float length){
     char lastDirectionOfSequence = model.getDirectionFromString(lastMarkerOfSequence);
     char lastDirectionOfCurrent = model.getDirectionFromString(lastMarkerAtCurrent);
     
-    cout << "Moving to " << direction << " from either " << lastDirectionOfSequence << " or " << lastDirectionOfCurrent << " for last in sequence " << lastMarkerOfSequence << " and last current " << lastMarkerAtCurrent << endl;
+    cout << "Moving to " << agentInfo.direction << " from either " << lastDirectionOfSequence << " or " << lastDirectionOfCurrent << " for last in sequence " << lastMarkerOfSequence << " and last current " << lastMarkerAtCurrent << endl;
     
     
     // if we're going in the same direction then don't bother cutting frames
     bool bSameDirection = false;
-    if (direction == lastDirectionOfSequence) bSameDirection = true;
-
+    if (agentInfo.direction == lastDirectionOfSequence) bSameDirection = true;
+    
     // create a sequence of motions
     vector<string> motionSequence;
     vector<string> transitions;
     
-    switch (direction) {
+    switch (agentInfo.direction) {
         case 'l':
         {
             // get the possible approach motions for going left
@@ -347,7 +367,7 @@ void Agent2::move(char direction, float length){
     }
     
     ms.normalise();
-
+    
     actionBounding =  ms.getScaledTotalBounding();
     bActionCollide = false;
     // if the bounding intersects with windows, then do not push the sequence in; return from the function
@@ -363,13 +383,14 @@ void Agent2::move(char direction, float length){
     
     if(bActionCollide){
         cout << "Bounding box collides with windows" << endl;
+        agentInfo.state = AGENT_RUN;
         return;
     }else{
         cout << "No Collision" << endl;
         currentMovie.isLoopedStatic = false;
         setSpeed(3);
-        update();
-        video->finish();
+//        update();
+//        video->finish();
     }
     
     if(!bSameDirection){
@@ -386,90 +407,9 @@ void Agent2::move(char direction, float length){
         push(ms.getMovieSequence()[i]);
     }
     
-    vector<MovieInfo> sequencecopy = sequence;
-
-    ofPoint tCurrentPosition = getScaledPositionAt(sequenceFrames[currentSequenceIndex]);
-    int tCurrentVideoFrame = video->getCurrentFrame();
-    int tCurrentSequenceIndex = currentSequenceIndex;
-    int tCurrentSpeed = speed;
-    float tCurrentScale = scale;
-    bool tCurrentAutoStop = bAutoSequenceStop;
+    removePreviousMovies();
     
-    MovieSequence::clear();
-
-    for(int i = tCurrentSequenceIndex; i < sequencecopy.size(); i++){
-        push(sequencecopy[i]);
-    }
-    
-    setNormalPosition(tCurrentPosition);
-    setNormalScale(tCurrentScale);
-    
-    cout << "get positions" << endl;
-    getPositionsForMovieSequence(sequence);
-    normalise();
-    
-    bAutoSequenceStop = tCurrentAutoStop;
-    bPaused = false;
-    currentSequenceIndex = 0;
-    currentMovie = sequence[0];
-    setSpeed(tCurrentSpeed);
-    updateFrame();
-    updatePosition();
-    
-    
-//    if (!isPlaying()) {
-//        cout << "is not playing " << endl;
-//        play();
-//    }
-
-}
-
-//--------------------------------------------------------------
-void Agent2::cutSequenceFromCurrentMovie(bool cutFromCurrentFrame) {
-    // Remove the rest of the movies in the sequence as we are overwriting them
-    if (currentSequenceIndex < sequence.size() - 1){
-        removeMoviesFromIndex(currentSequenceIndex + 1);
-    }
-    
-    if (!cutFromCurrentFrame){
-        rebuildSequenceFrames();
-        return;
-    }
-    
-    
-    // Cut the current movie and start the new movie at the current position
-    string lastMotion = ofSplitString(currentMovie.markername,"_")[0] + "_" + ofSplitString(currentMovie.markername,"_")[1];
-    int oldLength = currentMovie.endframe - currentMovie.startframe;
-    
-    // find the next or last marker and cut at that point
-    
-    // get the players model
-    map<string, ofxXMP>& xmp = model.getXMP();
-    
-    ofxXMPMarker lastMarker = xmp[currentMovie.name].getLastMarker(currentMovie.frame);
-    ofxXMPMarker nextMarker = xmp[currentMovie.name].getNextMarker(currentMovie.frame);
-    
-    
-    cout << "lastmarker name = " << lastMarker.getName() << endl;
-    cout << "lastmarker st frame =  " << lastMarker.getStartFrame() << endl;
-    cout << "nextmarker st frame =  " << nextMarker.getStartFrame() << endl;
-    cout << "cframe = " << currentMovie.frame << endl;
-    
-
-    int newEndFrame = currentMovie.startframe + currentMovie.frame;
-    //int newEndFrame = currentMovie->startframe + nextMarker.getStartFrame();
-    
-    if(currentMovie.startframe == newEndFrame){
-        cout << "Adding a frame when cutting!!!! " << currentMovie << endl;
-        newEndFrame++;
-    }
-    currentMovie.endframe = newEndFrame;
-    sequence[currentSequenceIndex].endframe = newEndFrame;
-    
-    
-    
-    // we have pushed this movie before, so we need to fix the sequence frame
-    rebuildSequenceFrames();
+    agentInfo.state = AGENT_RUN;
 }
 
 //--------------------------------------------------------------
@@ -625,63 +565,6 @@ void Agent2::_plan(){
     cout << "<<<<<<<<<<<PLANNING END" << endl;
 }
 
-
-//--------------------------------------------------------------
-void Agent2::removeAllMovies(){
-    
-    
-    ofPoint sequenceNormalPosition = getScaledPosition();// agent's video position
-
-    
-    // keep a copy of the current movie
-    MovieInfo movieToKeep;
-    
-    if (currentSequenceIndex == -1 || currentSequenceIndex == 0) {
-        movieToKeep.name = sequence[0].name;
-        movieToKeep.path = sequence[0].path;
-        movieToKeep.startframe = sequence[0].startframe + sequence[0].frame;
-        movieToKeep.endframe = sequence[0].endframe;
-        movieToKeep.speed = sequence[0].speed;
-        movieToKeep.markername = sequence[0].markername;
-        movieToKeep.agentActionIndex = -1;
-    } else {
-        movieToKeep.name = getCurrentMovie().name;
-        movieToKeep.path = getCurrentMovie().path;
-        movieToKeep.startframe = getCurrentMovie().startframe + getCurrentMovie().frame;
-        movieToKeep.endframe = getCurrentMovie().endframe;
-        movieToKeep.speed = getCurrentMovie().speed;
-        movieToKeep.markername = getCurrentMovie().markername;
-        movieToKeep.agentActionIndex = -1;
-    }
-    
-    
-    //
-    getMovieSequence().clear();
-    getSequenceFrames().clear();
-    getSequenceFrames().push_back(0);
-    positions.clear();
-    boundings.clear();
-    centres.clear();
-    spositions.clear();
-    sboundings.clear();
-    scentres.clear();
-    
-    currentMovie = NoMovie;
-    currentSequenceIndex = -1;
-    currentSequenceFrame = totalSequenceFrames = 0;
-    
-    push(movieToKeep);
-    
-    //getCurrentMovie().startframe = getCurrentMovie().frame;
-    
-    //rebuildSequenceFrames();
-    
-    setNormalPosition(sequenceNormalPosition);
-    
-    getPositionsForMovieSequence(sequence);
-    normalise();
-}
-
 //--------------------------------------------------------------
 AgentInfo Agent2::getAgentInfo(){
     return agentInfo;
@@ -706,6 +589,10 @@ void Agent2::threadedFunction(){
                 case AGENT_PLAN:
                     _plan();
                     break;
+                    
+                case AGENT_MOVE:
+                    _move();
+                    break;
             }
             
             unlockAgentFlag();
@@ -719,27 +606,27 @@ void Agent2::threadedFunction(){
 
 //--------------------------------------------------------------
 bool Agent2::isAgentLocked(){
-    ofScopedLock lock(mutex);
+    ofScopedLock lock(mMutex);
     return agentInfo.bIsAgentLocked;
 }
 
 //--------------------------------------------------------------
 void Agent2::lockAgentFlag(){
-    lock();
+    mMutex.lock();
     agentInfo.bIsAgentLocked = true;
-    unlock();
+    mMutex.unlock();
 }
 
 void Agent2::unlockAgentFlag(){
-    lock();
+    mMutex.lock();
     agentInfo.bIsAgentLocked = false;
-    unlock();
+    mMutex.unlock();
 }
 
 //--------------------------------------------------------------
 void Agent2::lockAgent(){
     if(isThreadRunning()){
-        lock();
+        mMutex.lock();
         agentInfo.bIsAgentLocked = true;
     }
 }
@@ -747,8 +634,97 @@ void Agent2::lockAgent(){
 void Agent2::unlockAgent(){
     if(isThreadRunning()){
         agentInfo.bIsAgentLocked = false;
-        unlock();
+        mMutex.unlock();
     }
+}
+
+//--------------------------------------------------------------
+void Agent2::cutSequenceFromCurrentMovie(bool cutFromCurrentFrame) {
+    // Remove the rest of the movies in the sequence as we are overwriting them
+    if (currentSequenceIndex < sequence.size() - 1){
+        removeMoviesFromIndex(currentSequenceIndex + 1);
+    }
+    
+    if (!cutFromCurrentFrame){
+        rebuildSequenceFrames();
+        return;
+    }
+    
+    
+    // Cut the current movie and start the new movie at the current position
+    string lastMotion = ofSplitString(currentMovie.markername,"_")[0] + "_" + ofSplitString(currentMovie.markername,"_")[1];
+    int oldLength = currentMovie.endframe - currentMovie.startframe;
+    
+    // find the next or last marker and cut at that point
+    
+    // get the players model
+    map<string, ofxXMP>& xmp = model.getXMP();
+    
+    ofxXMPMarker lastMarker = xmp[currentMovie.name].getLastMarker(currentMovie.frame);
+    ofxXMPMarker nextMarker = xmp[currentMovie.name].getNextMarker(currentMovie.frame);
+    
+    
+    cout << "lastmarker name = " << lastMarker.getName() << endl;
+    cout << "lastmarker st frame =  " << lastMarker.getStartFrame() << endl;
+    cout << "nextmarker st frame =  " << nextMarker.getStartFrame() << endl;
+    cout << "cframe = " << currentMovie.frame << endl;
+    
+    
+    int newEndFrame = currentMovie.startframe + currentMovie.frame;
+    //int newEndFrame = currentMovie->startframe + nextMarker.getStartFrame();
+    
+    if(currentMovie.startframe == newEndFrame){
+        cout << "Adding a frame when cutting!!!! " << currentMovie << endl;
+        newEndFrame++;
+    }
+    currentMovie.endframe = newEndFrame;
+    sequence[currentSequenceIndex].endframe = newEndFrame;
+    
+    
+    
+    // we have pushed this movie before, so we need to fix the sequence frame
+    rebuildSequenceFrames();
+}
+
+//--------------------------------------------------------------
+void Agent2::removePreviousMovies(){
+    
+    lockAgent();
+    
+    cout << "Remove previous movies" << endl;
+    
+    vector<MovieInfo> sequencecopy = sequence;
+    
+    ofPoint tCurrentPosition = getScaledPositionAt(sequenceFrames[currentSequenceIndex]);
+    int tCurrentVideoFrame = video->getCurrentFrame();
+    int tCurrentSequenceIndex = currentSequenceIndex;
+    int tCurrentSpeed = speed;
+    float tCurrentScale = scale;
+    bool tCurrentAutoStop = bAutoSequenceStop;
+    
+    MovieSequence::clear();
+    
+    for(int i = tCurrentSequenceIndex; i < sequencecopy.size(); i++){
+        push(sequencecopy[i]);
+    }
+    
+    setNormalPosition(tCurrentPosition);
+    setNormalScale(tCurrentScale);
+    
+    cout << "get positions" << endl;
+    getPositionsForMovieSequence(sequence);
+    normalise();
+    
+    bAutoSequenceStop = tCurrentAutoStop;
+    bPaused = false;
+    currentSequenceIndex = 0;
+    currentMovie = sequence[0];
+    setSpeed(tCurrentSpeed);
+    updateFrame();
+    updatePosition();
+    
+    unlockAgent();
+    
 }
 
 //--------------------------------------------------------------

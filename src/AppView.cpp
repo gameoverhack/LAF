@@ -497,7 +497,7 @@ void AppView::update(){
                 int startFrame = MAX(agent->getCurrentSequenceFrame() - range, 0);
                 int endFrame = MIN(agent->getCurrentSequenceFrame() + range, agent->getTotalSequenceFrames());
                 
-                int step = 1;
+                int step = 10;
                 
                 for(int j = startFrame; j < endFrame; j = j + step){
                     

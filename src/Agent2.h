@@ -21,6 +21,7 @@
 enum AgentState{
     AGENT_INIT = 0, 
     AGENT_PLAN,
+    AGENT_MOVE,
     AGENT_RUN
 };
 
@@ -33,6 +34,8 @@ enum CollisionMode{
     COLLISION_AVOID = 0,
     COLLISION_IGNORE
 };
+
+static int sAgentID = 0;
 
 typedef struct{
     
@@ -52,6 +55,8 @@ typedef struct{
     ofRectangle target;
     ofPoint origin;
     
+    char direction;
+    
     // agent states
     bool bIsAgentLocked;
     AgentState state;
@@ -59,8 +64,6 @@ typedef struct{
     
     
 } AgentInfo;
-
-static int sAgentID = -1;
 
 class Agent2 : public MovieSequence, ofThread{
     
@@ -105,10 +108,7 @@ public:
     
     // immediate occasionaly called commands
     void plan(ofRectangle _target, int _numSequenceRetries = 3);
-    void move(char direction, float length = -1);
-    
-    
-    void removeAllMovies();
+    void move(char _direction);
     
     // CHECKS
     
@@ -190,6 +190,10 @@ public:
     
     vector< pair<char, float> > actions;
     
+    int getAgentID(){
+        return agentID;
+    }
+    
 protected:
     
     // METHODS
@@ -203,8 +207,9 @@ protected:
     void generateMotionsBetween(string startMotion, string endMotion, vector<string>& motionSequence);
     
     float calculateMovieDistanceNormalised(int indexA, int indexB, char dir, int frameOffset);
-    void  cutSequenceFromCurrentMovie(bool cutFromCurrentFrame);
+    void cutSequenceFromCurrentMovie(bool cutFromCurrentFrame);
     void generateMoviesFromMotionsNoPush(vector<string>& motionSequence, vector<MovieInfo>& resultMovies);
+    void removePreviousMovies();
     
     // worker thread
     void threadedFunction();
@@ -216,6 +221,7 @@ protected:
     void unlockAgent();
     
     // actual worker methods that require threading
+    void _move();
     void _plan();
     
     // DATA
@@ -240,6 +246,7 @@ protected:
     
     // agent state info
     AgentInfo agentInfo;
+    int agentID;
     
     // agents 'memory'
     vector<AgentInfo> otherAgentInfo;

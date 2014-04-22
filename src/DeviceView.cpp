@@ -56,14 +56,20 @@ void DeviceView::update(){
             
             // draw pointer
             ofCircle(pF.x, pF.y, 50);
-            
+            if(client.bOver){
+                ofFill();
+            }else{
+                
+            }
+            ofRect(pF.x - 25, pF.y - 25, 50, 50);
+            ofNoFill();
             // draw 'optical flow'
             ofLine(pF.x, pF.y, pF.x + pD.x, pF.y + pD.y);
 
             //cout << pD.length() << endl;
             
             // testing jerk and direction
-            if(pD.length() > 200.0f){
+            if(pD.length() > 400.0f){
                 
                 
                 // and send to OSCSender -> philippe
@@ -78,7 +84,7 @@ void DeviceView::update(){
                 
                 OSCSender.sendMessage(m);
                 
-                cout << "JERK->" << client.positionBuffer.getFlowDirectionAsString() << endl;
+                //cout << "JERK->" << client.positionBuffer.getFlowDirectionAsString() << endl;
                 
             }
             

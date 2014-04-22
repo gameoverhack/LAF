@@ -235,6 +235,8 @@ public:
     
     double timeThisMessage, timeLastMessage, fps, frameRate;
     
+    bool bOver;
+    
 };
 
 inline ostream& operator<<(ostream& os, DeviceMessage& dm){

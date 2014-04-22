@@ -37,7 +37,7 @@ public:
     }
     
     void setView(MovieView& m, int index){
-        ofxLogVerbose() << "Assigning video player" << endl;
+        ofLogVerbose() << "Assigning video player" << endl;
         video = m.video;
         fboSmall = m.fboSmall;
         fboBig = m.fboBig;
@@ -51,7 +51,7 @@ public:
         return fboBig;
     }
 //    void setVideo(ofxThreadedVideo * v, int index){
-//        ofxLogVerbose() << "Assigning video player" << endl;
+//        ofLogVerbose() << "Assigning video player" << endl;
 //        video = v;
 //        viewID = index;
 //    }
@@ -66,6 +66,8 @@ public:
         
         // update the video
         video->update();
+        
+        ofScopedLock lock(mMutex);
         
         // make sure there are no commands cue'd on the video
         if(video->getQueueSize() > 0) return;
@@ -99,16 +101,16 @@ public:
         
         if(currentMovie.isLoopedStatic){
             
-            cout << "heav: " << speed << " " << currentMovie.frame + currentMovie.startframe << " < " << currentMovie.endframe - currentMovie.staticLoopFrames << endl;
-            cout << "dist: " << ABS(getScaledPositionAt(sequenceFrames[currentSequenceIndex + 1]).distance(getScaledPosition())) << endl;
+            //cout << "heav: " << speed << " " << currentMovie.frame + currentMovie.startframe << " < " << currentMovie.endframe - currentMovie.staticLoopFrames << endl;
+            //cout << "dist: " << ABS(getScaledPositionAt(sequenceFrames[currentSequenceIndex + 1]).distance(getScaledPosition())) << endl;
             if(speed < 0 && (ABS(getScaledPositionAt(sequenceFrames[currentSequenceIndex + 1]).distance(getScaledPosition())) > 2.0f || (currentMovie.frame + currentMovie.startframe < currentMovie.endframe - currentMovie.staticLoopFrames))){
-                cout << "hell forw" << endl;
+                //cout << "hell forw" << endl;
                 setSpeed(ofRandom(0.2, 1));
             }
             
             if(speed > 0 && (ABS(getScaledPositionAt(sequenceFrames[currentSequenceIndex + 1] - 2).distance(getScaledPosition())) <= 0.0f ||
                (video->getIsMovieDone() || currentMovie.frame + currentMovie.startframe > currentMovie.endframe - 2))){
-                cout << "hell back" << endl;
+                //cout << "hell back" << endl;
                 setSpeed(-ofRandom(0.2, 1));
             }
             
@@ -157,7 +159,7 @@ public:
     
     void loadNextMovie(int frameSeek = 0){
         
-        ofxLogVerbose() << "Loading next movie: " << currentSequenceIndex << " -> " << currentSequenceIndex + 1 << " of " << sequence.size() << endl;
+        ofLogVerbose() << "Loading next movie: " << currentSequenceIndex << " -> " << currentSequenceIndex + 1 << " of " << sequence.size() << endl;
         
         // increment sequenceIndex TODO: reverse
         if(speed>0 && currentSequenceIndex + 1 < sequence.size()){
@@ -192,7 +194,7 @@ public:
         MovieInfo& nextMovie = sequence[currentSequenceIndex];
         
         if(nextMovie.agentActionIndex != currentMovie.agentActionIndex){
-            ofxLogVerbose() << "Starting to perform the next action old = " << currentMovie.agentActionIndex << "  new = " << nextMovie.agentActionIndex << endl;
+            ofLogVerbose() << "Starting to perform the next action old = " << currentMovie.agentActionIndex << "  new = " << nextMovie.agentActionIndex << endl;
             cout << endl;
            // if (currentMovie.agentActionIndex!=-1) stop();
         }
@@ -200,12 +202,12 @@ public:
         nextMovie.speed = speed; //ASK: do we update the speed in each movie or for the sequence
         
         if(nextMovie.path != currentMovie.path){
-            ofxLogVerbose() << "Loading next movie: " << currentMovie.markername << " -> " << nextMovie.markername << " " << nextMovie.startframe << endl;
+            ofLogVerbose() << "Loading next movie: " << currentMovie.markername << " -> " << nextMovie.markername << " " << nextMovie.startframe << endl;
             video->loadMovie(nextMovie.path);
             video->setLoopState(OF_LOOP_NONE);
             video->play();
         }else{
-            ofxLogVerbose() << "Loading same movie: " << currentMovie.markername << " -> " << nextMovie.markername << " " << nextMovie.startframe << endl;
+            ofLogVerbose() << "Loading same movie: " << currentMovie.markername << " -> " << nextMovie.markername << " " << nextMovie.startframe << endl;
         }
         
         if(speed> 0){
@@ -222,7 +224,7 @@ public:
     }
     
     void play(){
-        ofxLogVerbose() << "Play Sequence" << endl;
+        ofLogVerbose() << "Play Sequence" << endl;
         setPaused(false);
         bSequenceIsDone = false;
         pauseFrame = -1;
@@ -230,13 +232,13 @@ public:
     }
     
     void stop(){
-        ofxLogVerbose() << "Stop Sequence" << endl;
+        ofLogVerbose() << "Stop Sequence" << endl;
         setPaused(true);
     }
     
     
     void stopAt(int frame) {
-         ofxLogVerbose() << "Stoping current movie at frame " << frame << "" << endl;
+         ofLogVerbose() << "Stoping current movie at frame " << frame << "" << endl;
         pauseFrame = frame;
     }
     
@@ -269,7 +271,7 @@ public:
     }
     
     void setPaused(bool b){
-        ofxLogVerbose() << "Pause Sequence: " << b << endl;
+        ofLogVerbose() << "Pause Sequence: " << b << endl;
         bPaused = b;
         if(video->isPlaying()) video->setPaused(bPaused);
     }
@@ -279,14 +281,14 @@ public:
     }
     
     void rewind(){
-        ofxLogVerbose() << "Rewind Sequence" << endl;
+        ofLogVerbose() << "Rewind Sequence" << endl;
         currentSequenceIndex = -1;
         currentSequenceFrame = 0;
     }
     
     void push(MovieInfo m){
         ostringstream os; os << m;
-        ofxLogVerbose() << "Push Sequence: " << os.str() << endl;
+        ofLogVerbose() << "Push Sequence: " << os.str() << endl;
         sequence.push_back(m);
         sequenceFrames.push_back(totalSequenceFrames + m.endframe - m.startframe);
         totalSequenceFrames += m.endframe - m.startframe;
@@ -295,7 +297,7 @@ public:
     
     void pushAt(MovieInfo m, int index){
         ostringstream os; os << m;
-        ofxLogVerbose() << "Push Sequence: " << os.str() << endl;
+        ofLogVerbose() << "Push Sequence: " << os.str() << endl;
         sequence.insert(sequence.begin()+index, m);
         rebuildSequenceFrames();
     }
@@ -307,7 +309,7 @@ public:
     }
     
     void clear(){
-        ofxLogVerbose() << "Clear Sequence" << endl;
+        ofLogVerbose() << "Clear Sequence" << endl;
         bPaused = false;
         sequence.clear();
         sequenceFrames.clear();
@@ -356,7 +358,7 @@ public:
     
     void rescale(){
         
-        ofxLogVerbose() << "Rescale Sequence: " << pNormal << " " << scale << endl;
+        ofLogVerbose() << "Rescale Sequence: " << pNormal << " " << scale << endl;
         
         // copy positions/boundings
         spositions = positions;
@@ -411,7 +413,7 @@ public:
 //        int startNormalIndex = 0;
 //        if(lastnormalindex == -1){
         
-            ofxLogVerbose() << "Normalize Whole Sequence" << endl;
+            ofLogVerbose() << "Normalize Whole Sequence" << endl;
             
             // clear all the pos/bound storage
             positions.clear();
@@ -422,7 +424,7 @@ public:
             scentres.clear();
             
 //        }else{
-//            ofxLogVerbose() << "Normalize Part Sequence: " << lastnormalindex << " < " << sequence.size() << endl;
+//            ofLogVerbose() << "Normalize Part Sequence: " << lastnormalindex << " < " << sequence.size() << endl;
 //            startNormalIndex = lastnormalindex;
 //            lNormal = positions[positions.size() - 1];
 //        }
@@ -683,6 +685,8 @@ protected:
     int pauseFrame;
     int pauseActionIndex;
     bool bAutoSequenceStop;
+    
+    ofMutex mMutex;
 };
 
 
