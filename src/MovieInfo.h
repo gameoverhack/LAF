@@ -65,12 +65,15 @@ public:
 //inline bool operator>=(const MovieInfo& lhs, const MovieInfo& rhs){return !operator< (lhs,rhs);}
 
 inline ostream& operator<<(ostream& os, MovieInfo &mI){
-    os  << mI.markername << " "
+    os  << " ("
+        << mI.agentActionIndex << ")"
+        << mI.markername << " "
         << mI.name << " "
         << mI.bounding << " ["
         << mI.startframe << " -> "
         << mI.endframe << "] "
-        << mI.frame;
+        << mI.frame
+        << endl;
     return os;
 };
 

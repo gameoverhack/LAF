@@ -520,6 +520,10 @@ void Agent2::_plan(){
             removeMoviesFromIndex(currentSequenceIndex + 1);
         }
         
+        for(int i = 0; i < sequence.size(); i++){
+            sequence[i].agentActionIndex = -1;
+        }
+        
         getPositionsForMovieSequence(sequence);
         normalise();
         bFaultyMovieSequence = false;
@@ -769,7 +773,7 @@ bool Agent2::cutMoviesForActionsNormalised(){
         // --- correct the length based on reality
         
         
-        ofPoint actionStartPosition = getScaledFloorOffsetAt(sequenceFrames[actionFirstMovieIndex]);
+        ofPoint actionStartPosition = getScaledFloorOffsetAt(sequenceFrames[actionFirstMovieIndex]+2); //TODO: BUG? sometimes it returns strange numbers for one dimension of the point
         ofPoint pathSegmentEndPosition = getCorrectedPath()[a+1];
         
         cout << "going from " << actionStartPosition << " to " << pathSegmentEndPosition << endl;
@@ -795,7 +799,10 @@ bool Agent2::cutMoviesForActionsNormalised(){
         ///// Calculate the distance during the transition movies
         float actionTransitionDistance = calculateMovieDistanceNormalised(actionFirstMovieIndex, actionLastMovieIndex, actionDirection, 0);
         cout << "The distance moved during the transition movies for this action is " << actionTransitionDistance << endl;
-        assert (actionTransitionDistance < realNeededLength);
+       
+        //assert (actionTransitionDistance < realNeededLength);
+        if(actionTransitionDistance < realNeededLength) validSolution = false;
+        
         
         ///// Calculate the distance during the transition movies for the next action
         float nextActionTransitionDistance = calculateMovieDistanceNormalised(actionLastMovieIndex+1, nextActionLastMovieIndex, actionDirection, 0);
@@ -813,7 +820,7 @@ bool Agent2::cutMoviesForActionsNormalised(){
         nextMovie.endframe = sequence[actionLastMovieIndex].endframe;
         nextMovie.speed = sequence[actionLastMovieIndex].speed;
         nextMovie.markername = sequence[actionLastMovieIndex].markername;
-        nextMovie.agentActionIndex = sequence[actionLastMovieIndex].agentActionIndex;
+        nextMovie.agentActionIndex = a;
         
         int inserts = 0;
         
@@ -857,26 +864,26 @@ bool Agent2::cutMoviesForActionsNormalised(){
         
         ///// Now it is time to cut the last movie of this action (the loopmarker movie) to fit the real needed length
         
-        MovieInfo& actionLastMovie = sequence[actionLastMovieIndex];
+        MovieInfo* actionLastMovie = &sequence[actionLastMovieIndex];
         ofPoint cutPosition;
         float diff = 0;
-        
-        for (int frame = 1; frame < actionLastMovie.endframe - actionLastMovie.startframe; frame++) {
+        for (int frame = 1; frame < actionLastMovie->endframe - actionLastMovie->startframe; frame++) {
             cutPosition = getScaledFloorOffsetAt(sequenceFrames[actionLastMovieIndex]+frame);
             
             if (actionDirection == 'r' || actionDirection == 'l')
                 diff = abs(cutPosition.x - pathSegmentEndPosition.x);
             if (actionDirection == 'u' || actionDirection == 'd')
                 diff = abs(cutPosition.y - pathSegmentEndPosition.y);
-            cout << " diff = " << diff << endl;
+//            cout << " diff = " << diff << endl;
+//            cout << " diff - tr = " << diff - nextActionTransitionDistance << endl;
             
             float dist = nextActionTransitionDistance + calculateMovieDistanceNormalised(actionFirstMovieIndex, actionLastMovieIndex, actionDirection, frame);
-            cout << " dist = " << dist << endl;
-            //if (diff < 3) {
+//            cout << " dist = " << dist << endl;
+            //if (diff - nextActionTransitionDistance < 3) {
             if (dist >= realNeededLength) {
-                cout << "Ending the last movie at frame " << frame << " instead of " << actionLastMovie.endframe << endl;
-                actionLastMovie.endframe=frame;
-                actionLastMovie.isCut = true;
+                cout << "Ending the last movie at frame " << frame << " instead of " << actionLastMovie->endframe  << " the distance is " << dist << endl;
+                actionLastMovie->endframe=actionLastMovie->startframe + frame;
+                actionLastMovie->isCut = true;
                 break;
             }
         }
@@ -891,192 +898,16 @@ bool Agent2::cutMoviesForActionsNormalised(){
         
         cout << " the end frame is " << sequence[actionLastMovieIndex].endframe << endl;
         
-        float finalTotalDistance = calculateMovieDistanceNormalised(actionFirstMovieIndex, actionLastMovieIndex+1, actionDirection, -1);
+        float finalTotalDistance = nextActionTransitionDistance + calculateMovieDistanceNormalised(actionFirstMovieIndex, nextActionLoopMarkerMovieIndex, actionDirection, -1);
         cout << "The total distance after trimming is " << finalTotalDistance << " while the needed distance was " << realNeededLength  << endl;
         
        // assert(abs(finalTotalDistance - realNeededLength) < 5);
+        if (abs(finalTotalDistance - realNeededLength) < 5) validSolution = false;
+        
         cout << abs(finalTotalDistance - realNeededLength);
     }
     
     
-    /*
-    
-    //vector<MovieInfo>& movieSequence = getMovieSequence();
-    //float scale = getNormalScale();
-    
-    // for each action, i.e., each segment in path, cut the last movie to match the length
-    
-    int lastMovIndex = 0;
-    int firstMovIndex = 0;
-    
-    cout<< "------- start ------" << endl;
-    
-    for (int a=0; a < actions.size(); a++) {
-        cout << " ------ action " << a << endl;
-        float totalDistance = 0;
-        
-        int firstNextMovIndex = 0;
-        
-        
-        char currentActionDirection = actions[a].first;
-        float currentActionLength = actions[a].second;
-        
-        
-        MovieInfo* lastActionMovie;
-        
-        firstMovIndex = lastMovIndex + 1;
-
-        for (int i = firstMovIndex; i < sequence.size(); i++) {
-            if (sequence[i].agentActionIndex == a) lastMovIndex = i;
-        }
-        
-        lastActionMovie = &sequence[lastMovIndex];
-        cout << "last action movie is " << lastMovIndex << endl;
-        
-        
-        for (int i = lastMovIndex+1; i < sequence.size() && sequence[i].agentActionIndex == a+1; i++) {
-            if (model.isLoopMarker(sequence[i].markername)){
-                firstNextMovIndex = i;
-                break;
-            }
-            
-        }
-        cout << "first none-transition movie of the next action is " << firstNextMovIndex << endl;
-        
-        
-        if (firstNextMovIndex < lastMovIndex) // there is no other movie after this action
-            firstNextMovIndex = sequence.size()-1;
-        
-        
-        cout << "firstMovIndex = " << firstMovIndex << endl;
-        cout << "firstNextMovIndex = " << firstNextMovIndex << endl;
-        cout << "lastMovIndex = " << lastMovIndex << endl;
-        
-        
-        // --- correct the length based on reality
-
-        
-        ofPoint actStartPos = getScaledFloorOffsetAt(getSequenceFrames()[firstMovIndex]);
-        ofPoint actEndPos = getCorrectedPath()[a+1];
-        
-        float realLength = 0;
-        
-        if (currentActionDirection == 'r' || currentActionDirection == 'l')
-            realLength = abs(actStartPos.x - actEndPos.x);
-        if (currentActionDirection == 'u' || currentActionDirection == 'd')
-            realLength = abs(actStartPos.y - actEndPos.y);
-        
-        cout << "real length = " << realLength << " vs action length = " << currentActionLength << endl;
-        currentActionLength = realLength;
-        //---
-        
-        totalDistance = calculateMovieDistanceNormalised(firstMovIndex, firstNextMovIndex+1, currentActionDirection, 0);
-        cout << "total distance from first movie to next movie before isertion = " << totalDistance << " / required length = " << currentActionLength << endl;
-        
-        
-        
-        /// insert enough movies to cover the distance
-        
-        
-        
-        MovieInfo nextMovie;
-        nextMovie.name = lastActionMovie->name;
-        nextMovie.path = lastActionMovie->path;
-        nextMovie.startframe = lastActionMovie->startframe;
-        nextMovie.endframe = lastActionMovie->endframe;
-        nextMovie.speed = lastActionMovie->speed;
-        nextMovie.markername = lastActionMovie->markername;
-        nextMovie.agentActionIndex = lastActionMovie->agentActionIndex;
-        
-        
-        while (totalDistance < currentActionLength) {
-            
-            cout << "WTF" << endl;
-            pushAt(nextMovie, lastMovIndex);
-            
-            getPositionsForMovieSequence(sequence);
-            normalise();
-            
-            totalDistance += calculateMovieDistanceNormalised(lastMovIndex, lastMovIndex + 1, currentActionDirection, 0);
-            
-            cout << "Repeating the last movie: total distance = " << totalDistance << endl;
-        }
-        
-        
-        // find the last movie for this action after insertion
-        for (int i = firstMovIndex; i < sequence.size(); i++) {
-            if (sequence[i].agentActionIndex == a)  lastMovIndex = i;
-        }
-        for (int i = lastMovIndex+1; i < sequence.size() && sequence[i].agentActionIndex == a+1; i++) {
-            if (model.isLoopMarker(sequence[i].markername)){
-                firstNextMovIndex = i;
-                break;
-            }
-        }
-        if (firstNextMovIndex < lastMovIndex) // there is no other movie after this action
-            firstNextMovIndex = sequence.size()-1;
-        
-        lastActionMovie = &sequence[lastMovIndex];
-        cout << "last action movie is " << lastMovIndex << endl;
-
-        totalDistance = calculateMovieDistanceNormalised(firstMovIndex, firstNextMovIndex+1, currentActionDirection, 0);
-        cout << "updated total distance after all insertions = " << totalDistance << endl;
-        
-        // Now that we have inserted movies to go over the required distance, we need to cut the last movie to get the exact distance
-        
-        // subtract the distance travelled in the last movie so that we check it frame-by-frame next
-        int d = calculateMovieDistanceNormalised(lastMovIndex, lastMovIndex + 1, currentActionDirection, 0);
-        totalDistance-= d;
-        cout << "last action movie distance = " << d << endl;
-        cout << "total distance after subtracting the last action movie = " << totalDistance << endl;
-        
-        for(int f = lastActionMovie->startframe + 1; f <=lastActionMovie->endframe; f++){
-            float dist = calculateMovieDistanceNormalised(lastMovIndex, lastMovIndex, currentActionDirection, f - lastActionMovie->startframe);
-            //float errorOffset = action
-            
-            float dd = 0;
-            
-            //dd = totalDistance + dist;
-            ofPoint pos = getScaledFloorOffsetAt(getSequenceFrames()[lastMovIndex] + f - lastActionMovie->startframe);
-            
-            if (currentActionDirection == 'r' || currentActionDirection == 'l')
-                dd = abs(pos.x - actEndPos.x);
-            if (currentActionDirection == 'u' || currentActionDirection == 'd')
-                dd = abs(pos.y - actEndPos.y);
-            
-            
-            //if ((totalDistance+dist) >= currentActionLength) { // if one movie is enough to cover the distance, this is the right cut frame
-            
-            if (dd < 3) {
-                cout << "dist at frame " << f << " = " << dist << endl;
-                cout << "Ending the last movie at " << f << " instead of " << lastActionMovie->endframe << endl;
-                int oldLength = lastActionMovie->endframe - lastActionMovie->startframe;
-                lastActionMovie->endframe=f;
-                lastActionMovie->isCut = true;
-                // we have pushed this movie before, so we need to fix the sequence frames
-                break;
-            }
-        }
-        
-        
-        totalDistance = calculateMovieDistanceNormalised(firstMovIndex, firstNextMovIndex+1, currentActionDirection, 0);
-        cout << "total distance from first movie to next movie after cut = " << totalDistance << " / required length = " << currentActionLength << endl;
-        
-        
-        rebuildSequenceFrames();
-        getPositionsForMovieSequence(sequence);
-        normalise();
-        
-        d = calculateMovieDistanceNormalised(firstMovIndex, firstNextMovIndex+1, currentActionDirection, 0);
-        totalDistance =d;
-        cout << "final total distance from first movie to next movie = " << totalDistance << " / required length = " << currentActionLength << endl;
-        
-        //assert(abs(totalDistance - currentActionLength) < 20 );
-        cout << abs(totalDistance - currentActionLength)  << endl;
-        if (abs(totalDistance - currentActionLength) > 10)
-            validSolution = false;
-    }
-     */
     
     return validSolution;
 }
@@ -1084,8 +915,8 @@ bool Agent2::cutMoviesForActionsNormalised(){
 //--------------------------------------------------------------
 float Agent2::calculateMovieDistanceNormalised(int indexA, int indexB, char dir, int frameOffset) {
     
-    ofPoint movieSP = getScaledFloorOffsetAt(getSequenceFrames()[indexA]);
-    ofPoint movieEP = getScaledFloorOffsetAt(getSequenceFrames()[indexB] + frameOffset);
+    ofPoint movieSP = getScaledFloorOffsetAt(getSequenceFrames()[indexA] + 1);
+    ofPoint movieEP = getScaledFloorOffsetAt(getSequenceFrames()[indexB] + frameOffset + 1);
     
     if (dir == 'l')
         return abs(movieSP.x - movieEP.x);
