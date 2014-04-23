@@ -108,7 +108,8 @@ void PlayController::update(){
                     
                     if(info.currentBounding.intersects(r)){
                         client.bOver = true;
-                        appModel->assignAgentToDevice(client.clientID, info.agentID);
+                        client.associate(agents[i]);
+                        //appModel->assignAgentToDevice(client.clientID, info.agentID);
                     }
                 }
                 
@@ -117,18 +118,28 @@ void PlayController::update(){
                     
                     cout << "JERK->" << client.positionBuffer.getFlowDirectionAsString() << endl;
                     
-                    map<int, vector<int> >& deviceAssignments = appModel->getDeviceAssignments();
-                    
-                    for(map<int, vector<int> >::iterator it = deviceAssignments.begin(); it != deviceAssignments.end(); ++it){
-                        vector<int>& assigments = it->second;
-                        for(int a = 0; a < assigments.size(); a++){
-                            Agent2* aagent = appModel->getAgentFromID(assigments[a]);
-                            if(client.positionBuffer.getFlowDirection() == FLOW_LEFT) aagent->move('l');
-                            if(client.positionBuffer.getFlowDirection() == FLOW_RIGHT) aagent->move('r');
-                            if(client.positionBuffer.getFlowDirection() == FLOW_UP) aagent->move('u');
-                            if(client.positionBuffer.getFlowDirection() == FLOW_DOWN) aagent->move('d');
-                        }
+                    for(int a = 0; a < client.agents.size(); a++){
+                        Agent2* agent = client.agents[a];
+                        if(client.positionBuffer.getFlowDirection() == FLOW_LEFT) agent->move('l');
+                        if(client.positionBuffer.getFlowDirection() == FLOW_RIGHT) agent->move('r');
+                        if(client.positionBuffer.getFlowDirection() == FLOW_UP) agent->move('u');
+                        if(client.positionBuffer.getFlowDirection() == FLOW_DOWN) agent->move('d');
                     }
+                    
+//                    map<int, vector<int> >& deviceAssignments = appModel->getDeviceAssignments();
+//                    
+//                    for(map<int, vector<int> >::iterator it = deviceAssignments.begin(); it != deviceAssignments.end(); ++it){
+//                        vector<int>& assigments = it->second;
+//                        for(int a = 0; a < assigments.size(); a++){
+//                            Agent2* agent = appModel->getAgentFromID(assigments[a]);
+//                            if(agent != NULL){
+//                                if(client.positionBuffer.getFlowDirection() == FLOW_LEFT) agent->move('l');
+//                                if(client.positionBuffer.getFlowDirection() == FLOW_RIGHT) agent->move('r');
+//                                if(client.positionBuffer.getFlowDirection() == FLOW_UP) agent->move('u');
+//                                if(client.positionBuffer.getFlowDirection() == FLOW_DOWN) agent->move('d');
+//                            }
+//                        }
+//                    }
                 }
                 
                 

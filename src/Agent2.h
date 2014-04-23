@@ -113,7 +113,7 @@ public:
     // CHECKS
     
     // external check on thread state
-    bool isAgentLocked();
+    inline bool isAgentLocked();
     
     // TALKING?
     
@@ -194,10 +194,17 @@ public:
         return agentID;
     }
     
+    void setDeviceID(int _deviceID){
+        deviceID = _deviceID;
+    }
+    
+    int getDeviceID(){
+        return deviceID;
+    }
+    
 protected:
     
     // METHODS
-    void clear();
     
     void insertMoviesFromAction(pair<char,float> act);
     void insertEndMotion();
@@ -247,6 +254,8 @@ protected:
     // agent state info
     AgentInfo agentInfo;
     int agentID;
+    int deviceID;
+    bool bIsAgentLocked;
     
     // agents 'memory'
     vector<AgentInfo> otherAgentInfo;

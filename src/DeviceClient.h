@@ -16,7 +16,7 @@
 #include "ofxNetwork.h"
 #include "ofxOSC.h"
 #include "PhilippeModel.h"
-
+#include "Agent2.h"
 #include "yarp/os/impl/NameConfig.h"
 #include "yarp/os/all.h"
 
@@ -71,7 +71,9 @@ public:
         clientID = -1;
         timeThisMessage = timeLastMessage = fps = frameRate = 0;
     }
-    ~DeviceClient(){}
+    ~DeviceClient(){
+        deassociate();
+    }
     
     void push(ofxOscMessage& oscData){
         
@@ -213,6 +215,25 @@ public:
         
     }
     
+    void deassociate(){
+        for(int i = 0; i < agents.size(); i++){
+            Agent2* agent = agents[i];
+            cout << "Device deassociating: " << clientID << " to " << agent->getAgentID() << endl;
+            agent->setDeviceID(-1);
+        }
+    }
+    
+    bool associate(Agent2* agent){
+        int agentDeviceID = agent->getDeviceID();
+        if(agentDeviceID == -1){
+            agent->setDeviceID(clientID);
+            cout << "Device associating: " << clientID << " to " << agent->getAgentID() << endl;
+            agents.push_back(agent);
+        }else{
+            cout << "Device already associated: " << agentDeviceID << endl;
+        }
+    }
+    
     friend inline ostream& operator<<(ostream& os, DeviceClient& dc);
     
     RingBuffer attitudeBuffer;
@@ -236,7 +257,7 @@ public:
     double timeThisMessage, timeLastMessage, fps, frameRate;
     
     bool bOver;
-    
+    vector<Agent2*> agents;
 };
 
 inline ostream& operator<<(ostream& os, DeviceMessage& dm){
