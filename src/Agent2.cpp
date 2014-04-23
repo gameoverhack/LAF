@@ -53,10 +53,11 @@ void Agent2::setModel(PlayerModel _model){
 }
 
 //--------------------------------------------------------------
-void Agent2::setMotionGraph(MotionGraph _forwardGraph, MotionGraph _directionGraph, MotionGraph _endGraph){
+void Agent2::setMotionGraph(MotionGraph _forwardGraph, MotionGraph _directionGraph, MotionGraph _endGraph, MotionGraph _targetGraph){
     forwardGraph = _forwardGraph;
     directionGraph = _directionGraph;
     endGraph = _endGraph;
+    targetGraph = _targetGraph;
     directionGraph.nestGraph(forwardGraph.getPossibilitie());
 }
 
@@ -65,6 +66,11 @@ void Agent2::setOrigin(ofPoint _origin){
     ofPoint origin = _origin;
     setNormalPosition(origin - getScaledFloorOffsetAt(1));
     normalise();
+}
+
+//--------------------------------------------------------------
+void Agent2::setWindows(vector<ofRectangle> _windows){
+    windows = _windows;
 }
 
 //--------------------------------------------------------------
@@ -425,6 +431,9 @@ void Agent2::plan(ofRectangle _target, int _numSequenceRetries){
         if(agentInfo.behaviourMode == BEHAVIOUR_AUTO){
             cout << "CALLED PLAN" << endl;
             agentInfo.state = AGENT_PLAN;
+        }else if(agentInfo.behaviourMode == BEHAVIOUR_VANILLA){
+            cout << "CALLED PLAN VANILLA" << endl;
+            agentInfo.state = AGENT_VANILLA;
         }else{
             cout << "CALLED PLAN - Aborting as we're manual agent!" << endl;
         }
@@ -437,6 +446,17 @@ void Agent2::plan(ofRectangle _target, int _numSequenceRetries){
 void Agent2::_plan(){
     
     cout << ">>>>>>>>PLANNING START" << endl;
+    
+    int window = -1;
+    for(int i = 0; i < windows.size(); i++){
+        if(windows[i] == agentInfo.target){
+            window = i;
+            break;
+        }
+    }
+    
+    assert(window != -1);
+    windowTargetIndex = window;
     
     ofPoint startPosition;
     
@@ -598,6 +618,10 @@ void Agent2::threadedFunction(){
                     
                 case AGENT_PLAN:
                     _plan();
+                    break;
+                    
+                case AGENT_VANILLA:
+                    _planVanilla();
                     break;
                     
                 case AGENT_MOVE:
@@ -1344,5 +1368,167 @@ void Agent2::generateMotionsBetween(string startMotion, string endMotion, vector
         }
         
     }
+    
+}
+
+//--------------------------------------------------------------
+void Agent2::_planVanilla(){
+    
+    int window = -1;
+    for(int i = 0; i < windows.size(); i++){
+        if(windows[i] == agentInfo.target){
+            window = i;
+            break;
+        }
+    }
+    
+    assert(window != -1);
+    windowTargetIndex = window;
+    
+    cout << "Making sequence for " << model.getPlayerName() << " targeting window " << window << endl;
+    
+    // get the players model
+    map<string, ofxXMP>& xmp = model.getXMP();
+    
+    // get the possible approach motions for this window
+    vector<string> transitions = targetGraph.getPossibleTransitions(ofToString(window));
+    
+    // CARA's hack -> she doesn't have TRAV_LEFT or TRAV_RIGT
+    if(model.getPlayerName() == "CARAS"){
+        eraseAll(transitions, (string)"TRAV_LEFT");
+        eraseAll(transitions, (string)"TRAV_RIGT");
+    }
+    
+    // randomly get a motion TODO: make this so that we don't have double approaches
+    string motion = transitions[(int)ofRandom(transitions.size())];
+    
+    // split motion into action and direction
+    string action = ofSplitString(motion, "_")[0];
+    string direction = ofSplitString(motion, "_")[1];
+    
+    // create a new MovieSequence
+    float tScale = scale;
+    clear();
+    push(model.getFirstMovie());
+    setNormalPosition(ofPoint(0,0,0));
+    setNormalScale(tScale);
+    
+    // create a sequence of motions
+    vector<string> motionSequence;
+    
+    // start standing front and go to -> motion
+    motionSequence.push_back("STND_FRNT");
+    generateMotionsBetween("STND_FRNT", motion, motionSequence);
+    motionSequence.push_back(motion);
+    
+    generateMoviesFromMotions(motionSequence, this);
+    getPositionsForMovieSequence(sequence);
+    normalise();
+    
+    // calulate and insert loops of the action to travel far enough to get to the target window
+    
+    int inserts = 0;
+    float target = drawSize;
+    MovieInfo loopMovie = getLastMovieInSequence();
+    
+    if(direction == "LEFT" || direction == "RIGT"){
+        if(direction == "RIGT") target += windows[window].x;
+        if(direction == "LEFT") target += ofGetWidth() - windows[window].x;
+        while (getScaledTotalBounding().width < target) {
+            inserts++;
+            push(loopMovie);
+            normalise();
+            cout << direction << " " << getScaledTotalBounding().width << endl;
+        }
+    }else if(direction == "DOWN" || direction == "UPPP") {
+        if(direction == "DOWN") target += windows[window].y;
+        if(direction == "UPPP") target = 2 * target + ofGetHeight() - windows[window].y;
+        while (getScaledTotalBounding().height < target) {
+            inserts++;
+            push(loopMovie);
+            normalise();
+            cout << direction << " " << getScaledTotalBounding().height << endl;
+        }
+    }
+    
+    motionSequence.clear();
+    
+    // randomise SYNCMOTIONS or WAITMOTIONS TODO: make this selectable
+    vector<string> vEndMotionType(2);
+    vEndMotionType[0] = "SYNCMOTIONS";
+    vEndMotionType[1] = "WAITMOTIONS";
+    string endMotionType = random(vEndMotionType);
+    
+    vector<string>& endMotions = endGraph.getPossibleTransitions(endMotionType);
+    string emotion = "HUGG_FRNT";//random(endMotions);
+    
+    generateMotionsBetween(motion, emotion, motionSequence);
+    
+    generateMoviesFromMotions(motionSequence, this);
+    getPositionsForMovieSequence(sequence);
+    normalise();
+    
+    // calculate target and syncframes
+    MovieInfo& lastMovieInSequence = getLastMovieInSequence();
+    int goalFrame = getTotalSequenceFrames() - 1;
+    int syncFrame = goalFrame - lastMovieInSequence.startframe + xmp[lastMovieInSequence.name].getMarker(motionSequence[motionSequence.size() - 1]).getStartFrame();
+    
+    setGoalFrame(goalFrame - lastMovieInSequence.endframe - lastMovieInSequence.startframe);
+    setSyncFrame(syncFrame);
+    
+    ofPoint floorOffset = getScaledFloorOffset();
+    ofPoint targetPosition = ofPoint(windows[window].x + windows[window].width / 2.0, windows[window].y, 0.0f);
+    ofPoint finalSequencePosition = targetPosition - getScaledPositionAt(goalFrame) - floorOffset;
+    
+    if(emotion != "FALL_BACK"){
+        
+        setHug(true);
+        
+        // reverse the motion to get back out
+        motionSequence.clear();
+        
+        if(emotion == "LWNG_FRNT"){
+            motionSequence.push_back("LWNG_FRNT");
+            motionSequence.push_back("LWNG_FRNT");
+        }
+        
+        if(emotion == "SITT_FRNT"){
+            motionSequence.push_back("SITT_FRNT");
+            motionSequence.push_back("SITT_FRNT");
+            motionSequence.push_back("CRCH_FRNT");
+        }
+        
+        motionSequence.push_back("STND_FRNT");
+        
+        string reversemotion;
+        if(direction == "LEFT") reversemotion = action + "_RIGT";
+        if(direction == "RIGT") reversemotion = action + "_LEFT";
+        if(direction == "DOWN") reversemotion = action + "_UPPP";
+        if(direction == "UPPP") reversemotion = action + "_DOWN";
+        
+        if(emotion == "SITT_FRNT"){
+            generateMotionsBetween("CRCH_FRNT", reversemotion, motionSequence);
+        }else{
+            generateMotionsBetween("STND_FRNT", reversemotion, motionSequence);
+        }
+        
+        for(int i = 0; i < inserts + 2; i++) motionSequence.push_back(reversemotion);
+        
+        generateMoviesFromMotions(motionSequence, this);
+        getPositionsForMovieSequence(sequence);
+    }else{
+        setHug(false);
+    }
+    
+    setNormalPosition(finalSequencePosition);
+    normalise();
+    
+    cout << "Adding MovieSequence" << getMovieSequenceAsString() << endl;
+    cout << "E(nd) Motion: " << endMotionType << " of " << emotion << endl;
+    
+//    setSpeed(ofRandom(1.0, 3.0));
+//    play();
+    
+    agentInfo.state = AGENT_RUN;
     
 }

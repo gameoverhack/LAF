@@ -432,9 +432,9 @@ void AppView::update(){
             tFade = 127 * CLAMP((      pct5), 0.0f, 1.0f) * iY;
             iSmal = 8   * CLAMP((      pct2), 0.0f, 1.0f) * iY;
             
-            
-            //windowFades[agent->getWindow()].cFade += cFade;
-            //windowFades[agent->getWindow()].numPlayers ++;
+            int wFI = CLAMP(agent->getWindow(), 0, windowFades.size());
+            windowFades[wFI].cFade += cFade;
+            windowFades[wFI].numPlayers ++;
             
             /******************************************************
              *******            Small Draw Players          *******
@@ -518,9 +518,9 @@ void AppView::update(){
             }
             
             if(appModel->getProperty<bool>("ShowCurrentBoundsSmall")){
-                if (agent->getWillCollide())
-                    ofSetColor(100,40,40);
-                else
+//                if (agent->getWillCollide())
+//                    ofSetColor(100,40,40);
+//                else
                     ofSetColor(0,40,iFade * 2);
                 
                 if(agent->getScaledBoundings().size() > agent->getCurrentSequenceFrame()) ofRect(agent->getScaledBounding());
@@ -610,23 +610,25 @@ void AppView::update(){
                 int endFrame = MIN(agent->getCurrentSequenceFrame() + range, agent->getTotalSequenceFrames());
                 
                 int step = 10;
-                
+                if(range < 500) step = 1;
+
                 for(int j = startFrame; j < endFrame; j = j + step){
                     
-                    if (agent->getFaultyFlag())
-                        ofSetColor(250,250,10);
-                    else if (agent->getWillCollide())
-                        ofSetColor(100,10,10);
-                    else
-                        ofSetColor(0, 60, 60);
-                        //ofSetColor(0, iSmal, iSmal);
+//                    if (agent->getFaultyFlag())
+//                        ofSetColor(250,250,10);
+//                    else if (agent->getWillCollide())
+//                        ofSetColor(100,10,10);
+//                    else
+//                        ofSetColor(0, 60, 60);
+                    
+                        ofSetColor(0, iSmal, iSmal);
                     
                     if(agent->getScaledBoundings().size() > j) ofRect(agent->getScaledBoundingAt(j));
                     //if(!agent->isAgentLocked()) ofRect(agent->getScaledBoundingAt(j));
                     
-                    ofSetColor(60, 10, 60);
+                    //ofSetColor(60, 10, 60);
                     
-                    if (agent->getOrgScaledBoundings().size() > 0) ofRect(agent->getOrgScaledBoundingAt(j));
+                    //if (agent->getOrgScaledBoundings().size() > 0) ofRect(agent->getOrgScaledBoundingAt(j));
                     //ofRect(sequence->getBoundingAt(j));
                 }
                 

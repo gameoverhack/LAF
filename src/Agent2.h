@@ -21,13 +21,15 @@
 enum AgentState{
     AGENT_INIT = 0, 
     AGENT_PLAN,
+    AGENT_VANILLA,
     AGENT_MOVE,
     AGENT_RUN
 };
 
 enum BehaviourMode{
     BEHAVIOUR_AUTO = 0,
-    BEHAVIOUR_MANUAL
+    BEHAVIOUR_MANUAL,
+    BEHAVIOUR_VANILLA
 };
 
 enum CollisionMode{
@@ -75,9 +77,10 @@ public:
     // PERSISTANT SETTERS
     
     void setModel(PlayerModel _model);
-    void setMotionGraph(MotionGraph _forwardGraph, MotionGraph _directionGraph, MotionGraph _endGraph);
+    void setMotionGraph(MotionGraph _forwardGraph, MotionGraph _directionGraph, MotionGraph _endGraph, MotionGraph _targetGraph);
     
     void setOrigin(ofPoint _origin);
+    void setWindows(vector<ofRectangle> _windows);
     void setPlanBoundary(ofRectangle _planBoundary);
     void setDrawSize(float _drawSize);
     void setGridSize(float _w, float _h);
@@ -230,6 +233,7 @@ protected:
     // actual worker methods that require threading
     void _move();
     void _plan();
+    void _planVanilla();
     
     // DATA
     
@@ -238,7 +242,8 @@ protected:
     ofRectangle planBoundary;
     float drawSize;
     float gridSizeX, gridSizeY;
-    MotionGraph forwardGraph, directionGraph, endGraph;
+    MotionGraph forwardGraph, directionGraph, endGraph, targetGraph;
+    vector<ofRectangle> windows;
     
     // plan vars
     ofPolyline currentPath;

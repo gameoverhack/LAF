@@ -239,10 +239,12 @@ public:
         bool bUnique = false;
 
         ofRectangle rWindow;
+        int iWindow;
         
         while(!bUnique){
             
-            rWindow = windows[random(targetwindows)];
+            iWindow = random(targetwindows);
+            rWindow = windows[iWindow];
             
             bUnique = true;
             for(int i = 0; i < agents.size(); i++){
@@ -259,7 +261,7 @@ public:
             
         }
 
-        cout << rWindow << " " << bUnique << endl;
+        cout << "Unque target window: " << iWindow << " = " << rWindow << " " << bUnique << endl;
         
         if(!bUnique){
             return NoTarget;

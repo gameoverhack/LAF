@@ -65,13 +65,13 @@ void PlayController::update(){
             break;
         case kPLAYCONTROLLER_MAKE:
         {
-            //createAgent(BEHAVIOUR_AUTO);
+            createAgent(BEHAVIOUR_VANILLA);
             
-            if(appModel->getAgents().size() < 5){
-                createAgent(BEHAVIOUR_MANUAL);
-            }else{
-                createAgent(BEHAVIOUR_AUTO);
-            }
+//            if(appModel->getAgents().size() < 5){
+//                createAgent(BEHAVIOUR_MANUAL);
+//            }else{
+//                createAgent(BEHAVIOUR_AUTO);
+//            }
             
             playControllerStates.setState(kPLAYCONTROLLER_PLAY);
         }
@@ -145,6 +145,7 @@ bool PlayController::createAgent(BehaviourMode bMode){
     ofRectangle target = appModel->getUniqueAgentTarget();
     ofPoint origin;
     switch (bMode) {
+        case BEHAVIOUR_VANILLA:
         case BEHAVIOUR_AUTO:
             origin = appModel->getUniqueAgentOrigin();
             break;
@@ -177,7 +178,8 @@ void PlayController::createAgent(string name, ofPoint origin, ofRectangle target
     // get and set motion  graphs
     agent->setMotionGraph(appModel->getGraph("ForwardMotionGraph"),
                           appModel->getGraph("DirectionGraph"),
-                          appModel->getGraph("EndGraph"));
+                          appModel->getGraph("EndGraph"),
+                          appModel->getGraph("TargetGraph"));
     
     // set position and target
     agent->setOrigin(origin);
@@ -186,13 +188,14 @@ void PlayController::createAgent(string name, ofPoint origin, ofRectangle target
     ofRectangle tPlanBoundary = ofRectangle(-tDrawSize * 2.0, -tDrawSize * 2.0, appModel->getProperty<float>("OutputWidth") + tDrawSize * 4.0, appModel->getProperty<float>("OutputHeight") + tDrawSize * 4.0);
     
     // set plan boundary and draw size
-    vector<ofRectangle> obstacles;
-    vector<int>& windowTargets = appModel->getWindowTargets();
-    for(int i = 0; i < windowTargets.size(); i++) obstacles.push_back(appModel->getWindows()[windowTargets[i]]);
+//    vector<ofRectangle> obstacles;
+//    vector<int>& windowTargets = appModel->getWindowTargets();
+//    for(int i = 0; i < windowTargets.size(); i++) obstacles.push_back(appModel->getWindows()[windowTargets[i]]);
     
-    agent->setWorldObstacles(obstacles);
+    agent->setWindows(appModel->getWindows());
+    //agent->setWorldObstacles(obstacles);
     agent->setPlanBoundary(tPlanBoundary);
-    agent->setGridSize(50, 50);
+    agent->setGridSize(tDrawSize / 2.0, tDrawSize / 2.0);
     
     // set modes
     agent->setCollisionMode(cMode);
@@ -201,7 +204,7 @@ void PlayController::createAgent(string name, ofPoint origin, ofRectangle target
     // start threading
     agent->startAgent();
     
-    agent->setSpeed(3);
+    agent->setSpeed(ofRandom(1.0, 3.0));
     agent->play();
     
     agent->plan(target);

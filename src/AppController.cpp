@@ -83,7 +83,7 @@ void AppController::setup(){
     
     appModel->setProperty("VideoWidth", 650.0f);
     appModel->setProperty("VideoHeight", 650.0f);
-    appModel->setProperty("DefaultDrawSize", 100.0f);
+    appModel->setProperty("DefaultDrawSize", 200.0f);
     
     appModel->setProperty("TransitionLength", 12);
     
@@ -115,7 +115,7 @@ void AppController::setup(){
 //    appModel->setProperty("ShowWindowTargets", true);
 //    appModel->setProperty("ShowWindowOutline", true);
 //    appModel->setProperty("ShowWindowInfo", true);
-    appModel->setProperty("ShowAvatarsLarge", false);
+//    appModel->setProperty("ShowAvatarsLarge", false);
 //    appModel->setProperty("ShowAvatarsSmall", true);
 //    appModel->setProperty("ShowTotalBoundsLarge", true);
 //    appModel->setProperty("ShowTotalBoundsSmall", true);
@@ -126,8 +126,8 @@ void AppController::setup(){
 //    //appModel->setProperty("ShowDistanceLarge", true);
 //    appModel->setProperty("ShowDistanceSmall", true);
 //    //appModel->setProperty("ShowInfoLarge", true);
-    appModel->setProperty("ShowInfoSmall", false);
-    appModel->setProperty("ShowHeroVideos", false);
+//    appModel->setProperty("ShowInfoSmall", false);
+//    appModel->setProperty("ShowHeroVideos", true);
     
     ofxLogSetLogToFile(appModel->getProperty<bool>("LogToFile"), ofToDataPath("log_" + ofGetTimestampString() + ".log"));
     
