@@ -94,7 +94,6 @@ void AppController::setup(){
     appModel->setProperty("AnalyseName", (string)"");
     
     appModel->setProperty("ManualAgentControl", false);
-    appModel->setProperty("AutoGenerate", true);
     
     appModel->setProperty("AvoidCollisions", true);
     appModel->setProperty("DefaultGridScale", 50.0f);  // 40
@@ -110,6 +109,8 @@ void AppController::setup(){
     appModel->setProperty("SyncTime", 2);
     appModel->setProperty("HeroTime", 80000);
     appModel->setProperty("HeroFade", 10000);
+    
+    appModel->setProperty("AgentBehaviour", (int)BEHAVIOUR_MANUAL);
     
     appModel->setProperty("ShowPathGrid", false);
 //    appModel->setProperty("ShowWindowTargets", true);
@@ -127,7 +128,7 @@ void AppController::setup(){
 //    appModel->setProperty("ShowDistanceSmall", true);
 //    //appModel->setProperty("ShowInfoLarge", true);
 //    appModel->setProperty("ShowInfoSmall", false);
-//    appModel->setProperty("ShowHeroVideos", true);
+    appModel->setProperty("ShowHeroVideos", false);
     
     ofxLogSetLogToFile(appModel->getProperty<bool>("LogToFile"), ofToDataPath("log_" + ofGetTimestampString() + ".log"));
     
@@ -398,25 +399,14 @@ void AppController::keyPressed(ofKeyEventArgs & e){
         case 'o':
             appView->toggleCameraOrtho();
             break;
-        case 'a':
-        {
-            bool bAuto = appModel->getProperty<bool>("AutoGenerate");
-            appModel->setProperty("AutoGenerate", !bAuto);
-        }
-            break;
         case ' ':
         {
-            if(playControllerStates.getState(kPLAYCONTROLLER_PLAY)){
-                playControllerStates.setState(kPLAYCONTROLLER_STOP);
-            }else{
-                playControllerStates.setState(kPLAYCONTROLLER_MAKE);
-            }
+            playController->deleteAllPlayers();
             break;
         }
         case 'g':
         {
-            bool bAuto = appModel->getProperty<bool>("ShowPathGrid");
-            appModel->setProperty("ShowPathGrid", !bAuto);
+            appModel->toggleProperty("ShowPathGrid");
         }
             break;
             
@@ -500,86 +490,48 @@ void AppController::keyPressed(ofKeyEventArgs & e){
         
         case ']':
         {
-//            vector<MovieSequence*>& sequences = appModel->getSequences();
-//            for(int i = 0; i < sequences.size(); i++){
-//                MovieSequence* sequence = sequences[i];
-//                sequence->setSpeed(sequence->getSpeed()+0.2);
-//            }
+            appModel->setProperty("AgentBehaviour", (int)BEHAVIOUR_VANILLA);
+            playController->deleteAllPlayers();
         }
             break;
             
         case '[':
         {
-//            vector<MovieSequence*>& sequences = appModel->getSequences();
-//            for(int i = 0; i < sequences.size(); i++){
-//                MovieSequence* sequence = sequences[i];
-//                sequence->setSpeed(sequence->getSpeed()-0.2);
-//            }
-            
+            appModel->setProperty("AgentBehaviour", (int)BEHAVIOUR_AUTO);
+            playController->deleteAllPlayers();
         }
             break;
-
+        case '\\':
+        {
+            appModel->setProperty("AgentBehaviour", (int)BEHAVIOUR_MANUAL);
+            playController->deleteAllPlayers();
+        }
+            break;
         case 'h':
         {
-//            vector<MovieSequence*>& sequences = appModel->getSequences();
-//            for(int i = 0; i < sequences.size(); i++){
-//                MovieSequence* sequence = sequences[i];
-//                sequence->setSpeed(-1);
-//            }
+
         }
             break;
         case 'j':
         {
-//            vector<MovieSequence*>& sequences = appModel->getSequences();
-//            for(int i = 0; i < sequences.size(); i++){
-//                MovieSequence* sequence = sequences[i];
-//                sequence->setSpeed(-0.5);
-//            }
+
         }
             break;
         case 'k':
         {
-//            vector<MovieSequence*>& sequences = appModel->getSequences();
-//            for(int i = 0; i < sequences.size(); i++){
-//                MovieSequence* sequence = sequences[i];
-//                sequence->setSpeed(0);
-//            }
+
         }
             break;
         case 'l':
         {
-//            vector<MovieSequence*>& sequences = appModel->getSequences();
-//            for(int i = 0; i < sequences.size(); i++){
-//                MovieSequence* sequence = sequences[i];
-//                sequence->setSpeed(1);
-//            }
+
         }
             break;
         case ';':
         {
-//            vector<MovieSequence*>& sequences = appModel->getSequences();
-//            for(int i = 0; i < sequences.size(); i++){
-//                MovieSequence* sequence = sequences[i];
-//                sequence->setSpeed(3);
-//            }
+
         }
             break;
-        case '\'':
-        {
-//            vector<MovieSequence*>& sequences = appModel->getSequences();
-//            for(int i = 0; i < sequences.size(); i++){
-//                MovieSequence* sequence = sequences[i];
-//                sequence->setSpeed(6);
-//            }
-        }
-            break;
-            
-//        case '/':
-//        {
-//            
-//        }
-//            break;
-            
 	}
     
 }

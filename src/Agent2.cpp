@@ -185,7 +185,7 @@ void Agent2::setBehaviourMode(BehaviourMode _behaviourMode){
         agentInfo.behaviourMode = _behaviourMode;
         if(agentInfo.behaviourMode == BEHAVIOUR_MANUAL){
             if(currentSequenceIndex <= 0){ // ie., we haven't started the agent/moviesequence playing
-                sequence[0].isLooped = true;
+                sequence[0].isLoopedStatic = true;
             }else{
                 removeMovies(true);
                 sequence[0].isLoopedStatic = true;
@@ -394,7 +394,11 @@ void Agent2::_move(){
         return;
     }else{
         cout << "No Collision" << endl;
-        currentMovie.isLoopedStatic = false;
+        
+        for(int i = 0; i < sequence.size(); i++){
+            sequence[i].isLooped = false;
+            sequence[i].isLoopedStatic = false;
+        }
         setSpeed(3);
 //        update();
 //        video->finish();

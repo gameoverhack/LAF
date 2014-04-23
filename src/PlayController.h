@@ -26,6 +26,8 @@ public:
     bool createAgent(BehaviourMode bMode);
     void createAgent(string name, ofPoint origin, ofRectangle target, CollisionMode cMode, BehaviourMode bMode);
     
+    void deleteAllPlayers();
+    
     void triggerReplan();
     void moveAgent(int agentIndex, char direction);
     

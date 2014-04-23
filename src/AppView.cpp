@@ -382,48 +382,50 @@ void AppView::update(){
             float framesFromEnd = agent->getTotalSequenceFrames() - (25.0f * appModel->getProperty<int>("FadeTime") * agent->getSpeed());
             float framesFromSync = agent->getSyncFrame() - (25.0f * appModel->getProperty<int>("SyncTime") * agent->getSpeed());
             
-            if(agent->getCurrentSequenceFrame() < framesFromStart){
+            if(agentInfo.behaviourMode != BEHAVIOUR_MANUAL){
                 
-                pct1 = ( (float)agent->getCurrentSequenceFrame() / framesFromStart );
-                pct2 = pct1;
-                pct3 = 1.0f;
-                pct5 = pct1;
-                //cout << i << " start " << pct1 << "  " << "   " << pct2 << "   " << pct3 << "   " << pct4 << "   " << pct5 << endl;
-            }
-            
-            if(agent->getCurrentSequenceFrame() >= framesFromEnd){
+                if(agent->getCurrentSequenceFrame() < framesFromStart){
+                    
+                    pct1 = ( (float)agent->getCurrentSequenceFrame() / framesFromStart );
+                    pct2 = pct1;
+                    pct3 = 1.0f;
+                    pct5 = pct1;
+                    //cout << i << " start " << pct1 << "  " << "   " << pct2 << "   " << pct3 << "   " << pct4 << "   " << pct5 << endl;
+                }
                 
-                pct1 = (float)(agent->getTotalSequenceFrames() - agent->getCurrentSequenceFrame()) / (agent->getTotalSequenceFrames() - framesFromEnd);
-                pct2 = pct1;
-                pct3 = 1.0f;
-                //cout << i << " end  " << pct1 << "  " << "   " << pct2 << "   " << pct3 << "   " << pct4 << "   " << pct5 << endl;
+                if(agent->getCurrentSequenceFrame() >= framesFromEnd){
+                    
+                    pct1 = (float)(agent->getTotalSequenceFrames() - agent->getCurrentSequenceFrame()) / (agent->getTotalSequenceFrames() - framesFromEnd);
+                    pct2 = pct1;
+                    pct3 = 1.0f;
+                    //cout << i << " end  " << pct1 << "  " << "   " << pct2 << "   " << pct3 << "   " << pct4 << "   " << pct5 << endl;
+                    
+                    if(!agent->getHug()){
+                        pct3 = 1.0 - pct1;
+                        pct2 = 0.0f;
+                        pct1 = 1.0f;
+                    }
+                }
                 
-                if(!agent->getHug()){
-                    pct3 = 1.0 - pct1;
-                    pct2 = 0.0f;
-                    pct1 = 1.0f;
+                if(agent->getCurrentSequenceFrame() > framesFromStart && agent->getCurrentSequenceFrame() < framesFromEnd){
+                    
+                    pct5 = pct3 = pct2 = ((distance - 200) / (maxDistance / 2.0) );
+                    //cout << i << " dist " << pct1 << "  " << "   " << pct2 << "   " << pct3 << "   " << pct4 << "   " << pct5 << endl;
+                }
+                
+                if(agent->getCurrentSequenceFrame() >= framesFromSync){
+                    
+                    pct4 = (float)(agent->getSyncFrame() - agent->getCurrentSequenceFrame()) / (agent->getSyncFrame() - framesFromSync);
+                    pct5 = 0.0f;
+                    //cout << i << " sync " << pct1 << "  " << "   " << pct2 << "   " << pct3 << "   " << pct4 << "   " << pct5 << endl;
+                    
+                }else{
+                    
+                    pct4 = pct1;
+                    //cout << i << " synb " << pct1 << "  " << "   " << pct2 << "   " << pct3 << "   " << pct4 << "   " << pct5 << endl;
                 }
             }
 
-            if(agent->getCurrentSequenceFrame() > framesFromStart && agent->getCurrentSequenceFrame() < framesFromEnd){
-                
-                pct5 = pct3 = pct2 = ((distance - 200) / (maxDistance / 2.0) );
-                //cout << i << " dist " << pct1 << "  " << "   " << pct2 << "   " << pct3 << "   " << pct4 << "   " << pct5 << endl;
-            }
-            
-            if(agent->getCurrentSequenceFrame() >= framesFromSync){
-                
-                pct4 = (float)(agent->getSyncFrame() - agent->getCurrentSequenceFrame()) / (agent->getSyncFrame() - framesFromSync);
-                pct5 = 0.0f;
-                //cout << i << " sync " << pct1 << "  " << "   " << pct2 << "   " << pct3 << "   " << pct4 << "   " << pct5 << endl;
-                
-            }else{
-                
-                pct4 = pct1;
-                //cout << i << " synb " << pct1 << "  " << "   " << pct2 << "   " << pct3 << "   " << pct4 << "   " << pct5 << endl;
-            }
- 
-            
             
             sFade = 255 * CLAMP((      pct1), 0.0f, 1.0f) * iY;
             bFade = 255 * CLAMP((      pct4), 0.0f, 1.0f) * iY;
@@ -467,7 +469,7 @@ void AppView::update(){
              *******            Big Draw Players            *******
              *****************************************************/
             
-            if(appModel->getProperty<bool>("ShowAvatarsLarge") && agentInfo.state != AGENT_INIT && agentInfo.currentPosition.x != 0 && agentInfo.currentPosition.y != 0){
+            if(appModel->getProperty<bool>("ShowAvatarsLarge") && agentInfo.behaviourMode != BEHAVIOUR_MANUAL && agentInfo.state != AGENT_INIT && agentInfo.currentPosition.x != 0 && agentInfo.currentPosition.y != 0){
                 
                 agent->getFboBig()->begin();
                 {
@@ -605,13 +607,20 @@ void AppView::update(){
             
             if(appModel->getProperty<bool>("ShowTrailBoundsSmall")){ //Omid
                 
+                int step = 1;
                 int range = appModel->getProperty<int>("RectTrail");
+
+                ofSetColor(0, iSmal, iSmal);
+                
+                if(agentInfo.behaviourMode == BEHAVIOUR_MANUAL){
+                    step = 10;
+                    range = 1000000;
+                    ofSetColor(0, iSmal * 2.0, iSmal * 2.0);
+                }
+
                 int startFrame = MAX(agent->getCurrentSequenceFrame() - range, 0);
                 int endFrame = MIN(agent->getCurrentSequenceFrame() + range, agent->getTotalSequenceFrames());
                 
-                int step = 10;
-                if(range < 500) step = 1;
-
                 for(int j = startFrame; j < endFrame; j = j + step){
                     
 //                    if (agent->getFaultyFlag())
@@ -621,7 +630,7 @@ void AppView::update(){
 //                    else
 //                        ofSetColor(0, 60, 60);
                     
-                        ofSetColor(0, iSmal, iSmal);
+                    
                     
                     if(agent->getScaledBoundings().size() > j) ofRect(agent->getScaledBoundingAt(j));
                     //if(!agent->isAgentLocked()) ofRect(agent->getScaledBoundingAt(j));

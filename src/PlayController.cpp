@@ -65,7 +65,8 @@ void PlayController::update(){
             break;
         case kPLAYCONTROLLER_MAKE:
         {
-            createAgent(BEHAVIOUR_VANILLA);
+            BehaviourMode mode = (BehaviourMode)appModel->getProperty<int>("AgentBehaviour");
+            createAgent(mode);
             
 //            if(appModel->getAgents().size() < 5){
 //                createAgent(BEHAVIOUR_MANUAL);
@@ -118,12 +119,10 @@ void PlayController::update(){
             break;
         case kPLAYCONTROLLER_STOP:
         {
+            
+            deleteAllPlayers();
+            
             vector<Agent2*>& agents = appModel->getAgents();
-            for(int i = 0; i < agents.size(); i++){
-                Agent2* agent = agents[i];
-                appModel->markPlayerForDeletion(agent->getViewID());
-            }
-            appModel->deleteMarkedPlayers();
             
             ofxThreadedVideo* hero = appModel->getCurrentHeroVideo();
             
@@ -136,6 +135,16 @@ void PlayController::update(){
         }
             break;
     }
+}
+
+//--------------------------------------------------------------
+void PlayController::deleteAllPlayers(){
+    vector<Agent2*>& agents = appModel->getAgents();
+    for(int i = 0; i < agents.size(); i++){
+        Agent2* agent = agents[i];
+        appModel->markPlayerForDeletion(agent->getViewID());
+    }
+    appModel->deleteMarkedPlayers();
 }
 
 //--------------------------------------------------------------
@@ -188,12 +197,14 @@ void PlayController::createAgent(string name, ofPoint origin, ofRectangle target
     ofRectangle tPlanBoundary = ofRectangle(-tDrawSize * 2.0, -tDrawSize * 2.0, appModel->getProperty<float>("OutputWidth") + tDrawSize * 4.0, appModel->getProperty<float>("OutputHeight") + tDrawSize * 4.0);
     
     // set plan boundary and draw size
-//    vector<ofRectangle> obstacles;
-//    vector<int>& windowTargets = appModel->getWindowTargets();
-//    for(int i = 0; i < windowTargets.size(); i++) obstacles.push_back(appModel->getWindows()[windowTargets[i]]);
+    vector<ofRectangle> obstacles;
+    vector<int>& windowTargets = appModel->getWindowTargets();
+    for(int i = 0; i < windowTargets.size(); i++) obstacles.push_back(appModel->getWindows()[windowTargets[i]]);
+    
+    // for now only set obstacles for manual agents because we want larger draw size...
+    if(bMode == BEHAVIOUR_MANUAL) agent->setWorldObstacles(obstacles);
     
     agent->setWindows(appModel->getWindows());
-    //agent->setWorldObstacles(obstacles);
     agent->setPlanBoundary(tPlanBoundary);
     agent->setGridSize(tDrawSize / 2.0, tDrawSize / 2.0);
     
