@@ -44,27 +44,27 @@
 //        }
 
         
-        if (n.prevNode && n.prevNode->prevNode && n.prevNode->prevNode->prevNode) {
-            if (n.x != n.prevNode->x) {
-                if ((n.prevNode->x == n.prevNode->prevNode->x && n.prevNode->x == n.prevNode->prevNode->prevNode->x) ||
-                    (n.prevNode->y == n.prevNode->prevNode->y && n.prevNode->y == n.prevNode->prevNode->prevNode->y) ||
-                    (n.y == n.prevNode->y && n.y == n.prevNode->prevNode->y))
-                    return true;
-                else
-                    return false;
-            }
-            
-            if (n.y != n.prevNode->y) {
-                if ((n.prevNode->y == n.prevNode->prevNode->y && n.prevNode->y == n.prevNode->prevNode->prevNode->y) ||
-                    (n.prevNode->x == n.prevNode->prevNode->x && n.prevNode->x == n.prevNode->prevNode->prevNode->x) ||
-                    (n.x == n.prevNode->x && n.x == n.prevNode->prevNode->x))
-                    return true;
-                else
-                    return false;
-            }
-        } else {
-            return true;
-        }
+//        if (n.prevNode && n.prevNode->prevNode && n.prevNode->prevNode->prevNode) {
+//            if (n.x != n.prevNode->x) {
+//                if ((n.prevNode->x == n.prevNode->prevNode->x && n.prevNode->x == n.prevNode->prevNode->prevNode->x) ||
+//                    (n.prevNode->y == n.prevNode->prevNode->y && n.prevNode->y == n.prevNode->prevNode->prevNode->y) ||
+//                    (n.y == n.prevNode->y && n.y == n.prevNode->prevNode->y))
+//                    return true;
+//                else
+//                    return false;
+//            }
+//            
+//            if (n.y != n.prevNode->y) {
+//                if ((n.prevNode->y == n.prevNode->prevNode->y && n.prevNode->y == n.prevNode->prevNode->prevNode->y) ||
+//                    (n.prevNode->x == n.prevNode->prevNode->x && n.prevNode->x == n.prevNode->prevNode->prevNode->x) ||
+//                    (n.x == n.prevNode->x && n.x == n.prevNode->prevNode->x))
+//                    return true;
+//                else
+//                    return false;
+//            }
+//        } else {
+//            return true;
+//        }
         
         
         if (!isInEnv(n))
@@ -95,24 +95,51 @@
             yCost = penalty;
         
         
-       /* if (n.prevNode && n.prevNode->prevNode) {
-            
-            if (n.x == n.prevNode->x) {
-                
-                for (int b=-1; b<=1; b+=2) {
-                    tn.x = n.x;
-                    tn.y = n.y+b;
-                    if (!isInObstacle(tn) && isInEnv(tn)) {
-                        s->push_back(tn);
-                        //c->push_back(sqrt((double)(b*b)));
-                        c->push_back(calcDistToObstacles(tn)+yCost);
+     
+        if (tn.prevNode && tn.prevNode->prevNode && tn.prevNode->prevNode->prevNode) {
+            for (int a=-1; a<=1; a+=2) {
+                tn.x = n.x+a;
+                tn.y = n.y;
+                    if ( tn.x != tn.prevNode->x) {
+                        if ((tn.prevNode->x == tn.prevNode->prevNode->x && tn.prevNode->x == tn.prevNode->prevNode->prevNode->x) ||
+                            (tn.prevNode->y == tn.prevNode->prevNode->y && tn.prevNode->y == tn.prevNode->prevNode->prevNode->y) ||
+                            (tn.y == tn.prevNode->y && tn.y == tn.prevNode->prevNode->y)) {
+                           
+                            if (!isInObstacle(tn) && isInEnv(tn)) {
+                                s->push_back(tn);
+                                //c->push_back(sqrt((double)(a*a)));
+                                c->push_back(calcDistToObstacles(tn)+xCost);
+                                
+                            }
+                        }
                     }
                 }
-                
-                if (n.x == n.prevNode->prevNode->x) {
-                    for (int a=-1; a<=1; a+=2) {
-                        tn.x = n.x+a;
-                        tn.y = n.y;
+            
+
+            for (int b=-1; b<=1; b+=2) {
+                tn.x = n.x;
+                tn.y = n.y+b;
+                if (tn.y != tn.prevNode->y) {
+                    if ((tn.prevNode->y == tn.prevNode->prevNode->y && tn.prevNode->y == tn.prevNode->prevNode->prevNode->y) ||
+                        (tn.prevNode->x == tn.prevNode->prevNode->x && tn.prevNode->x == tn.prevNode->prevNode->prevNode->x) ||
+                        (tn.x == tn.prevNode->x && tn.x == tn.prevNode->prevNode->x)) {
+                        if (!isInObstacle(tn) && isInEnv(tn)) {
+                            s->push_back(tn);
+                            //c->push_back(sqrt((double)(b*b)));
+                            c->push_back(calcDistToObstacles(tn)+yCost);
+                        }
+                    }
+                }
+            }
+        } else if (tn.prevNode && tn.prevNode->prevNode) {
+            for (int a=-1; a<=1; a+=2) {
+                tn.x = n.x+a;
+                tn.y = n.y;
+                if ( tn.x != tn.prevNode->x) {
+                    if ((tn.prevNode->x == tn.prevNode->prevNode->x) ||
+                        (tn.prevNode->y == tn.prevNode->prevNode->y) ||
+                        (tn.y == tn.prevNode->y && tn.y == tn.prevNode->prevNode->y)) {
+                        
                         if (!isInObstacle(tn) && isInEnv(tn)) {
                             s->push_back(tn);
                             //c->push_back(sqrt((double)(a*a)));
@@ -121,23 +148,16 @@
                         }
                     }
                 }
-                
-            } else if (n.y == n.prevNode->y) {
-                
-                for (int a=-1; a<=1; a+=2) {
-                    tn.x = n.x+a;
-                    tn.y = n.y;
-                    if (!isInObstacle(tn) && isInEnv(tn)) {
-                        s->push_back(tn);
-                        //c->push_back(sqrt((double)(a*a)));
-                        c->push_back(calcDistToObstacles(tn)+xCost);
-                    }
-                }
-                
-                if (n.y == n.prevNode->prevNode->y) {
-                    for (int b=-1; b<=1; b+=2) {
-                        tn.x = n.x;
-                        tn.y = n.y+b;
+            }
+            
+            
+            for (int b=-1; b<=1; b+=2) {
+                tn.x = n.x;
+                tn.y = n.y+b;
+                if (tn.y != tn.prevNode->y) {
+                    if ((tn.prevNode->y == tn.prevNode->prevNode->y) ||
+                        (tn.prevNode->x == tn.prevNode->prevNode->x) ||
+                        (tn.x == tn.prevNode->x && tn.x == tn.prevNode->prevNode->x)) {
                         if (!isInObstacle(tn) && isInEnv(tn)) {
                             s->push_back(tn);
                             //c->push_back(sqrt((double)(b*b)));
@@ -145,11 +165,8 @@
                         }
                     }
                 }
-                
             }
-            
-            
-        } else */{
+        } else {
             for (int a=-1; a<=1; a+=2) {
                 tn.x = n.x+a;
                 tn.y = n.y;
@@ -160,7 +177,7 @@
                     
                 }
             }
-
+            
             for (int b=-1; b<=1; b+=2) {
                 tn.x = n.x;
                 tn.y = n.y+b;
@@ -171,33 +188,31 @@
                 }
             }
         }
-        
-
-        
-        
 	}
+
+
 
 	double myGraphDescription::getHeuristics(myNode& n1, myNode& n2)
 	{
         int directH = 0;
         
-        if (n1.prevNode && n1.prevNode->prevNode) {
-            if ((n1.x == n1.prevNode->x  && n1.x == n1.prevNode->prevNode->x)
-                || (n1.y == n1.prevNode->y  && n1.y == n1.prevNode->prevNode->y)) {
-              
-                    if ((n1.prevNode->prevNode->prevNode) &&
-                           ( (n1.x == n1.prevNode->prevNode->prevNode->x)
-                        || (n1.y == n1.prevNode->prevNode->prevNode->y)))
-                        directH = 20000;
-                    else
-                        directH = 10000;
-            }
-            
-        }
+//        if (n1.prevNode && n1.prevNode->prevNode) {
+//            if ((n1.x == n1.prevNode->x  && n1.x == n1.prevNode->prevNode->x)
+//                || (n1.y == n1.prevNode->y  && n1.y == n1.prevNode->prevNode->y)) {
+//              
+//                    if ((n1.prevNode->prevNode->prevNode) &&
+//                           ( (n1.x == n1.prevNode->prevNode->prevNode->x)
+//                        || (n1.y == n1.prevNode->prevNode->prevNode->y)))
+//                        directH = 20000;
+//                    else
+//                        directH = 10000;
+//            }
+//            
+//        }
         
         int dx = abs(n1.x - n2.x);
         int dy = abs(n1.y - n2.y);
-        int distToTarget = 0;//sqrt((double)(dx*dx + dy*dy));
+        int distToTarget = sqrt((double)(dx*dx + dy*dy));
         int rnd = ofRandom(2000); // make some variety in paths
         return (directH + distToTarget + rnd); // Euclidean distance as heuristics
 	}
@@ -243,7 +258,7 @@ bool myGraphDescription::isInObstacle(myNode& n) {
 }
 
 float myGraphDescription::calcDistToObstacles(myNode& n) {
-    float cost = 0;
+    float cost = 1000;
     
 //    ofPoint scaledNode;
 //    scaledNode.x = n.x * pathPlanner->gridScaleX + pathPlanner->offsetX;
@@ -382,6 +397,14 @@ vector< vector< ofPoint > > PathPlanner::findPaths(ofPoint _startPoint, ofPoint 
         }
         paths2.push_back(path);
     }
+    
+//    for (int i=0; i < paths.size(); i++) {
+//        vector<ofPoint> path;
+//        for (int j=0; j < paths[i].size();j++) {  // the points are reverse
+//            path.push_back(ofPoint(paths[i][j].x*this->gridScaleX+offsetX,paths[i][j].y*this->gridScaleY+offsetY));
+//        }
+//        paths2.push_back(path);
+//    }
     
 	return paths2;
 }

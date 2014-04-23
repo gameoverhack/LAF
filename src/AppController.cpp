@@ -64,9 +64,9 @@ void AppController::setup(){
     appModel->setProperty("Ortho", true);
     
     //appModel->setProperty("MediaPath", (string)"/Users/gameoverlf/Desktop/LAF/media");
-    appModel->setProperty("MediaPath", (string)"/Users/gameover/Desktop/LOTE/medianew");
+    //appModel->setProperty("MediaPath", (string)"/Users/gameover/Desktop/LOTE/medianew");
     //appModel->setProperty("MediaPath", (string)"/Volumes/LongingAndForgetting02/LOTE/TESTRENDERS/mediaANIME");
-    //appModel->setProperty("MediaPath", (string)"/Users/omid/Desktop/LAF/medianew");
+    appModel->setProperty("MediaPath", (string)"/Users/omid/Desktop/LAF/medianew");
     appModel->setProperty("NumberPlayers", 10);
     appModel->setProperty("RectTrail", 200);
     
