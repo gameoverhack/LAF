@@ -67,7 +67,7 @@ void AppController::setup(){
     //appModel->setProperty("MediaPath", (string)"/Users/gameover/Desktop/LOTE/medianew");
     //appModel->setProperty("MediaPath", (string)"/Volumes/LongingAndForgetting02/LOTE/TESTRENDERS/mediaANIME");
     appModel->setProperty("MediaPath", (string)"/Users/omid/Desktop/LAF/medianew");
-    appModel->setProperty("NumberPlayers", 10);
+    appModel->setProperty("NumberPlayers", 1);
     appModel->setProperty("RectTrail", 200);
     
     appModel->setProperty("ForceFileListUpdate", false);
@@ -489,6 +489,12 @@ void AppController::keyPressed(ofKeyEventArgs & e){
         {
             //playController->triggerReplan();
             cout << appModel->getAgents()[0]->getMovieSequence() << endl;
+        }
+            break;
+        case 'Z':
+        {
+            playController->triggerReplan();
+            //cout << appModel->getAgents()[0]->getMovieSequence() << endl;
         }
             break;
         

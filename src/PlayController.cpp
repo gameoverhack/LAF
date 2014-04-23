@@ -65,12 +65,13 @@ void PlayController::update(){
             break;
         case kPLAYCONTROLLER_MAKE:
         {
+            createAgent(BEHAVIOUR_AUTO);
             
-            if(appModel->getAgents().size() < 5){
-                createAgent(BEHAVIOUR_MANUAL);
-            }else{
-                createAgent(BEHAVIOUR_AUTO);
-            }
+//            if(appModel->getAgents().size() < 5){
+//                createAgent(BEHAVIOUR_MANUAL);
+//            }else{
+//                createAgent(BEHAVIOUR_AUTO);
+//            }
             
             playControllerStates.setState(kPLAYCONTROLLER_PLAY);
         }
