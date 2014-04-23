@@ -65,13 +65,13 @@ void PlayController::update(){
             break;
         case kPLAYCONTROLLER_MAKE:
         {
-            createAgent(BEHAVIOUR_AUTO);
+            //createAgent(BEHAVIOUR_AUTO);
             
-//            if(appModel->getAgents().size() < 5){
-//                createAgent(BEHAVIOUR_MANUAL);
-//            }else{
-//                createAgent(BEHAVIOUR_AUTO);
-//            }
+            if(appModel->getAgents().size() < 5){
+                createAgent(BEHAVIOUR_MANUAL);
+            }else{
+                createAgent(BEHAVIOUR_AUTO);
+            }
             
             playControllerStates.setState(kPLAYCONTROLLER_PLAY);
         }
@@ -218,16 +218,21 @@ void PlayController::triggerReplan() {
     
     cout << "++++++++++++++++++++++++++++++++ REPLAN" << endl;
     
-    int newWindowIndex = ofRandom(11);
-    ofRectangle newWindow = appModel->getWindows()[newWindowIndex];
-    
     vector<Agent2*>& agents = appModel->getAgents();
     
     for (int i=0; i < agents.size(); i++) {
-        //agents[i]->removeAllMovies();
-        //agents[i]->stop();
-        //agents[i]->setWindow(newWindowIndex);
-        agents[i]->plan(newWindow);
+        Agent2* agent = agents[i];
+        AgentInfo agentInfo = agent->getAgentInfo();
+        if(agentInfo.behaviourMode == BEHAVIOUR_AUTO){
+            agent->setBehaviourMode(BEHAVIOUR_MANUAL);
+        }else{
+            ofRectangle target = appModel->getUniqueAgentTarget();
+            if(target != NoTarget){
+                agent->setBehaviourMode(BEHAVIOUR_AUTO);
+                agent->setSpeed(3);
+                agent->plan(target);
+            }
+        }
         
     }
     

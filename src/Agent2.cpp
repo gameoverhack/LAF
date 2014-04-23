@@ -180,11 +180,19 @@ void Agent2::setBehaviourMode(BehaviourMode _behaviourMode){
         if(agentInfo.behaviourMode == BEHAVIOUR_MANUAL){
             if(currentSequenceIndex <= 0){ // ie., we haven't started the agent/moviesequence playing
                 sequence[0].isLooped = true;
+            }else{
+                removeMovies(true);
+                sequence[0].isLoopedStatic = true;
             }
             MovieSequence::setAutoSequenceStop(false);
         }else{
             MovieSequence::setAutoSequenceStop(true);
+            for(int i = 0; i < sequence.size(); i++){
+                sequence[i].isLooped = false;
+                sequence[i].isLoopedStatic = false;
+            }
         }
+        
     }
     unlockAgent();
 }
@@ -400,7 +408,7 @@ void Agent2::_move(){
         push(ms.getMovieSequence()[i]);
     }
     
-    removePreviousMovies();
+    removeMovies(false);
     
 //    getPositionsForMovieSequence(sequence);
 //    normalise();
@@ -477,7 +485,7 @@ void Agent2::_plan(){
         actions =  pp.getDirectionsInPath(paths[0]);
     }else{
         cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!No path found for me !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"  << endl;
-        //assert(false); // oh oh!
+        assert(false); // oh oh!
     }
     
     /////////
@@ -689,11 +697,16 @@ void Agent2::cutSequenceFromCurrentMovie(bool cutFromCurrentFrame) {
 }
 
 //--------------------------------------------------------------
-void Agent2::removePreviousMovies(){
+void Agent2::removeMovies(bool bAllMovies){
     
-    lockAgent();
-    
-    cout << "Remove previous movies" << endl;
+    if(bAllMovies){
+        cout << "Remove all movies" << endl;
+    }else{
+        lockAgent();
+        cout << "Remove previous movies" << endl;
+    }
+
+    currentPath.clear();
     
     vector<MovieInfo> sequencecopy = sequence;
     
@@ -708,6 +721,7 @@ void Agent2::removePreviousMovies(){
     
     for(int i = tCurrentSequenceIndex; i < sequencecopy.size(); i++){
         push(sequencecopy[i]);
+        if(bAllMovies && model.isLoopMarker(sequencecopy[i].markername)) break;
     }
     
     setNormalPosition(tCurrentPosition);
@@ -725,7 +739,7 @@ void Agent2::removePreviousMovies(){
     updateFrame();
     updatePosition();
     
-    unlockAgent();
+    if(!bAllMovies) unlockAgent();
     
 }
 
@@ -1047,14 +1061,14 @@ void Agent2::insertEndMotion(){
     vector<string> motionSequence;
     string motion = ofSplitString(getLastMovieInSequence().markername,"_")[0]+"_"+ofSplitString(getLastMovieInSequence().markername,"_")[1];
     
-    // randomise SYNCMOTIONS or WAITMOTIONS TODO: make this selectable
-    vector<string> vEndMotionType(2);
-    vEndMotionType[0] = "SYNCMOTIONS";
-    vEndMotionType[1] = "WAITMOTIONS";
-    string endMotionType = random(vEndMotionType);
-    
-    vector<string>& endMotions = endGraph.getPossibleTransitions(endMotionType);
-    string emotion = "STND_FRNT";//random(endMotions);
+//    // randomise SYNCMOTIONS or WAITMOTIONS TODO: make this selectable
+//    vector<string> vEndMotionType(2);
+//    vEndMotionType[0] = "SYNCMOTIONS";
+//    vEndMotionType[1] = "WAITMOTIONS";
+//    string endMotionType = random(vEndMotionType);
+//    
+//    vector<string>& endMotions = endGraph.getPossibleTransitions(endMotionType);
+    string emotion = "FALL_BACK";//random(endMotions);
     
     generateMotionsBetween(motion, emotion, motionSequence);
     

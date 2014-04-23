@@ -292,9 +292,7 @@ void DeviceController2::threadedFunction(){
                             device.bButton = false;
                         }
                     }
-                    
-                    
-                    
+
                 }
                 
             }

@@ -272,7 +272,7 @@ public:
     //--------------------------------------------------------------
     ofPoint getUniqueAgentOrigin(){
         
-        float dDrawSize = 0;//getProperty<float>("DefaultDrawSize");
+        float dDrawSize = getProperty<float>("DefaultDrawSize") / 2.0f;
         float dWidth = getProperty<float>("OutputWidth");
         float dHeight = getProperty<float>("OutputHeight");
         

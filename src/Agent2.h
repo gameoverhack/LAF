@@ -216,7 +216,7 @@ protected:
     float calculateMovieDistanceNormalised(int indexA, int indexB, char dir, int frameOffset);
     void cutSequenceFromCurrentMovie(bool cutFromCurrentFrame);
     void generateMoviesFromMotionsNoPush(vector<string>& motionSequence, vector<MovieInfo>& resultMovies);
-    void removePreviousMovies();
+    void removeMovies(bool bAllMovies);
     
     // worker thread
     void threadedFunction();
@@ -256,6 +256,8 @@ protected:
     int agentID;
     int deviceID;
     bool bIsAgentLocked;
+    
+    BehaviourMode behaviourMode;
     
     // agents 'memory'
     vector<AgentInfo> otherAgentInfo;
