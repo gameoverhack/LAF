@@ -36,6 +36,7 @@ enum ServerType{
 
 #pragma pack(push, 1)
 typedef struct{
+    char control;
     int clientID;
     int deviceType;
     int serverType;
@@ -69,6 +70,7 @@ public:
     
     DeviceClient(){
         clientID = -1;
+        bButton = false;
         timeThisMessage = timeLastMessage = fps = frameRate = 0;
     }
     ~DeviceClient(){
@@ -215,12 +217,18 @@ public:
         
     }
     
+    void deassociate(Agent2* agent){
+        agent->setDeviceID(-1);
+        eraseAll(agents, agent);
+    }
+    
     void deassociate(){
         for(int i = 0; i < agents.size(); i++){
             Agent2* agent = agents[i];
             cout << "Device deassociating: " << clientID << " to " << agent->getAgentID() << endl;
             agent->setDeviceID(-1);
         }
+        agents.clear();
     }
     
     bool associate(Agent2* agent){
@@ -256,7 +264,7 @@ public:
     
     double timeThisMessage, timeLastMessage, fps, frameRate;
     
-    bool bOver;
+    bool bButton;
     vector<Agent2*> agents;
 };
 

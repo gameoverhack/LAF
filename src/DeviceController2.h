@@ -32,6 +32,9 @@ static void initColors(){
     colors.push_back(ofColor::gold);
     colors.push_back(ofColor::magenta);
     colors.push_back(ofColor::violet);
+    colors.push_back(ofColor::green);
+    colors.push_back(ofColor::crimson);
+    colors.push_back(ofColor::moccasin);
 }
 
 //--------------------------------------------------------------
