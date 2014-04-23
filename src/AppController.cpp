@@ -64,13 +64,13 @@ void AppController::setup(){
     appModel->setProperty("Ortho", true);
     
     //appModel->setProperty("MediaPath", (string)"/Users/gameoverlf/Desktop/LAF/media");
-    //appModel->setProperty("MediaPath", (string)"/Users/gameover/Desktop/LOTE/medianew");
+    appModel->setProperty("MediaPath", (string)"/Users/gameover/Desktop/LOTE/medianew");
     //appModel->setProperty("MediaPath", (string)"/Volumes/LongingAndForgetting02/LOTE/TESTRENDERS/mediaANIME");
-    appModel->setProperty("MediaPath", (string)"/Users/omid/Desktop/LAF/medianew");
+    //appModel->setProperty("MediaPath", (string)"/Users/omid/Desktop/LAF/medianew");
     appModel->setProperty("NumberPlayers", 10);
     appModel->setProperty("RectTrail", 200);
     
-    appModel->setProperty("ForceFileListUpdate", false);
+    appModel->setProperty("ForceFileListUpdate", true);
     appModel->setProperty("ForceFileListCheck", false);
     appModel->setProperty("CheckKeyFrames", false);
     appModel->setProperty("CheckXMP", false);
@@ -106,7 +106,7 @@ void AppController::setup(){
     appModel->setProperty("DeviceClientInfo", (string)"");
     
     appModel->setProperty("DistanceThreshold", 200.0f);
-    appModel->setProperty("FadeTime", 0);
+    appModel->setProperty("FadeTime", 5);
     appModel->setProperty("SyncTime", 2);
     appModel->setProperty("HeroTime", 80000);
     appModel->setProperty("HeroFade", 10000);
