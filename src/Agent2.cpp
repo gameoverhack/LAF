@@ -11,37 +11,33 @@
 //--------------------------------------------------------------
 Agent2::Agent2(){
     cout << "Creating Agent " << sAgentID << endl;
-    clear();
     
+    // init internal state
+    MovieSequence::MovieSequence();
+    
+    agentInfo.bIsAgentLocked = false;
+    agentInfo.state = AGENT_INIT;
+    agentInfo.behaviourMode = BEHAVIOUR_AUTO;
+    agentInfo.collisionMode = COLLISION_AVOID;
+    agentInfo.target = ofRectangle(0, 0, 0, 0);
+    actionBounding = ofRectangle(0, 0, 0, 0);
     
     agentID = sAgentID;
     sAgentID++;
     
-    // init internal state
-    MovieSequence::MovieSequence();
-
+    bIsAgentLocked = false;
+    deviceID = -1;
     
+    //clear();
+    
+    willCollide = false;
+
 }
 
 //--------------------------------------------------------------
 Agent2::~Agent2(){
     cout << "Destroying Agent" << endl;
     //MovieSequence::~MovieSequence();
-}
-
-//--------------------------------------------------------------
-void Agent2::clear(){
-    MovieSequence::clear();
-    willCollide = false;
-    //    agentInfo.currentMovieInfo = NoMovie;
-    agentInfo.bIsAgentLocked = false;
-    agentInfo.state = AGENT_INIT;
-    agentInfo.behaviourMode = BEHAVIOUR_AUTO;
-    agentInfo.collisionMode = COLLISION_AVOID;
-    agentInfo.target = ofRectangle(0, 0, 0, 0);
-    
-    
-    actionBounding = ofRectangle(0, 0, 0, 0);
 }
 
 //--------------------------------------------------------------
@@ -117,9 +113,6 @@ void Agent2::stopAgent(){
     waitForThread();
     stopThread();
     stop();
-//    video->flush();
-//    video->stop();
-//    video->finish();
 }
 
 
@@ -151,11 +144,12 @@ void Agent2::update(){
     if(!isAgentLocked()){
 
         lockAgent();
+        
         agentInfo.agentID = agentID;
-//        agentInfo.currentMovieInfo = MovieSequence::getCurrentMovie();
         if(sboundings.size() > currentSequenceFrame) agentInfo.currentBounding = sboundings[currentSequenceFrame];
         if(spositions.size() > currentSequenceFrame) agentInfo.currentPosition = spositions[currentSequenceFrame];
         if(scentres.size() > currentSequenceFrame) agentInfo.currentCentre = scentres[currentSequenceFrame];
+        agentInfo.bIsAgentLocked = bIsAgentLocked;
         
         unlockAgent();
         
@@ -216,20 +210,19 @@ void Agent2::setOtherAgents(vector<AgentInfo> _otherAgentInfo){
 
 //--------------------------------------------------------------
 void Agent2::move(char _direction){
-    
     lockAgent();
     {
         if(agentInfo.behaviourMode == BEHAVIOUR_AUTO){
             cout << "CALLED MOVE - Aborting as we're auto agent" << endl;
-            agentInfo.state = AGENT_RUN;
         }else{
-            cout << "CALLED MOVE" << endl;
-            agentInfo.direction = _direction;
-            agentInfo.state = AGENT_MOVE;
+            if(agentInfo.state != AGENT_MOVE){
+                cout << "CALLED MOVE" << endl;
+                agentInfo.direction = _direction;
+                agentInfo.state = AGENT_MOVE;
+            }
         }
     }
     unlockAgent();
-    
 }
 
 //--------------------------------------------------------------
@@ -409,6 +402,9 @@ void Agent2::_move(){
     
     removePreviousMovies();
     
+//    getPositionsForMovieSequence(sequence);
+//    normalise();
+    
     agentInfo.state = AGENT_RUN;
 }
 
@@ -423,7 +419,6 @@ void Agent2::plan(ofRectangle _target, int _numSequenceRetries){
             agentInfo.state = AGENT_PLAN;
         }else{
             cout << "CALLED PLAN - Aborting as we're manual agent!" << endl;
-            agentInfo.state = AGENT_RUN;
         }
         
     }
@@ -483,7 +478,6 @@ void Agent2::_plan(){
     }else{
         cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!No path found for me !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"  << endl;
         //assert(false); // oh oh!
-        
     }
     
     /////////
@@ -582,6 +576,10 @@ void Agent2::threadedFunction(){
             lockAgentFlag();
             
             switch (agentInfo.state) {
+                case AGENT_INIT:
+                    agentInfo.state = AGENT_RUN;
+                    break;
+                    
                 case AGENT_RUN:
                     // nothing for now
                     break;
@@ -607,19 +605,19 @@ void Agent2::threadedFunction(){
 //--------------------------------------------------------------
 bool Agent2::isAgentLocked(){
     ofScopedLock lock(mMutex);
-    return agentInfo.bIsAgentLocked;
+    return bIsAgentLocked;
 }
 
 //--------------------------------------------------------------
 void Agent2::lockAgentFlag(){
     mMutex.lock();
-    agentInfo.bIsAgentLocked = true;
+    bIsAgentLocked = true;
     mMutex.unlock();
 }
 
 void Agent2::unlockAgentFlag(){
     mMutex.lock();
-    agentInfo.bIsAgentLocked = false;
+    bIsAgentLocked = false;
     mMutex.unlock();
 }
 
@@ -627,13 +625,13 @@ void Agent2::unlockAgentFlag(){
 void Agent2::lockAgent(){
     if(isThreadRunning()){
         mMutex.lock();
-        agentInfo.bIsAgentLocked = true;
+        bIsAgentLocked = true;
     }
 }
 
 void Agent2::unlockAgent(){
     if(isThreadRunning()){
-        agentInfo.bIsAgentLocked = false;
+        bIsAgentLocked = false;
         mMutex.unlock();
     }
 }

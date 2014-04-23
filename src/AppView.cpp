@@ -233,6 +233,118 @@ void AppView::update(){
             
         vector<Agent2*>& agents = appModel->getAgents();
         
+        //vector<Agent2*>& agents = appModel->getAgents();
+        
+        appModel->getDeviceMutex().lock();
+        
+        map<int, DeviceClient>& devices = appModel->getAllDevices();
+        
+        for(map<int, DeviceClient>::iterator it = devices.begin(); it != devices.end(); ++it){
+            
+            DeviceClient& client = it->second;
+            
+            ofNoFill();
+            ofSetColor(client.deviceColor);
+            
+            // get last position and difference from buffer
+            ofPoint& pF = client.positionBuffer.getFrontAsPoint();
+            ofPoint& pD = client.positionBuffer.getDifferenceAsPoint();
+            float angle = client.positionBuffer.getFlowAngle();
+            
+            
+            if(client.agents.size() == 0){
+                
+                // draw pointer
+                ofCircle(pF.x, pF.y, 50);
+                
+                // draw 'optical flow'
+                ofLine(pF.x, pF.y, pF.x + pD.x, pF.y + pD.y);
+                
+            }else{
+                
+                ofFill();
+                ofSetColor(client.deviceColor / 4.0);
+                ofCircle(pF.x, pF.y, 50);
+                ofNoFill();
+                
+                ofSetColor(client.deviceColor / 2.0);
+                
+                for(int i = 0; i < client.agents.size(); i++){
+                    // draw agent pointer
+                    ofCircle(client.agents[i]->getScaledCentre().x, client.agents[i]->getScaledCentre().y, 50);
+                    
+                    // draw 'optical flow'
+                    ofLine(client.agents[i]->getScaledCentre().x, client.agents[i]->getScaledCentre().y, pF.x + pD.x, pF.y + pD.y);
+                }
+                
+                // draw pointer
+                ofCircle(pF.x + pD.x, pF.y + pD.y, 50);
+
+            }
+            
+            if(client.bButton){
+                
+                for(int i = 0; i < agents.size(); i++){
+                    
+                    ofRectangle r = ofRectangle(pF.x - 50, pF.y - 50, 100, 100);
+                    
+                    if(agents[i]->getScaledBounding().intersects(r)){
+                        ofFill();
+                        ofSetColor(client.deviceColor / 3.0);
+                        ofCircle(pF.x, pF.y, 50);
+                        ofNoFill();
+                        
+                        
+                        client.associate(agents[i]);
+                        
+//                        if(agents[i]->getDeviceID() == -1){
+//                            client.associate(agents[i]);
+//                        }else if(agents[i]->getDeviceID() != client.clientID){
+//                            map<int, DeviceClient>::iterator it2 = devices.find(agents[i]->getDeviceID());
+//                            if(it2 != devices.end()){
+//                                it->second.deassociate(agents[i]);
+//                            }
+//                        }
+                        
+                        
+                        break;
+                    }
+                }
+            }
+            
+
+            
+            // testing jerk and direction
+            if(pD.length() > 400.0f){
+                
+                cout << "JERK->" << client.positionBuffer.getFlowDirectionAsString() << endl;
+                
+                // and send to OSCSender -> philippe
+                ofxOscSender& OSCSender = philModel->getOSCSender();
+                
+                ofxOscMessage m;
+                m.setAddress("/" + client.positionBuffer.getFlowDirectionAsString());
+                
+                m.addIntArg(client.clientID);
+                m.addFloatArg(pD.length());
+                m.addFloatArg(angle);
+                
+                OSCSender.sendMessage(m);
+                
+                for(int a = 0; a < client.agents.size(); a++){
+                    Agent2* agent = client.agents[a];
+                    if(client.positionBuffer.getFlowDirection() == FLOW_LEFT) agent->move('l');
+                    if(client.positionBuffer.getFlowDirection() == FLOW_RIGHT) agent->move('r');
+                    if(client.positionBuffer.getFlowDirection() == FLOW_UP) agent->move('u');
+                    if(client.positionBuffer.getFlowDirection() == FLOW_DOWN) agent->move('d');
+                }
+                
+            }
+            
+        }
+        
+        appModel->getDeviceMutex().unlock();
+        
         for(int i = 0; i < agents.size(); i++){
             
             ofNoFill();

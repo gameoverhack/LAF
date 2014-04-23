@@ -10,7 +10,6 @@
 #define __H_MOVIESEQUENCE
 
 #include "MovieInfo.h"
-#include "ofxLogger.h"
 #include "ofxThreadedVideo.h"
 
 typedef struct {
@@ -67,10 +66,10 @@ public:
         // update the video
         video->update();
         
-        ofScopedLock lock(mMutex);
-        
         // make sure there are no commands cue'd on the video
         if(video->getQueueSize() > 0) return;
+        
+        ofScopedLock lock(mMutex);
         
         // make sure the video paused state is the same as the sequence
 //        if(video->isPaused() != bPaused){
@@ -331,13 +330,13 @@ public:
     void setNormalPosition(ofPoint p){
         pNormal = p;
         lastnormalindex = -1;
-        ofxLogWarning() << "Remember to call normalize() or rescale() after setting position" << endl;
+        ofLogWarning() << "Remember to call normalize() or rescale() after setting position" << endl;
     }
     
     void setNormalScale(float s){
         scale = s;
         lastnormalindex = -1;
-        ofxLogWarning() << "Remember to call normalize() or rescale() after setting scale" << endl;
+        ofLogWarning() << "Remember to call normalize() or rescale() after setting scale" << endl;
     }
     
     ofPoint getNormalPosition(){

@@ -419,22 +419,27 @@ public:
                 
                 if(agent->getViewID() == viewID){
                     
-                    agent->stopAgent();
+                    int deviceID = agent->getDeviceID();
                     
-//                    ofFbo* fboSmall = agent->getFboSmall();
-//                    ofFbo* fboBig = agent->getFboBig();
-//                    
-//                    fboSmall->begin();
-//                    {
-//                        ofClear(0, 0, 0);
-//                    }
-//                    fboSmall->end();
-//                    
-//                    fboBig->begin();
-//                    {
-//                        ofClear(0, 0, 0);
-//                    }
-//                    fboBig->end();
+                    if(deviceID != -1){
+                        
+                        deviceMutex.lock();
+                        
+                        map<int, DeviceClient>::iterator it = devices.find(deviceID);
+                        
+                        if(it != devices.end()){
+                            
+                            ofxLogVerbose() << "Deleting Device Agent ref for: " << deviceID << endl;
+                            
+                            DeviceClient& device = it->second;
+                            device.deassociate(agent);
+                            
+                        }
+                        
+                        deviceMutex.unlock();
+                    }
+
+                    agent->stopAgent();
                     
                     delete agent;
                     index = i;
@@ -578,46 +583,9 @@ public:
     ofMutex& getDeviceMutex(){
         return deviceMutex;
     }
-
-    bool assignAgentToDevice(int deviceID, int agentID){
-        map<int, int>::iterator it = agentAssignments.find(agentID);
-        if(it == agentAssignments.end()){
-            ofxLogNotice() << "Assigning agent " << agentID << " to " << deviceID << endl;
-            agentAssignments[agentID] = deviceID;
-            vector<int>& aAssigns = deviceAssignments[deviceID];
-            aAssigns.push_back(agentID);
-            return true;
-        }else{
-            ofxLogNotice() << "Agent " << agentID << " already assigned " << it->second << endl;
-            return false;
-        }
-    }
     
-    bool deassignAgentFromDevices(int agentID){
-        map<int, int>::iterator it = agentAssignments.find(agentID);
-        if(it != agentAssignments.end()){
-            int deviceID = it->second;
-            ofxLogNotice() << "Deassigning agent " << agentID << " from " << deviceID << endl;
-            vector<int>& aAssigns = deviceAssignments[deviceID];
-            eraseAll(aAssigns, agentID);
-            if(aAssigns.size() == 0){
-                eraseAll(deviceAssignments, deviceID);
-            }
-            eraseAll(agentAssignments, agentID);
-        }
-    }
-    
-    Agent2* getAgentFromID(int agentID){
-        for(int i = 0; i < agents.size(); i++){
-            if(agents[i]->getAgentID() == agentID){
-                return agents[i];
-            }
-        }
-        return NULL;
-    }
-    
-    map<int, vector<int> >& getDeviceAssignments(){
-        return deviceAssignments;
+    vector<AgentInfo>& getAgentInfos(){
+        return infos;
     }
     
 protected:
@@ -634,6 +602,7 @@ protected:
     
     vector<MovieView>           views;
     vector<Agent2*>             agents;
+    vector<AgentInfo>           infos;
     
     set<int>                todelete;
     set<int>                assigned;
@@ -651,9 +620,6 @@ protected:
     vector<int>         targetwindows;
     
     map<string, MotionGraph> motionGraphs;
-    
-    map<int, vector<int> >  deviceAssignments;
-    map<int, int>           agentAssignments;
     
     // device client storage
     map<int, DeviceClient> devices;

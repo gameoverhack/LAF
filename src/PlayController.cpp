@@ -84,56 +84,9 @@ void PlayController::update(){
 
             vector<Agent2*>& agents = appModel->getAgents();
 
-            vector<AgentInfo> allAgentInfo;
-            for(int i = 0; i < agents.size(); i++) allAgentInfo.push_back(agents[i]->getAgentInfo());
-            for(int i = 0; i < agents.size(); i++) agents[i]->setOtherAgents(allAgentInfo);
-            
-            appModel->getDeviceMutex().lock();
-            
-            map<int, DeviceClient>& devices = appModel->getAllDevices();
-            
-            for(map<int, DeviceClient>::iterator it = devices.begin(); it != devices.end(); ++it){
-                
-                DeviceClient& client = it->second;
-                client.bOver = false;
-                ofPoint& pF = client.positionBuffer.getFrontAsPoint();
-                ofPoint& pD = client.positionBuffer.getDifferenceAsPoint();
-                ofRectangle r = ofRectangle(pF.x - 25, pF.y - 25, 50, 50);
-                
-                //cout << info.agentID << " " << info.currentBounding << endl;
-                
-                for(int i = 0; i < agents.size(); i++){
-                    
-                    AgentInfo& info = allAgentInfo[i];
-                    
-                    if(info.currentBounding.intersects(r)){
-                        client.bOver = true;
-                        appModel->assignAgentToDevice(client.clientID, info.agentID);
-                    }
-                }
-                
-                // testing jerk and direction
-                if(pD.length() > 400.0f){
-                    
-                    cout << "JERK->" << client.positionBuffer.getFlowDirectionAsString() << endl;
-                    
-                    map<int, vector<int> >& deviceAssignments = appModel->getDeviceAssignments();
-                    
-                    for(map<int, vector<int> >::iterator it = deviceAssignments.begin(); it != deviceAssignments.end(); ++it){
-                        vector<int>& assigments = it->second;
-                        for(int a = 0; a < assigments.size(); a++){
-                            Agent2* aagent = appModel->getAgentFromID(assigments[a]);
-                            if(client.positionBuffer.getFlowDirection() == FLOW_LEFT) aagent->move('l');
-                            if(client.positionBuffer.getFlowDirection() == FLOW_RIGHT) aagent->move('r');
-                            if(client.positionBuffer.getFlowDirection() == FLOW_UP) aagent->move('u');
-                            if(client.positionBuffer.getFlowDirection() == FLOW_DOWN) aagent->move('d');
-                        }
-                    }
-                }
-                
-                
-            }
-            appModel->getDeviceMutex().unlock();
+//            vector<AgentInfo> allAgentInfo;
+//            for(int i = 0; i < agents.size(); i++) allAgentInfo.push_back(agents[i]->getAgentInfo());
+//            for(int i = 0; i < agents.size(); i++) agents[i]->setOtherAgents(allAgentInfo);
             
             for(int i = 0; i < agents.size(); i++){
                 Agent2* agent = agents[i];

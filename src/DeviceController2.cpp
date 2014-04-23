@@ -273,7 +273,27 @@ void DeviceController2::threadedFunction(){
                     
                     int clientID = dmu.deviceMessage.clientID;
                     map<int, DeviceClient>::iterator it = devices.find(clientID);
-                    if(it != devices.end()) it->second.push(dmu.deviceMessage);
+                    
+                    if(it != devices.end()){
+                        
+                        DeviceClient& device = it->second;
+                        
+                        if(dmu.deviceMessage.control == 'd'){
+                            device.push(dmu.deviceMessage);
+                        }
+                        
+                        if(dmu.deviceMessage.control == 'r'){
+                            cout << "Record DOWN" << endl;
+                            device.bButton = true;
+                        }
+                        
+                        if(dmu.deviceMessage.control == 'R'){
+                            cout << "Record UP" << endl;
+                            device.bButton = false;
+                        }
+                    }
+                    
+                    
                     
                 }
                 
