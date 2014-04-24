@@ -252,7 +252,7 @@ void AppController::draw(){
     StateGroup & playControllerStates = appModel->getStateGroup("PlayControllerStates");
     
     appView->update();
-    deviceView->update();
+    //deviceView->update();
     
     if(debugViewStates.getState(kDEBUGVIEW_SHOWINFO)) debugView->update();
     
@@ -268,7 +268,7 @@ void AppController::draw(){
             ofEnableBlendMode(OF_BLENDMODE_SCREEN);
 
             appView->draw();
-            deviceView->draw();
+            //deviceView->draw();
             
         }
             break;

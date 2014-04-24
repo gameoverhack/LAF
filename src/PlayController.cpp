@@ -47,6 +47,7 @@ void PlayController::update(){
     StateGroup & playControllerStates = appModel->getStateGroup("PlayControllerStates");
     
     vector<ofRectangle> & windowPositions = appModel->getWindows();
+    ofRectangle tPlanBoundary = ofRectangle(-appModel->getProperty<float>("DefaultDrawSize"), -appModel->getProperty<float>("DefaultDrawSize"), appModel->getProperty<float>("OutputWidth"), appModel->getProperty<float>("OutputHeight"));
     
     switch (playControllerStates.getState()) {
         case kPLAYCONTROLLER_INIT:
@@ -97,7 +98,13 @@ void PlayController::update(){
                 Agent2* agent = agents[i];
                 
                 agent->update();
-
+                
+                AgentInfo& agentInfo = appModel->getAgentInfos()[agent];
+                
+//                if(!tPlanBoundary.inside(agentInfo.currentBounding) && agentInfo.behaviourMode == BEHAVIOUR_MANUAL){
+//                    appModel->markPlayerForDeletion(agent->getViewID());
+//                }
+                
                 if(agent->isSequequenceDone()) appModel->markPlayerForDeletion(agent->getViewID());
                 ostringstream os;
                 os << agent << endl;

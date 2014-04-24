@@ -144,7 +144,7 @@ void DeviceController2::update(){
             // check for ping timeout from clients
             // and mark for deletion if we haven't
             // heard from them in "PingClient" millis
-            if(ofGetElapsedTimeMillis() - client.timeLastPing > 2 * appModel->getProperty<int>("PingClient")){
+            if(ofGetElapsedTimeMillis() - client.timeLastPing > 3 * appModel->getProperty<int>("PingClient")){
                 
                 // mark for deletion
                 clientsToDelete.insert(it->first);

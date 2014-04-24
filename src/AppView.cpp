@@ -247,9 +247,9 @@ void AppView::update(){
             // get last position and difference from buffer
             ofPoint& pF = client.positionBuffer.getFrontAsPoint();
             ofPoint pD = client.positionBuffer.getDifferenceAsPoint();
-            pD.x /= 4.0;
-            pD.y /= 4.0;
-            pD.z /= 4.0;
+            pD.x /= 2.0;
+            pD.y /= 2.0;
+            //pD.z = 0.0;
             float angle = client.positionBuffer.getFlowAngle();
             ofPoint pDF = pF + pD;
             float pDThreashold = 200.0f;
@@ -301,6 +301,12 @@ void AppView::update(){
                 
                 if(true){
                     
+                    
+                    // draw pointer
+                    //ofCircle(pF.x, pF.y, 50);
+                    
+                    // draw 'optical flow'
+                    
 //                    ofFill();
 //                    ofSetColor(client.deviceColor / 4.0);
 //                    ofCircle(pF.x, pF.y, 50);
@@ -312,10 +318,22 @@ void AppView::update(){
                         
                         ofPoint cP = agentInfo.currentCentre + pD;
                         
+                        //ofLine(agentInfo.currentCentre.x, agentInfo.currentCentre.y, pF.x, pF.y);
+                        
 //                        ofFill();
                         ofSetColor(client.deviceColor);
                         ofCircle(cP.x, cP.y, 50);
+//                        ofSetColor(255, 255, 255);
+//#ifdef USE_PRORES
+//                        shader.begin();
+//                        shader.setUniformTexture("yuvTex", client.agents[i]->getFboSmall()->getTextureReference(), 1);
+//                        shader.setUniform1i("conversionType", (true ? 709 : 601));
+//                        shader.setUniform1f("fade", 0.5f);
+//                        client.agents[i]->getFboSmall()->draw(cP.x - 100, cP.y - 100);
+//                        shader.end();
+//#endif
                         
+                        ofSetColor(client.deviceColor);
                         // draw agent pointer
                         ofCircle(agentInfo.currentCentre.x, agentInfo.currentCentre.y, 50);
                         
@@ -327,8 +345,7 @@ void AppView::update(){
                         float tS = 50.0f;
                         float actionFade = 2.0 * (pD.length() / pDThreashold);
                         
-                        
-                        ofSetColor(64 * actionFade, 64 * actionFade, 64 * actionFade);
+                        ofSetColor(40 * actionFade, 40 * actionFade, 40 * actionFade);
                         
                         ofFill();
                         
@@ -374,33 +391,32 @@ void AppView::update(){
 
             }
             
-            if(client.bButton && client.agents.size() == 0){
+            if(client.bButton){
                 
+                int indexIntersect = -1;
                 for(int i = 0; i < agents.size(); i++){
                     
                     ofRectangle r = ofRectangle(pF.x - 50, pF.y - 50, 100, 100);
                     
                     if(agents[i]->getScaledBounding().intersects(r)){
+                        
                         ofFill();
                         ofSetColor(client.deviceColor / 3.0);
                         ofCircle(pF.x, pF.y, 50);
                         ofNoFill();
-                        
-                        
-                        client.associate(agents[i]);
-                        
-//                        if(agents[i]->getDeviceID() == -1){
-//                            client.associate(agents[i]);
-//                        }else if(agents[i]->getDeviceID() != client.clientID){
-//                            map<int, DeviceClient>::iterator it2 = devices.find(agents[i]->getDeviceID());
-//                            if(it2 != devices.end()){
-//                                it->second.deassociate(agents[i]);
-//                            }
-//                        }
-                        
-                        
-                        break;
+
+                        if(client.agents.size() == 0){
+                            indexIntersect = i;
+                            break;
+                        }
+
                     }
+                    
+                }
+                if(indexIntersect != -1){
+                    client.associate(agents[indexIntersect]);
+                }else{
+                    //client.deassociate();
                 }
             }
             
@@ -541,35 +557,48 @@ void AppView::update(){
             if(agentInfo.behaviourMode == BEHAVIOUR_MANUAL){
 
                 float tS = 50.0f;
-                float actionFade = 1.0f - (ofGetElapsedTimeMillis() - agentInfo.manualActionTime) / 2000.0f;
+                float actionFade;
                 
                 if(agentInfo.bActionCollide){
+                    
+                    actionFade = 1.0f - (ofGetElapsedTimeMillis() - agentInfo.manualActionTime) / 2000.0f;
                     ofSetColor(127 * actionFade, 0, 0);
+                    
                 }else{
+                    
+                    actionFade = 1.0f - (ofGetElapsedTimeMillis() - agentInfo.manualActionTime) / 6000.0f;
                     ofSetColor(0, 127 * actionFade, 0);
+                    
                 }
                 
                 ofFill();
                 
+                ofPoint dBB = agentInfo.currentCentre;
+                float tOb = 50.0f;
+                
                 switch (agentInfo.direction) {
                     case 'l':
                     {
-                        ofTriangle(agentInfo.currentCentre - ofPoint(tS, 0, 0), agentInfo.currentCentre + ofPoint(0, tS, 0), agentInfo.currentCentre - ofPoint(0, tS, 0));
+                        dBB -= ofPoint(tOb, 0, 0);
+                        ofTriangle(dBB - ofPoint(tS, 0, 0), dBB + ofPoint(0, tS, 0), dBB - ofPoint(0, tS, 0));
                     }
                         break;
                     case 'r':
                     {
-                        ofTriangle(agentInfo.currentCentre + ofPoint(tS, 0, 0), agentInfo.currentCentre + ofPoint(0, tS, 0), agentInfo.currentCentre - ofPoint(0, tS, 0));
+                        dBB += ofPoint(tOb, 0, 0);
+                        ofTriangle(dBB + ofPoint(tS, 0, 0), dBB + ofPoint(0, tS, 0), dBB - ofPoint(0, tS, 0));
                     }
                         break;
                     case 'u':
                     {
-                        ofTriangle(agentInfo.currentCentre - ofPoint(0, tS, 0), agentInfo.currentCentre + ofPoint(tS, 0, 0), agentInfo.currentCentre - ofPoint(tS, 0, 0));
+                        dBB -= ofPoint(0, tOb, 0);
+                        ofTriangle(dBB - ofPoint(0, tS, 0), dBB + ofPoint(tS, 0, 0), dBB - ofPoint(tS, 0, 0));
                     }
                         break;
                     case 'd':
                     {
-                        ofTriangle(agentInfo.currentCentre + ofPoint(0, tS, 0), agentInfo.currentCentre + ofPoint(tS, 0, 0), agentInfo.currentCentre - ofPoint(tS, 0, 0));
+                        dBB += ofPoint(0, tOb, 0);
+                        ofTriangle(dBB + ofPoint(0, tS, 0), dBB + ofPoint(tS, 0, 0), dBB - ofPoint(tS, 0, 0));
                     }
                         break;
                     default:
@@ -703,7 +732,7 @@ void AppView::update(){
             
             if(appModel->getProperty<bool>("ShowTrailBoundsSmall")){ //Omid
                 
-                int step = 20;
+                
                 int range = appModel->getProperty<int>("RectTrail");
                 
                 int startFrame = MAX(agent->getCurrentSequenceFrame() - range, 0);
@@ -712,17 +741,24 @@ void AppView::update(){
                 for(int j = 0; j < agent->getTotalSequenceFrames(); j++){
                     
                     if(j > startFrame && j < endFrame){
+                        
                         ofSetColor(0, iSmal, iSmal);
-                        if(agent->getScaledBoundings().size() > j) ofRect(agent->getScaledBoundingAt(j));
+                        if(agent->getScaledBoundings().size() > j && (agentInfo.behaviourMode == BEHAVIOUR_AUTO)) ofRect(agent->getScaledBoundingAt(j));
+                        
                     }else{
-                        if(agentInfo.behaviourMode == BEHAVIOUR_MANUAL || agentInfo.behaviourMode == BEHAVIOUR_AUTO){
-                            if(agentInfo.state == AGENT_PLAN || agentInfo.state == AGENT_MOVE){
-                                if(j % step == 0){
-                                    ofSetColor(10, 10, 10);
-                                    if(agent->getScaledBoundings().size() > j) ofRect(agent->getScaledBoundingAt(j));
-                                }
+                        
+                        if(agentInfo.behaviourMode == BEHAVIOUR_MANUAL){
+                            if(j % 10 == 0){
+                                ofSetColor(10, 10, 10);
+                                if(agent->getScaledBoundings().size() > j) ofRect(agent->getScaledBoundingAt(j));
                             }
-                            
+                        }
+                        
+                        if(agentInfo.state == AGENT_PLAN && agentInfo.behaviourMode == BEHAVIOUR_AUTO){
+                            if(j % 20 == 0){
+                                ofSetColor(10, 10, 10);
+                                if(agent->getScaledBoundings().size() > j) ofRect(agent->getScaledBoundingAt(j));
+                            }
                         }
                     }
 
