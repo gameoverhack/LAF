@@ -184,6 +184,8 @@ public:
         
         m.addIntArg(clientID);
         
+        m.addFloatArg(pD.length());
+        
         m.addFloatArg(pD.x);
         m.addFloatArg(pD.y);
         m.addFloatArg(pD.z);
@@ -266,6 +268,8 @@ public:
     
     ofPoint cursor;
     bool bButton;
+    int flowTimeout;
+    
     vector<Agent2*> agents;
 };
 

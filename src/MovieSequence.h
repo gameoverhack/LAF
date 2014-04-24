@@ -60,6 +60,9 @@ public:
     }
     
     void update(){
+        
+//        ofScopedLock lock(mMutex);
+        
         // don't try this on a NULL
         if(video == NULL) return;
         
@@ -69,7 +72,7 @@ public:
         // make sure there are no commands cue'd on the video
         if(video->getQueueSize() > 0) return;
         
-        ofScopedLock lock(mMutex);
+        
         
         // make sure the video paused state is the same as the sequence
 //        if(video->isPaused() != bPaused){
@@ -158,6 +161,7 @@ public:
     
     void loadNextMovie(int frameSeek = 0){
         
+        ofScopedLock lock(mMutex);
         ofLogVerbose() << "Loading next movie: " << currentSequenceIndex << " -> " << currentSequenceIndex + 1 << " of " << sequence.size();
         
         // increment sequenceIndex TODO: reverse
@@ -183,7 +187,7 @@ public:
             }else{
                 cout << "bNICE whtf" << endl;
                 currentMovie.isLoopedStatic = true;
-                currentMovie.staticLoopFrames = 30;
+                currentMovie.staticLoopFrames = 40;
                 setSpeed(-ofRandom(0.2, 1));
                 return;
             }

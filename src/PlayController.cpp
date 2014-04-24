@@ -230,7 +230,25 @@ void PlayController::createAgent(string name, ofPoint origin, ofRectangle target
     agent->setSpeed(ofRandom(1.0, 3.0));
     agent->play();
     
-    agent->plan(target);
+    if(bMode == BEHAVIOUR_AUTO){
+        
+        int attempts = 0;
+        bool bPathOk = agent->checkPath(target);
+        while (attempts < 3 && !bPathOk) {
+            target = appModel->getUniqueAgentTarget();
+            cout << "Trying to find new target: " << target << endl;
+            bPathOk = agent->checkPath(target);
+            attempts++;
+        }
+        
+        if(bPathOk){
+            agent->plan(target);
+        }else{
+            assert(false);
+        }
+        
+    }
+
 
 }
 
@@ -250,16 +268,31 @@ void PlayController::triggerReplan() {
         Agent2* agent = agents[i];
         AgentInfo& agentInfo = appModel->getAgentInfos()[agent];
         if(agentInfo.behaviourMode == BEHAVIOUR_AUTO){
-            //agent->setBehaviourMode(BEHAVIOUR_MANUAL);
-            ofRectangle target = appModel->getUniqueAgentTarget();
-            agent->plan(target);
+            cout << "set to manual: " << i << endl;
+            agent->setBehaviourMode(BEHAVIOUR_MANUAL);
+            //ofRectangle target = appModel->getUniqueAgentTarget();
+            //agent->plan(target);
         }else{
+            cout << "set to auto: " << i << endl;
             ofRectangle target = appModel->getUniqueAgentTarget();
-            if(target != NoTarget){
+            
+            int attempts = 0;
+            bool bPathOk = agent->checkPath(target);
+            while (attempts < 3 && !bPathOk) {
+                target = appModel->getUniqueAgentTarget();
+                cout << "Trying to find new target: " << target << endl;
+                bPathOk = agent->checkPath(target);
+                attempts++;
+            }
+            
+            if(bPathOk){
                 agent->setBehaviourMode(BEHAVIOUR_AUTO);
                 agent->setSpeed(3);
                 agent->plan(target);
+            }else{
+                cout << "CAN'T CHANGE MODE" << endl;
             }
+
         }
         
     }

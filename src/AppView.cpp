@@ -88,6 +88,9 @@ void AppView::update(){
     
     StateGroup & analyzeControllerStates = appModel->getStateGroup("AnalyzeControllerStates");
 
+    // and send to OSCSender -> philippe
+    ofxOscSender& OSCSender = philModel->getOSCSender();
+    
     /******************************************************
      *******                Analysis                *******
      *****************************************************/
@@ -383,8 +386,6 @@ void AppView::update(){
                     // draw pointer
                     //ofCircle(pDF.x, pDF.y, 50);
                 
-                }else{
-                    client.deassociate();
                 }
                 
                 
@@ -423,24 +424,24 @@ void AppView::update(){
             ofNoFill();
             
             // testing jerk and direction
-            if(pD.length() > pDThreashold){
+            if(pD.length() > pDThreashold && ofGetElapsedTimeMillis() - client.flowTimeout > 1000){
                 
                 cout << "JERK->" << client.positionBuffer.getFlowDirectionAsString() << endl;
-                
-                // and send to OSCSender -> philippe
-                ofxOscSender& OSCSender = philModel->getOSCSender();
-                
-                ofxOscMessage m;
-                m.setAddress("/" + client.positionBuffer.getFlowDirectionAsString());
-                
-                m.addIntArg(client.clientID);
-                m.addFloatArg(pD.length());
-                m.addFloatArg(angle);
-                
-                OSCSender.sendMessage(m);
+                client.flowTimeout = ofGetElapsedTimeMillis();
                 
                 for(int a = 0; a < client.agents.size(); a++){
+                    
                     Agent2* agent = client.agents[a];
+                    
+                    ofxOscMessage m;
+                    m.setAddress("/" + client.positionBuffer.getFlowDirectionAsString());
+                    
+                    m.addIntArg(client.clientID);
+                    m.addFloatArg(pD.length());
+                    m.addFloatArg(angle);
+                    
+                    OSCSender.sendMessage(m);
+                    
                     if(client.positionBuffer.getFlowDirection() == FLOW_LEFT) agent->move('l');
                     if(client.positionBuffer.getFlowDirection() == FLOW_RIGHT) agent->move('r');
                     if(client.positionBuffer.getFlowDirection() == FLOW_UP) agent->move('u');

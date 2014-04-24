@@ -191,23 +191,29 @@ void Agent2::setCollisionMode(CollisionMode _collisionMode){
 void Agent2::setBehaviourMode(BehaviourMode _behaviourMode){
     lockAgent();
     {
-        agentInfo.behaviourMode = _behaviourMode;
-        if(agentInfo.behaviourMode == BEHAVIOUR_MANUAL){
-            if(currentSequenceIndex <= 0){ // ie., we haven't started the agent/moviesequence playing
-                sequence[0].isLoopedStatic = true;
-            }else{
+        
+        if(_behaviourMode == BEHAVIOUR_MANUAL){
+            agentInfo.target = ofRectangle(0, 0, 0, 0);
+            currentPath.clear();
+            correctedPath.clear();
+            sequence[CLAMP(currentSequenceIndex, 0, sequence.size() - 1)].isLoopedStatic = true;
+            if(agentInfo.behaviourMode == BEHAVIOUR_AUTO && agentInfo.state != AGENT_INIT){
+                unlockAgent(); // weird but true cos removeMovies is locked...
+                removeMovies(true);
+                lockAgent();
                 sequence[0].isLoopedStatic = true;
                 cout << "WARNING!!!!!!!!!!!!!!!!!!!! I think this is buggy" << endl;
             }
             MovieSequence::setAutoSequenceStop(false);
         }else{
+            
             MovieSequence::setAutoSequenceStop(true);
             for(int i = 0; i < sequence.size(); i++){
                 sequence[i].isLooped = false;
                 sequence[i].isLoopedStatic = false;
             }
         }
-        
+        agentInfo.behaviourMode = _behaviourMode;
     }
     unlockAgent();
 }
@@ -457,9 +463,7 @@ void Agent2::plan(ofRectangle _target, int _numSequenceRetries){
 }
 
 //--------------------------------------------------------------
-void Agent2::_plan(){
-    
-    cout << "START PLANNING" << endl;
+bool Agent2::checkPath(ofRectangle tTarget){
     
     // for now only windows are valid targets
     int window = -1;
@@ -470,25 +474,24 @@ void Agent2::_plan(){
         }
     }
     
-    assert(window != -1);
+    if(window != -1) return false;
     windowTargetIndex = window;
     
-    removeMovies(true);
+    //removeMovies(true);
     
-    /*
+    cout << "CheckPlanA " << ofGetElapsedTimeMillis() << endl;
+    
     ofPoint startPosition;
     if(currentSequenceIndex <= 0){ // ie., we haven't started the agent/moviesequence playing
         startPosition = getScaledFloorOffsetAt(1);
     }else{
         startPosition = getScaledFloorOffsetAt(sequenceFrames[currentSequenceIndex+1]);
     }
-     */
+    
     
     // get a start point...do we need to lock?
-    ofPoint startPosition = getScaledFloorOffsetAt(1);
-    ofPoint targetPosition = ofPoint(agentInfo.target.x + agentInfo.target.width / 2.0, agentInfo.target.y, 0.0f);
-    
-    resetActionIndexes();
+    //ofPoint startPosition = getScaledFloorOffsetAt(1);
+    ofPoint targetPosition = ofPoint(tTarget.x + tTarget.width / 2.0, tTarget.y, 0.0f);
     
     /////////////
     
@@ -520,10 +523,28 @@ void Agent2::_plan(){
     if (paths.size() > 0){
         currentPath = paths[0];
         actions =  pp.getDirectionsInPath(paths[0]);
+        cout << "CheckPlanB " << ofGetElapsedTimeMillis() << endl;
+        return true;
     }else{
         cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!No path found for me !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"  << endl;
-        assert(false); // oh oh!
+        //assert(false); // oh oh!
+//        bFaultyMovieSequence = true;
+//        agentInfo.state = AGENT_RUN;
+        cout << "CheckPlanC " << ofGetElapsedTimeMillis() << endl;
+        return false;
     }
+}
+
+//--------------------------------------------------------------
+void Agent2::_plan(){
+    
+    cout << "START PLANNING" << endl;
+    
+    removeMovies(true);
+    resetActionIndexes(); //???
+    
+    ofPoint startPosition = getScaledFloorOffsetAt(1);
+    ofPoint targetPosition = ofPoint(agentInfo.target.x + agentInfo.target.width / 2.0, agentInfo.target.y, 0.0f);
     
     /////////
     
@@ -781,7 +802,7 @@ void Agent2::removeMovies(bool bAllMovies){
         cout << "Remove previous movies" << endl;
     }
 
-    currentPath.clear();
+    //currentPath.clear();
     
     vector<MovieInfo> sequencecopy = sequence;
     

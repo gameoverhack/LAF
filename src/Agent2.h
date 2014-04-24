@@ -114,6 +114,7 @@ public:
     // immediate occasionaly called commands
     void plan(ofRectangle _target, int _numSequenceRetries = 3);
     void move(char _direction);
+    bool checkPath(ofRectangle tTarget);
     
     // CHECKS
     

@@ -234,6 +234,8 @@ public:
     //--------------------------------------------------------------
     ofRectangle getUniqueAgentTarget(){
         
+        ofSeedRandom();
+        
         bool bUnique = false;
 
         ofRectangle rWindow;
