@@ -246,10 +246,15 @@ void AppView::update(){
             
             // get last position and difference from buffer
             ofPoint& pF = client.positionBuffer.getFrontAsPoint();
-            ofPoint& pD = client.positionBuffer.getDifferenceAsPoint();
+            ofPoint pD = client.positionBuffer.getDifferenceAsPoint();
+            pD.x /= 4.0;
+            pD.y /= 4.0;
+            pD.z /= 4.0;
             float angle = client.positionBuffer.getFlowAngle();
             ofPoint pDF = pF + pD;
-            
+            float pDThreashold = 200.0f;
+            //            pDMaxLength = MAX(pDMaxLength, pD.length());
+            //            cout << pDMaxLength << endl;
             if(client.agents.size() == 0){
                 
                 // draw pointer
@@ -258,30 +263,118 @@ void AppView::update(){
                 // draw 'optical flow'
                 ofLine(pF.x, pF.y, pDF.x, pDF.y);
                 
-            }else{
+                float tS = 50.0f;
+                float actionFade = 2.0 * (pD.length() / pDThreashold);
+                
+                
+                ofSetColor(64 * actionFade, 64 * actionFade, 64 * actionFade);
                 
                 ofFill();
-                ofSetColor(client.deviceColor / 4.0);
-                ofCircle(pF.x, pF.y, 50);
+                
+                switch (client.positionBuffer.getFlowDirection()) {
+                    case FLOW_LEFT:
+                    {
+                        ofTriangle(pDF - ofPoint(tS, 0, 0), pDF + ofPoint(0, tS, 0), pDF - ofPoint(0, tS, 0));
+                    }
+                        break;
+                    case FLOW_RIGHT:
+                    {
+                        ofTriangle(pDF + ofPoint(tS, 0, 0), pDF + ofPoint(0, tS, 0), pDF - ofPoint(0, tS, 0));
+                    }
+                        break;
+                    case FLOW_UP:
+                    {
+                        ofTriangle(pDF - ofPoint(0, tS, 0), pDF + ofPoint(tS, 0, 0), pDF - ofPoint(tS, 0, 0));
+                    }
+                        break;
+                    case FLOW_DOWN:
+                    {
+                        ofTriangle(pDF + ofPoint(0, tS, 0), pDF + ofPoint(tS, 0, 0), pDF - ofPoint(tS, 0, 0));
+                    }
+                        break;
+                    default:
+                        break;
+                }
                 ofNoFill();
                 
-                ofSetColor(client.deviceColor / 2.0);
+            }else{
                 
-                for(int i = 0; i < client.agents.size(); i++){
+                if(true){
                     
-                    // draw agent pointer
-                    ofCircle(client.agents[i]->getScaledCentre().x, client.agents[i]->getScaledCentre().y, 50);
+//                    ofFill();
+//                    ofSetColor(client.deviceColor / 4.0);
+//                    ofCircle(pF.x, pF.y, 50);
+//                    ofNoFill();
                     
-                    // draw 'optical flow'
-                    ofLine(client.agents[i]->getScaledCentre().x, client.agents[i]->getScaledCentre().y, pDF.x, pDF.y);
+                    for(int i = 0; i < client.agents.size(); i++){
+                        
+                        AgentInfo& agentInfo = appModel->getAgentInfos()[client.agents[i]];
+                        
+                        ofPoint cP = agentInfo.currentCentre + pD;
+                        
+//                        ofFill();
+                        ofSetColor(client.deviceColor);
+                        ofCircle(cP.x, cP.y, 50);
+                        
+                        // draw agent pointer
+                        ofCircle(agentInfo.currentCentre.x, agentInfo.currentCentre.y, 50);
+                        
+                        // draw 'optical flow'
+                        ofLine(agentInfo.currentCentre.x, agentInfo.currentCentre.y, cP.x, cP.y);
+                        
+//                        ofNoFill();
+                        
+                        float tS = 50.0f;
+                        float actionFade = 2.0 * (pD.length() / pDThreashold);
+                        
+                        
+                        ofSetColor(64 * actionFade, 64 * actionFade, 64 * actionFade);
+                        
+                        ofFill();
+                        
+                        switch (client.positionBuffer.getFlowDirection()) {
+                            case FLOW_LEFT:
+                            {
+                                ofTriangle(cP - ofPoint(tS, 0, 0), cP + ofPoint(0, tS, 0), cP - ofPoint(0, tS, 0));
+                            }
+                                break;
+                            case FLOW_RIGHT:
+                            {
+                                ofTriangle(cP + ofPoint(tS, 0, 0), cP + ofPoint(0, tS, 0), cP - ofPoint(0, tS, 0));
+                            }
+                                break;
+                            case FLOW_UP:
+                            {
+                                ofTriangle(cP - ofPoint(0, tS, 0), cP + ofPoint(tS, 0, 0), cP - ofPoint(tS, 0, 0));
+                            }
+                                break;
+                            case FLOW_DOWN:
+                            {
+                                ofTriangle(cP + ofPoint(0, tS, 0), cP + ofPoint(tS, 0, 0), cP - ofPoint(tS, 0, 0));
+                            }
+                                break;
+                            default:
+                                break;
+                        }
+                        ofNoFill();
+                        
+                       
+                    }
+                    
+                    //ofSetColor(client.deviceColor / 2.0);
+                    
+                    // draw pointer
+                    //ofCircle(pDF.x, pDF.y, 50);
+                
+                }else{
+                    client.deassociate();
                 }
                 
-                // draw pointer
-                ofCircle(pDF.x, pDF.y, 50);
+                
 
             }
             
-            if(client.bButton){
+            if(client.bButton && client.agents.size() == 0){
                 
                 for(int i = 0; i < agents.size(); i++){
                     
@@ -311,44 +404,6 @@ void AppView::update(){
                 }
             }
             
-            float pDThreashold = 200.0f;
-            
-            float tS = 50.0f;
-            
-//            pDMaxLength = MAX(pDMaxLength, pD.length());
-//            cout << pDMaxLength << endl;
-            
-            float actionFade = 2.0 * (pD.length() / pDThreashold);
-            
-            
-            ofSetColor(64 * actionFade, 64 * actionFade, 64 * actionFade);
-            
-            ofFill();
-            
-            switch (client.positionBuffer.getFlowDirection()) {
-                case FLOW_LEFT:
-                {
-                    ofTriangle(pDF - ofPoint(tS, 0, 0), pDF + ofPoint(0, tS, 0), pDF - ofPoint(0, tS, 0));
-                }
-                    break;
-                case FLOW_RIGHT:
-                {
-                    ofTriangle(pDF + ofPoint(tS, 0, 0), pDF + ofPoint(0, tS, 0), pDF - ofPoint(0, tS, 0));
-                }
-                    break;
-                case FLOW_UP:
-                {
-                    ofTriangle(pDF - ofPoint(0, tS, 0), pDF + ofPoint(tS, 0, 0), pDF - ofPoint(tS, 0, 0));
-                }
-                    break;
-                case FLOW_DOWN:
-                {
-                    ofTriangle(pDF + ofPoint(0, tS, 0), pDF + ofPoint(tS, 0, 0), pDF - ofPoint(tS, 0, 0));
-                }
-                    break;
-                default:
-                    break;
-            }
             ofNoFill();
             
             // testing jerk and direction
@@ -661,7 +716,7 @@ void AppView::update(){
                         if(agent->getScaledBoundings().size() > j) ofRect(agent->getScaledBoundingAt(j));
                     }else{
                         if(agentInfo.behaviourMode == BEHAVIOUR_MANUAL || agentInfo.behaviourMode == BEHAVIOUR_AUTO){
-                            if(agentInfo.state == AGENT_PLAN){
+                            if(agentInfo.state == AGENT_PLAN || agentInfo.state == AGENT_MOVE){
                                 if(j % step == 0){
                                     ofSetColor(10, 10, 10);
                                     if(agent->getScaledBoundings().size() > j) ofRect(agent->getScaledBoundingAt(j));
