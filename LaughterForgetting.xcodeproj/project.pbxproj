@@ -189,7 +189,6 @@
 		23640f57df6c4bb6bfc5da4c2199c7dd /* PacketListener.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = PacketListener.h; path = ../../../addons/ofxOsc/libs/oscpack/src/ip/PacketListener.h; sourceTree = SOURCE_ROOT; };
 		26ef3e71a07c6948eaf6709ef2dcacc0 /* ofxTCPManager.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = ofxTCPManager.h; path = ../../../addons/ofxNetwork/src/ofxTCPManager.h; sourceTree = SOURCE_ROOT; };
 		2834d88a62cd23f3de2c47d1c39bd645 /* ofxButton.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = ofxButton.h; path = ../../../addons/ofxGui/src/ofxButton.h; sourceTree = SOURCE_ROOT; };
-		2E155A1618E4837E00BC86A2 /* AgentBehaviours.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AgentBehaviours.h; sourceTree = "<group>"; };
 		2E97C17F18B66B3900CF1BA5 /* A_star.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = A_star.cpp; sourceTree = "<group>"; };
 		2E97C18018B66B3900CF1BA5 /* A_star.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = A_star.h; sourceTree = "<group>"; };
 		2E97C18118B66B3900CF1BA5 /* README.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
@@ -198,7 +197,6 @@
 		2E97C18418B66D6B00CF1BA5 /* AStarSearch.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AStarSearch.cpp; sourceTree = "<group>"; };
 		2E97C18518B66D6B00CF1BA5 /* AStarSearch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AStarSearch.h; sourceTree = "<group>"; };
 		2E97C18718B68A6500CF1BA5 /* myNode.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = myNode.h; sourceTree = "<group>"; };
-		2E97C18818B6E83000CF1BA5 /* Agent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Agent.h; sourceTree = "<group>"; };
 		2a5b1fad3f30c8065c396acbb72e5d95 /* NetworkingUtilsWin.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 30; name = NetworkingUtilsWin.cpp; path = ../../../addons/ofxOsc/libs/oscpack/src/ip/win32/NetworkingUtilsWin.cpp; sourceTree = SOURCE_ROOT; };
 		2b0a017124e9362d0bd153a135315311 /* WXMPIterator.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = WXMPIterator.hpp; path = "../../../addons/ofxXMP/libs/xmp/include/client-glue/WXMPIterator.hpp"; sourceTree = SOURCE_ROOT; };
 		2b40eda85beb63e46785bc299a638898 /* tinyxml.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 30; name = tinyxml.cpp; path = ../../../addons/ofxXmlSettings/libs/tinyxml.cpp; sourceTree = SOURCE_ROOT; };
@@ -1000,8 +998,6 @@
 				77D988B118861798003926D4 /* MovieSequence.h */,
 				7701FDD7187F49750092EDD9 /* AppStates.h */,
 				DCAC66DF1890AF3A00316A1F /* Pointer.h */,
-				2E97C18818B6E83000CF1BA5 /* Agent.h */,
-				2E155A1618E4837E00BC86A2 /* AgentBehaviours.h */,
 				77BCF6B718FC5D7900C2D366 /* DeviceClient.h */,
 				77BCF6B818FC5FF800C2D366 /* RingBuffer.h */,
 				773571541901B6190086FBFB /* Agent2.cpp */,

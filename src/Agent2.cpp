@@ -149,6 +149,11 @@ void Agent2::update(){
     
     MovieSequence::update();
     
+//    for(map<Agent2*, AgentInfo>::iterator it = otherAgentInfo->begin(); it != otherAgentInfo->end(); ++it){
+//        AgentInfo& info = it->second;
+//        // etc
+//    }
+    
     if(!isAgentLocked()){
 
         lockAgent();
@@ -216,7 +221,7 @@ void Agent2::setWorldObstacles(vector<ofRectangle> _obstacles){
 }
 
 //--------------------------------------------------------------
-void Agent2::setOtherAgents(vector<AgentInfo> _otherAgentInfo){
+void Agent2::setOtherAgents(map<Agent2*, AgentInfo>* _otherAgentInfo){
     lockAgent();
     {
         otherAgentInfo = _otherAgentInfo;

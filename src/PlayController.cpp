@@ -7,7 +7,6 @@
 //
 
 #include "PlayController.h"
-#include "AgentBehaviours.h"
 
 //--------------------------------------------------------------
 PlayController::PlayController(){
@@ -74,7 +73,11 @@ void PlayController::update(){
 //                createAgent(BEHAVIOUR_AUTO);
 //            }
             
+            vector<Agent2*>& agents = appModel->getAgents();
+            for(int i = 0; i < agents.size(); i++) agents[i]->setOtherAgents(&appModel->getAgentInfos());
+            
             playControllerStates.setState(kPLAYCONTROLLER_PLAY);
+            
         }
             break;
         case kPLAYCONTROLLER_PLAY:
@@ -85,12 +88,12 @@ void PlayController::update(){
             }
 
             vector<Agent2*>& agents = appModel->getAgents();
-
-//            vector<AgentInfo> allAgentInfo;
-//            for(int i = 0; i < agents.size(); i++) allAgentInfo.push_back(agents[i]->getAgentInfo());
-//            for(int i = 0; i < agents.size(); i++) agents[i]->setOtherAgents(allAgentInfo);
+            map<Agent2*, AgentInfo>& agentInfos = appModel->getAgentInfos();
+            
+            for(int i = 0; i < agents.size(); i++) agentInfos[agents[i]] = agents[i]->getAgentInfo();
             
             for(int i = 0; i < agents.size(); i++){
+                
                 Agent2* agent = agents[i];
                 
                 agent->update();
@@ -236,7 +239,7 @@ void PlayController::triggerReplan() {
     
     for (int i=0; i < agents.size(); i++) {
         Agent2* agent = agents[i];
-        AgentInfo agentInfo = agent->getAgentInfo();
+        AgentInfo& agentInfo = appModel->getAgentInfos()[agent];
         if(agentInfo.behaviourMode == BEHAVIOUR_AUTO){
             agent->setBehaviourMode(BEHAVIOUR_MANUAL);
         }else{

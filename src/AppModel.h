@@ -19,13 +19,11 @@
 #include "MotionGraph.h"
 #include "PlayerView.h"
 #include "PlayerModel.h"
-#include "MovieSequence.h"
 #include "MovieInfo.h"
 #include "ofxCv.h"
 #include "MouseObj.h"
 #include "KeyModifiers.h"
 #include "Pointer.h"
-#include "Agent.h"
 #include "Agent2.h"
 #include "DeviceClient.h"
 
@@ -442,6 +440,7 @@ public:
                     }
 
                     agent->stopAgent();
+                    eraseAll(infos, agent);
                     
                     delete agent;
                     index = i;
@@ -477,6 +476,7 @@ public:
             assert(false);
         }
         agents.push_back(agent);
+        infos[agent] = agent->getAgentInfo();
     }
     
     //--------------------------------------------------------------
@@ -586,7 +586,7 @@ public:
         return deviceMutex;
     }
     
-    vector<AgentInfo>& getAgentInfos(){
+    map<Agent2*, AgentInfo>& getAgentInfos(){
         return infos;
     }
     
@@ -604,7 +604,7 @@ protected:
     
     vector<MovieView>           views;
     vector<Agent2*>             agents;
-    vector<AgentInfo>           infos;
+    map<Agent2*, AgentInfo>     infos;
     
     set<int>                todelete;
     set<int>                assigned;

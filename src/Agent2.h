@@ -107,7 +107,7 @@ public:
     void setWorldObstacles(vector<ofRectangle> _obstacles);
     
     // short term
-    void setOtherAgents(vector<AgentInfo> _otherAgentInfo);
+    void setOtherAgents(map<Agent2*, AgentInfo>* _otherAgentInfo);
     
     // COMMANDS
     
@@ -266,7 +266,7 @@ protected:
     BehaviourMode behaviourMode;
     
     // agents 'memory'
-    vector<AgentInfo> otherAgentInfo;
+    map<Agent2*, AgentInfo>* otherAgentInfo;
     vector<ofRectangle> obstacles;
     
 };
