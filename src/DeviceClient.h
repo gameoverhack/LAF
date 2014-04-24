@@ -267,7 +267,7 @@ public:
     double timeThisMessage, timeLastMessage, fps, frameRate;
     
     ofPoint cursor;
-    bool bButton;
+    bool bButton, lButton;
     int flowTimeout;
     
     vector<Agent2*> agents;

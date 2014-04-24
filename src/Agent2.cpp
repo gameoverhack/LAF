@@ -166,6 +166,14 @@ void Agent2::update(){
         if(scentres.size() > currentSequenceFrame) agentInfo.currentCentre = scentres[currentSequenceFrame];
         agentInfo.bIsAgentLocked = bIsAgentLocked;
         
+        if(agentInfo.behaviourMode == BEHAVIOUR_MANUAL && agentInfo.currentBounding != ofRectangle(0,0,0,0)){
+            ofRectangle r = ofRectangle(0, 0, ofGetWidth(), ofGetHeight());
+            if(!r.intersects(agentInfo.currentBounding)){
+                cout << "Agent is gone walkies! " << agentInfo.currentBounding << endl;
+                bSequenceIsDone = true;
+            }
+        }
+        
         unlockAgent();
         
     }
@@ -235,6 +243,11 @@ void Agent2::setOtherAgents(map<Agent2*, AgentInfo>* _otherAgentInfo){
         otherAgentInfo = _otherAgentInfo;
     }
     unlockAgent();
+}
+
+//--------------------------------------------------------------
+void Agent2::setIgnoreTarget(ofRectangle _ignoreTarget){
+    agentInfo.ignoreTarget = _ignoreTarget;
 }
 
 //--------------------------------------------------------------
@@ -396,7 +409,7 @@ void Agent2::_move(){
     // TODO: this limits the movements
     for (int w = 0; w < obstacles.size(); w++){
         cout << "We colliding with you>? " << w << " " << obstacles[w] << " " << actionBounding << endl;
-        if (obstacles[w] != agentInfo.target && actionBounding.intersects(obstacles[w])){
+        if (obstacles[w] != agentInfo.ignoreTarget && actionBounding.intersects(obstacles[w])){
             cout << "We collide!!!" << endl;
             agentInfo.bActionCollide = true;
             break;
@@ -664,6 +677,7 @@ void Agent2::_plan(){
 
 //--------------------------------------------------------------
 AgentInfo Agent2::getAgentInfo(){
+    ofScopedLock lock(mMutex);
     return agentInfo;
 }
 

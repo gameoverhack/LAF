@@ -55,6 +55,7 @@ typedef struct{
     BehaviourMode behaviourMode;
     
     ofRectangle target;
+    ofRectangle ignoreTarget;
     ofPoint origin;
     
     char direction;
@@ -115,6 +116,7 @@ public:
     void plan(ofRectangle _target, int _numSequenceRetries = 3);
     void move(char _direction);
     bool checkPath(ofRectangle tTarget);
+    void setIgnoreTarget(ofRectangle _ignoreTarget);
     
     // CHECKS
     

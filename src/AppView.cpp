@@ -152,7 +152,7 @@ void AppView::update(){
         
         float iY = 1.0f;
         
-        if(appModel->getProperty<bool>("ShowHeroVideos")){
+        if(appModel->getProperty<bool>("ShowHeroVideos") && (BehaviourMode)appModel->getProperty<int>("AgentBehaviour") != BEHAVIOUR_MANUAL){
             
             ofxThreadedVideo* hero = appModel->getCurrentHeroVideo();
             
@@ -244,32 +244,106 @@ void AppView::update(){
             
             DeviceClient& client = it->second;
             
-            ofNoFill();
-            ofSetColor(client.deviceColor);
-            
             // get last position and difference from buffer
             ofPoint& pF = client.positionBuffer.getFrontAsPoint();
             ofPoint pD = client.positionBuffer.getDifferenceAsPoint();
+            float angle = client.positionBuffer.getFlowAngle();
+            
+            // massage the flow difference
+            float pDThreashold = 200.0f;
             pD.x /= 2.0;
             pD.y /= 2.0;
-            //pD.z = 0.0;
-            float angle = client.positionBuffer.getFlowAngle();
+
+            // precalculate useful values
             ofPoint pDF = pF + pD;
-            float pDThreashold = 200.0f;
-            //            pDMaxLength = MAX(pDMaxLength, pD.length());
-            //            cout << pDMaxLength << endl;
+            
+            // precalculate the cursor rect
+            ofRectangle deviceCursorRect = ofRectangle(pF.x - 50, pF.y - 50, 100, 100);
+
+            // testing jerk and direction
+            if(pD.length() > pDThreashold && ofGetElapsedTimeMillis() - client.flowTimeout > 1000){
+                
+                cout << "JERK->" << client.positionBuffer.getFlowDirectionAsString() << endl;
+                client.flowTimeout = ofGetElapsedTimeMillis();
+                
+                for(int a = 0; a < client.agents.size(); a++){
+                    
+                    Agent2* agent = client.agents[a];
+                    
+                    ofxOscMessage m;
+                    m.setAddress("/" + client.positionBuffer.getFlowDirectionAsString());
+                    
+                    m.addIntArg(client.clientID);
+                    m.addFloatArg(pD.length());
+                    m.addFloatArg(angle);
+                    
+                    OSCSender.sendMessage(m);
+                    
+                    if(client.positionBuffer.getFlowDirection() == FLOW_LEFT) agent->move('l');
+                    if(client.positionBuffer.getFlowDirection() == FLOW_RIGHT) agent->move('r');
+                    if(client.positionBuffer.getFlowDirection() == FLOW_UP) agent->move('u');
+                    if(client.positionBuffer.getFlowDirection() == FLOW_DOWN) agent->move('d');
+                }
+                
+            }
+            
+            // find the first agent we are over
+            Agent2* overAgent = NULL;
+            for(int i = 0; i < agents.size(); i++){
+                
+                Agent2* agent = agents[i];
+                AgentInfo& agentInfo = appModel->getAgentInfos()[agent];
+                
+                if(agentInfo.currentBounding.intersects(deviceCursorRect)){
+                    overAgent = agents[i];
+                    break;
+                }
+                
+            }
+            
+            // find the first window we are over
+            ofRectangle overWindow = NoTarget;
+            for(int i = 0; i < windowPositions.size(); i++){
+                
+                if(windowPositions[i].intersects(deviceCursorRect)){
+                    overWindow = windowPositions[i];
+                    break;
+                }
+                
+            }
+            
+            if(client.agents.size() == 0 && client.bButton){
+                
+                if(overAgent != NULL){
+                    client.associate(overAgent);
+                    overAgent->setBehaviourMode(BEHAVIOUR_MANUAL);
+                }
+                
+            }
+            
             if(client.agents.size() == 0){
+
+                if(overAgent != NULL){
+                    ofFill();
+                    ofSetColor(client.deviceColor / 4.0f);
+                }else{
+                    ofNoFill();
+                    ofSetColor(client.deviceColor);
+                }
                 
                 // draw pointer
                 ofCircle(pF.x, pF.y, 50);
                 
+                ofNoFill();
+                ofSetColor(client.deviceColor);
+                
                 // draw 'optical flow'
                 ofLine(pF.x, pF.y, pDF.x, pDF.y);
                 
+                // draw triangle for flow
                 float tS = 50.0f;
                 float actionFade = 2.0 * (pD.length() / pDThreashold);
-                
-                
+
                 ofSetColor(64 * actionFade, 64 * actionFade, 64 * actionFade);
                 
                 ofFill();
@@ -299,154 +373,119 @@ void AppView::update(){
                         break;
                 }
                 ofNoFill();
+            }
+            
+            if(client.agents.size() > 0){
                 
-            }else{
+                bool bOverMyself = false;
                 
-                if(true){
+                for(int i = 0; i < client.agents.size(); i++){
                     
+                    AgentInfo& agentInfo = appModel->getAgentInfos()[client.agents[i]];
                     
-                    // draw pointer
-                    //ofCircle(pF.x, pF.y, 50);
+                    if(client.agents[i] == overAgent) bOverMyself = true;
+                    
+                    ofPoint cP = agentInfo.currentCentre + pD;
+
+                    ofSetColor(client.deviceColor);
+                    
+                    // circle around agent
+                    ofCircle(agentInfo.currentCentre.x, agentInfo.currentCentre.y, 50);
+                    
+                    // circle indicating flow
+                    ofCircle(cP.x, cP.y, 50);
                     
                     // draw 'optical flow'
+                    ofLine(agentInfo.currentCentre.x, agentInfo.currentCentre.y, cP.x, cP.y);
                     
-//                    ofFill();
-//                    ofSetColor(client.deviceColor / 4.0);
-//                    ofCircle(pF.x, pF.y, 50);
-//                    ofNoFill();
+                    // triangle indicating flow
+                    float tS = 50.0f;
+                    float actionFade = 2.0 * (pD.length() / pDThreashold);
                     
-                    for(int i = 0; i < client.agents.size(); i++){
-                        
-                        AgentInfo& agentInfo = appModel->getAgentInfos()[client.agents[i]];
-                        
-                        ofPoint cP = agentInfo.currentCentre + pD;
-                        
-                        //ofLine(agentInfo.currentCentre.x, agentInfo.currentCentre.y, pF.x, pF.y);
-                        
-//                        ofFill();
-                        ofSetColor(client.deviceColor);
-                        ofCircle(cP.x, cP.y, 50);
-//                        ofSetColor(255, 255, 255);
-//#ifdef USE_PRORES
-//                        shader.begin();
-//                        shader.setUniformTexture("yuvTex", client.agents[i]->getFboSmall()->getTextureReference(), 1);
-//                        shader.setUniform1i("conversionType", (true ? 709 : 601));
-//                        shader.setUniform1f("fade", 0.5f);
-//                        client.agents[i]->getFboSmall()->draw(cP.x - 100, cP.y - 100);
-//                        shader.end();
-//#endif
-                        
-                        ofSetColor(client.deviceColor);
-                        // draw agent pointer
-                        ofCircle(agentInfo.currentCentre.x, agentInfo.currentCentre.y, 50);
-                        
-                        // draw 'optical flow'
-                        ofLine(agentInfo.currentCentre.x, agentInfo.currentCentre.y, cP.x, cP.y);
-                        
-//                        ofNoFill();
-                        
-                        float tS = 50.0f;
-                        float actionFade = 2.0 * (pD.length() / pDThreashold);
-                        
-                        ofSetColor(40 * actionFade, 40 * actionFade, 40 * actionFade);
-                        
-                        ofFill();
-                        
-                        switch (client.positionBuffer.getFlowDirection()) {
-                            case FLOW_LEFT:
-                            {
-                                ofTriangle(cP - ofPoint(tS, 0, 0), cP + ofPoint(0, tS, 0), cP - ofPoint(0, tS, 0));
-                            }
-                                break;
-                            case FLOW_RIGHT:
-                            {
-                                ofTriangle(cP + ofPoint(tS, 0, 0), cP + ofPoint(0, tS, 0), cP - ofPoint(0, tS, 0));
-                            }
-                                break;
-                            case FLOW_UP:
-                            {
-                                ofTriangle(cP - ofPoint(0, tS, 0), cP + ofPoint(tS, 0, 0), cP - ofPoint(tS, 0, 0));
-                            }
-                                break;
-                            case FLOW_DOWN:
-                            {
-                                ofTriangle(cP + ofPoint(0, tS, 0), cP + ofPoint(tS, 0, 0), cP - ofPoint(tS, 0, 0));
-                            }
-                                break;
-                            default:
-                                break;
+                    ofSetColor(40 * actionFade, 40 * actionFade, 40 * actionFade);
+                    
+                    ofFill();
+                    
+                    switch (client.positionBuffer.getFlowDirection()) {
+                        case FLOW_LEFT:
+                        {
+                            ofTriangle(cP - ofPoint(tS, 0, 0), cP + ofPoint(0, tS, 0), cP - ofPoint(0, tS, 0));
                         }
-                        ofNoFill();
-                        
-                       
-                    }
-                    
-                    //ofSetColor(client.deviceColor / 2.0);
-                    
-                    // draw pointer
-                    //ofCircle(pDF.x, pDF.y, 50);
-                
-                }
-                
-                
-
-            }
-            
-            if(client.bButton){
-                
-                int indexIntersect = -1;
-                for(int i = 0; i < agents.size(); i++){
-                    
-                    ofRectangle r = ofRectangle(pF.x - 50, pF.y - 50, 100, 100);
-                    
-                    if(agents[i]->getScaledBounding().intersects(r)){
-                        
-                        ofFill();
-                        ofSetColor(client.deviceColor / 3.0);
-                        ofCircle(pF.x, pF.y, 50);
-                        ofNoFill();
-
-                        if(client.agents.size() == 0){
-                            indexIntersect = i;
                             break;
+                        case FLOW_RIGHT:
+                        {
+                            ofTriangle(cP + ofPoint(tS, 0, 0), cP + ofPoint(0, tS, 0), cP - ofPoint(0, tS, 0));
                         }
+                            break;
+                        case FLOW_UP:
+                        {
+                            ofTriangle(cP - ofPoint(0, tS, 0), cP + ofPoint(tS, 0, 0), cP - ofPoint(tS, 0, 0));
+                        }
+                            break;
+                        case FLOW_DOWN:
+                        {
+                            ofTriangle(cP + ofPoint(0, tS, 0), cP + ofPoint(tS, 0, 0), cP - ofPoint(tS, 0, 0));
+                        }
+                            break;
+                        default:
+                            break;
+                    }
+                    ofNoFill();
+                    
+                }
 
+                if(client.bButton){
+                    
+                    
+                
+                    ofNoFill();
+                    ofSetColor(client.deviceColor);
+                    ofCircle(pF.x, pF.y, 50);
+                    
+                    
+                    ofSetColor(client.deviceColor / 4.0);
+                    if(overWindow != NoTarget){
+                        ofFill();
+                        ofRect(overWindow);
+                    }
+                    if(overAgent != NULL && !bOverMyself){
+                        ofNoFill();
+                        AgentInfo& agentInfo = appModel->getAgentInfos()[overAgent];
+                        ofCircle(agentInfo.currentCentre.x, agentInfo.currentCentre.y, 50);
                     }
                     
-                }
-                if(indexIntersect != -1){
-                    client.associate(agents[indexIntersect]);
+                    ofNoFill();
+                    
                 }else{
-                    //client.deassociate();
+                    
+                    if(client.lButton != client.bButton){
+                        if(!bOverMyself && overWindow == NoTarget && overAgent == NULL){
+                            cout << "DEASSOCIATE" << endl;
+                            client.deassociate();
+                        }else if(!bOverMyself && overWindow != NoTarget && overAgent == NULL){
+                            cout << "PLANASSOCIATE" << endl;
+                            if(client.agents[0]->checkPath(overWindow)){
+                                cout << "PLAN CAN DO !!!!!!!!!!!!" << endl;
+                                Agent2* reAgent = client.agents[0];
+                                client.deassociate();
+                                reAgent->setBehaviourMode(BEHAVIOUR_AUTO);
+                                reAgent->setSpeed(3);
+                                reAgent->plan(overWindow);
+                            }else{
+                                cout << "PLAN NOT DO !!!!!!!!!!!!" << endl;
+                            }
+                        }else if(!bOverMyself && overWindow == NoTarget && overAgent != NULL){
+                            cout << "REASSOCIATE" << endl;
+                            client.deassociate();
+                            client.associate(overAgent);
+                            overAgent->setBehaviourMode(BEHAVIOUR_MANUAL);
+                        }
+                    }
                 }
-            }
             
-            ofNoFill();
+                
             
-            // testing jerk and direction
-            if(pD.length() > pDThreashold && ofGetElapsedTimeMillis() - client.flowTimeout > 1000){
-                
-                cout << "JERK->" << client.positionBuffer.getFlowDirectionAsString() << endl;
-                client.flowTimeout = ofGetElapsedTimeMillis();
-                
-                for(int a = 0; a < client.agents.size(); a++){
-                    
-                    Agent2* agent = client.agents[a];
-                    
-                    ofxOscMessage m;
-                    m.setAddress("/" + client.positionBuffer.getFlowDirectionAsString());
-                    
-                    m.addIntArg(client.clientID);
-                    m.addFloatArg(pD.length());
-                    m.addFloatArg(angle);
-                    
-                    OSCSender.sendMessage(m);
-                    
-                    if(client.positionBuffer.getFlowDirection() == FLOW_LEFT) agent->move('l');
-                    if(client.positionBuffer.getFlowDirection() == FLOW_RIGHT) agent->move('r');
-                    if(client.positionBuffer.getFlowDirection() == FLOW_UP) agent->move('u');
-                    if(client.positionBuffer.getFlowDirection() == FLOW_DOWN) agent->move('d');
-                }
+                client.lButton = client.bButton;
                 
             }
             
@@ -625,7 +664,13 @@ void AppView::update(){
                 shader.begin();
                 shader.setUniformTexture("yuvTex", agent->getFboSmall()->getTextureReference(), 1);
                 shader.setUniform1i("conversionType", (true ? 709 : 601));
-                shader.setUniform1f("fade", CLAMP(pct1, 0.0f, 1.0f) * iY);
+                
+                if((BehaviourMode)appModel->getProperty<int>("AgentBehaviour") == BEHAVIOUR_MANUAL){
+                    shader.setUniform1f("fade", 1.0f);
+                }else{
+                    shader.setUniform1f("fade", CLAMP(pct1, 0.0f, 1.0f) * iY);
+                }
+                
                 agent->getFboSmall()->draw(agentInfo.currentPosition.x, agentInfo.currentPosition.y);
                 shader.end();
 #else
@@ -749,7 +794,7 @@ void AppView::update(){
                     }else{
                         
                         if(agentInfo.behaviourMode == BEHAVIOUR_MANUAL){
-                            if(j % 10 == 0){
+                            if(j % 4 == 0){
                                 ofSetColor(10, 10, 10);
                                 if(agent->getScaledBoundings().size() > j) ofRect(agent->getScaledBoundingAt(j));
                             }

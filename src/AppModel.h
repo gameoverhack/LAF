@@ -252,7 +252,7 @@ public:
                 Agent2* agent = agents[i];
                 AgentInfo agentInfo = agents[i]->getAgentInfo();
                 
-                if(agentInfo.target == rWindow){
+                if(agentInfo.target == rWindow || agentInfo.ignoreTarget == rWindow){
                     bUnique = false;
                     break;
                 }

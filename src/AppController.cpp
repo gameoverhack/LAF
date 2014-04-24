@@ -128,7 +128,7 @@ void AppController::setup(){
 //    appModel->setProperty("ShowDistanceSmall", true);
 //    //appModel->setProperty("ShowInfoLarge", true);
 //    appModel->setProperty("ShowInfoSmall", false);
-    appModel->setProperty("ShowHeroVideos", false);
+    appModel->setProperty("ShowHeroVideos", true);
     
     ofxLogSetLogToFile(appModel->getProperty<bool>("LogToFile"), ofToDataPath("log_" + ofGetTimestampString() + ".log"));
     

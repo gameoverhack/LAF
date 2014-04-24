@@ -84,13 +84,12 @@ void PlayController::update(){
         case kPLAYCONTROLLER_PLAY:
         {
             
-            if(appModel->getProperty<bool>("ShowHeroVideos")){
+            if(appModel->getProperty<bool>("ShowHeroVideos") && (BehaviourMode)appModel->getProperty<int>("AgentBehaviour") != BEHAVIOUR_MANUAL){
                 if(appModel->checkHeroTimer()) appModel->activateHero();
             }
 
             vector<Agent2*>& agents = appModel->getAgents();
             map<Agent2*, AgentInfo>& agentInfos = appModel->getAgentInfos();
-            
             for(int i = 0; i < agents.size(); i++) agentInfos[agents[i]] = agents[i]->getAgentInfo();
             
             for(int i = 0; i < agents.size(); i++){
@@ -137,7 +136,7 @@ void PlayController::update(){
             ofxThreadedVideo* hero = appModel->getCurrentHeroVideo();
             
             if(hero != NULL){
-                if(hero->getFade() < 0.95 && agents.size() == 0){
+                if(hero->getFade() < 0.05 && agents.size() == 0){
                     playControllerStates.setState(kPLAYCONTROLLER_MAKE);
                 }
             }
@@ -247,6 +246,8 @@ void PlayController::createAgent(string name, ofPoint origin, ofRectangle target
             assert(false);
         }
         
+    }else{
+        agent->setIgnoreTarget(target);
     }
 
 
