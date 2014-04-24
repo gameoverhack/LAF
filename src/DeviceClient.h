@@ -264,6 +264,7 @@ public:
     
     double timeThisMessage, timeLastMessage, fps, frameRate;
     
+    ofPoint cursor;
     bool bButton;
     vector<Agent2*> agents;
 };

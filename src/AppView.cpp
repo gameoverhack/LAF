@@ -8,7 +8,7 @@
 
 #include "AppView.h"
 #include "AStarSearch.h"
-
+static float pDMaxLength = 0;
 //--------------------------------------------------------------
 AppView::AppView(){
     ofxLogNotice() << "Constructing AppView" << endl;
@@ -228,12 +228,10 @@ void AppView::update(){
         }
         
         /******************************************************
-         *******            Draw Agents              *******
+         *******            Draw Devices                *******
          *****************************************************/
             
         vector<Agent2*>& agents = appModel->getAgents();
-        
-        //vector<Agent2*>& agents = appModel->getAgents();
         
         appModel->getDeviceMutex().lock();
         
@@ -250,7 +248,7 @@ void AppView::update(){
             ofPoint& pF = client.positionBuffer.getFrontAsPoint();
             ofPoint& pD = client.positionBuffer.getDifferenceAsPoint();
             float angle = client.positionBuffer.getFlowAngle();
-            
+            ofPoint pDF = pF + pD;
             
             if(client.agents.size() == 0){
                 
@@ -258,7 +256,7 @@ void AppView::update(){
                 ofCircle(pF.x, pF.y, 50);
                 
                 // draw 'optical flow'
-                ofLine(pF.x, pF.y, pF.x + pD.x, pF.y + pD.y);
+                ofLine(pF.x, pF.y, pDF.x, pDF.y);
                 
             }else{
                 
@@ -270,15 +268,16 @@ void AppView::update(){
                 ofSetColor(client.deviceColor / 2.0);
                 
                 for(int i = 0; i < client.agents.size(); i++){
+                    
                     // draw agent pointer
                     ofCircle(client.agents[i]->getScaledCentre().x, client.agents[i]->getScaledCentre().y, 50);
                     
                     // draw 'optical flow'
-                    ofLine(client.agents[i]->getScaledCentre().x, client.agents[i]->getScaledCentre().y, pF.x + pD.x, pF.y + pD.y);
+                    ofLine(client.agents[i]->getScaledCentre().x, client.agents[i]->getScaledCentre().y, pDF.x, pDF.y);
                 }
                 
                 // draw pointer
-                ofCircle(pF.x + pD.x, pF.y + pD.y, 50);
+                ofCircle(pDF.x, pDF.y, 50);
 
             }
             
@@ -312,10 +311,48 @@ void AppView::update(){
                 }
             }
             
-
+            float pDThreashold = 200.0f;
+            
+            float tS = 50.0f;
+            
+//            pDMaxLength = MAX(pDMaxLength, pD.length());
+//            cout << pDMaxLength << endl;
+            
+            float actionFade = 2.0 * (pD.length() / pDThreashold);
+            
+            
+            ofSetColor(64 * actionFade, 64 * actionFade, 64 * actionFade);
+            
+            ofFill();
+            
+            switch (client.positionBuffer.getFlowDirection()) {
+                case FLOW_LEFT:
+                {
+                    ofTriangle(pDF - ofPoint(tS, 0, 0), pDF + ofPoint(0, tS, 0), pDF - ofPoint(0, tS, 0));
+                }
+                    break;
+                case FLOW_RIGHT:
+                {
+                    ofTriangle(pDF + ofPoint(tS, 0, 0), pDF + ofPoint(0, tS, 0), pDF - ofPoint(0, tS, 0));
+                }
+                    break;
+                case FLOW_UP:
+                {
+                    ofTriangle(pDF - ofPoint(0, tS, 0), pDF + ofPoint(tS, 0, 0), pDF - ofPoint(tS, 0, 0));
+                }
+                    break;
+                case FLOW_DOWN:
+                {
+                    ofTriangle(pDF + ofPoint(0, tS, 0), pDF + ofPoint(tS, 0, 0), pDF - ofPoint(tS, 0, 0));
+                }
+                    break;
+                default:
+                    break;
+            }
+            ofNoFill();
             
             // testing jerk and direction
-            if(pD.length() > 400.0f){
+            if(pD.length() > pDThreashold){
                 
                 cout << "JERK->" << client.positionBuffer.getFlowDirectionAsString() << endl;
                 
@@ -344,6 +381,10 @@ void AppView::update(){
         }
         
         appModel->getDeviceMutex().unlock();
+        
+        /******************************************************
+         *******            Draw Agents              *******
+         *****************************************************/
         
         for(int i = 0; i < agents.size(); i++){
             
@@ -439,6 +480,50 @@ void AppView::update(){
             windowFades[wFI].numPlayers ++;
             
             /******************************************************
+             *******            Draw Diresctions            *******
+             *****************************************************/
+            
+            if(agentInfo.behaviourMode == BEHAVIOUR_MANUAL){
+
+                float tS = 50.0f;
+                float actionFade = 1.0f - (ofGetElapsedTimeMillis() - agentInfo.manualActionTime) / 2000.0f;
+                
+                if(agentInfo.bActionCollide){
+                    ofSetColor(127 * actionFade, 0, 0);
+                }else{
+                    ofSetColor(0, 127 * actionFade, 0);
+                }
+                
+                ofFill();
+                
+                switch (agentInfo.direction) {
+                    case 'l':
+                    {
+                        ofTriangle(agentInfo.currentCentre - ofPoint(tS, 0, 0), agentInfo.currentCentre + ofPoint(0, tS, 0), agentInfo.currentCentre - ofPoint(0, tS, 0));
+                    }
+                        break;
+                    case 'r':
+                    {
+                        ofTriangle(agentInfo.currentCentre + ofPoint(tS, 0, 0), agentInfo.currentCentre + ofPoint(0, tS, 0), agentInfo.currentCentre - ofPoint(0, tS, 0));
+                    }
+                        break;
+                    case 'u':
+                    {
+                        ofTriangle(agentInfo.currentCentre - ofPoint(0, tS, 0), agentInfo.currentCentre + ofPoint(tS, 0, 0), agentInfo.currentCentre - ofPoint(tS, 0, 0));
+                    }
+                        break;
+                    case 'd':
+                    {
+                        ofTriangle(agentInfo.currentCentre + ofPoint(0, tS, 0), agentInfo.currentCentre + ofPoint(tS, 0, 0), agentInfo.currentCentre - ofPoint(tS, 0, 0));
+                    }
+                        break;
+                    default:
+                        break;
+                }
+                ofNoFill();
+            }
+            
+            /******************************************************
              *******            Small Draw Players          *******
              *****************************************************/
             
@@ -528,8 +613,8 @@ void AppView::update(){
                 if(agent->getScaledBoundings().size() > agent->getCurrentSequenceFrame()) ofRect(agent->getScaledBounding());
                 //if(!agent->isAgentLocked())  ofRect(agent->getScaledBounding());
                 
-                if (agent->getAgentInfo().behaviourMode == BEHAVIOUR_MANUAL){
-                    if(agent->bActionCollide){
+                if (agentInfo.behaviourMode == BEHAVIOUR_MANUAL){
+                    if(agentInfo.bActionCollide){
                         ofSetColor(127, 0, 0);
                     }else{
                         ofSetColor(0, 127, 127);

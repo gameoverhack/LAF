@@ -20,6 +20,8 @@ Agent2::Agent2(){
     agentInfo.behaviourMode = BEHAVIOUR_AUTO;
     agentInfo.collisionMode = COLLISION_AVOID;
     agentInfo.target = ofRectangle(0, 0, 0, 0);
+    agentInfo.manualActionTime = ofGetElapsedTimeMillis();
+    agentInfo.bActionCollide = false;
     actionBounding = ofRectangle(0, 0, 0, 0);
     
     agentID = sAgentID;
@@ -376,25 +378,26 @@ void Agent2::_move(){
     ms.normalise();
     
     actionBounding =  ms.getScaledTotalBounding();
-    bActionCollide = false;
+    agentInfo.bActionCollide = false;
     // if the bounding intersects with windows, then do not push the sequence in; return from the function
     // TODO: this limits the movements
     for (int w = 0; w < obstacles.size(); w++){
         cout << "We colliding with you>? " << w << " " << obstacles[w] << " " << actionBounding << endl;
         if (obstacles[w] != agentInfo.target && actionBounding.intersects(obstacles[w])){
             cout << "We collide!!!" << endl;
-            bActionCollide = true;
+            agentInfo.bActionCollide = true;
             break;
         }
     }
     
-    if(bActionCollide){
+    agentInfo.manualActionTime = ofGetElapsedTimeMillis();
+    
+    if(agentInfo.bActionCollide){
         cout << "Bounding box collides with windows" << endl;
         agentInfo.state = AGENT_RUN;
         return;
     }else{
         cout << "No Collision" << endl;
-        
         for(int i = 0; i < sequence.size(); i++){
             sequence[i].isLooped = false;
             sequence[i].isLoopedStatic = false;

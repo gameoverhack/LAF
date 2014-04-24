@@ -58,6 +58,8 @@ typedef struct{
     ofPoint origin;
     
     char direction;
+    bool bActionCollide;
+    int manualActionTime;
     
     // agent states
     bool bIsAgentLocked;
@@ -125,7 +127,6 @@ public:
     // annoying
     
     ofRectangle actionBounding;
-    bool bActionCollide;
     
     void setWindow(int wTarget);
     int getWindow();
