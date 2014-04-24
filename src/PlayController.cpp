@@ -117,7 +117,7 @@ void PlayController::update(){
                     playControllerStates.setState(kPLAYCONTROLLER_STOP);
                 }
             }
-            
+            //triggerReplan();
         }
             break;
         case kPLAYCONTROLLER_STOP:
@@ -142,12 +142,14 @@ void PlayController::update(){
 
 //--------------------------------------------------------------
 void PlayController::deleteAllPlayers(){
+    appModel->getDeviceMutex().lock();
     vector<Agent2*>& agents = appModel->getAgents();
     for(int i = 0; i < agents.size(); i++){
         Agent2* agent = agents[i];
         appModel->markPlayerForDeletion(agent->getViewID());
     }
     appModel->deleteMarkedPlayers();
+    appModel->getDeviceMutex().unlock();
 }
 
 //--------------------------------------------------------------
@@ -241,7 +243,9 @@ void PlayController::triggerReplan() {
         Agent2* agent = agents[i];
         AgentInfo& agentInfo = appModel->getAgentInfos()[agent];
         if(agentInfo.behaviourMode == BEHAVIOUR_AUTO){
-            agent->setBehaviourMode(BEHAVIOUR_MANUAL);
+            //agent->setBehaviourMode(BEHAVIOUR_MANUAL);
+            ofRectangle target = appModel->getUniqueAgentTarget();
+            agent->plan(target);
         }else{
             ofRectangle target = appModel->getUniqueAgentTarget();
             if(target != NoTarget){

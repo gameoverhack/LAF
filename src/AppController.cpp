@@ -110,7 +110,7 @@ void AppController::setup(){
     appModel->setProperty("HeroTime", 80000);
     appModel->setProperty("HeroFade", 10000);
     
-    appModel->setProperty("AgentBehaviour", (int)BEHAVIOUR_MANUAL);
+    appModel->setProperty("AgentBehaviour", (int)BEHAVIOUR_AUTO);
     
     appModel->setProperty("ShowPathGrid", false);
 //    appModel->setProperty("ShowWindowTargets", true);

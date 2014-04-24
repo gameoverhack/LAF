@@ -359,7 +359,7 @@ vector< vector< ofPoint > > PathPlanner::findPaths(ofPoint _startPoint, ofPoint 
 	
     ///
     
-    screenBoundary = ofRectangle(100, 100, 1820, 566);
+    //screenBoundary = ofRectangle(100, 100, 1820, 566);
     
     
     

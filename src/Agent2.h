@@ -147,6 +147,10 @@ public:
         return bHug;
     }
     
+    ofPolyline getCorrectedPath() {
+        return correctedPath;
+    }
+    
     ofPolyline getCurrentPath() {
         return currentPath;
     }
@@ -157,39 +161,6 @@ public:
     
     bool getFaultyFlag() {
         return bFaultyMovieSequence;
-    }
-
-    ofPolyline getCorrectedPath() {
-        ofPolyline pathFromHere; //= ofPolyline(agent->getCurrentPath().getVertices());
-        ofPoint point;
-        
-        //if (!isAgentLocked())
-        {
-            
-        int index;
-        for (int i=0; i < getMovieSequence().size(); i++)
-            if (getMovieSequence()[i].agentActionIndex == 0) {
-                index = i;
-                break;
-            }
-        
-            point = getScaledFloorOffsetAt(getSequenceFrames()[index]);
-            pathFromHere.addVertex(point);
-            
-            for (int a=0;a<actions.size();a++) {
-                if (actions[a].first == 'l')
-                    point.x-=actions[a].second;
-                else if (actions[a].first == 'r')
-                    point.x+=actions[a].second;
-                else if (actions[a].first == 'u')
-                    point.y-=actions[a].second;
-                else if (actions[a].first == 'd')
-                    point.y+=actions[a].second;
-                
-                pathFromHere.addVertex(point);
-            }
-        }
-        return pathFromHere;
     }
     
     vector< pair<char, float> > actions;
@@ -205,6 +176,12 @@ public:
     int getDeviceID(){
         return deviceID;
     }
+    
+    // convenience locks of bool to indicate threading is occuring
+    void lockAgentFlag();
+    void unlockAgentFlag();
+    void lockAgent();
+    void unlockAgent();
     
 protected:
     
@@ -225,11 +202,7 @@ protected:
     // worker thread
     void threadedFunction();
     
-    // convenience locks of bool to indicate threading is occuring
-    void lockAgentFlag();
-    void unlockAgentFlag();
-    void lockAgent();
-    void unlockAgent();
+
     
     // actual worker methods that require threading
     void _move();
@@ -247,7 +220,7 @@ protected:
     vector<ofRectangle> windows;
     
     // plan vars
-    ofPolyline currentPath;
+    ofPolyline currentPath, correctedPath;
     bool bFaultyMovieSequence;
     int numSequenceRetries;
     int startPosSegment;

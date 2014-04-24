@@ -526,7 +526,7 @@ void AppView::update(){
             /******************************************************
              *******            Small Draw Players          *******
              *****************************************************/
-            
+            agent->lockAgent();
             if(appModel->getProperty<bool>("ShowAvatarsSmall") && agentInfo.state != AGENT_INIT && agentInfo.currentPosition.x != 0 && agentInfo.currentPosition.y != 0){
                 
                 agent->getFboSmall()->begin();
@@ -576,7 +576,7 @@ void AppView::update(){
 #endif
 
             }
-            
+            agent->unlockAgent();
             /******************************************************
              *******            Draw Large Rects            *******
              *****************************************************/
@@ -625,62 +625,18 @@ void AppView::update(){
             }
             
             if(appModel->getProperty<bool>("ShowDistanceSmall")){ // Omid
-                ofSetColor(0, 100, 0);/*
-                ofCircle(sequence->getScaledCentre(), 4);
-                ofPoint playCenter = sequence->getScaledCentre();
-                ofPoint distanceTrailCenter;
-                if (currentMovie.getCurrentDirection() == "LEFT" || currentMovie.getCurrentDirection() == "RIGT" )
-                    distanceTrailCenter.set(wC.x, playCenter.y);
-                else
-                    distanceTrailCenter.set(playCenter.x, wC.y);
-                ofLine(sequence->getScaledCentre(), distanceTrailCenter);
-                */
-               
-                ofPolyline pathFromHere; //= ofPolyline(agent->getCurrentPath().getVertices());
-                ofPoint point;
-                
-                int index;
-                for (int i=0; i < agent->getMovieSequence().size(); i++)
-                    if (agent->getMovieSequence()[i].agentActionIndex == 0) {
-                        index = i;
-                        break;
-                    }
-                
-                if (agentInfo.state != AGENT_PLAN && agentInfo.behaviourMode == BEHAVIOUR_AUTO && agent->getCurrentPath().size() > 0) {
-                    
-                    point = agent->getScaledFloorOffsetAt(agent->getSequenceFrames()[index]);
-                    pathFromHere.addVertex(point);
-                    
-                    
-                    for (int a=0;a<agent->actions.size();a++) {
-                        if (agent->actions[a].first == 'l')
-                            point.x-=agent->actions[a].second;
-                        else if (agent->actions[a].first == 'r')
-                            point.x+=agent->actions[a].second;
-                        else if (agent->actions[a].first == 'u')
-                            point.y-=agent->actions[a].second;
-                        else if (agent->actions[a].first == 'd')
-                            point.y+=agent->actions[a].second;
-                        
-                        pathFromHere.addVertex(point);
-                    }
-                    
-                    
-                }
-
-                //TODO: delelet the traveled path points
-//                if (agent->getCurrentMovie().agentActionIndex > 0) {
-//                        pathFromHere.getVertices().erase(pathFromHere.getVertices().begin(), pathFromHere.getVertices().begin()+agent->getCurrentMovie().agentActionIndex);
-//                }
+                ofSetColor(0, 100, 0);
                 
                 ofSetLineWidth(3.0f);
-                if (pathFromHere.size() >0)
-                    pathFromHere.draw();
+                if (agent->getCorrectedPath().size() > 0){
+                    agent->getCorrectedPath().draw();
+                }
                 
                 ofSetColor(100, 10, 0);
                 ofSetLineWidth(3.0f);
-                if (agent->getCurrentPath().size() >0)
+                if (agent->getCurrentPath().size() > 0){
                     agent->getCurrentPath().draw();
+                }
                 
                 ofSetLineWidth(1.0f);
             }
@@ -692,39 +648,50 @@ void AppView::update(){
             
             if(appModel->getProperty<bool>("ShowTrailBoundsSmall")){ //Omid
                 
-                int step = 1;
+                int step = 20;
                 int range = appModel->getProperty<int>("RectTrail");
-
-                ofSetColor(0, iSmal, iSmal);
                 
-                if(agentInfo.behaviourMode == BEHAVIOUR_MANUAL){
-                    step = 10;
-                    range = 1000000;
-                    ofSetColor(0, iSmal * 2.0, iSmal * 2.0);
-                }
-
                 int startFrame = MAX(agent->getCurrentSequenceFrame() - range, 0);
                 int endFrame = MIN(agent->getCurrentSequenceFrame() + range, agent->getTotalSequenceFrames());
                 
-                for(int j = startFrame; j < endFrame; j = j + step){
+                for(int j = 0; j < agent->getTotalSequenceFrames(); j++){
                     
-//                    if (agent->getFaultyFlag())
-//                        ofSetColor(250,250,10);
-//                    else if (agent->getWillCollide())
-//                        ofSetColor(100,10,10);
-//                    else
-//                        ofSetColor(0, 60, 60);
-                    
-                    
-                    
-                    if(agent->getScaledBoundings().size() > j) ofRect(agent->getScaledBoundingAt(j));
-                    //if(!agent->isAgentLocked()) ofRect(agent->getScaledBoundingAt(j));
-                    
-                    //ofSetColor(60, 10, 60);
-                    
-                    //if (agent->getOrgScaledBoundings().size() > 0) ofRect(agent->getOrgScaledBoundingAt(j));
-                    //ofRect(sequence->getBoundingAt(j));
+                    if(j > startFrame && j < endFrame){
+                        ofSetColor(0, iSmal, iSmal);
+                        if(agent->getScaledBoundings().size() > j) ofRect(agent->getScaledBoundingAt(j));
+                    }else{
+                        if(agentInfo.behaviourMode == BEHAVIOUR_MANUAL || agentInfo.behaviourMode == BEHAVIOUR_AUTO){
+                            if(agentInfo.state == AGENT_PLAN){
+                                if(j % step == 0){
+                                    ofSetColor(10, 10, 10);
+                                    if(agent->getScaledBoundings().size() > j) ofRect(agent->getScaledBoundingAt(j));
+                                }
+                            }
+                            
+                        }
+                    }
+
                 }
+                
+//                int step = 1;
+//                int range = appModel->getProperty<int>("RectTrail");
+//
+//                ofSetColor(0, iSmal, iSmal);
+//                
+//                if(agentInfo.behaviourMode == BEHAVIOUR_MANUAL || agentInfo.behaviourMode == BEHAVIOUR_AUTO){
+//                    step = 10;
+//                    range = 1000000;
+//                    ofSetColor(0, iSmal * 2.0, iSmal * 2.0);
+//                }
+//                
+//                int startFrame = MAX(agent->getCurrentSequenceFrame() - range, 0);
+//                int endFrame = MIN(agent->getCurrentSequenceFrame() + range, agent->getTotalSequenceFrames());
+//                
+//                for(int j = startFrame; j < endFrame; j = j + step){
+//                    
+//                    if(agent->getScaledBoundings().size() > j) ofRect(agent->getScaledBoundingAt(j));
+//
+//                }
                 
             }
 

@@ -119,8 +119,10 @@ void Agent2::startAgent(){
 //--------------------------------------------------------------
 void Agent2::stopAgent(){
     waitForThread();
-    stopThread();
-    stop();
+    //stopThread();
+    video->stop();
+    video->finish();
+    clear();
 }
 
 
@@ -194,8 +196,8 @@ void Agent2::setBehaviourMode(BehaviourMode _behaviourMode){
             if(currentSequenceIndex <= 0){ // ie., we haven't started the agent/moviesequence playing
                 sequence[0].isLoopedStatic = true;
             }else{
-                removeMovies(true);
                 sequence[0].isLoopedStatic = true;
+                cout << "WARNING!!!!!!!!!!!!!!!!!!!! I think this is buggy" << endl;
             }
             MovieSequence::setAutoSequenceStop(false);
         }else{
@@ -457,8 +459,9 @@ void Agent2::plan(ofRectangle _target, int _numSequenceRetries){
 //--------------------------------------------------------------
 void Agent2::_plan(){
     
-    cout << ">>>>>>>>PLANNING START" << endl;
+    cout << "START PLANNING" << endl;
     
+    // for now only windows are valid targets
     int window = -1;
     for(int i = 0; i < windows.size(); i++){
         if(windows[i] == agentInfo.target){
@@ -470,20 +473,22 @@ void Agent2::_plan(){
     assert(window != -1);
     windowTargetIndex = window;
     
-    ofPoint startPosition;
+    removeMovies(true);
     
+    /*
+    ofPoint startPosition;
     if(currentSequenceIndex <= 0){ // ie., we haven't started the agent/moviesequence playing
         startPosition = getScaledFloorOffsetAt(1);
     }else{
         startPosition = getScaledFloorOffsetAt(sequenceFrames[currentSequenceIndex+1]);
     }
-
-    ofPoint targetPosition = ofPoint(agentInfo.target.x + agentInfo.target.width / 2.0, agentInfo.target.y, 0.0f); // where I'm going
+     */
     
-    currentMovie.agentActionIndex = -1;
-    for(int i = 0; i < sequence.size(); i++){
-        sequence[i].agentActionIndex = -1;
-    }
+    // get a start point...do we need to lock?
+    ofPoint startPosition = getScaledFloorOffsetAt(1);
+    ofPoint targetPosition = ofPoint(agentInfo.target.x + agentInfo.target.width / 2.0, agentInfo.target.y, 0.0f);
+    
+    resetActionIndexes();
     
     /////////////
     
@@ -504,15 +509,15 @@ void Agent2::_plan(){
     pp.obstacles = tObstacles;
     
     // set the size of the area that the agent's bounding box can grow used in path finding to avoid possible collisions
-    pp.obstAvoidBoundingW = 2.5 * drawSize / 3.0;
-    pp.obstAvoidBoundingH = drawSize;
+    pp.obstAvoidBoundingW = drawSize / 2.0;
+    pp.obstAvoidBoundingH = drawSize / 2.0;
     
     // find the paths using A*.
     cout << "Finding a path from (" << startPosition.x << "," << startPosition.y  << ") to  (" << targetPosition.x << "," << targetPosition.y << ")"  << endl;
     
     vector< vector< ofPoint > > paths = pp.findPaths(startPosition, targetPosition);
     
-    if (paths.size()>0){
+    if (paths.size() > 0){
         currentPath = paths[0];
         actions =  pp.getDirectionsInPath(paths[0]);
     }else{
@@ -525,11 +530,11 @@ void Agent2::_plan(){
     // Make the start positon of the path to the start position of the agent
     // The target position is aligned
     
-    float xOffset;
-    float yOffset;
-    
+    float xOffset = 0;
+    float yOffset = 0;
     
     if (actions.size() > 0) {
+        
         xOffset =  currentPath[0].x - startPosition.x;
         yOffset =  currentPath[0].y - startPosition.y;
         
@@ -548,8 +553,40 @@ void Agent2::_plan(){
     }
     
     
-    bool solved = false;
+    correctedPath.clear();
     
+    int index;
+    for (int i=0; i < sequence.size(); i++){
+        if (sequence[i].agentActionIndex == 0) {
+            index = i;
+            break;
+        }
+    }
+    
+    ofPoint point = startPosition;
+    correctedPath.addVertex(point);
+    
+    for (int a = 0; a < actions.size(); a++) {
+        if (actions[a].first == 'l')
+            point.x -= actions[a].second;
+        else if (actions[a].first == 'r')
+            point.x += actions[a].second;
+        else if (actions[a].first == 'u')
+            point.y -= actions[a].second;
+        else if (actions[a].first == 'd')
+            point.y += actions[a].second;
+        
+        correctedPath.addVertex(point);
+    }
+
+    cout << "STARTS   aF " << currentPath[0] << " == " << startPosition << endl;
+    cout << "CURRENT  aF " << currentPath[currentPath.size() - 1] << " == " << targetPosition << endl;
+    cout << "CORRECT  aF " << correctedPath[correctedPath.size() - 1] << " == " << targetPosition << endl;
+    cout << "ACTION   aF " << actions[actions.size() - 1].first << " valid? " << actions[actions.size() - 1].second << " SIZE: " << actions.size() << endl;
+
+
+    bool solved = false;
+
     for (int t = 0; t < numSequenceRetries && !solved; t++ ) {
         // Remove the rest of the movies in the sequence as we are overwriting them
         //removeAllMovies();
@@ -598,9 +635,10 @@ void Agent2::_plan(){
     //------
     
     //play();
+    
     agentInfo.state = AGENT_RUN;
     
-    cout << "<<<<<<<<<<<PLANNING END" << endl;
+    cout << "PLANNING END" << endl;
 }
 
 //--------------------------------------------------------------
@@ -735,10 +773,11 @@ void Agent2::cutSequenceFromCurrentMovie(bool cutFromCurrentFrame) {
 //--------------------------------------------------------------
 void Agent2::removeMovies(bool bAllMovies){
     
+    lockAgent();
+    
     if(bAllMovies){
         cout << "Remove all movies" << endl;
     }else{
-        lockAgent();
         cout << "Remove previous movies" << endl;
     }
 
@@ -775,7 +814,7 @@ void Agent2::removeMovies(bool bAllMovies){
     updateFrame();
     updatePosition();
     
-    if(!bAllMovies) unlockAgent();
+    unlockAgent();
     
 }
 

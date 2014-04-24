@@ -319,7 +319,7 @@ public:
         scale = 1.0f;
         currentMovie = NoMovie;
         currentSequenceIndex = lastnormalindex = -1;
-        currentSequenceFrame = totalSequenceFrames = 0;
+        currentSequenceFrame = totalSequenceFrames = -1;
         bAutoSequenceStop = true;
         
         pauseActionIndex = -2;
@@ -641,6 +641,13 @@ public:
     
     void storeSBoundings() {
         orgsboundings = vector<ofRectangle>(sboundings);
+    }
+    
+    void resetActionIndexes(){
+        currentMovie.agentActionIndex = -1;
+        for(int i = 0; i < sequence.size(); i++){
+            sequence[i].agentActionIndex = -1;
+        }
     }
     
 protected:
